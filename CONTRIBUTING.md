@@ -1,0 +1,83 @@
+# Contributing
+
+Thanks for helping. Innkeep is small on purpose, so the bar for a change is
+that a host with one or two properties would notice it.
+
+## Setup
+
+```bash
+npm install
+npm run dev
+```
+
+Open http://localhost:3000/overview and click **Load sample data**. Delete the
+`data/` folder to start again from empty.
+
+## Before you open a pull request
+
+```bash
+npm run check
+```
+
+That runs formatting, lint, types, tests and a production build, the same
+steps as CI.
+
+## How the code is organised
+
+```
+src/
+  app/                 Routes only: pages compose features, API routes stay thin
+    (marketing)/       Landing page
+    (app)/             The dashboard, behind the sidebar shell
+    api/               iCal export, messages webhook, MCP
+  features/<name>/     One folder per product area
+    queries.ts         Reads (server only)
+    actions.ts         Writes, as server actions validated with zod
+    *.tsx              Components used by that feature's pages
+    compute.ts, rules.ts   Pure logic, unit tested
+  channels/            Airbnb and Booking.com adapters, sync engine (no Next.js imports)
+  components/ui/       Presentational primitives with no data access
+  components/shell/    Sidebar, command menu and keyboard layer
+  db/                  Schema, migrations, sample data
+  i18n/                Languages: messages/<area>.ts (English and French side by side), formats
+extension/             Innkeep Companion browser extension (plain JS, no build step)
+  lib/                 Dates, money, iCal, small helpers
+```
+
+Conventions:
+
+- **Server first.** Pages are server components that read through `queries.ts`.
+  Add `"use client"` only for real interactivity.
+- **Request-time data** sits in an async component inside `<Suspense>` that
+  calls `await connection()` first. Next.js 16 Cache Components requires it.
+- **Pure logic stays pure.** Revenue maths and suggestion rules take plain rows
+  and return plain values, so they are tested without a database.
+- **Schema changes** append a migration to `MIGRATIONS` in `src/db/index.ts`.
+  Never edit one that has shipped.
+- **Money** is stored in minor units (cents). Use `formatMoney` and `parseMoney`.
+- **Colour means something.** The interface is monochrome; the only colours
+  are the three booking sources and good / warning / critical. Use the tokens
+  in `globals.css`, never raw hex values.
+- **Keyboard and screen readers.** Every action must be reachable by keyboard
+  and every control labelled. Add page shortcuts with `data-shortcut="key"`.
+- **Copy** is plain and specific: say what happened and what to do next.
+- **Every string is in two languages.** No text in components: add it to
+  `src/i18n/messages/<area>.ts` in English and French (the French object is
+  typed from the English one, so a missing translation fails the type check).
+  Server components read it with `await getI18n()`, client components with
+  `useI18n()`. Dates and amounts go through `fmt` from the same call, not
+  through `lib/` directly.
+- **Light and dark** are separate token sets in `globals.css`. The host's
+  choice is a `data-theme` attribute on `<html>`; never branch on the system
+  setting in a component.
+
+## What will not be merged
+
+- Anything that acts on Airbnb or Booking.com unattended: background or
+  scheduled crawling, calls to their private APIs, automated clicking, typing
+  or form filling, or handling a host's password or session. The extension
+  reads pages in the host's own browser. Its one form of automation is the
+  run the host starts from its popup: a single visible tab taken through a
+  fixed list of the host's own pages, with a Stop button, that ends by itself.
+  Keep it that way.
+- Features that only make sense for agencies with dozens of listings.

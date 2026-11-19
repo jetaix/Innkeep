@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest something Innkeep should do
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: The problem
+      description: What are you trying to do as a host, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What you would like
+  - type: textarea
+    attributes:
+      label: Alternatives you have tried

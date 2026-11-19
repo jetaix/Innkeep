@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens.
+ *
+ * The interface is monochrome on purpose: the only colours on screen are the
+ * three booking sources and the three states (good, warning, critical), so
+ * colour always means something. Dark mode is its own set of values, not an
+ * inversion.
+ */
+:root {
+  color-scheme: light dark;
+
+  --bg: #ffffff;
+  --subtle: #f7f7f6;
+  --sunken: #efefed;
+  --line: #e7e7e4;
+  --line-strong: #d4d4d0;
+  --ink: #18181b;
+  --muted: #6b6b73;
+  --faint: #9a9aa2;
+  --inverse: #ffffff;
+
+  --airbnb: #e0475c;
+  --booking: #2f5fd6;
+  --direct: #0f8f7c;
+  --block: #9a9aa2;
+
+  --good: #18794e;
+  --warn: #9a6700;
+  --warn-bg: #fff6d6;
+  --critical: #c62a2f;
+  --critical-bg: #ffecec;
+
+  --shadow-pop: 0 16px 48px -12px rgb(0 0 0 / 0.22), 0 0 0 1px rgb(0 0 0 / 0.06);
+}
+
+/*
+ * Dark values apply when the host picks dark, or when they follow the system
+ * and the system is dark. `data-theme` is set before first paint by the
+ * script in the root layout, so there is no flash.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f0f11;
+  --subtle: #151518;
+  --sunken: #1d1d21;
+  --line: #25252a;
+  --line-strong: #34343b;
+  --ink: #ededf0;
+  --muted: #9b9ba4;
+  --faint: #6c6c75;
+  --inverse: #0f0f11;
+
+  --airbnb: #f0647a;
+  --booking: #6b8ff5;
+  --direct: #2bb8a3;
+  --block: #6c6c75;
+
+  --good: #4cc38a;
+  --warn: #f1c453;
+  --warn-bg: #2b2410;
+  --critical: #ff8589;
+  --critical-bg: #2e1517;
+
+  --shadow-pop: 0 16px 48px -12px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f0f11;
+    --subtle: #151518;
+    --sunken: #1d1d21;
+    --line: #25252a;
+    --line-strong: #34343b;
+    --ink: #ededf0;
+    --muted: #9b9ba4;
+    --faint: #6c6c75;
+    --inverse: #0f0f11;
+
+    --airbnb: #f0647a;
+    --booking: #6b8ff5;
+    --direct: #2bb8a3;
+    --block: #6c6c75;
+
+    --good: #4cc38a;
+    --warn: #f1c453;
+    --warn-bg: #2b2410;
+    --critical: #ff8589;
+    --critical-bg: #2e1517;
+
+    --shadow-pop: 0 16px 48px -12px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-subtle: var(--subtle);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-inverse: var(--inverse);
+  --color-airbnb: var(--airbnb);
+  --color-booking: var(--booking);
+  --color-direct: var(--direct);
+  --color-block: var(--block);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-critical: var(--critical);
+  --color-critical-bg: var(--critical-bg);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --shadow-pop: var(--shadow-pop);
+
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-grow: grow 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @keyframes grow {
+    from {
+      opacity: 0;
+      transform: scaleX(0.4);
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* One focus style everywhere, visible on every surface. */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--ink) 16%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 5px,
+    color-mix(in oklab, var(--ink) 10%, transparent) 5px 6px
+  );
+}

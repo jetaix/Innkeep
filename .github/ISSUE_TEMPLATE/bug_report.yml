@@ -1,0 +1,27 @@
+name: Bug report
+description: Something does not work as described
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to …
+        2. Click …
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version
+      description: Commit hash or release, plus your Node.js version.
+  - type: textarea
+    attributes:
+      label: Logs
+      description: Server output or browser console errors. Remove calendar links and tokens first.
+      render: text

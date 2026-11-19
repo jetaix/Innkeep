@@ -1,0 +1,76 @@
+{
+  "manifest_version": 3,
+  "name": "Innkeep Companion",
+  "version": "0.12.1",
+  "description": "Sends the reservations, listing details and nightly prices shown on your own Airbnb and Booking.com host pages to your self-hosted Innkeep.",
+  "permissions": ["storage"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Innkeep Companion",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.airbnb.com/hosting/*",
+        "https://www.airbnb.fr/hosting/*",
+        "https://www.airbnb.co.uk/hosting/*",
+        "https://www.airbnb.de/hosting/*",
+        "https://www.airbnb.es/hosting/*",
+        "https://www.airbnb.it/hosting/*",
+        "https://www.airbnb.pt/hosting/*",
+        "https://www.airbnb.nl/hosting/*",
+        "https://www.airbnb.be/hosting/*",
+        "https://www.airbnb.ch/hosting/*",
+        "https://www.airbnb.at/hosting/*",
+        "https://www.airbnb.ie/hosting/*",
+        "https://www.airbnb.ca/hosting/*",
+        "https://www.airbnb.com.au/hosting/*",
+        "https://www.airbnb.com/multicalendar/*",
+        "https://www.airbnb.fr/multicalendar/*",
+        "https://www.airbnb.co.uk/multicalendar/*",
+        "https://www.airbnb.de/multicalendar/*",
+        "https://www.airbnb.es/multicalendar/*",
+        "https://www.airbnb.it/multicalendar/*",
+        "https://www.airbnb.pt/multicalendar/*",
+        "https://www.airbnb.nl/multicalendar/*",
+        "https://www.airbnb.be/multicalendar/*",
+        "https://www.airbnb.ch/multicalendar/*",
+        "https://www.airbnb.at/multicalendar/*",
+        "https://www.airbnb.ie/multicalendar/*",
+        "https://www.airbnb.ca/multicalendar/*",
+        "https://www.airbnb.com.au/multicalendar/*",
+        "https://www.airbnb.com/rooms/*",
+        "https://www.airbnb.fr/rooms/*",
+        "https://www.airbnb.co.uk/rooms/*",
+        "https://www.airbnb.de/rooms/*",
+        "https://www.airbnb.es/rooms/*",
+        "https://www.airbnb.it/rooms/*",
+        "https://www.airbnb.pt/rooms/*",
+        "https://www.airbnb.nl/rooms/*",
+        "https://www.airbnb.be/rooms/*",
+        "https://www.airbnb.ch/rooms/*",
+        "https://www.airbnb.at/rooms/*",
+        "https://www.airbnb.ie/rooms/*",
+        "https://www.airbnb.ca/rooms/*",
+        "https://www.airbnb.com.au/rooms/*"
+      ],
+      "js": ["parse.js", "ui.js", "airbnb.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://admin.booking.com/hotel/hoteladmin/extranet_ng/manage/*"],
+      "js": ["parse.js", "ui.js", "booking.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.booking.com/hotel/*"],
+      "js": ["parse.js", "ui.js", "booking.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

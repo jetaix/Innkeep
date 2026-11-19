@@ -1,0 +1,106 @@
+/** The listing preview page: each platform's public listing as guests see it, side by side. */
+const en = {
+  title: "Listing preview",
+  description: "Your listing as guests see it on each platform, read from its public page.",
+  link: "Preview as guests see it",
+  back: "Back to the property",
+  read: (platform: string) => `Read from ${platform}`,
+  readAgain: "Read again",
+  open: "Open the real page",
+  hint: "Opens your public listing. The extension reads it and closes the tab.",
+  readAt: (ago: string) => `Read ${ago}`,
+  empty: {
+    title: (platform: string) => `Not read from ${platform} yet`,
+    body: "Press the button: your public page opens, the extension reads it and the preview appears here.",
+    noLink: (platform: string) =>
+      `Innkeep does not know your public ${platform} page yet. Paste its address in the listing page URL field of the property.`,
+    noExtension: "Connect the browser extension first.",
+  },
+  photos: (n: number) => `${n} photo${n === 1 ? "" : "s"}`,
+  noPhotos: "Photos appear once the extension has read the page.",
+  photoAlt: (n: number, title: string) => `Photo ${n} of ${title}`,
+  reviews: (n: number) => `${n} review${n === 1 ? "" : "s"}`,
+  rating: (value: string, scale: number) => `${value} out of ${scale}`,
+  highlights: "Highlights",
+  about: "About this place",
+  amenities: "What this place offers",
+  showAll: "Read the full description",
+  price: {
+    title: "Price shown to guests",
+    stay: (from: string, to: string, guests: number | null) =>
+      `${from} to ${to}${guests ? `, ${guests} guest${guests === 1 ? "" : "s"}` : ""}`,
+    was: (original: string) => `before discount: ${original}`,
+    none: "Check a stay on the Pricing page to see a price here.",
+  },
+  compare: {
+    title: "Side by side",
+    subtitle: "Where the two listings differ. Guests comparing platforms see these gaps too.",
+    field: "What",
+    titleRow: "Title",
+    photos: "Photos shown",
+    rating: "Rating",
+    reviews: "Reviews",
+    descriptionLength: "Description",
+    characters: (n: number) => `${n} characters`,
+    amenities: "Amenities shown up front",
+    price: "Guest price, same stay",
+    missing: "Not read yet",
+    same: "Same on both",
+  },
+  note: "This is a reading of your public pages, not a copy of their layout. Photos load from each platform's own servers. Reviews and host details are not read.",
+};
+
+const fr: typeof en = {
+  title: "Aperçu des annonces",
+  description:
+    "Votre annonce telle que les voyageurs la voient sur chaque plateforme, lue sur sa page publique.",
+  link: "Aperçu côté voyageurs",
+  back: "Retour au logement",
+  read: (platform) => `Lire depuis ${platform}`,
+  readAgain: "Relire",
+  open: "Ouvrir la vraie page",
+  hint: "Ouvre votre annonce publique. L’extension la lit puis ferme l’onglet.",
+  readAt: (ago) => `Lu ${ago}`,
+  empty: {
+    title: (platform) => `Pas encore lu sur ${platform}`,
+    body: "Appuyez sur le bouton : votre page publique s’ouvre, l’extension la lit et l’aperçu apparaît ici.",
+    noLink: (platform) =>
+      `Innkeep ne connaît pas encore votre page publique ${platform}. Collez son adresse dans le champ URL de l’annonce, sur la page du logement.`,
+    noExtension: "Connectez d’abord l’extension de navigateur.",
+  },
+  photos: (n) => `${n} photo${n > 1 ? "s" : ""}`,
+  noPhotos: "Les photos apparaissent une fois la page lue par l’extension.",
+  photoAlt: (n, title) => `Photo ${n} de ${title}`,
+  reviews: (n) => `${n} avis`,
+  rating: (value, scale) => `${value} sur ${scale}`,
+  highlights: "Points forts",
+  about: "À propos de ce logement",
+  amenities: "Ce que propose ce logement",
+  showAll: "Lire toute la description",
+  price: {
+    title: "Prix affiché aux voyageurs",
+    stay: (from, to, guests) =>
+      `${from} au ${to}${guests ? `, ${guests} voyageur${guests > 1 ? "s" : ""}` : ""}`,
+    was: (original) => `avant remise : ${original}`,
+    none: "Vérifiez un séjour depuis la page Tarifs pour voir un prix ici.",
+  },
+  compare: {
+    title: "Côte à côte",
+    subtitle:
+      "Là où les deux annonces diffèrent. Les voyageurs qui comparent les plateformes voient aussi ces écarts.",
+    field: "Élément",
+    titleRow: "Titre",
+    photos: "Photos affichées",
+    rating: "Note",
+    reviews: "Avis",
+    descriptionLength: "Description",
+    characters: (n) => `${n} caractères`,
+    amenities: "Équipements mis en avant",
+    price: "Prix voyageur, même séjour",
+    missing: "Pas encore lu",
+    same: "Identique des deux côtés",
+  },
+  note: "Il s’agit d’une lecture de vos pages publiques, pas d’une copie de leur mise en page. Les photos sont chargées depuis les serveurs de chaque plateforme. Les avis et les informations sur l’hôte ne sont pas lus.",
+};
+
+export const preview = { en, fr };
