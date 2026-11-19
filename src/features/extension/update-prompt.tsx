@@ -39,7 +39,10 @@ export async function UpdatePrompt() {
 
   return (
     <DismissForNow>
-      <section aria-labelledby="update-heading" className="border-b border-line bg-subtle px-4 py-4 md:px-8">
+      <section
+        aria-labelledby="update-heading"
+        className="border-b border-line bg-subtle px-4 py-4 md:px-8 print:hidden"
+      >
         <div className="max-w-3xl">
           <h2 id="update-heading" className="font-semibold">
             {t.refresh.title}

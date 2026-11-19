@@ -4,6 +4,9 @@
 # next.js
 /.next/
 /out/
+
+# packaged browser extension
+/dist
 next-env.d.ts
 *.tsbuildinfo
 

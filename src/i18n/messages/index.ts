@@ -3,6 +3,7 @@ import { common } from "./common";
 import { overview } from "./overview";
 import { calendar } from "./calendar";
 import { reservations } from "./reservations";
+import { cleaning } from "./cleaning";
 import { revenue } from "./revenue";
 import { pricing } from "./pricing";
 import { insights } from "./insights";
@@ -26,6 +27,7 @@ const AREAS = {
   overview,
   calendar,
   reservations,
+  cleaning,
   revenue,
   pricing,
   insights,

@@ -17,7 +17,7 @@ export async function ExtensionSetupButton() {
   return (
     <Link
       href="/extension"
-      className="fixed right-4 bottom-4 z-40 flex h-10 items-center gap-2 rounded-full bg-ink pr-4 pl-3.5 text-[13px] font-medium text-inverse shadow-pop transition-opacity hover:opacity-90"
+      className="fixed right-4 bottom-4 z-40 flex h-10 items-center gap-2 rounded-full bg-ink pr-4 pl-3.5 text-[13px] font-medium text-inverse shadow-pop transition-opacity hover:opacity-90 print:hidden"
     >
       <Puzzle aria-hidden className="size-4" strokeWidth={1.75} />
       {state === "outdated" ? t.update : t.add}

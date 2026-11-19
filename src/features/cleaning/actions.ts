@@ -1,0 +1,107 @@
+"use server";
+
+import { and, eq } from "drizzle-orm";
+import { refresh } from "next/cache";
+import { z } from "zod";
+import { cleanerAssignments, cleaners, cleanings, CLEANING_STATUSES, getDb, properties } from "@/db";
+import { isoDate, parseForm, text } from "@/lib/form";
+
+const day = z.object({ propertyId: z.coerce.number().int().positive(), date: isoDate });
+
+/** Creates the record of a cleaning day if there is none, then changes it. */
+function upsertCleaning(propertyId: number, date: string, changes: Partial<typeof cleanings.$inferInsert>) {
+  getDb()
+    .insert(cleanings)
+    .values({ propertyId, date, ...changes })
+    .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: changes })
+    .run();
+}
+
+export async function addCleaner(form: FormData) {
+  const parsed = parseForm(z.object({ name: text.min(1).max(80), phone: text.max(40) }), form);
+  if (!parsed.success) return;
+  getDb()
+    .insert(cleaners)
+    .values({ ...parsed.data, createdAt: Date.now() })
+    .run();
+  refresh();
+}
+
+export async function deleteCleaner(id: number) {
+  getDb().delete(cleaners).where(eq(cleaners.id, id)).run();
+  refresh();
+}
+
+/** Sets who cleans a property: priority 0 is the usual cleaner, 1 the backup. An empty choice clears it. */
+export async function assignCleaner(propertyId: number, priority: number, form: FormData) {
+  const parsed = parseForm(
+    z.object({ cleanerId: z.union([z.literal(""), z.coerce.number().int().positive()]) }),
+    form,
+  );
+  if (!parsed.success || ![0, 1].includes(priority)) return;
+  const db = getDb();
+  const { cleanerId } = parsed.data;
+  db.transaction((tx) => {
+    tx.delete(cleanerAssignments)
+      .where(and(eq(cleanerAssignments.propertyId, propertyId), eq(cleanerAssignments.priority, priority)))
+      .run();
+    if (cleanerId !== "") tx.insert(cleanerAssignments).values({ propertyId, cleanerId, priority }).run();
+  });
+  refresh();
+}
+
+export async function setCleaningEnabled(propertyId: number, enabled: boolean) {
+  getDb().update(properties).set({ cleaningEnabled: enabled }).where(eq(properties.id, propertyId)).run();
+  refresh();
+}
+
+export async function setCleaningStatus(propertyId: number, date: string, status: string) {
+  const parsed = z
+    .object({ ...day.shape, status: z.enum(CLEANING_STATUSES) })
+    .safeParse({ propertyId, date, status });
+  if (!parsed.success) return;
+  upsertCleaning(parsed.data.propertyId, parsed.data.date, {
+    status: parsed.data.status,
+    doneAt: parsed.data.status === "done" ? Date.now() : null,
+  });
+  refresh();
+}
+
+/** The note for the cleaner, and who does this one when it is not the usual cleaner. */
+export async function updateCleaning(propertyId: number, date: string, form: FormData) {
+  const where = day.safeParse({ propertyId, date });
+  const parsed = parseForm(
+    z.object({
+      notes: text.max(500),
+      cleanerId: z.union([z.literal(""), z.coerce.number().int().positive()]),
+    }),
+    form,
+  );
+  if (!where.success || !parsed.success) return;
+  upsertCleaning(where.data.propertyId, where.data.date, {
+    notes: parsed.data.notes,
+    cleanerId: parsed.data.cleanerId === "" ? null : parsed.data.cleanerId,
+  });
+  refresh();
+}
+
+export async function addManualCleaning(form: FormData) {
+  const parsed = parseForm(z.object({ ...day.shape, notes: text.max(500) }), form);
+  if (!parsed.success) return;
+  const { propertyId, date, notes } = parsed.data;
+  getDb()
+    .insert(cleanings)
+    .values({ propertyId, date, notes, manual: true })
+    .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: { manual: true, notes } })
+    .run();
+  refresh();
+}
+
+/** Removes a cleaning the host added by hand. */
+export async function removeManualCleaning(propertyId: number, date: string) {
+  getDb()
+    .delete(cleanings)
+    .where(and(eq(cleanings.propertyId, propertyId), eq(cleanings.date, date), eq(cleanings.manual, true)))
+    .run();
+  refresh();
+}

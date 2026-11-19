@@ -21,6 +21,14 @@ tells you when the copy you loaded is older than it needs.
 Finished stays are the exception: calendar links drop them, so the extension
 adds them as history, which is what gives the Revenue page its past months.
 
+## Publishing it
+
+The extension can go on the Chrome Web Store as an unlisted item, so users
+install it from a link and get updates by themselves instead of loading this
+folder. [docs/CHROME-WEB-STORE.md](../docs/CHROME-WEB-STORE.md) has every step
+and all the text to paste; its privacy policy is
+[docs/EXTENSION-PRIVACY.md](../docs/EXTENSION-PRIVACY.md).
+
 ## Read this first
 
 Airbnb's Terms of Service restrict collecting data from the platform by

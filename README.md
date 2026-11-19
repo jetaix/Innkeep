@@ -60,6 +60,9 @@ persistent disk.
   gives each platform a link that blocks what the other sold.
 - **Reservations.** Who is staying, arriving this week and later, with nights
   and expected payout.
+- **Cleaning.** A cleaning after every check-out, the time there is to do it,
+  who does it, done or skipped, and a schedule to copy or print for your
+  cleaner. The idea comes from [RentTools.io](https://github.com/Gribadan/RentTools.io) (MIT).
 - **Revenue.** Month-by-month revenue, costs and net. Add cleaning per stay,
   commission as a percentage, monthly or yearly subscriptions and one-off bills.
 - **Pricing.** The price of each night on Airbnb and Booking.com side by side,

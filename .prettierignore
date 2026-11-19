@@ -4,3 +4,4 @@ data
 package-lock.json
 next-env.d.ts
 docs/ALTERNATIVES.md
+dist

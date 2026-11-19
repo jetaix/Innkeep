@@ -197,6 +197,34 @@ CREATE TABLE IF NOT EXISTS channel_pages (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS channel_pages_page ON channel_pages (listing_id, page);
 `,
+  // 12: cleaning schedule: who cleans which place, and the state of each cleaning
+  `
+ALTER TABLE properties ADD COLUMN cleaning_enabled INTEGER NOT NULL DEFAULT 1;
+CREATE TABLE IF NOT EXISTS cleaners (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS cleaner_assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  cleaner_id INTEGER NOT NULL REFERENCES cleaners(id) ON DELETE CASCADE,
+  priority INTEGER NOT NULL DEFAULT 0
+);
+CREATE UNIQUE INDEX IF NOT EXISTS cleaner_assignments_rank ON cleaner_assignments (property_id, priority);
+CREATE TABLE IF NOT EXISTS cleanings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  cleaner_id INTEGER REFERENCES cleaners(id) ON DELETE SET NULL,
+  notes TEXT NOT NULL DEFAULT '',
+  manual INTEGER NOT NULL DEFAULT 0,
+  done_at INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS cleanings_day ON cleanings (property_id, date);
+`,
 ];
 
 function migrate(sqlite: Database.Database) {

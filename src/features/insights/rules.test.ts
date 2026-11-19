@@ -23,6 +23,7 @@ const property: Property = {
   checkInTime: "15:00",
   checkOutTime: "11:00",
   houseRules: "No smoking",
+  cleaningEnabled: true,
   icalToken: "t",
   createdAt: 0,
 };

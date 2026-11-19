@@ -22,6 +22,8 @@ export const properties = sqliteTable("properties", {
   checkInTime: text("check_in_time").notNull().default("15:00"),
   checkOutTime: text("check_out_time").notNull().default("11:00"),
   houseRules: text("house_rules").notNull().default(""),
+  /** Whether this place appears in the cleaning schedule. Off for a place the host cleans without planning. */
+  cleaningEnabled: integer("cleaning_enabled", { mode: "boolean" }).notNull().default(true),
   /** Secret used in the public iCal export URLs. */
   icalToken: text("ical_token").notNull(),
   createdAt: integer("created_at").notNull(),
@@ -296,3 +298,57 @@ export const channelPages = sqliteTable(
   (t) => [uniqueIndex("channel_pages_page").on(t.listingId, t.page)],
 );
 export type ChannelPage = typeof channelPages.$inferSelect;
+
+/** Someone who cleans for the host. A contact, not an account: they never sign in. */
+export const cleaners = sqliteTable("cleaners", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  phone: text("phone").notNull().default(""),
+  createdAt: integer("created_at").notNull(),
+});
+export type Cleaner = typeof cleaners.$inferSelect;
+
+/** Who cleans a property: priority 0 is the usual cleaner, 1 the backup. */
+export const cleanerAssignments = sqliteTable(
+  "cleaner_assignments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    propertyId: integer("property_id")
+      .notNull()
+      .references(() => properties.id, { onDelete: "cascade" }),
+    cleanerId: integer("cleaner_id")
+      .notNull()
+      .references(() => cleaners.id, { onDelete: "cascade" }),
+    priority: integer("priority").notNull().default(0),
+  },
+  (t) => [uniqueIndex("cleaner_assignments_rank").on(t.propertyId, t.priority)],
+);
+export type CleanerAssignment = typeof cleanerAssignments.$inferSelect;
+
+export const CLEANING_STATUSES = ["pending", "done", "skipped"] as const;
+export type CleaningStatus = (typeof CLEANING_STATUSES)[number];
+
+/**
+ * What the host recorded about one cleaning day of a property. Cleanings
+ * after a check-out are worked out from the reservations and need no row; a
+ * row exists once the host marks, annotates or reassigns one, or adds a
+ * cleaning by hand (`manual`).
+ */
+export const cleanings = sqliteTable(
+  "cleanings",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    propertyId: integer("property_id")
+      .notNull()
+      .references(() => properties.id, { onDelete: "cascade" }),
+    date: text("date").notNull(),
+    status: text("status").$type<CleaningStatus>().notNull().default("pending"),
+    /** Set when someone other than the property's usual cleaner takes this one. */
+    cleanerId: integer("cleaner_id").references(() => cleaners.id, { onDelete: "set null" }),
+    notes: text("notes").notNull().default(""),
+    manual: integer("manual", { mode: "boolean" }).notNull().default(false),
+    doneAt: integer("done_at"),
+  },
+  (t) => [uniqueIndex("cleanings_day").on(t.propertyId, t.date)],
+);
+export type CleaningRecord = typeof cleanings.$inferSelect;

@@ -51,6 +51,10 @@
           color: #0f0f11;
         }
       }
+      /* The rule above would otherwise show a button marked hidden. */
+      [hidden] {
+        display: none !important;
+      }
       button:disabled {
         opacity: 0.5;
         cursor: default;

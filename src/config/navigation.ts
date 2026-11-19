@@ -9,6 +9,7 @@ import {
   Building2,
   Settings,
   Sparkles,
+  SprayCan,
   Star,
   Tags,
   Wallet,
@@ -21,6 +22,7 @@ export type NavItem = {
     | "overview"
     | "calendar"
     | "reservations"
+    | "cleaning"
     | "inbox"
     | "reviews"
     | "revenue"
@@ -39,6 +41,7 @@ export const NAV: NavItem[] = [
   { href: "/overview", id: "overview", icon: Home, key: "o" },
   { href: "/calendar", id: "calendar", icon: CalendarDays, key: "c" },
   { href: "/reservations", id: "reservations", icon: ClipboardList, key: "r" },
+  { href: "/cleaning", id: "cleaning", icon: SprayCan, key: "m" },
   { href: "/inbox", id: "inbox", icon: MessageSquare, key: "i" },
   { href: "/reviews", id: "reviews", icon: Star, key: "w" },
   { href: "/revenue", id: "revenue", icon: Wallet, key: "v" },
