@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs before every `git push`: the same checks as CI, minus the production build.
+# A failing check stops the push. Skip once with `git push --no-verify`.
+echo "Checking format, lint, types and tests before pushing…"
+npm run format:check && npm run lint && npm run typecheck && npm test

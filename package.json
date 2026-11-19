@@ -11,7 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "prepare": "node scripts/hooks.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",

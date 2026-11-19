@@ -22,6 +22,11 @@ npm run check
 That runs formatting, lint, types, tests and a production build, the same
 steps as CI.
 
+`npm install` points git at the hooks in `.githooks`: format, lint, types and
+tests run before every `git push`, and a failure stops the push. GitHub Actions
+runs the same checks plus the build on every push to `main` and every pull
+request ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
 ## How the code is organised
 
 ```

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { CopyButton } from "@/components/ui/actions";
+import { buttonClass } from "@/components/ui/button";
 import { Badge, Card, Notice, PageHeader, SectionTitle } from "@/components/ui/primitives";
 import { Loading } from "@/components/ui/loading";
 import { getExtensionStatus, REQUIRED_EXTENSION } from "@/features/extension/status";
@@ -109,8 +110,10 @@ async function Guide() {
             {s.load.before} <strong className="font-medium text-ink">{s.load.strong}</strong> {s.load.after}
             <Copyable value={folder} label={s.copyPath} />
           </Step>
+          <Step title={s.pin.title}>{s.pin.body}</Step>
           <Step title={s.connect.title}>
-            {s.connect.before} <strong className="font-medium text-ink">{s.connect.strong}</strong>
+            {s.connect.before} <strong className="font-medium text-ink">{s.connect.settings}</strong>{" "}
+            {s.connect.middle} <strong className="font-medium text-ink">{s.connect.strong}</strong>
             {s.connect.after}
             <Copyable value={origin} label={s.copyAddress} />
             {token ? (
@@ -120,12 +123,41 @@ async function Guide() {
             )}
           </Step>
           <Step title={s.read.title}>
-            {s.read.before} <strong className="font-medium text-ink">{s.read.strong}</strong> {s.read.after}
-            <span className="mt-3 block">
+            {s.read.body}
+            <span className="mt-3 flex flex-wrap gap-2">
+              {/* Innkeep's own start page hands over to the extension. */}
+              <a
+                href="/extension/start?scope=all"
+                target="_blank"
+                className={buttonClass({ size: "sm", variant: "primary" })}
+              >
+                {t.prompt.refresh.everything}
+                <span className="sr-only">{m.common.actions.newTab}</span>
+              </a>
+              <a
+                href="/extension/start?scope=reservations"
+                target="_blank"
+                className={buttonClass({ size: "sm" })}
+              >
+                {t.prompt.refresh.reservations}
+                <span className="sr-only">{m.common.actions.newTab}</span>
+              </a>
+            </span>
+            <span className="mt-4 block text-xs">{s.read.manual}</span>
+            <span className="mt-2 block">
               <DetailsRefresh />
             </span>
           </Step>
         </ol>
+      </Card>
+
+      <Card className="p-5">
+        <SectionTitle>{t.after.title}</SectionTitle>
+        <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed text-muted">
+          {t.after.items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
       </Card>
 
       <Card className="p-5">

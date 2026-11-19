@@ -5,8 +5,17 @@ _Version française : [INSTALLATION.fr.md](INSTALLATION.fr.md)_
 This guide is for people who have never installed a program this way. No
 technical knowledge is needed. Allow about 20 minutes the first time.
 
+Innkeep has two parts: the app, which runs on your own computer, and a
+**Chrome extension** that reads your own Airbnb and Booking.com pages. You
+install both; steps 1 to 4 are the app, step 5 is the extension.
+
 Innkeep runs on your own computer. Your reservations and prices stay in a
 folder on that computer and are not sent to anyone.
+
+> **Prefer to be guided by an AI assistant?** The home page of Innkeep (and of
+> its website) has a ready-made request to copy into Claude, ChatGPT or
+> another assistant. It installs Innkeep for you, or walks you through these
+> same steps one at a time.
 
 ## What you need
 
@@ -82,14 +91,16 @@ from your own Airbnb and Booking.com pages: guest names, payouts, prices,
 reviews.
 
 In Innkeep, click the button **Add the browser extension** at the bottom
-right of the screen. It opens a guide with four short steps and a **Copy**
+right of the screen. It opens a guide with six short steps and a **Copy**
 button for everything you need to paste. In short:
 
 1. In Chrome, open the extensions page and switch on **Developer mode**.
 2. Click **Load unpacked** and choose the `extension` folder inside
    `Innkeep-main`.
-3. Click the new Innkeep Companion icon, open **Settings**, paste the address
-   and the token that Innkeep shows you, and click **Save and test**.
+3. Click the puzzle-piece icon next to the address bar and pin Innkeep
+   Companion, so its icon stays visible.
+4. Click the Innkeep Companion icon, open **Settings**, paste the address and
+   the token that Innkeep shows you, and click **Save and test**.
 
 Then sign in to Airbnb and Booking.com in the same browser, come back to
 Innkeep and click **Refresh everything**. One tab goes through your pages by

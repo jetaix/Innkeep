@@ -16,7 +16,7 @@ const en = {
   },
   setup: {
     title: "Set it up",
-    subtitle: "Chrome, Edge, Brave or Arc. About two minutes, once.",
+    subtitle: "Chrome, Edge, Brave or Arc, on a computer. About five minutes, once.",
     copyAddress: "Copy address",
     copyPath: "Copy path",
     copyToken: "Copy token",
@@ -25,46 +25,64 @@ const en = {
       title: "Switch it on in Innkeep",
       before: "Add a line",
       middle: "followed by a long random string to",
-      after: ", then restart Innkeep. The token is the password the extension uses to reach this app.",
+      after:
+        ", then restart Innkeep. The token is the password the extension uses to reach this app. If you start Innkeep by double-clicking its start file, this is already done.",
     },
     openPage: {
       title: "Open the extensions page of your browser",
       before: "Browsers do not let a web page link to it, so paste this address in a new tab. Then turn on",
       strong: "Developer mode",
-      after: "(top right).",
+      after:
+        "(the switch at the top right). It is needed because the extension comes from this folder, not from the Chrome Web Store.",
     },
     load: {
       title: "Load the extension",
       before: "Click",
       strong: "Load unpacked",
-      after: "and choose this folder.",
+      after:
+        "(top left) and choose the folder below. On a Mac, press Command + Shift + G in the window that opens and paste the path. A card named Innkeep Companion appears.",
+    },
+    pin: {
+      title: "Keep its icon in view",
+      body: "Click the puzzle-piece icon to the right of the address bar, then the pin next to Innkeep Companion. Its icon now stays in the toolbar.",
     },
     connect: {
       title: "Connect it to this Innkeep",
-      before:
-        "Click the Innkeep Companion icon in the toolbar (under the puzzle piece), paste the address and the token, then",
+      before: "Click the Innkeep Companion icon, then",
+      settings: "Settings",
+      middle: "at the bottom of the small window. Paste the address and the token below, then click",
       strong: "Save and test",
-      after: ".",
+      after:
+        ". Chrome asks whether the extension may reach that address: allow it. You should read “Connected”.",
       tokenMissing: "The token appears here once it is set.",
     },
     read: {
-      title: "Open your reservations pages",
-      before:
-        "Each button opens your own reservations page. The extension reads what it shows, sends it here and closes the tab. Sign in to the platform first if it asks. On Booking.com, choose",
-      strong: "Show 100",
-      after: "under the table if you have more than 25 reservations: only the rows on screen are read.",
+      title: "Read your data",
+      body: "Sign in to Airbnb and to Booking.com in this same browser. Then press the button: one tab goes through your own pages by itself, shows a Stop button on each, and comes back here. The same two buttons are in the Innkeep Companion icon.",
+      manual: "Or open one page at a time:",
     },
+  },
+  after: {
+    title: "Later on",
+    items: [
+      "After updating Innkeep: open the extensions page again and press the round arrow on the Innkeep Companion card, then refresh any Airbnb or Booking.com tab that was already open.",
+      "Chrome may show “Disable developer mode extensions” when it starts. Close that message; choosing to disable would switch Innkeep Companion off.",
+      "If the corner button of Innkeep says “Update the browser extension”, do the first point above.",
+      "To remove it: on the extensions page, click Remove on the Innkeep Companion card. Nothing stays behind.",
+    ],
   },
   reads: {
     title: "What it reads",
     items: [
       "Reservations: guest name, party size, dates, confirmation code, status, date booked and payout. On Booking.com also the price and the commission.",
       "Finished and cancelled stays, so the Revenue page has a past.",
-      "Your Airbnb listing: description, address, times, house rules, prices and amenities.",
-      "Never phone numbers, messages, door codes or wifi details. It makes no requests to Airbnb or Booking.com and takes no cookies or passwords.",
+      "Nightly prices from both calendars, and what a guest is shown for a stay on your public listings.",
+      "Your listing as you set it and as guests see it: description, address, times, house rules, amenities, photos, rating.",
+      "Reviews and your replies, from your public listings.",
+      "Never phone numbers, messages, door codes, wifi details, or any page about money, invoices, bank details or your account. It calls none of the platforms' APIs and takes no cookies or passwords.",
     ],
     terms:
-      "Both platforms restrict automated data collection in their terms. The extension only reads pages you open, but using it on your account is your decision.",
+      "Both platforms restrict automated data collection in their terms. The extension reads your own pages, in your own browser, when you open them or start a run. It never runs in the background. Using it on your account is your decision.",
   },
   button: {
     add: "Add the browser extension",
@@ -137,7 +155,7 @@ const fr: typeof en = {
   },
   setup: {
     title: "Installation",
-    subtitle: "Chrome, Edge, Brave ou Arc. Environ deux minutes, une seule fois.",
+    subtitle: "Chrome, Edge, Brave ou Arc, sur un ordinateur. Environ cinq minutes, une seule fois.",
     copyAddress: "Copier l’adresse",
     copyPath: "Copier le chemin",
     copyToken: "Copier le jeton",
@@ -146,47 +164,64 @@ const fr: typeof en = {
       before: "Ajoutez une ligne",
       middle: "suivie d’une longue chaîne aléatoire dans",
       after:
-        ", puis redémarrez Innkeep. Le jeton est le mot de passe que l’extension utilise pour joindre cette application.",
+        ", puis redémarrez Innkeep. Le jeton est le mot de passe que l’extension utilise pour joindre cette application. Si vous démarrez Innkeep en double-cliquant sur son fichier de démarrage, c’est déjà fait.",
     },
     openPage: {
       title: "Ouvrez la page des extensions de votre navigateur",
       before:
-        "Les navigateurs ne permettent pas à une page web d’y renvoyer : collez donc cette adresse dans un nouvel onglet. Activez ensuite le",
+        "Les navigateurs ne permettent pas à une page web d’y renvoyer : collez cette adresse dans un nouvel onglet. Activez ensuite le",
       strong: "Mode développeur",
-      after: "(en haut à droite).",
+      after:
+        "(l’interrupteur en haut à droite). Il est nécessaire parce que l’extension vient de ce dossier, et non du Chrome Web Store.",
     },
     load: {
       title: "Chargez l’extension",
       before: "Cliquez sur",
       strong: "Charger l’extension non empaquetée",
-      after: "et choisissez ce dossier.",
+      after:
+        "(en haut à gauche) et choisissez le dossier ci-dessous. Sur Mac, appuyez sur Commande + Maj + G dans la fenêtre qui s’ouvre et collez le chemin. Une carte nommée Innkeep Companion apparaît.",
+    },
+    pin: {
+      title: "Gardez son icône visible",
+      body: "Cliquez sur l’icône en forme de pièce de puzzle, à droite de la barre d’adresse, puis sur l’épingle à côté d’Innkeep Companion. Son icône reste alors dans la barre d’outils.",
     },
     connect: {
-      title: "Connectez-la à cet Innkeep",
-      before:
-        "Cliquez sur l’icône Innkeep Companion dans la barre d’outils (sous la pièce de puzzle), collez l’adresse et le jeton, puis cliquez sur",
+      title: "Reliez-la à cet Innkeep",
+      before: "Cliquez sur l’icône Innkeep Companion, puis sur",
+      settings: "Settings",
+      middle: "en bas de la petite fenêtre. Collez l’adresse et le jeton ci-dessous, puis cliquez sur",
       strong: "Save and test",
-      after: ".",
+      after:
+        ". Chrome demande si l’extension peut accéder à cette adresse : acceptez. Vous devez lire « Connected ».",
       tokenMissing: "Le jeton apparaît ici une fois défini.",
     },
     read: {
-      title: "Ouvrez vos pages de réservations",
-      before:
-        "Chaque bouton ouvre votre propre page de réservations. L’extension lit ce qui s’y affiche, l’envoie ici et ferme l’onglet. Connectez-vous d’abord à la plateforme si elle le demande. Sur Booking.com, choisissez d’afficher",
-      strong: "100 réservations",
-      after: "sous le tableau si vous en avez plus de 25 : seules les lignes à l’écran sont lues.",
+      title: "Lisez vos données",
+      body: "Connectez-vous à Airbnb et à Booking.com dans ce même navigateur. Appuyez ensuite sur le bouton : un onglet parcourt vos propres pages tout seul, affiche un bouton Stop sur chacune, puis revient ici. Les deux mêmes boutons se trouvent dans l’icône Innkeep Companion.",
+      manual: "Ou ouvrez une page à la fois :",
     },
+  },
+  after: {
+    title: "Par la suite",
+    items: [
+      "Après une mise à jour d’Innkeep : rouvrez la page des extensions et appuyez sur la flèche ronde de la carte Innkeep Companion, puis actualisez les onglets Airbnb ou Booking.com déjà ouverts.",
+      "Chrome peut afficher « Désactiver les extensions en mode développeur » au démarrage. Fermez ce message ; choisir de désactiver éteindrait Innkeep Companion.",
+      "Si le bouton en bas à droite d’Innkeep indique « Mettre à jour l’extension de navigateur », suivez le premier point ci-dessus.",
+      "Pour la retirer : sur la page des extensions, cliquez sur Supprimer sur la carte Innkeep Companion. Rien ne reste derrière.",
+    ],
   },
   reads: {
     title: "Ce qu’elle lit",
     items: [
-      "Réservations : nom du voyageur, nombre de personnes, dates, code de confirmation, statut, date de réservation et versement. Sur Booking.com, également le prix et la commission.",
+      "Les réservations : nom du voyageur, nombre de personnes, dates, code de confirmation, statut, date de réservation et versement. Sur Booking.com, aussi le prix et la commission.",
       "Les séjours terminés et annulés, pour que la page Revenus ait un historique.",
-      "Votre annonce Airbnb : description, adresse, horaires, règlement intérieur, prix et équipements.",
-      "Jamais de numéros de téléphone, de messages, de codes de porte ni d’identifiants wifi. Elle n’envoie aucune requête à Airbnb ou à Booking.com et ne prend ni cookies ni mots de passe.",
+      "Les prix par nuit des deux calendriers, et ce qu’un voyageur voit pour un séjour sur vos annonces publiques.",
+      "Votre annonce telle que vous l’avez réglée et telle que les voyageurs la voient : description, adresse, horaires, règlement, équipements, photos, note.",
+      "Les avis et vos réponses, sur vos annonces publiques.",
+      "Jamais les numéros de téléphone, les messages, les codes d’accès, le wifi, ni aucune page concernant l’argent, les factures, les coordonnées bancaires ou votre compte. Elle n’appelle aucune API des plateformes et ne prend ni cookie ni mot de passe.",
     ],
     terms:
-      "Les conditions des deux plateformes limitent la collecte automatisée de données. L’extension ne lit que les pages que vous ouvrez, mais l’utiliser sur votre compte relève de votre décision.",
+      "Les conditions des deux plateformes restreignent la collecte automatisée de données. L’extension lit vos propres pages, dans votre navigateur, quand vous les ouvrez ou lancez une tournée. Elle ne tourne jamais en arrière-plan. L’utiliser sur votre compte relève de votre décision.",
   },
   button: {
     add: "Ajouter l’extension de navigateur",

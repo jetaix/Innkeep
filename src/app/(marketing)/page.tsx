@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Logo } from "@/components/brand/logo";
-import { LanguageSwitch, ThemeSwitch } from "@/components/shell/preferences";
+import { Puzzle } from "lucide-react";
+import { CopyButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
 import { Badge, Kbd } from "@/components/ui/primitives";
 import { site } from "@/config/site";
 import { CalendarPreview } from "@/features/marketing/calendar-preview";
+import { SiteFooter, SiteHeader } from "@/features/marketing/site-chrome";
 import { getI18n } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,31 +16,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LandingPage() {
-  const { m, fmt } = await getI18n();
+  const { locale, m, fmt } = await getI18n();
   const t = m.marketing;
   const f = t.features;
   const euros = (amount: number) => fmt.money(amount * 100, "EUR", { cents: false });
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8">
-      <header className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="rounded-md">
-          <Logo />
-        </Link>
-        <nav aria-label={t.nav.label} className="flex items-center gap-1 text-[13px]">
-          <a href="#features" className="hidden rounded-md px-3 py-1.5 text-muted hover:text-ink sm:block">
-            {t.nav.features}
-          </a>
-          <a href="#limits" className="hidden rounded-md px-3 py-1.5 text-muted hover:text-ink sm:block">
-            {t.nav.limits}
-          </a>
-          <a href={site.repo} className="rounded-md px-3 py-1.5 text-muted hover:text-ink">
-            GitHub
-          </a>
-          <Link href="/overview" className={buttonClass({}, "ml-2")}>
-            {t.nav.dashboard}
-          </Link>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <main>
         <section className="pt-16 pb-12 sm:pt-24">
@@ -57,6 +40,10 @@ export default async function LandingPage() {
               {t.hero.dashboard}
             </Link>
           </div>
+          <p className="mt-6 flex max-w-[64ch] animate-rise items-start gap-2.5 text-[15px] leading-relaxed text-muted [animation-delay:240ms]">
+            <Puzzle aria-hidden className="mt-1 size-4 shrink-0 text-ink" strokeWidth={1.75} />
+            {t.hero.extension}
+          </p>
         </section>
 
         <CalendarPreview />
@@ -164,7 +151,7 @@ export default async function LandingPage() {
             <code>
               <span className="text-faint">$ </span>git clone {site.repo.replace("https://", "")}
               {"\n"}
-              <span className="text-faint">$ </span>cd innkeep && npm install
+              <span className="text-faint">$ </span>cd Innkeep && npm install
               {"\n"}
               <span className="text-faint">$ </span>npm run dev
               {"\n\n"}
@@ -172,27 +159,39 @@ export default async function LandingPage() {
             </code>
           </pre>
         </section>
+
+        <section className="pt-16" aria-labelledby="ai-install">
+          <div className="rounded-xl border border-line">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line p-6 sm:p-8">
+              <div>
+                <h3 id="ai-install" className="text-xl font-semibold tracking-tight text-balance">
+                  {t.open.ai.title}
+                </h3>
+                <p className="mt-2 max-w-[70ch] text-[15px] leading-relaxed text-muted">{t.open.ai.body}</p>
+              </div>
+              <CopyButton value={t.open.ai.prompt} label={t.open.ai.copy} />
+            </div>
+            <pre
+              tabIndex={0}
+              aria-label={t.open.ai.label}
+              className="max-h-80 overflow-y-auto bg-subtle p-6 font-sans text-[13px] leading-relaxed whitespace-pre-wrap text-muted sm:p-8"
+            >
+              {t.open.ai.prompt}
+            </pre>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-6 py-4 text-[13px] text-muted sm:px-8">
+              <p className="max-w-[60ch]">{t.open.ai.caution}</p>
+              <a
+                href={`${site.repo}/blob/main/docs/${locale === "fr" ? "INSTALLATION.fr.md" : "INSTALL.md"}`}
+                className="text-ink underline underline-offset-2"
+              >
+                {t.open.ai.guide}
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <footer className="mt-28 flex flex-wrap items-center justify-between gap-4 border-t border-line py-8 text-[13px] text-muted">
-        <Logo className="text-ink" />
-        <p>{t.footer.disclaimer}</p>
-        <nav aria-label={t.footer.label} className="flex gap-5">
-          <a href={site.repo} className="hover:text-ink">
-            GitHub
-          </a>
-          <a href={`${site.repo}/blob/main/docs/ALTERNATIVES.md`} className="hover:text-ink">
-            {t.footer.alternatives}
-          </a>
-          <a href={`${site.repo}/blob/main/LICENSE`} className="hover:text-ink">
-            {t.footer.license}
-          </a>
-        </nav>
-        <div className="flex items-center gap-2">
-          <LanguageSwitch />
-          <ThemeSwitch />
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

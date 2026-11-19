@@ -56,19 +56,33 @@ Innkeep walks you through this at **/extension** (the button in the corner of
 every page until the extension is connected), with the folder path, address
 and token ready to copy. The same steps:
 
-1. On the Innkeep server, set `EXTENSION_TOKEN` to a long random string and
-   restart. Settings → Browser extension should show **On**.
-2. In Chrome (or Edge, Brave, Arc), open `chrome://extensions`, turn on
-   **Developer mode**, click **Load unpacked** and choose this `extension/`
-   folder.
-3. Click the extension's icon, enter your Innkeep address and the token, then
-   **Save and test**. Chrome asks permission to reach that one address.
-4. Make sure the property's Airbnb calendar link is connected in Innkeep and
-   has synced.
-5. Open Airbnb → Reservations, or the Booking.com extranet → Reservations,
-   and click **Send to Innkeep**. On Airbnb, the **All** tab also lists
-   finished stays. On Booking.com, widen the date filter first: only the rows
-   on screen are sent.
+1. **Token.** The extension needs a password to reach Innkeep, set as
+   `EXTENSION_TOKEN` in `.env.local`. Starting Innkeep with `start.command`,
+   `start.bat` or `npm run app` creates one for you. Otherwise add a long
+   random string yourself and restart. Settings → Browser extension should
+   show **On**.
+2. **Extensions page.** In Chrome (or Edge, Brave, Arc), open
+   `chrome://extensions` and turn on **Developer mode** (top right). It is
+   needed because the extension is loaded from a folder, not from the Chrome
+   Web Store.
+3. **Load it.** Click **Load unpacked** and choose this `extension/` folder. A
+   card named Innkeep Companion appears.
+4. **Pin it.** Click the puzzle-piece icon next to the address bar and pin
+   Innkeep Companion, so its icon stays in the toolbar.
+5. **Connect it.** Click the icon, then **Settings** at the bottom of the
+   popup. Enter your Innkeep address (for example `http://localhost:3000`)
+   and the token, then **Save and test**. Chrome asks permission to reach that
+   one address; allow it. The page should say "Connected".
+6. **Read your data.** Sign in to Airbnb and Booking.com in the same browser,
+   then press **Refresh everything** in Innkeep, or **Read everything** in the
+   extension's popup.
+
+After updating Innkeep, reload the extension (the round arrow on its card at
+`chrome://extensions`) and refresh any Airbnb or Booking.com tab that was
+already open: tabs opened before a reload keep the old script.
+
+Chrome may show "Disable developer mode extensions" when it starts. Dismiss
+it; disabling would switch the extension off.
 
 ### One click from Innkeep
 

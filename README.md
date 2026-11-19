@@ -6,6 +6,12 @@
 </p>
 
 <p align="center">
+  <strong>Innkeep works with a Chrome extension, included in this repository.</strong><br />
+  Calendar links only carry dates. The extension reads the rest (guests, payouts, prices, reviews)<br />
+  from your own Airbnb and Booking.com pages. <a href="extension/README.md">How it works and what it reads</a>.
+</p>
+
+<p align="center">
   <a href="#quick-start">Quick start</a> ·
   <a href="#features">Features</a> ·
   <a href="#what-it-does-not-do">Limits</a> ·
@@ -119,8 +125,9 @@ approved software partners, and Innkeep is not one.
 iCal is not instant: platforms re-read links on their own schedule, so a
 double booking is still possible in the gap. Innkeep flags it; it cannot
 prevent it. If you need instant sync and in-app messaging, a partner-API
-product is the right tool; [docs/ALTERNATIVES.md](docs/ALTERNATIVES.md)
-compares them, including the ones with free tiers.
+product is the right tool; the site's **/alternatives** pages compare them
+([how to find and edit them](docs/ALTERNATIVES.md)), including the ones with
+free tiers.
 
 ## Configuration
 

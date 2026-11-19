@@ -15,6 +15,8 @@ const en = {
     body: "Innkeep keeps Airbnb and Booking.com in step, shows what each month pays after costs, and points out what to fix. It is free, open source, and runs on your own machine.",
     github: "Get Innkeep on GitHub",
     dashboard: "Open the dashboard",
+    extension:
+      "Works with a Chrome extension, included. Calendar links only carry dates; the extension reads the rest (guests, payouts, prices, reviews) from your own Airbnb and Booking.com pages.",
   },
   features: {
     title: "Made for hosts with one or two places, not two hundred.",
@@ -88,6 +90,18 @@ const en = {
       `${license} licensed. Your bookings live in a single SQLite file on your machine, with no account and no subscription.`,
     source: "Read the source",
     install: "Install commands",
+    /** A prompt a non-technical host pastes into an AI assistant, which then installs Innkeep or guides them. */
+    ai: {
+      title: "Not technical? Let an AI assistant install it with you.",
+      body: "Copy this request and paste it into Claude, ChatGPT, Gemini or any other assistant. One that can act on your computer (Claude Code, Claude in its desktop app, Codex and similar) does the installation itself. A chat-only assistant guides you one step at a time.",
+      copy: "Copy the request",
+      label: "Request to paste into an AI assistant",
+      guide: "Prefer to follow written steps? Read the install guide",
+      caution:
+        "The request tells the assistant never to ask for your passwords. If it does anyway, do not give them.",
+      prompt:
+        'I want to install and run Innkeep on my own computer. It is a free, open-source app for people who rent out one or two places on Airbnb and Booking.com. It has two parts: the app itself, and a Chrome extension included in the project that reads my own Airbnb and Booking.com pages. Both must be installed. I am not technical. Please help me from start to finish.\n\nABOUT THE PROJECT\n- Code: https://github.com/jetaix/Innkeep\n- It needs Node.js version 22 or later. Nothing else: no database to install, no account to create.\n- It starts with one file in the project folder: "start.command" on a Mac, "start.bat" on Windows, or the command "npm run app" in a terminal. That file installs what is missing, creates the settings, prepares the app and opens http://localhost:3000 in my browser.\n- The full guide is in the project: docs/INSTALL.md (docs/INSTALLATION.fr.md in French). Read it if you can.\n\nHOW TO HELP ME\n- First ask me whether I use a Mac or Windows, unless you can see it yourself.\n- If you can run commands on my computer, do the work yourself: check Node.js (install the current LTS version if it is missing or older than 22), download the project into my Documents folder, run "npm run app" inside it, wait until it says Innkeep is running, and check that http://localhost:3000/overview answers. Then tell me in plain words what you did.\n- If you cannot run commands, guide me one step at a time. Give me a single step, say exactly where to click or what to type, and wait until I tell you it is done before giving the next one.\n- Explain any word I might not know. Do not skip steps, and do not give me several options to choose from: pick the simplest one.\n\nTHEN HELP ME FINISH THE SETUP INSIDE INNKEEP\n1. Add my place: "Properties", then "Add property", then paste the calendar links that Airbnb and Booking.com give me. Tell me where to find those links on each site.\n2. Add the browser extension: Innkeep shows a button "Add the browser extension" that opens a guide with everything to copy. In short: open chrome://extensions, switch on "Developer mode", click "Load unpacked", choose the "extension" folder of the project, pin the Innkeep Companion icon, click it, open "Settings", paste the address and the token that Innkeep shows, and click "Save and test".\n3. I sign in to Airbnb and Booking.com myself, then press "Refresh everything" in Innkeep.\n\nRULES\n- Never ask me for my Airbnb, Booking.com or other passwords, and never type them for me. I sign in myself.\n- Do not show, copy or send anywhere the content of the ".env.local" file or of the "data" folder. They hold my private settings and my reservations.\n- Do not change the project\'s code. If something fails, show me the exact error message and explain the fix in plain words.\n- Innkeep only runs while its window is open. At the end, tell me how to stop it and how to start it again tomorrow.',
+    },
   },
   footer: {
     label: "Footer",
@@ -118,6 +132,8 @@ const fr: typeof en = {
     body: "Innkeep garde Airbnb et Booking.com synchronisés, montre ce que chaque mois rapporte une fois les charges déduites et vous signale ce qu’il faut corriger. Gratuit et open source, il tourne sur votre propre machine.",
     github: "Obtenir Innkeep sur GitHub",
     dashboard: "Ouvrir le tableau de bord",
+    extension:
+      "Fonctionne avec une extension Chrome, fournie. Les liens de calendrier ne contiennent que des dates ; l’extension lit le reste (voyageurs, versements, prix, avis) sur vos propres pages Airbnb et Booking.com.",
   },
   features: {
     title: "Pensé pour les hôtes qui ont un ou deux logements, pas deux cents.",
@@ -190,6 +206,17 @@ const fr: typeof en = {
       `Sous licence ${license}. Vos réservations sont stockées dans un seul fichier SQLite sur votre machine, sans compte ni abonnement.`,
     source: "Lire le code source",
     install: "Commandes d’installation",
+    ai: {
+      title: "Pas technicien ? Laissez un assistant IA l’installer avec vous.",
+      body: "Copiez cette demande et collez-la dans Claude, ChatGPT, Gemini ou un autre assistant. Un assistant capable d’agir sur votre ordinateur (Claude Code, Claude dans son application de bureau, Codex et équivalents) fait l’installation lui-même. Un assistant limité à la conversation vous guide une étape à la fois.",
+      copy: "Copier la demande",
+      label: "Demande à coller dans un assistant IA",
+      guide: "Vous préférez suivre des étapes écrites ? Lisez le guide d’installation",
+      caution:
+        "La demande précise à l’assistant de ne jamais vous réclamer vos mots de passe. S’il le fait quand même, ne les donnez pas.",
+      prompt:
+        "Je veux installer et lancer Innkeep sur mon propre ordinateur. C’est une application gratuite et open source pour les personnes qui louent un ou deux logements sur Airbnb et Booking.com. Elle comprend deux parties : l’application elle-même, et une extension Chrome fournie avec le projet, qui lit mes propres pages Airbnb et Booking.com. Les deux doivent être installées. Je ne suis pas technicien. Aide-moi du début à la fin, en français.\n\nÀ PROPOS DU PROJET\n- Code : https://github.com/jetaix/Innkeep\n- Il a besoin de Node.js en version 22 ou plus. Rien d’autre : aucune base de données à installer, aucun compte à créer.\n- Il démarre avec un seul fichier du dossier du projet : « start.command » sur Mac, « start.bat » sur Windows, ou la commande « npm run app » dans un terminal. Ce fichier installe ce qui manque, crée les réglages, prépare l’application et ouvre http://localhost:3000 dans mon navigateur.\n- Le guide complet est dans le projet : docs/INSTALLATION.fr.md (docs/INSTALL.md en anglais). Lis-le si tu le peux.\n\nCOMMENT M’AIDER\n- Demande-moi d’abord si j’utilise un Mac ou Windows, sauf si tu peux le voir toi-même.\n- Si tu peux exécuter des commandes sur mon ordinateur, fais le travail toi-même : vérifie Node.js (installe la version LTS actuelle s’il manque ou s’il est antérieur à la version 22), télécharge le projet dans mon dossier Documents, lance « npm run app » dans ce dossier, attends qu’il indique qu’Innkeep est démarré, et vérifie que http://localhost:3000/overview répond. Explique-moi ensuite simplement ce que tu as fait.\n- Si tu ne peux pas exécuter de commandes, guide-moi une étape à la fois. Donne-moi une seule étape, dis-moi exactement où cliquer ou quoi taper, et attends que je te dise que c’est fait avant de passer à la suivante.\n- Explique chaque mot que je pourrais ne pas connaître. Ne saute aucune étape, et ne me propose pas plusieurs options : choisis la plus simple.\n\nAIDE-MOI ENSUITE À TERMINER L’INSTALLATION DANS INNKEEP\n1. Ajouter mon logement : « Logements », puis « Ajouter le logement », puis coller les liens de calendrier fournis par Airbnb et Booking.com. Dis-moi où trouver ces liens sur chaque site.\n2. Ajouter l’extension de navigateur : Innkeep affiche un bouton « Ajouter l’extension de navigateur » qui ouvre un guide avec tout ce qu’il faut copier. En résumé : ouvrir chrome://extensions, activer le « Mode développeur », cliquer sur « Charger l’extension non empaquetée », choisir le dossier « extension » du projet, épingler l’icône Innkeep Companion, cliquer dessus, ouvrir « Settings », coller l’adresse et le jeton affichés par Innkeep, puis cliquer sur « Save and test ».\n3. Je me connecte moi-même à Airbnb et à Booking.com, puis j’appuie sur « Tout mettre à jour » dans Innkeep.\n\nRÈGLES\n- Ne me demande jamais mes mots de passe Airbnb, Booking.com ou autres, et ne les saisis jamais à ma place. Je me connecte moi-même.\n- N’affiche pas, ne copie pas et n’envoie nulle part le contenu du fichier « .env.local » ni du dossier « data ». Ils contiennent mes réglages privés et mes réservations.\n- Ne modifie pas le code du projet. Si quelque chose échoue, montre-moi le message d’erreur exact et explique simplement la solution.\n- Innkeep ne fonctionne que lorsque sa fenêtre est ouverte. À la fin, dis-moi comment l’arrêter et comment le relancer demain.",
+    },
   },
   footer: {
     label: "Pied de page",

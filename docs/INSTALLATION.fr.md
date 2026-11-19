@@ -6,9 +6,19 @@ Ce guide s’adresse aux personnes qui n’ont jamais installé un programme de
 cette façon. Aucune connaissance technique n’est nécessaire. Comptez environ
 20 minutes la première fois.
 
+Innkeep comprend deux parties : l’application, qui tourne sur votre propre
+ordinateur, et une **extension Chrome** qui lit vos propres pages Airbnb et
+Booking.com. Vous installez les deux ; les étapes 1 à 4 concernent
+l’application, l’étape 5 l’extension.
+
 Innkeep fonctionne sur votre propre ordinateur. Vos réservations et vos
 tarifs restent dans un dossier de cet ordinateur et ne sont envoyés à
 personne.
+
+> **Vous préférez être guidé par un assistant IA ?** La page d’accueil
+> d’Innkeep (et de son site) propose une demande toute prête à copier dans
+> Claude, ChatGPT ou un autre assistant. Il installe Innkeep pour vous, ou vous
+> accompagne dans ces mêmes étapes, une à la fois.
 
 ## Ce qu’il vous faut
 
@@ -89,15 +99,17 @@ navigateur lit le reste sur vos propres pages Airbnb et Booking.com : noms des
 voyageurs, versements, tarifs, avis.
 
 Dans Innkeep, cliquez sur le bouton **Ajouter l’extension de navigateur** en
-bas à droite de l’écran. Il ouvre un guide en quatre étapes courtes, avec un
+bas à droite de l’écran. Il ouvre un guide en six étapes courtes, avec un
 bouton **Copier** pour tout ce qu’il faut coller. En résumé :
 
 1. Dans Chrome, ouvrez la page des extensions et activez le **Mode
    développeur**.
 2. Cliquez sur **Charger l’extension non empaquetée** et choisissez le
    dossier `extension` qui se trouve dans `Innkeep-main`.
-3. Cliquez sur la nouvelle icône Innkeep Companion, ouvrez **Settings**,
-   collez l’adresse et le jeton qu’Innkeep vous affiche, puis cliquez sur
+3. Cliquez sur l’icône en forme de pièce de puzzle, à côté de la barre
+   d’adresse, et épinglez Innkeep Companion pour garder son icône visible.
+4. Cliquez sur l’icône Innkeep Companion, ouvrez **Settings**, collez
+   l’adresse et le jeton qu’Innkeep vous affiche, puis cliquez sur
    **Save and test**.
 
 Connectez-vous ensuite à Airbnb et à Booking.com dans le même navigateur,
