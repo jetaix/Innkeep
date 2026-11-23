@@ -1,12 +1,52 @@
 /**
  * Messages to the host's own Telegram, through a bot they created with
- * @BotFather. `TELEGRAM_CHAT_ID` is a person or a group, so a couple can
- * both receive them. Off unless both variables are set.
+ * @BotFather. The chat is a person or a group, so a couple can both receive
+ * them. It comes from `TELEGRAM_CHAT_ID`, or from the group the host picked
+ * on the Settings page (see `features/cleaning/telegram-chat`).
  */
 const LIMIT = 4000; // Telegram refuses a message over 4096 characters.
 
-export function telegramConfigured(): boolean {
-  return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+/** Whether a bot is set up at all; which chat it writes to is a separate matter. */
+export const telegramBot = () => Boolean(process.env.TELEGRAM_BOT_TOKEN);
+
+export type TelegramChat = { id: string; title: string; kind: "group" | "person" | "channel" };
+
+/** The chats in what `getUpdates` returns, newest first, each once. Pure. */
+export function chatsIn(updates: unknown): TelegramChat[] {
+  const found = new Map<string, TelegramChat>();
+  for (const update of Array.isArray(updates) ? [...updates].reverse() : []) {
+    for (const part of Object.values((update ?? {}) as Record<string, unknown>)) {
+      const chat = (part as { chat?: Record<string, unknown> } | null)?.chat;
+      if (!chat || (typeof chat.id !== "number" && typeof chat.id !== "string")) continue;
+      const id = String(chat.id);
+      if (found.has(id)) continue;
+      const kind = chat.type === "private" ? "person" : chat.type === "channel" ? "channel" : "group";
+      const name = [chat.title, chat.first_name, chat.username].find((value) => typeof value === "string");
+      found.set(id, { id, title: String(name ?? id).slice(0, 80), kind });
+    }
+  }
+  return [...found.values()];
+}
+
+/**
+ * The chats the bot has recently been written to in, so the host can pick
+ * theirs instead of looking its number up by hand. Telegram only remembers
+ * the last day or so: a message sent in the group just before is what makes
+ * it appear.
+ */
+export async function findTelegramChats(): Promise<TelegramChat[]> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error("Set TELEGRAM_BOT_TOKEN");
+  const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`, {
+    signal: AbortSignal.timeout(15_000),
+    cache: "no-store",
+  });
+  const answer = (await response.json().catch(() => null)) as {
+    result?: unknown;
+    description?: string;
+  } | null;
+  if (!response.ok) throw new Error(answer?.description ?? `Telegram answered ${response.status}`);
+  return chatsIn(answer?.result);
 }
 
 /** Cuts a long text into messages at line breaks. */
@@ -25,10 +65,9 @@ export function splitMessage(text: string, limit = LIMIT): string[] {
 }
 
 /** Sends a plain-text message. Throws with Telegram's own explanation when it is refused. */
-export async function sendTelegram(text: string): Promise<void> {
+export async function sendTelegram(text: string, chat: string | null): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chat = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chat) throw new Error("Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID");
+  if (!token || !chat) throw new Error("Set TELEGRAM_BOT_TOKEN and choose a chat");
 
   for (const part of splitMessage(text)) {
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

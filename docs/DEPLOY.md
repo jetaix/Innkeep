@@ -113,11 +113,14 @@ cleaning is no longer needed.
    questions. It gives you a token: that is `TELEGRAM_BOT_TOKEN`.
 2. For both of you to get the messages, create a group, add your partner and
    the bot. For yourself only, just open the bot and press **Start**.
-3. Send any message in that chat, then open
-   `https://api.telegram.org/bot<token>/getUpdates` in a browser. The number
-   after `"chat":{"id":` is `TELEGRAM_CHAT_ID` (negative for a group).
-4. Restart Innkeep with the two variables, open **Settings** and press
-   **Send a test message**.
+3. Set `TELEGRAM_BOT_TOKEN` and restart Innkeep. Send any message in that
+   chat, then open **Settings** and press **Find my group**: Innkeep asks
+   Telegram which chats the bot was written to in, and you pick yours. A first
+   message arrives there straight away.
+
+To fix the chat in the server's settings instead, set `TELEGRAM_CHAT_ID` to its
+number (negative for a group); it then takes precedence over the one picked in
+Settings.
 
 Messages go out after each calendar sync: every 15 minutes on your own
 server, or each time the scheduler calls on Vercel. The first run tells you about every cleaning already planned, in one message.

@@ -93,6 +93,18 @@ const en = {
     testSending: "Sending…",
     testSent: "Sent. Check Telegram.",
     testFailed: (reason: string) => `Telegram refused the message: ${reason}`,
+    writesTo: (chat: string) => `Messages go to “${chat}”.`,
+    find: {
+      intro:
+        "The bot is set up, but Innkeep does not know which chat to write to. Send any message in your group (or to the bot), then press the button.",
+      button: "Find my group",
+      searching: "Asking Telegram…",
+      again: "Look again",
+      none: "Telegram shows no recent chat for this bot. Add the bot to your group, send a message there such as /start, then look again.",
+      failed: (reason: string) => `Telegram did not answer the question: ${reason}`,
+      use: "Use this one",
+      kinds: { group: "Group", person: "Person", channel: "Channel" },
+    },
   },
   credit: "The idea of this schedule comes from RentTools.io, an open-source project under the MIT licence.",
 };
@@ -197,6 +209,18 @@ const fr: typeof en = {
     testSending: "Envoi…",
     testSent: "Envoyé. Regardez Telegram.",
     testFailed: (reason) => `Telegram a refusé le message : ${reason}`,
+    writesTo: (chat) => `Les messages vont dans « ${chat} ».`,
+    find: {
+      intro:
+        "Le bot est en place, mais Innkeep ne sait pas dans quelle conversation écrire. Envoyez un message dans votre groupe (ou au bot), puis appuyez sur le bouton.",
+      button: "Trouver mon groupe",
+      searching: "Question à Telegram…",
+      again: "Chercher à nouveau",
+      none: "Telegram ne montre aucune conversation récente pour ce bot. Ajoutez le bot à votre groupe, envoyez-y un message comme /start, puis cherchez à nouveau.",
+      failed: (reason) => `Telegram n’a pas répondu à la question : ${reason}`,
+      use: "Utiliser celle-ci",
+      kinds: { group: "Groupe", person: "Personne", channel: "Canal" },
+    },
   },
   credit: "L’idée de ce planning vient de RentTools.io, un projet open source sous licence MIT.",
 };

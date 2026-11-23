@@ -13,8 +13,10 @@ const en = {
     synced: (ago: string) => `Synced ${ago}.`,
     notSynced: "Not synced yet.",
     failing: (count: number) => `${count} calendar${count > 1 ? "s are" : " is"} not syncing`,
-    previous: "Previous 4 weeks",
-    next: "Next 4 weeks",
+    previous: { weeks: "Previous 4 weeks", month: "Previous month", year: "Previous year" },
+    next: { weeks: "Next 4 weeks", month: "Next month", year: "Next year" },
+    view: "View",
+    views: { weeks: "Weeks", month: "Month", year: "Year" },
     today: "Today",
     /** A button's tooltip with its key: "Today (T)". */
     withKey: (label: string, key: string) => `${label} (${key})`,
@@ -33,6 +35,10 @@ const en = {
     /** "2 Nov to 5 Nov", inside a bar's label and tooltip. */
     range: (from: string, to: string) => `${from} to ${to}`,
     doubleBooking: "double booking",
+  },
+  year: {
+    /** "142 nights booked" */
+    booked: (n: number) => `${n} night${n === 1 ? "" : "s"} booked`,
   },
   legend: {
     blocked: "Blocked",
@@ -96,8 +102,10 @@ const fr: typeof en = {
       count > 1
         ? `${count} calendriers ne se synchronisent pas`
         : `${count} calendrier ne se synchronise pas`,
-    previous: "4 semaines précédentes",
-    next: "4 semaines suivantes",
+    previous: { weeks: "4 semaines précédentes", month: "Mois précédent", year: "Année précédente" },
+    next: { weeks: "4 semaines suivantes", month: "Mois suivant", year: "Année suivante" },
+    view: "Vue",
+    views: { weeks: "Semaines", month: "Mois", year: "Année" },
     today: "Aujourd’hui",
     withKey: (label, key) => `${label} (${key})`,
     syncNow: "Synchroniser",
@@ -114,6 +122,9 @@ const fr: typeof en = {
     blocked: "Bloqué",
     range: (from, to) => `${from} au ${to}`,
     doubleBooking: "double réservation",
+  },
+  year: {
+    booked: (n) => `${n} nuit${n > 1 ? "s réservées" : " réservée"}`,
   },
   legend: {
     blocked: "Bloqué",

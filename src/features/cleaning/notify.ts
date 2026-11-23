@@ -4,9 +4,10 @@ import { cleanings, getDb } from "@/db";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/config";
 import { createFormat } from "@/i18n/format";
 import { MESSAGES } from "@/i18n/messages";
-import { sendTelegram, telegramConfigured } from "@/lib/telegram";
+import { sendTelegram, telegramBot } from "@/lib/telegram";
 import { cleaningNotices } from "./compute";
 import { getCleaning } from "./queries";
+import { getTelegramChat } from "./telegram-chat";
 import { cleaningDay, cleaningLines } from "./text";
 
 /** Notifications are written outside any request, so their language is a setting, not a cookie. */
@@ -25,7 +26,8 @@ const scope = globalThis as unknown as { __innkeepNotifying?: boolean };
  * the next run.
  */
 export async function notifyCleanings(): Promise<{ needed: number; cancelled: number }> {
-  if (!telegramConfigured() || scope.__innkeepNotifying) return { needed: 0, cancelled: 0 };
+  const chat = telegramBot() ? await getTelegramChat() : null;
+  if (!chat || scope.__innkeepNotifying) return { needed: 0, cancelled: 0 };
   scope.__innkeepNotifying = true;
   try {
     const db = getDb();
@@ -63,7 +65,7 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
         ].join("\n"),
       );
     }
-    await sendTelegram(blocks.join("\n\n"));
+    await sendTelegram(blocks.join("\n\n"), chat.id);
 
     const now = Date.now();
     await db.transaction(async (tx) => {

@@ -13,9 +13,9 @@ export async function register() {
 
   const minutes = Number(process.env.SYNC_INTERVAL_MINUTES ?? 15);
   const syncing = Number.isFinite(minutes) && minutes > 0;
-  const { telegramConfigured } = await import("@/lib/telegram");
+  const { telegramBot } = await import("@/lib/telegram");
   // Telegram notifications still go out when the sync is switched off.
-  if (!syncing && !telegramConfigured()) return;
+  if (!syncing && !telegramBot()) return;
 
   const scope = globalThis as unknown as { __innkeepSync?: NodeJS.Timeout };
   if (scope.__innkeepSync) return;

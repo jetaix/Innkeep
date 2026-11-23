@@ -10,11 +10,13 @@ import { NAV } from "@/config/navigation";
 import { site } from "@/config/site";
 import { LanguageSwitch, ThemeSwitch } from "@/components/shell/preferences";
 import { signOut } from "@/features/auth/actions";
+import { getTelegramChat } from "@/features/cleaning/telegram-chat";
+import { TelegramFind } from "@/features/cleaning/telegram-find";
 import { TelegramTest } from "@/features/cleaning/telegram-test";
 import { AI_MODEL, aiConfigured } from "@/features/insights/ai";
 import { getI18n } from "@/i18n/server";
 import { appPassword } from "@/lib/session";
-import { telegramConfigured } from "@/lib/telegram";
+import { telegramBot } from "@/lib/telegram";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).m.settings.title };
@@ -45,6 +47,8 @@ async function Settings() {
     `${requestHeaders.get("x-forwarded-proto") ?? "http"}://${requestHeaders.get("host")}`;
 
   const interval = Number(process.env.SYNC_INTERVAL_MINUTES ?? 15);
+  const telegramChat = telegramBot() ? await getTelegramChat() : null;
+  const telegramOn = telegramChat !== null;
   // On a serverless host a scheduler calls /api/cron; there is no timer to show.
   const hosted = Boolean(process.env.VERCEL);
   const mcpOn = Boolean(process.env.MCP_TOKEN);
@@ -123,12 +127,16 @@ async function Settings() {
             </Integration>
             <Integration
               name={i.telegram.name}
-              on={telegramConfigured()}
-              status={state(telegramConfigured())}
+              on={telegramOn}
+              status={state(telegramOn)}
               variable="TELEGRAM_BOT_TOKEN"
             >
               {i.telegram.body}
-              {telegramConfigured() && <TelegramTest />}
+              {telegramOn && telegramChat?.title && (
+                <span className="mt-1 block">{m.cleaning.telegram.writesTo(telegramChat.title)}</span>
+              )}
+              {telegramOn && <TelegramTest />}
+              {telegramBot() && !telegramChat && <TelegramFind />}
             </Integration>
             <Integration
               name={i.password.name}
