@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
-import { site } from "@/config/site";
+import { site, siteUrl } from "@/config/site";
 import { LocaleProvider } from "@/i18n/client";
 import { LOCALE_COOKIE, THEME_KEY } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
@@ -11,16 +11,14 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  // On Vercel the production address is known without configuration.
-  metadataBase: new URL(
-    process.env.APP_URL ??
-      (process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : "http://localhost:3000"),
-  ),
+  metadataBase: new URL(siteUrl),
   title: { default: `${site.name} · ${site.tagline}`, template: `%s · ${site.name}` },
   description: site.description,
   applicationName: site.name,
+  // Added to a phone's home screen, it opens like an app, under its own name.
+  appleWebApp: { capable: true, title: site.name, statusBarStyle: "default" },
+  // A dashboard full of dates and amounts: none of them is a phone number to dial.
+  formatDetection: { telephone: false },
   openGraph: { title: site.name, description: site.description, type: "website", siteName: site.name },
   twitter: { card: "summary_large_image", title: site.name, description: site.description },
 };

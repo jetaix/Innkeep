@@ -12,3 +12,11 @@ export const site = {
  * into the dashboard are then left out, since there is no dashboard to open.
  */
 export const landingOnly = process.env.LANDING_ONLY === "1";
+
+/** The public address of this instance. On Vercel the production address is known without configuration. */
+export const siteUrl = (
+  process.env.APP_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000")
+).replace(/\/$/, "");
