@@ -331,8 +331,8 @@ export type CleaningStatus = (typeof CLEANING_STATUSES)[number];
 /**
  * What the host recorded about one cleaning day of a property. Cleanings
  * after a check-out are worked out from the reservations and need no row; a
- * row exists once the host marks, annotates or reassigns one, or adds a
- * cleaning by hand (`manual`).
+ * row exists once the host marks, annotates or reassigns one, adds a
+ * cleaning by hand (`manual`), or is told about one on Telegram.
  */
 export const cleanings = sqliteTable(
   "cleanings",
@@ -348,6 +348,8 @@ export const cleanings = sqliteTable(
     notes: text("notes").notNull().default(""),
     manual: integer("manual", { mode: "boolean" }).notNull().default(false),
     doneAt: integer("done_at"),
+    /** When the host was told on Telegram that this cleaning is needed; null if they were not. */
+    notifiedAt: integer("notified_at"),
   },
   (t) => [uniqueIndex("cleanings_day").on(t.propertyId, t.date)],
 );

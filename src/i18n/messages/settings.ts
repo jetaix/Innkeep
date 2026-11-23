@@ -32,6 +32,15 @@ const en = {
       body: "Lets the Innkeep Companion extension add guest names, payouts, past stays and listing details from your own Airbnb and Booking.com pages.",
       link: "How to install it",
     },
+    telegram: {
+      name: "Telegram notifications",
+      body: "Sends you a Telegram message each time a cleaning has to be arranged: a new check-out, or a cleaning added by hand. Needs a bot token and a chat.",
+    },
+    password: {
+      name: "Password",
+      body: "Asks for a password before any page opens. Set it before putting Innkeep on the internet.",
+      signOut: "Sign out",
+    },
     mcp: {
       name: "MCP server",
       body: "Lets an AI assistant read your calendar, revenue and suggestions, and block dates, over the Model Context Protocol.",
@@ -89,6 +98,15 @@ const fr: typeof en = {
       name: "Extension de navigateur",
       body: "Permet à l’extension Innkeep Companion d’ajouter les noms des voyageurs, les versements, les séjours passés et les détails des annonces à partir de vos propres pages Airbnb et Booking.com.",
       link: "Comment l’installer",
+    },
+    telegram: {
+      name: "Notifications Telegram",
+      body: "Vous envoie un message Telegram chaque fois qu’un ménage est à demander : un nouveau départ, ou un ménage ajouté à la main. Nécessite le jeton d’un bot et une conversation.",
+    },
+    password: {
+      name: "Mot de passe",
+      body: "Demande un mot de passe avant d’ouvrir la moindre page. À définir avant de mettre Innkeep sur Internet.",
+      signOut: "Se déconnecter",
     },
     mcp: {
       name: "Serveur MCP",

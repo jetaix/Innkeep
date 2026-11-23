@@ -4,7 +4,10 @@ import { and, eq } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { cleanerAssignments, cleaners, cleanings, CLEANING_STATUSES, getDb, properties } from "@/db";
+import { MESSAGES } from "@/i18n/messages";
 import { isoDate, parseForm, text } from "@/lib/form";
+import { sendTelegram } from "@/lib/telegram";
+import { notifyCleanings, telegramLocale } from "./notify";
 
 const day = z.object({ propertyId: z.coerce.number().int().positive(), date: isoDate });
 
@@ -104,4 +107,17 @@ export async function removeManualCleaning(propertyId: number, date: string) {
     .where(and(eq(cleanings.propertyId, propertyId), eq(cleanings.date, date), eq(cleanings.manual, true)))
     .run();
   refresh();
+}
+
+export type TelegramTestState = { sent: boolean; error: string | null };
+
+/** Checks the Telegram settings with a real message, then sends whatever is waiting. */
+export async function sendTelegramTest(): Promise<TelegramTestState> {
+  try {
+    await sendTelegram(MESSAGES[telegramLocale()].cleaning.telegram.test);
+    await notifyCleanings();
+    return { sent: true, error: null };
+  } catch (cause) {
+    return { sent: false, error: cause instanceof Error ? cause.message : String(cause) };
+  }
 }

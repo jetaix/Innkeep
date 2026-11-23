@@ -17,6 +17,7 @@ import { data } from "./data";
 import { extension } from "./extension";
 import { marketing } from "./marketing";
 import { alternatives } from "./alternatives";
+import { auth } from "./auth";
 
 /**
  * One file per area of the app, each holding English and French side by side
@@ -41,6 +42,7 @@ const AREAS = {
   extension,
   marketing,
   alternatives,
+  auth,
 };
 
 type Area = keyof typeof AREAS;

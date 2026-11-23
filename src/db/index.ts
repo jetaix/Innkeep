@@ -225,6 +225,10 @@ CREATE TABLE IF NOT EXISTS cleanings (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS cleanings_day ON cleanings (property_id, date);
 `,
+  // 13: when the host was told on Telegram that a cleaning is needed
+  `
+ALTER TABLE cleanings ADD COLUMN notified_at INTEGER;
+`,
 ];
 
 function migrate(sqlite: Database.Database) {

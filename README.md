@@ -62,7 +62,8 @@ persistent disk.
   and expected payout.
 - **Cleaning.** A cleaning after every check-out, the time there is to do it,
   who does it, done or skipped, and a schedule to copy or print for your
-  cleaner. The idea comes from [RentTools.io](https://github.com/Gribadan/RentTools.io) (MIT).
+  cleaner. A Telegram message tells you each time one has to be arranged. The
+  idea comes from [RentTools.io](https://github.com/Gribadan/RentTools.io) (MIT).
 - **Revenue.** Month-by-month revenue, costs and net. Add cleaning per stay,
   commission as a percentage, monthly or yearly subscriptions and one-off bills.
 - **Pricing.** The price of each night on Airbnb and Booking.com side by side,
@@ -114,16 +115,16 @@ Airbnb and Booking.com give every host calendar links. Everything else
 (reservation details, listing content, messaging, rates) is reserved for
 approved software partners, and Innkeep is not one.
 
-| Capability                     | Status      | How                                                           |
-| ------------------------------ | ----------- | ------------------------------------------------------------- |
-| Calendar sync, both directions | Works       | iCal import and export                                        |
-| Double-booking detection       | Works       | Overlap check across channels                                 |
-| Guest names, payouts, history  | Extension   | The browser extension reads them from your reservations pages |
-| Listing details on platforms   | Semi-manual | Edit once, copy into each platform, mark as published         |
-| Receiving guest messages       | Via webhook | Anything that sees the message posts it to Innkeep            |
-| Replying to guests             | Semi-manual | Draft here, paste into the platform's inbox                   |
-| Changing prices on platforms   | No          | Suggestions tell you what to change; you change it there      |
-| Login and multiple users       | Not yet     | Run it privately or behind a proxy that asks for a password   |
+| Capability                     | Status       | How                                                           |
+| ------------------------------ | ------------ | ------------------------------------------------------------- |
+| Calendar sync, both directions | Works        | iCal import and export                                        |
+| Double-booking detection       | Works        | Overlap check across channels                                 |
+| Guest names, payouts, history  | Extension    | The browser extension reads them from your reservations pages |
+| Listing details on platforms   | Semi-manual  | Edit once, copy into each platform, mark as published         |
+| Receiving guest messages       | Via webhook  | Anything that sees the message posts it to Innkeep            |
+| Replying to guests             | Semi-manual  | Draft here, paste into the platform's inbox                   |
+| Changing prices on platforms   | No           | Suggestions tell you what to change; you change it there      |
+| Login and multiple users       | One password | `APP_PASSWORD` protects every page; no separate accounts yet  |
 
 iCal is not instant: platforms re-read links on their own schedule, so a
 double booking is still possible in the gap. Innkeep flags it; it cannot
@@ -135,6 +136,8 @@ free tiers.
 ## Configuration
 
 Every setting is optional. Copy [.env.example](.env.example) to `.env.local`.
+To run Innkeep online for you and your partner, with a password and Telegram
+notifications, see [docs/DEPLOY.md](docs/DEPLOY.md).
 The Settings page shows what is switched on.
 
 | Variable                | Default             | Purpose                                               |
@@ -147,6 +150,10 @@ The Settings page shows what is switched on.
 | `WEBHOOK_SECRET`        | unset               | Turns on the inbound messages webhook                 |
 | `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                 |
 | `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details               |
+| `APP_PASSWORD`          | unset               | Asks for this password before any page opens          |
+| `TELEGRAM_BOT_TOKEN`    | unset               | With the chat below, turns on Telegram notifications  |
+| `TELEGRAM_CHAT_ID`      | unset               | The person or group the notifications go to           |
+| `TELEGRAM_LANGUAGE`     | `en`                | Language of the notifications: `en` or `fr`           |
 | `LANDING_ONLY`          | unset               | `1` publishes only the landing and Alternatives pages |
 
 ### Browser extension
@@ -229,11 +236,10 @@ npm run check   # format, lint, types, tests, build
 
 ## Roadmap
 
-- Login and multi-user access
+- Separate accounts for each person
 - Message templates and scheduled messages
 - Per-night pricing and minimum stays
 - Partner-API adapters for hosts who have credentials
-- Docker image
 
 ## License
 

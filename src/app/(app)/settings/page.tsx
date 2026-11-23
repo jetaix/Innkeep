@@ -3,14 +3,18 @@ import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { headers } from "next/headers";
 import { connection } from "next/server";
-import { CopyButton } from "@/components/ui/actions";
+import { CopyButton, SubmitButton } from "@/components/ui/actions";
 import { Badge, Card, Kbd, PageHeader, SectionTitle } from "@/components/ui/primitives";
 import { Loading } from "@/components/ui/loading";
 import { NAV } from "@/config/navigation";
 import { site } from "@/config/site";
 import { LanguageSwitch, ThemeSwitch } from "@/components/shell/preferences";
+import { signOut } from "@/features/auth/actions";
+import { TelegramTest } from "@/features/cleaning/telegram-test";
 import { AI_MODEL, aiConfigured } from "@/features/insights/ai";
 import { getI18n } from "@/i18n/server";
+import { appPassword } from "@/lib/session";
+import { telegramConfigured } from "@/lib/telegram";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).m.settings.title };
@@ -114,6 +118,28 @@ async function Settings() {
               <Link href="/extension" className="text-ink underline underline-offset-2">
                 {i.extension.link}
               </Link>
+            </Integration>
+            <Integration
+              name={i.telegram.name}
+              on={telegramConfigured()}
+              status={state(telegramConfigured())}
+              variable="TELEGRAM_BOT_TOKEN"
+            >
+              {i.telegram.body}
+              {telegramConfigured() && <TelegramTest />}
+            </Integration>
+            <Integration
+              name={i.password.name}
+              on={Boolean(appPassword())}
+              status={state(Boolean(appPassword()))}
+              variable="APP_PASSWORD"
+            >
+              {i.password.body}
+              {appPassword() && (
+                <form action={signOut} className="mt-3">
+                  <SubmitButton size="sm">{i.password.signOut}</SubmitButton>
+                </form>
+              )}
             </Integration>
             <Integration name={i.mcp.name} on={mcpOn} status={state(mcpOn)} variable="MCP_TOKEN">
               {i.mcp.body}
