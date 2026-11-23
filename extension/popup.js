@@ -10,11 +10,14 @@ function show(state) {
   if (running) {
     status.textContent = `Reading page ${state.index + 1} of ${state.total}: ${state.label}`;
   } else if (state?.last) {
-    const { read, total, silent, completed } = state.last;
+    const { read, total, silent, completed, turnedAway = [] } = state.last;
     status.textContent =
       `${completed ? "Last run" : "Last run (stopped)"}: ${read} of ${total} pages gave data.` +
       (silent.length
         ? ` Nothing from: ${silent.slice(0, 4).join(", ")}${silent.length > 4 ? "…" : ""}.`
+        : "") +
+      (turnedAway.includes("admin.booking.com")
+        ? " Booking.com asked you to sign in, so its other pages were skipped. Sign in there, then run again."
         : "");
   }
 }
