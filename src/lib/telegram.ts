@@ -1,3 +1,6 @@
+import http from "node:http";
+import https from "node:https";
+
 /**
  * Messages to the host's own Telegram, through a bot they created with
  * @BotFather. The chat is a person or a group, so a couple can both receive
@@ -5,6 +8,66 @@
  * on the Settings page (see `features/cleaning/telegram-chat`).
  */
 const LIMIT = 4000; // Telegram refuses a message over 4096 characters.
+
+type Answer = { status: number; data: { result?: unknown; description?: string } | null };
+
+/**
+ * One JSON request, over IPv4 only. Telegram also publishes an IPv6 address,
+ * and on hosts whose network cannot route IPv6 (most serverless ones) a
+ * request sent there is never answered: it hangs until it times out. Asking
+ * for IPv4 outright is the known cure. Exported for its test.
+ */
+export function requestJson(url: URL, body?: unknown, timeoutMs = 10_000): Promise<Answer> {
+  return new Promise((resolve, reject) => {
+    const payload = body === undefined ? null : JSON.stringify(body);
+    const request = (url.protocol === "http:" ? http : https).request(
+      url,
+      {
+        family: 4,
+        method: payload ? "POST" : "GET",
+        headers: payload
+          ? { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payload) }
+          : {},
+      },
+      (response) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => {
+          clearTimeout(deadline);
+          let data: Answer["data"] = null;
+          try {
+            data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+          } catch {
+            // Not JSON: the status alone will have to do.
+          }
+          resolve({ status: response.statusCode ?? 0, data });
+        });
+      },
+    );
+    // From the first byte sent to the last received: connecting counts too.
+    const deadline = setTimeout(
+      () => request.destroy(new Error("Telegram did not answer in time")),
+      timeoutMs,
+    );
+    request.on("error", (cause) => {
+      clearTimeout(deadline);
+      reject(cause);
+    });
+    request.end(payload ?? undefined);
+  });
+}
+
+/** Calls one method of the bot API. A request that fails on the way is tried once more. */
+async function telegram(method: string, body?: unknown): Promise<Answer> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error("Set TELEGRAM_BOT_TOKEN");
+  const url = new URL(`https://api.telegram.org/bot${token}/${method}`);
+  try {
+    return await requestJson(url, body);
+  } catch {
+    return await requestJson(url, body);
+  }
+}
 
 /** Whether a bot is set up at all; which chat it writes to is a separate matter. */
 export const telegramBot = () => Boolean(process.env.TELEGRAM_BOT_TOKEN);
@@ -35,18 +98,9 @@ export function chatsIn(updates: unknown): TelegramChat[] {
  * it appear.
  */
 export async function findTelegramChats(): Promise<TelegramChat[]> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) throw new Error("Set TELEGRAM_BOT_TOKEN");
-  const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`, {
-    signal: AbortSignal.timeout(15_000),
-    cache: "no-store",
-  });
-  const answer = (await response.json().catch(() => null)) as {
-    result?: unknown;
-    description?: string;
-  } | null;
-  if (!response.ok) throw new Error(answer?.description ?? `Telegram answered ${response.status}`);
-  return chatsIn(answer?.result);
+  const { status, data } = await telegram("getUpdates");
+  if (status !== 200) throw new Error(data?.description ?? `Telegram answered ${status}`);
+  return chatsIn(data?.result);
 }
 
 /** Cuts a long text into messages at line breaks. */
@@ -66,19 +120,14 @@ export function splitMessage(text: string, limit = LIMIT): string[] {
 
 /** Sends a plain-text message. Throws with Telegram's own explanation when it is refused. */
 export async function sendTelegram(text: string, chat: string | null): Promise<void> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token || !chat) throw new Error("Set TELEGRAM_BOT_TOKEN and choose a chat");
+  if (!process.env.TELEGRAM_BOT_TOKEN || !chat) throw new Error("Set TELEGRAM_BOT_TOKEN and choose a chat");
 
   for (const part of splitMessage(text)) {
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chat, text: part, disable_web_page_preview: true }),
-      signal: AbortSignal.timeout(15_000),
-      cache: "no-store",
+    const { status, data } = await telegram("sendMessage", {
+      chat_id: chat,
+      text: part,
+      disable_web_page_preview: true,
     });
-    if (response.ok) continue;
-    const answer = (await response.json().catch(() => null)) as { description?: string } | null;
-    throw new Error(answer?.description ?? `Telegram answered ${response.status}`);
+    if (status !== 200) throw new Error(data?.description ?? `Telegram answered ${status}`);
   }
 }
