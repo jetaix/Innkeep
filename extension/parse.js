@@ -590,12 +590,14 @@
   /**
    * Extranet pages worth keeping as they are shown: the ones that describe
    * the property. Pages about money, the account, guests or messages are
-   * never read this way, whatever they are called.
+   * never read this way, whatever they are called. Neither are settings,
+   * profile and tax pages: the extranet asks for the password again before
+   * showing them, which sends a run to the sign-in page.
    */
   const EXTRANET_KEEP =
-    /photo|description|general|facilit|amenit|room|polic|propert|quality|score|opportunit|promotion|restriction|nearby|location|sustainab|view|setting|profile|house|rule|children|bed|charge|fee|tax|language|content/;
+    /photo|description|general|facilit|amenit|room|polic|propert|quality|score|opportunit|promotion|restriction|nearby|location|sustainab|view|house|rule|children|bed|charge|fee|content/;
   const EXTRANET_NEVER =
-    /financ|invoice|payout|payment|bank|vat|security|account|user|access|messag|inbox|contact|reserv|booking|guest|review|calendar|home|login|sign|statement|card|commission|legal|contract/;
+    /financ|invoice|payout|payment|bank|vat|tax|security|account|user|access|profile|setting|language|password|messag|inbox|contact|reserv|booking|guest|review|calendar|home|login|logout|sign|sso|statement|card|commission|legal|contract/;
 
   /** The page name of an extranet address ("photos"), when that page may be kept; null otherwise. */
   function extranetPage(pathname) {

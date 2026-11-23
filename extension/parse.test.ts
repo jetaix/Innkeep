@@ -536,6 +536,11 @@ describe("admin pages", () => {
       "home",
       "payment_policies",
       "account_users",
+      // The extranet asks for the password again before these.
+      "property_settings",
+      "your_profile",
+      "tax_details",
+      "language_settings",
     ]) {
       expect(extranetPage(extranet(name)), name).toBeNull();
     }

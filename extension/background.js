@@ -93,6 +93,7 @@ async function startTour(query, tabId) {
     index: 0,
     found: 0,
     conversations: readMessages === true ? 0 : MAX_CONVERSATIONS,
+    turnedAway: new Set(),
     doneUrl: plan.doneUrl,
     timer: null,
   };
@@ -105,8 +106,26 @@ function armTimer(delay) {
   tour.timer = setTimeout(nextStep, delay);
 }
 
+/**
+ * Sites that answer a page the host may not see with their sign-in page. A
+ * step there that never showed the page it asked for was sent to sign in;
+ * asking for the next ones would only do it again, page after page, and can
+ * end the host's session. The rest of that site is left for another run.
+ */
+const SIGN_IN_WALLED = ["admin.booking.com"];
+const hostOf = (url) => new URL(url).hostname;
+
+function leaveSiteIfTurnedAway() {
+  const step = tour.steps[tour.index];
+  const host = step ? hostOf(step.url) : null;
+  if (!step || step.arrived || !SIGN_IN_WALLED.includes(host)) return;
+  tour.turnedAway.add(host);
+  tour.steps = tour.steps.filter((other, index) => index <= tour.index || hostOf(other.url) !== host);
+}
+
 function nextStep() {
   if (!tour) return;
+  leaveSiteIfTurnedAway();
   tour.index++;
   if (tour.index >= tour.steps.length) return finishTour(true);
   chrome.tabs.update(tour.tabId, { url: tour.steps[tour.index].url }).catch(() => finishTour(false));
@@ -123,6 +142,8 @@ function finishTour(completed) {
     read: steps.filter((step) => step.sent).length,
     // Pages that gave nothing, so the host knows where to look (usually a sign-in).
     silent: steps.filter((step) => !step.sent).map((step) => step.label),
+    // Sites that asked the host to sign in: their remaining pages were not tried.
+    turnedAway: [...tour.turnedAway],
     at: Date.now(),
   };
   tour = null;
@@ -179,9 +200,13 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       startTour(`scope=${message.scope === "reservations" ? "reservations" : "all"}`).then(respond);
       return true;
 
-    case "innkeep:tour-status":
+    case "innkeep:tour-status": {
+      // A page script asking is a page that loaded: the step reached the site it was meant for.
+      const step = tour && tabId === tour.tabId ? tour.steps[tour.index] : null;
+      if (step && sender.url && hostOf(sender.url) === hostOf(step.url)) step.arrived = true;
       respond(tourStatus(tabId));
       return false;
+    }
 
     case "innkeep:tour-stop":
       finishTour(false);
@@ -194,6 +219,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       const origin = new URL(sender.url ?? sender.tab.url).origin;
       for (const page of message.pages) {
         if (typeof page?.url !== "string" || !page.url.startsWith(`${origin}/`)) continue;
+        if (tour.turnedAway.has(hostOf(page.url))) continue;
         // Conversations have their own allowance, so a long inbox does not crowd out a site's menu.
         const counter = isInbox(page.url) ? "conversations" : "found";
         if (tour[counter] >= (counter === "found" ? MAX_FOUND : MAX_CONVERSATIONS)) continue;
