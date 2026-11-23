@@ -180,9 +180,7 @@ export function createMcpServer(): McpServer {
         );
       }
 
-      const row = await (
-        await getDb()
-      )
+      const row = await (await getDb())
         .insert(reservations)
         .values({
           propertyId,

@@ -63,13 +63,19 @@ export async function UpdatePrompt() {
               href="/extension/start?scope=all"
               target="_blank"
               className={buttonClass({ variant: "primary" })}
+              rel="noopener"
             >
               {t.refresh.everything}
               <span className="font-normal opacity-70">{t.refresh.everythingHint}</span>
               <span className="sr-only">{m.common.actions.newTab}</span>
             </a>
             {reservationsOld && (
-              <a href="/extension/start?scope=reservations" target="_blank" className={buttonClass()}>
+              <a
+                href="/extension/start?scope=reservations"
+                target="_blank"
+                className={buttonClass()}
+                rel="noopener"
+              >
                 {t.refresh.reservations}
                 <span className="font-normal text-muted">{t.refresh.reservationsHint}</span>
                 <span className="sr-only">{m.common.actions.newTab}</span>

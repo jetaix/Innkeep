@@ -1,7 +1,0 @@
-.next
-node_modules
-data
-package-lock.json
-next-env.d.ts
-docs/ALTERNATIVES.md
-dist

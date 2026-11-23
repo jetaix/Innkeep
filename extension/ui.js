@@ -234,7 +234,7 @@
           if (result.unmatched.length) parts.push(`${result.unmatched.length} not in your Innkeep calendar`);
           if (result.cancelled) parts.push(`${result.cancelled} cancelled`);
           if (this.skipped) parts.push(`${this.skipped} unreadable`);
-          return { text: parts.join(", ") + ".", tone: result.unmatched.length ? "neutral" : "good" };
+          return { text: `${parts.join(", ")}.`, tone: result.unmatched.length ? "neutral" : "good" };
         },
       });
     },

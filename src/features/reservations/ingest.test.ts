@@ -171,9 +171,7 @@ describe("ingestReservations", () => {
     expect(await byUid("d")).toMatchObject({ externalCode: "HMDDDDDDDD", status: "confirmed" });
 
     await ingestReservations({ source: "airbnb", reservations: [cancelled] });
-    const stored = await (
-      await getDb()
-    )
+    const stored = await (await getDb())
       .select()
       .from(reservations)
       .where(eq(reservations.externalCode, "HMCANCELLED"))
@@ -195,9 +193,7 @@ describe("ingestReservations", () => {
         row("HMOLDCLIENT", "2020-01-01", "2020-01-03", { payout: 0, listingName: "Pine cabin" }),
       ],
     });
-    const stored = await (
-      await getDb()
-    )
+    const stored = await (await getDb())
       .select()
       .from(reservations)
       .where(eq(reservations.externalCode, "HMOLDCLIENT"))
@@ -216,9 +212,7 @@ describe("ingestReservations", () => {
       added: 0,
       unchanged: 1,
     });
-    const stored = await (
-      await getDb()
-    )
+    const stored = await (await getDb())
       .select()
       .from(reservations)
       .where(eq(reservations.externalCode, "HMPAST00001"))

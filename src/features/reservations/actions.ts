@@ -26,9 +26,7 @@ export async function createReservation(returnTo: string, form: FormData) {
   if (!parsed.success) return;
   const { amount, ...values } = parsed.data;
 
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(reservations)
     .values({
       ...values,
@@ -68,9 +66,7 @@ export async function updateReservation(id: number, returnTo: string, form: Form
 }
 
 export async function deleteReservation(id: number, returnTo: string) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .delete(reservations)
     .where(and(eq(reservations.id, id), eq(reservations.source, "direct")))
     .run();

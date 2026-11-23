@@ -29,7 +29,8 @@ export const pricesSchema = z.object({
 });
 
 export type PricesResult =
-  { ok: true; saved: number; until: string; propertyId: number } | { ok: false; error: string };
+  | { ok: true; saved: number; until: string; propertyId: number }
+  | { ok: false; error: string };
 
 export async function ingestPrices(input: z.input<typeof pricesSchema>): Promise<PricesResult> {
   const parsed = pricesSchema.parse(input);

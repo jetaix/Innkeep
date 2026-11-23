@@ -12,9 +12,7 @@ import { aiConfigured, buildSnapshot, generateAdvice } from "./ai";
 import { getSuggestions } from "./queries";
 
 export async function dismissSuggestion(key: string) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(dismissedSuggestions)
     .values({ key, dismissedAt: Date.now() })
     .onConflictDoNothing()
@@ -55,9 +53,7 @@ export async function requestAdvice(): Promise<AdviceState> {
   if (!result.ok) return { error: result.error };
 
   const row = { generatedAt: Date.now(), model: result.model, payload: JSON.stringify(result.advice) };
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(aiAdvice)
     .values({ id: 1, ...row })
     .onConflictDoUpdate({ target: aiAdvice.id, set: row })

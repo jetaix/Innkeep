@@ -127,9 +127,7 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
 }
 
 export async function syncAll(): Promise<{ synced: number; failed: number }> {
-  const rows = await (
-    await getDb()
-  )
+  const rows = await (await getDb())
     .select({ id: listings.id })
     .from(listings)
     .where(ne(listings.icalUrl, ""))

@@ -2,11 +2,13 @@
 # Keep the database on a volume mounted at /data, or it is lost on every update.
 FROM node:22-slim AS build
 WORKDIR /app
-COPY package.json package-lock.json ./
+RUN npm install --global bun@1.4.4
+COPY package.json bun.lock ./
 # No install scripts: the database driver ships its compiled binary, so nothing has to be built here.
-RUN npm ci --ignore-scripts --no-audit --no-fund
+RUN bun install --frozen-lockfile --ignore-scripts
 COPY . .
-RUN npm run build && npm prune --omit=dev --ignore-scripts
+# Build with everything, then keep only what the running app needs.
+RUN bun run build && rm -rf node_modules && bun install --frozen-lockfile --ignore-scripts --production
 
 FROM node:22-slim
 WORKDIR /app

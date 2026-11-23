@@ -6,8 +6,8 @@ that a host with one or two properties would notice it.
 ## Setup
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Open http://localhost:3000/overview and click **Load sample data**. Delete the
@@ -16,13 +16,13 @@ Open http://localhost:3000/overview and click **Load sample data**. Delete the
 ## Before you open a pull request
 
 ```bash
-npm run check
+bun run check
 ```
 
 That runs formatting, lint, types, tests and a production build, the same
 steps as CI.
 
-`npm install` points git at the hooks in `.githooks`: format, lint, types and
+`bun install` points git at the hooks in `.githooks`: format, lint, types and
 tests run before every `git push`, and a failure stops the push. GitHub Actions
 runs the same checks plus the build on every push to `main` and every pull
 request ([.github/workflows/ci.yml](.github/workflows/ci.yml)).

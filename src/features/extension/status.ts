@@ -18,9 +18,7 @@ export async function recordExtension(request: Request) {
   const version = request.headers.get("x-innkeep-extension");
   if (!version || !/^\d+(\.\d+){0,3}$/.test(version)) return;
   const value = JSON.stringify({ version, at: Date.now() } satisfies Seen);
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(appState)
     .values({ key: KEY, value })
     .onConflictDoUpdate({ target: appState.key, set: { value } })
@@ -64,9 +62,7 @@ export type LastUpdate = { at: number; stays: number };
 /** Remembers when a platform's reservations page was last read, and how many live stays it held. */
 export async function recordUpdate(source: OtaChannel, stays: number) {
   const value = JSON.stringify({ at: Date.now(), stays } satisfies LastUpdate);
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(appState)
     .values({ key: `updated:${source}`, value })
     .onConflictDoUpdate({ target: appState.key, set: { value } })
@@ -74,9 +70,7 @@ export async function recordUpdate(source: OtaChannel, stays: number) {
 }
 
 export async function getLastUpdate(source: OtaChannel): Promise<LastUpdate | null> {
-  const row = await (
-    await getDb()
-  )
+  const row = await (await getDb())
     .select()
     .from(appState)
     .where(eq(appState.key, `updated:${source}`))

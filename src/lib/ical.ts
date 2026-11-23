@@ -136,5 +136,5 @@ export function generateICal(calendarName: string, events: CalendarEvent[]): str
     lines.push("END:VEVENT");
   }
   lines.push("END:VCALENDAR");
-  return lines.map(fold).join("\r\n") + "\r\n";
+  return `${lines.map(fold).join("\r\n")}\r\n`;
 }

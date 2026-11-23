@@ -296,7 +296,7 @@ async function Photos({ preview }: { preview: Preview }) {
   const photo = (url: string, index: number, width: number) => (
     <div key={url} className="relative min-h-0 overflow-hidden bg-sunken">
       {/* Photos come from the platforms' own image servers, which next/image is not set up for. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers */}
       <img
         src={sized(url, width)}
         alt={t.photoAlt(index + 1, preview.title)}

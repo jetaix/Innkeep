@@ -434,7 +434,7 @@ async function AdminPages({ adapter, listing }: { adapter: ChannelAdapter; listi
                   <div className="mb-2 grid grid-cols-4 gap-1 sm:grid-cols-6">
                     {page.images.slice(0, 24).map((image) => (
                       // Photos load from the platform's own image servers.
-                      // eslint-disable-next-line @next/next/no-img-element
+                      // biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers
                       <img
                         key={image}
                         src={image}

@@ -35,9 +35,7 @@ export const previewIngestSchema = z.object({
 });
 
 export async function savePreview(listingRowId: number, preview: Preview) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .update(listings)
     .set({ publicPreview: JSON.stringify(preview), publicPreviewAt: Date.now() })
     .where(eq(listings.id, listingRowId))
@@ -49,9 +47,7 @@ export async function ingestPreview(
   input: z.input<typeof previewIngestSchema>,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { source, listingId, preview } = previewIngestSchema.parse(input);
-  const listing = await (
-    await getDb()
-  )
+  const listing = await (await getDb())
     .select()
     .from(listings)
     .where(and(eq(listings.channel, source), eq(listings.externalId, listingId)))

@@ -16,7 +16,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 process.chdir(root);
 const port = Number(process.env.PORT ?? 3000);
 const address = `http://localhost:${port}`;
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+// The project is developed with bun; npm, which comes with Node.js, does the same job for someone who only wants to run it.
+const hasBun =
+  spawnSync("bun", ["--version"], { stdio: "ignore", shell: process.platform === "win32" }).status === 0;
+const runner = hasBun ? "bun" : process.platform === "win32" ? "npm.cmd" : "npm";
 const say = (text) => console.log(`\n  ${text}`);
 
 function stop(text) {
@@ -47,9 +50,15 @@ function newest(folder) {
   return latest;
 }
 
-const installed = path.join("node_modules", ".package-lock.json");
-if (!existsSync(installed) || statSync("package-lock.json").mtimeMs > statSync(installed).mtimeMs) {
-  run(npm, ["install", "--no-audit", "--no-fund"], "Installing what Innkeep needs.");
+// A stamp of our own: bun and npm leave different traces of an install.
+const installed = path.join("node_modules", ".innkeep-installed");
+if (!existsSync(installed) || statSync("package.json").mtimeMs > statSync(installed).mtimeMs) {
+  run(
+    runner,
+    hasBun ? ["install"] : ["install", "--no-audit", "--no-fund"],
+    "Installing what Innkeep needs.",
+  );
+  writeFileSync(installed, new Date().toISOString());
 }
 
 // The settings file. The browser extension needs a password to talk to Innkeep:
@@ -68,7 +77,7 @@ if (!/^EXTENSION_TOKEN=.+/m.test(current)) {
 const built = path.join(".next", "BUILD_ID");
 const changed = Math.max(newest("src"), statSync("package.json").mtimeMs, statSync(settings).mtimeMs);
 if (!existsSync(built) || statSync(built).mtimeMs < changed) {
-  run(npm, ["run", "build"], "Preparing the app.");
+  run(runner, ["run", "build"], "Preparing the app.");
 }
 
 /** Whether something already answers on the port (Innkeep left running, or another program). */
@@ -84,7 +93,7 @@ if (taken) {
 }
 
 say(`Starting Innkeep at ${address}`);
-const server = spawn(npm, ["run", "start", "--", "-p", String(port)], {
+const server = spawn(runner, ["run", "start", "--", "-p", String(port)], {
   stdio: ["inherit", "pipe", "inherit"],
   shell: process.platform === "win32",
 });
