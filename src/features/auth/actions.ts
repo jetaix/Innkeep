@@ -3,15 +3,39 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getI18n } from "@/i18n/server";
+import { eq } from "drizzle-orm";
+import { appState, getDb } from "@/db";
 import {
   appPassword,
   passwordMatches,
-  recordFailure,
+  recentFailures,
   SESSION_COOKIE,
   SESSION_DAYS,
   sessionValue,
   tooManyAttempts,
 } from "@/lib/session";
+
+/** Wrong passwords are counted in the database, so the limit holds on a host with many short-lived servers. */
+const FAILURES = "sign-in-failures";
+
+async function failures(): Promise<number[]> {
+  const row = await getDb().select().from(appState).where(eq(appState.key, FAILURES)).get();
+  try {
+    const parsed: unknown = JSON.parse(row?.value ?? "[]");
+    return Array.isArray(parsed) ? parsed.filter((at) => typeof at === "number") : [];
+  } catch {
+    return [];
+  }
+}
+
+async function recordFailure(earlier: number[], now: number) {
+  const value = JSON.stringify([...recentFailures(earlier, now), now]);
+  await getDb()
+    .insert(appState)
+    .values({ key: FAILURES, value })
+    .onConflictDoUpdate({ target: appState.key, set: { value } })
+    .run();
+}
 
 export type SignInState = { error: string | null };
 
@@ -19,11 +43,13 @@ export async function signIn(_previous: SignInState, form: FormData): Promise<Si
   const password = appPassword();
   if (!password) redirect("/overview");
   const t = (await getI18n()).m.auth;
-  if (tooManyAttempts()) return { error: t.tooMany };
+  const now = Date.now();
+  const earlier = await failures();
+  if (tooManyAttempts(earlier, now)) return { error: t.tooMany };
 
   const given = form.get("password");
   if (typeof given !== "string" || !passwordMatches(given, password)) {
-    recordFailure();
+    await recordFailure(earlier, now);
     await new Promise((resolve) => setTimeout(resolve, 800));
     return { error: t.wrong };
   }

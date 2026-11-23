@@ -8,6 +8,8 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   // A landing-only deployment has no calendars to sync.
   if (process.env.LANDING_ONLY === "1") return;
+  // A serverless host freezes the process between requests: a scheduler calls /api/cron instead.
+  if (process.env.VERCEL) return;
 
   const minutes = Number(process.env.SYNC_INTERVAL_MINUTES ?? 15);
   const syncing = Number.isFinite(minutes) && minutes > 0;

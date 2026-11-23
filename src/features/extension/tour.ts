@@ -39,16 +39,16 @@ const EDITOR_SECTIONS: ["details" | "arrival", string][] = [
  * adds calendars, the listing editor, the extranet and the public pages.
  * On Booking.com the extranet's own menu adds its property pages during the run.
  */
-export function tourSteps(scope: "reservations" | "all"): TourStep[] {
-  const steps: TourStep[] = reservationLinks().map((link) => ({
+export async function tourSteps(scope: "reservations" | "all"): Promise<TourStep[]> {
+  const steps: TourStep[] = (await reservationLinks()).map((link) => ({
     url: link.href,
     label: `${CHANNELS[link.channel].label}: reservations`,
   }));
   if (scope === "reservations") return steps;
 
-  const allListings = getDb().select().from(listings).all();
-  for (const property of getProperties()) {
-    for (const link of calendarLinks(property.id)) {
+  const allListings = await getDb().select().from(listings).all();
+  for (const property of await getProperties()) {
+    for (const link of await calendarLinks(property.id)) {
       steps.push({ url: link.href, label: `${CHANNELS[link.channel].label}: calendar and prices` });
     }
 
@@ -77,8 +77,8 @@ export function tourSteps(scope: "reservations" | "all"): TourStep[] {
       });
     }
 
-    const pages = publicPageLinks(property.id);
-    const reviews = reviewPageLinks(property.id);
+    const pages = await publicPageLinks(property.id);
+    const reviews = await reviewPageLinks(property.id);
     for (const channel of ["airbnb", "booking"] as const) {
       const label = CHANNELS[channel].label;
       if (pages[channel]) steps.push({ url: pages[channel], label: `${label}: public listing` });

@@ -140,21 +140,24 @@ To run Innkeep online for you and your partner, with a password and Telegram
 notifications, see [docs/DEPLOY.md](docs/DEPLOY.md).
 The Settings page shows what is switched on.
 
-| Variable                | Default             | Purpose                                               |
-| ----------------------- | ------------------- | ----------------------------------------------------- |
-| `DATABASE_PATH`         | `./data/innkeep.db` | SQLite file location                                  |
-| `APP_URL`               | from the request    | Public URL used in export links                       |
-| `SYNC_INTERVAL_MINUTES` | `15`                | Background sync period, `0` to disable                |
-| `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Assistant page       |
-| `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                              |
-| `WEBHOOK_SECRET`        | unset               | Turns on the inbound messages webhook                 |
-| `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                 |
-| `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details               |
-| `APP_PASSWORD`          | unset               | Asks for this password before any page opens          |
-| `TELEGRAM_BOT_TOKEN`    | unset               | With the chat below, turns on Telegram notifications  |
-| `TELEGRAM_CHAT_ID`      | unset               | The person or group the notifications go to           |
-| `TELEGRAM_LANGUAGE`     | `en`                | Language of the notifications: `en` or `fr`           |
-| `LANDING_ONLY`          | unset               | `1` publishes only the landing and Alternatives pages |
+| Variable                | Default             | Purpose                                                 |
+| ----------------------- | ------------------- | ------------------------------------------------------- |
+| `DATABASE_PATH`         | `./data/innkeep.db` | SQLite file location                                    |
+| `TURSO_DATABASE_URL`    | unset               | A hosted Turso database instead of the file             |
+| `TURSO_AUTH_TOKEN`      | unset               | The token of that database                              |
+| `CRON_SECRET`           | unset               | Turns on `/api/cron` for a scheduler (serverless hosts) |
+| `APP_URL`               | from the request    | Public URL used in export links                         |
+| `SYNC_INTERVAL_MINUTES` | `15`                | Background sync period, `0` to disable                  |
+| `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Assistant page         |
+| `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                                |
+| `WEBHOOK_SECRET`        | unset               | Turns on the inbound messages webhook                   |
+| `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                   |
+| `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details                 |
+| `APP_PASSWORD`          | unset               | Asks for this password before any page opens            |
+| `TELEGRAM_BOT_TOKEN`    | unset               | With the chat below, turns on Telegram notifications    |
+| `TELEGRAM_CHAT_ID`      | unset               | The person or group the notifications go to             |
+| `TELEGRAM_LANGUAGE`     | `en`                | Language of the notifications: `en` or `fr`             |
+| `LANDING_ONLY`          | unset               | `1` publishes only the landing and Alternatives pages   |
 
 ### Browser extension
 
@@ -225,7 +228,7 @@ are safe to expose and how to report a vulnerability.
 ## Stack
 
 Next.js 16 (App Router, server components and actions), TypeScript, SQLite
-with Drizzle, Tailwind CSS 4, zod, cmdk, Vitest.
+(libSQL: a local file, or Turso when hosted) with Drizzle, Tailwind CSS 4, zod, cmdk, Vitest.
 [docs/TECH-BENCHMARK.md](docs/TECH-BENCHMARK.md) explains each choice and what
 was considered instead. [CONTRIBUTING.md](CONTRIBUTING.md) describes how the
 code is organised.

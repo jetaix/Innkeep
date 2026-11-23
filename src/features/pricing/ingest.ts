@@ -31,7 +31,7 @@ export const pricesSchema = z.object({
 export type PricesResult =
   { ok: true; saved: number; until: string; propertyId: number } | { ok: false; error: string };
 
-export function ingestPrices(input: z.input<typeof pricesSchema>): PricesResult {
+export async function ingestPrices(input: z.input<typeof pricesSchema>): Promise<PricesResult> {
   const parsed = pricesSchema.parse(input);
   const { source, listingId } = parsed;
   // Airbnb's calendar also shows a year of past nights; only prices still on sale are kept.
@@ -41,13 +41,13 @@ export function ingestPrices(input: z.input<typeof pricesSchema>): PricesResult 
   const db = getDb();
 
   const known = listingId
-    ? db
+    ? await db
         .select()
         .from(listings)
         .where(and(eq(listings.channel, source), eq(listings.externalId, listingId)))
         .get()
     : undefined;
-  const all = db.select({ id: properties.id }).from(properties).all();
+  const all = await db.select({ id: properties.id }).from(properties).all();
   // A price on the wrong property would mislead every comparison, so never guess between several.
   const propertyId = known?.propertyId ?? (all.length === 1 ? all[0].id : null);
   if (propertyId == null) {
@@ -58,9 +58,10 @@ export function ingestPrices(input: z.input<typeof pricesSchema>): PricesResult 
   }
 
   const seenAt = Date.now();
-  db.transaction((tx) => {
+  await db.transaction(async (tx) => {
     for (const price of prices) {
-      tx.insert(nightlyPrices)
+      await tx
+        .insert(nightlyPrices)
         .values({ propertyId, source, seenAt, ...price, note: price.note ?? null })
         .onConflictDoUpdate({
           target: [nightlyPrices.propertyId, nightlyPrices.source, nightlyPrices.plan, nightlyPrices.date],
@@ -70,7 +71,8 @@ export function ingestPrices(input: z.input<typeof pricesSchema>): PricesResult 
     }
     // The platform told us its id for this listing: remember it for next time.
     if (listingId && !known) {
-      tx.update(listings)
+      await tx
+        .update(listings)
         .set({ externalId: listingId })
         .where(and(eq(listings.propertyId, propertyId), eq(listings.channel, source)))
         .run();
@@ -98,10 +100,12 @@ export const quoteSchema = z.object({
  * Keeps what a guest is shown for one stay. Only for a listing Innkeep knows
  * by its platform id: the public page of anyone else's listing is refused.
  */
-export function ingestQuote(input: z.input<typeof quoteSchema>): { ok: true } | { ok: false; error: string } {
+export async function ingestQuote(
+  input: z.input<typeof quoteSchema>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const quote = quoteSchema.parse(input);
   const db = getDb();
-  const listing = db
+  const listing = await db
     .select()
     .from(listings)
     .where(and(eq(listings.channel, quote.source), eq(listings.externalId, quote.listingId)))
@@ -114,7 +118,8 @@ export function ingestQuote(input: z.input<typeof quoteSchema>): { ok: true } | 
     original: quote.original ?? null,
     seenAt: Date.now(),
   };
-  db.insert(guestQuotes)
+  await db
+    .insert(guestQuotes)
     .values({
       propertyId: listing.propertyId,
       source: quote.source,
@@ -127,6 +132,6 @@ export function ingestQuote(input: z.input<typeof quoteSchema>): { ok: true } | 
       set: values,
     })
     .run();
-  if (quote.preview) savePreview(listing.id, quote.preview);
+  if (quote.preview) await savePreview(listing.id, quote.preview);
   return { ok: true };
 }

@@ -12,8 +12,14 @@ import { notifyCleanings, telegramLocale } from "./notify";
 const day = z.object({ propertyId: z.coerce.number().int().positive(), date: isoDate });
 
 /** Creates the record of a cleaning day if there is none, then changes it. */
-function upsertCleaning(propertyId: number, date: string, changes: Partial<typeof cleanings.$inferInsert>) {
-  getDb()
+async function upsertCleaning(
+  propertyId: number,
+  date: string,
+  changes: Partial<typeof cleanings.$inferInsert>,
+) {
+  await (
+    await getDb()
+  )
     .insert(cleanings)
     .values({ propertyId, date, ...changes })
     .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: changes })
@@ -23,7 +29,9 @@ function upsertCleaning(propertyId: number, date: string, changes: Partial<typeo
 export async function addCleaner(form: FormData) {
   const parsed = parseForm(z.object({ name: text.min(1).max(80), phone: text.max(40) }), form);
   if (!parsed.success) return;
-  getDb()
+  await (
+    await getDb()
+  )
     .insert(cleaners)
     .values({ ...parsed.data, createdAt: Date.now() })
     .run();
@@ -31,7 +39,7 @@ export async function addCleaner(form: FormData) {
 }
 
 export async function deleteCleaner(id: number) {
-  getDb().delete(cleaners).where(eq(cleaners.id, id)).run();
+  await getDb().delete(cleaners).where(eq(cleaners.id, id)).run();
   refresh();
 }
 
@@ -44,17 +52,25 @@ export async function assignCleaner(propertyId: number, priority: number, form: 
   if (!parsed.success || ![0, 1].includes(priority)) return;
   const db = getDb();
   const { cleanerId } = parsed.data;
-  db.transaction((tx) => {
-    tx.delete(cleanerAssignments)
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(cleanerAssignments)
       .where(and(eq(cleanerAssignments.propertyId, propertyId), eq(cleanerAssignments.priority, priority)))
       .run();
-    if (cleanerId !== "") tx.insert(cleanerAssignments).values({ propertyId, cleanerId, priority }).run();
+    if (cleanerId !== "")
+      await tx.insert(cleanerAssignments).values({ propertyId, cleanerId, priority }).run();
   });
   refresh();
 }
 
 export async function setCleaningEnabled(propertyId: number, enabled: boolean) {
-  getDb().update(properties).set({ cleaningEnabled: enabled }).where(eq(properties.id, propertyId)).run();
+  await (
+    await getDb()
+  )
+    .update(properties)
+    .set({ cleaningEnabled: enabled })
+    .where(eq(properties.id, propertyId))
+    .run();
   refresh();
 }
 
@@ -63,7 +79,7 @@ export async function setCleaningStatus(propertyId: number, date: string, status
     .object({ ...day.shape, status: z.enum(CLEANING_STATUSES) })
     .safeParse({ propertyId, date, status });
   if (!parsed.success) return;
-  upsertCleaning(parsed.data.propertyId, parsed.data.date, {
+  await upsertCleaning(parsed.data.propertyId, parsed.data.date, {
     status: parsed.data.status,
     doneAt: parsed.data.status === "done" ? Date.now() : null,
   });
@@ -81,7 +97,7 @@ export async function updateCleaning(propertyId: number, date: string, form: For
     form,
   );
   if (!where.success || !parsed.success) return;
-  upsertCleaning(where.data.propertyId, where.data.date, {
+  await upsertCleaning(where.data.propertyId, where.data.date, {
     notes: parsed.data.notes,
     cleanerId: parsed.data.cleanerId === "" ? null : parsed.data.cleanerId,
   });
@@ -92,7 +108,9 @@ export async function addManualCleaning(form: FormData) {
   const parsed = parseForm(z.object({ ...day.shape, notes: text.max(500) }), form);
   if (!parsed.success) return;
   const { propertyId, date, notes } = parsed.data;
-  getDb()
+  await (
+    await getDb()
+  )
     .insert(cleanings)
     .values({ propertyId, date, notes, manual: true })
     .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: { manual: true, notes } })
@@ -102,7 +120,9 @@ export async function addManualCleaning(form: FormData) {
 
 /** Removes a cleaning the host added by hand. */
 export async function removeManualCleaning(propertyId: number, date: string) {
-  getDb()
+  await (
+    await getDb()
+  )
     .delete(cleanings)
     .where(and(eq(cleanings.propertyId, propertyId), eq(cleanings.date, date), eq(cleanings.manual, true)))
     .run();

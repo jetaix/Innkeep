@@ -39,13 +39,13 @@ async function PricingView({ searchParams }: Pick<PageProps<"/pricing">, "search
   const { m } = await getI18n();
   const t = m.pricing;
   const params = await searchParams;
-  const properties = getProperties();
+  const properties = await getProperties();
   if (properties.length === 0) {
     return <EmptyState title={t.noProperty.title}>{t.noProperty.body}</EmptyState>;
   }
   const property = properties.find((p) => p.id === Number(one(params.property))) ?? properties[0];
   const days = PRICING_WINDOWS.find((window) => window === Number(one(params.days))) ?? PRICING_WINDOWS[0];
-  const pricing = getPricing(property.id, one(params.plan), days);
+  const pricing = await getPricing(property.id, one(params.plan), days);
   const hasPrices = pricing.coverage.airbnb != null || pricing.coverage.booking != null;
   const href = (next: { property?: number; plan?: string; days?: number }) => {
     const query = new URLSearchParams();
@@ -161,7 +161,7 @@ function Choice({
 async function ReadPrices({ property, pricing }: { property: Property; pricing: Pricing }) {
   const { m, fmt } = await getI18n();
   const t = m.pricing;
-  const links = process.env.EXTENSION_TOKEN ? calendarLinks(property.id) : [];
+  const links = process.env.EXTENSION_TOKEN ? await calendarLinks(property.id) : [];
   const channels: OtaChannel[] = ["airbnb", "booking"];
 
   return (
@@ -250,10 +250,14 @@ async function GuestChecks({ property, pricing }: { property: Property; pricing:
   const money = (amount: number) => fmt.money(amount, property.currency, { cents: false });
   const canOpen = Boolean(process.env.EXTENSION_TOKEN);
   const channels = ["airbnb", "booking"] as const;
-  const rows = pricing.guestChecks.map((check) => ({
-    ...check,
-    links: canOpen ? guestViewLinks(property.id, check.checkIn, check.checkOut, property.maxGuests) : {},
-  }));
+  const rows = await Promise.all(
+    pricing.guestChecks.map(async (check) => ({
+      ...check,
+      links: canOpen
+        ? await guestViewLinks(property.id, check.checkIn, check.checkOut, property.maxGuests)
+        : {},
+    })),
+  );
 
   return (
     <Card>

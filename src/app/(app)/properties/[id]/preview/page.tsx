@@ -49,12 +49,12 @@ async function Previews({ params }: Pick<PageProps<"/properties/[id]/preview">, 
   const id = Number((await params).id);
   const db = getDb();
   const property = Number.isInteger(id)
-    ? db.select().from(properties).where(eq(properties.id, id)).get()
+    ? await db.select().from(properties).where(eq(properties.id, id)).get()
     : undefined;
   if (!property) notFound();
 
-  const rows = db.select().from(listings).where(eq(listings.propertyId, id)).all();
-  const quotes = db
+  const rows = await db.select().from(listings).where(eq(listings.propertyId, id)).all();
+  const quotes = await db
     .select()
     .from(guestQuotes)
     .where(eq(guestQuotes.propertyId, id))
@@ -77,16 +77,18 @@ async function Previews({ params }: Pick<PageProps<"/properties/[id]/preview">, 
         )
       : quotes.find((quote) => quote.source === channel)) ?? null;
 
-  const sides: Side[] = OTA_CHANNELS.map((channel) => {
-    const listing = rows.find((row) => row.channel === channel);
-    return {
-      channel,
-      preview: withAdminPhotos(listing ? readPreview(listing) : null, id, channel),
-      readAt: listing?.publicPreviewAt ?? null,
-      quote: quoteFor(channel),
-    };
-  });
-  const links = publicPageLinks(id);
+  const sides: Side[] = await Promise.all(
+    OTA_CHANNELS.map(async (channel) => {
+      const listing = rows.find((row) => row.channel === channel);
+      return {
+        channel,
+        preview: await withAdminPhotos(listing ? readPreview(listing) : null, id, channel),
+        readAt: listing?.publicPreviewAt ?? null,
+        quote: quoteFor(channel),
+      };
+    }),
+  );
+  const links = await publicPageLinks(id);
   const canRead = Boolean(process.env.EXTENSION_TOKEN);
 
   return (
@@ -114,9 +116,13 @@ async function Previews({ params }: Pick<PageProps<"/properties/[id]/preview">, 
 }
 
 /** When the public page's gallery was not read, the photos from the platform's admin stand in. */
-function withAdminPhotos(preview: Preview | null, propertyId: number, channel: OtaChannel): Preview | null {
+async function withAdminPhotos(
+  preview: Preview | null,
+  propertyId: number,
+  channel: OtaChannel,
+): Promise<Preview | null> {
   if (!preview || preview.images.length > 0) return preview;
-  return { ...preview, images: adminPhotos(propertyId, channel).slice(0, 12) };
+  return { ...preview, images: (await adminPhotos(propertyId, channel)).slice(0, 12) };
 }
 
 async function ListingCard({

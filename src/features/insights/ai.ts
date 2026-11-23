@@ -22,8 +22,8 @@ import type { InsightInput, Suggestion } from "./rules";
 
 export const AI_MODEL = process.env.AI_MODEL ?? "claude-opus-5-5";
 
-export function aiConfigured(): boolean {
-  return Boolean(getApiKey() || process.env.ANTHROPIC_AUTH_TOKEN);
+export async function aiConfigured(): Promise<boolean> {
+  return Boolean((await getApiKey()) || process.env.ANTHROPIC_AUTH_TOKEN);
 }
 
 const adviceSchema = z.object({
@@ -199,7 +199,7 @@ export async function generateAdvice(
   const errors = MESSAGES[locale].insights.errors;
   const language = LANGUAGE[locale];
   // No key here means the SDK falls back to its own environment variables.
-  const client = new Anthropic({ apiKey: getApiKey() ?? undefined });
+  const client = new Anthropic({ apiKey: (await getApiKey()) ?? undefined });
   try {
     const response = await client.beta.messages.parse({
       model: AI_MODEL,

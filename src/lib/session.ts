@@ -31,17 +31,13 @@ export const sessionValid = (cookie: string | undefined, password: string) =>
 /**
  * Slows down guessing: after too many wrong passwords in a few minutes, every
  * attempt is refused until the window has passed. People already signed in
- * are not affected.
+ * are not affected. Pure: the times of recent failures are kept by the caller.
  */
-const WINDOW_MS = 10 * 60_000;
-const MAX_FAILURES = 20;
-const failures: number[] = [];
+export const ATTEMPT_WINDOW_MS = 10 * 60_000;
+export const MAX_FAILURES = 20;
 
-export function tooManyAttempts(now = Date.now()): boolean {
-  while (failures.length > 0 && failures[0] < now - WINDOW_MS) failures.shift();
-  return failures.length >= MAX_FAILURES;
-}
+export const recentFailures = (failures: number[], now: number) =>
+  failures.filter((at) => at > now - ATTEMPT_WINDOW_MS);
 
-export function recordFailure(now = Date.now()) {
-  failures.push(now);
-}
+export const tooManyAttempts = (failures: number[], now: number) =>
+  recentFailures(failures, now).length >= MAX_FAILURES;

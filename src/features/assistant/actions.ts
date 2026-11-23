@@ -37,12 +37,12 @@ export async function connectClaude(_previous: ConnectState, form: FormData): Pr
     throw error;
   }
 
-  saveApiKey(parsed.data);
+  await saveApiKey(parsed.data);
   refresh();
   return { error: null, connected: true };
 }
 
 export async function disconnectClaude() {
-  removeApiKey();
+  await removeApiKey();
   refresh();
 }

@@ -12,12 +12,18 @@ import { aiConfigured, buildSnapshot, generateAdvice } from "./ai";
 import { getSuggestions } from "./queries";
 
 export async function dismissSuggestion(key: string) {
-  getDb().insert(dismissedSuggestions).values({ key, dismissedAt: Date.now() }).onConflictDoNothing().run();
+  await (
+    await getDb()
+  )
+    .insert(dismissedSuggestions)
+    .values({ key, dismissedAt: Date.now() })
+    .onConflictDoNothing()
+    .run();
   refresh();
 }
 
 export async function restoreSuggestions() {
-  getDb().delete(dismissedSuggestions).run();
+  await getDb().delete(dismissedSuggestions).run();
   refresh();
 }
 
@@ -27,22 +33,31 @@ export type AdviceState = { error: string | null };
 export async function requestAdvice(): Promise<AdviceState> {
   const locale = await getLocale();
   const errors = MESSAGES[locale].insights.errors;
-  if (!aiConfigured()) return { error: errors.notConfigured };
+  if (!(await aiConfigured())) return { error: errors.notConfigured };
 
-  const { active, input } = getSuggestions(locale);
+  const { active, input } = await getSuggestions(locale);
   if (input.properties.length === 0) return { error: errors.noProperty };
 
   // A full year of nightly prices, so seasonal advice has something real to stand on.
   const pricing = new Map(
-    input.properties.map((property) => [property.id, getPricing(property.id, undefined, 365)]),
+    await Promise.all(
+      input.properties.map(
+        async (property) => [property.id, await getPricing(property.id, undefined, 365)] as const,
+      ),
+    ),
   );
   // The rules only look ahead; the model also gets the past year, where the real payouts are.
-  const withHistory = { ...input, stays: getStays(addDays(input.today, -400)) };
-  const result = await generateAdvice(buildSnapshot(withHistory, getCharges(), active, pricing), locale);
+  const withHistory = { ...input, stays: await getStays(addDays(input.today, -400)) };
+  const result = await generateAdvice(
+    buildSnapshot(withHistory, await getCharges(), active, pricing),
+    locale,
+  );
   if (!result.ok) return { error: result.error };
 
   const row = { generatedAt: Date.now(), model: result.model, payload: JSON.stringify(result.advice) };
-  getDb()
+  await (
+    await getDb()
+  )
     .insert(aiAdvice)
     .values({ id: 1, ...row })
     .onConflictDoUpdate({ target: aiAdvice.id, set: row })

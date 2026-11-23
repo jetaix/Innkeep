@@ -10,72 +10,66 @@ import { addDays, today } from "@/lib/dates";
 import type { Advice } from "./ai";
 import { buildSuggestions, type InsightInput, type Suggestion } from "./rules";
 
-function gatherInput(): InsightInput {
+async function gatherInput(): Promise<InsightInput> {
   const db = getDb();
-  const properties = getProperties();
+  const properties = await getProperties();
   const now = today();
 
-  const threads = db.select().from(conversations).all();
-  const lastMessages = threads.map((conversation) => {
-    const last = db
-      .select({ direction: messages.direction })
-      .from(messages)
-      .where(eq(messages.conversationId, conversation.id))
-      .orderBy(desc(messages.sentAt))
-      .limit(1)
-      .get();
-    return {
-      id: conversation.id,
-      guestName: conversation.guestName,
-      lastDirection: last?.direction ?? ("out" as const),
-      lastMessageAt: conversation.lastMessageAt,
-    };
-  });
+  const threads = await db.select().from(conversations).all();
+  const lastMessages = await Promise.all(
+    threads.map(async (conversation) => {
+      const last = await db
+        .select({ direction: messages.direction })
+        .from(messages)
+        .where(eq(messages.conversationId, conversation.id))
+        .orderBy(desc(messages.sentAt))
+        .limit(1)
+        .get();
+      return {
+        id: conversation.id,
+        guestName: conversation.guestName,
+        lastDirection: last?.direction ?? ("out" as const),
+        lastMessageAt: conversation.lastMessageAt,
+      };
+    }),
+  );
 
   return {
     today: now,
     now: Date.now(),
     properties,
-    listings: db
-      .select()
-      .from(listings)
-      .all()
-      .flatMap((listing) => {
-        const property = properties.find((p) => p.id === listing.propertyId);
-        return property ? [{ ...listing, publishState: publishState(property, listing) }] : [];
-      }),
+    listings: (await db.select().from(listings).all()).flatMap((listing) => {
+      const property = properties.find((p) => p.id === listing.propertyId);
+      return property ? [{ ...listing, publishState: publishState(property, listing) }] : [];
+    }),
     // A day of history keeps today's departures in view for turnover checks.
-    stays: getStays(addDays(now, -1)),
+    stays: await getStays(addDays(now, -1)),
     conversations: lastMessages,
     chargeCount:
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(charges)
-        .get()?.count ?? 0,
+      (
+        await db
+          .select({ count: sql<number>`count(*)` })
+          .from(charges)
+          .get()
+      )?.count ?? 0,
   };
 }
 
 /** Suggestions written in `locale`. Their keys are the same in every language, so dismissals carry over. */
-export function getSuggestions(locale: Locale = "en"): {
+export async function getSuggestions(locale: Locale = "en"): Promise<{
   active: Suggestion[];
   dismissed: number;
   input: InsightInput;
-} {
-  const input = gatherInput();
+}> {
+  const input = await gatherInput();
   const all = buildSuggestions(input, MESSAGES[locale].insights.rules, createFormat(locale));
-  const hidden = new Set(
-    getDb()
-      .select()
-      .from(dismissedSuggestions)
-      .all()
-      .map((row) => row.key),
-  );
+  const hidden = new Set((await getDb().select().from(dismissedSuggestions).all()).map((row) => row.key));
   const active = all.filter((suggestion) => !hidden.has(suggestion.key));
   return { active, dismissed: all.length - active.length, input };
 }
 
-export function getAdvice(): { advice: Advice; generatedAt: number; model: string } | null {
-  const row = getDb().select().from(aiAdvice).where(eq(aiAdvice.id, 1)).get();
+export async function getAdvice(): Promise<{ advice: Advice; generatedAt: number; model: string } | null> {
+  const row = await getDb().select().from(aiAdvice).where(eq(aiAdvice.id, 1)).get();
   if (!row) return null;
   return { advice: JSON.parse(row.payload) as Advice, generatedAt: row.generatedAt, model: row.model };
 }

@@ -26,10 +26,12 @@ export const pageSchema = z.object({
 });
 
 /** Only for a listing Innkeep knows by its platform id. */
-export function ingestPage(input: z.input<typeof pageSchema>): { ok: true } | { ok: false; error: string } {
+export async function ingestPage(
+  input: z.input<typeof pageSchema>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const { source, listingId, page } = pageSchema.parse(input);
   const db = getDb();
-  const listing = db
+  const listing = await db
     .select()
     .from(listings)
     .where(and(eq(listings.channel, source), eq(listings.externalId, listingId)))
@@ -42,7 +44,8 @@ export function ingestPage(input: z.input<typeof pageSchema>): { ok: true } | { 
     images: JSON.stringify(page.images),
     seenAt: Date.now(),
   };
-  db.insert(channelPages)
+  await db
+    .insert(channelPages)
     .values({ listingId: listing.id, page: page.key, ...values })
     .onConflictDoUpdate({ target: [channelPages.listingId, channelPages.page], set: values })
     .run();
@@ -60,31 +63,36 @@ const list = (json: string): string[] => {
   }
 };
 
-export function getPages(listingRowId: number): StoredPage[] {
-  return getDb()
-    .select()
-    .from(channelPages)
-    .where(eq(channelPages.listingId, listingRowId))
-    .orderBy(asc(channelPages.page))
-    .all()
-    .map((row) => ({
-      key: row.page,
-      title: row.title,
-      lines: list(row.lines),
-      images: list(row.images),
-      seenAt: row.seenAt,
-    }));
+export async function getPages(listingRowId: number): Promise<StoredPage[]> {
+  return (
+    await (
+      await getDb()
+    )
+      .select()
+      .from(channelPages)
+      .where(eq(channelPages.listingId, listingRowId))
+      .orderBy(asc(channelPages.page))
+      .all()
+  ).map((row) => ({
+    key: row.page,
+    title: row.title,
+    lines: list(row.lines),
+    images: list(row.images),
+    seenAt: row.seenAt,
+  }));
 }
 
 /** The photos of a listing as its admin shows them, for when the public page's gallery was not read. */
-export function adminPhotos(propertyId: number, channel: OtaChannel): string[] {
+export async function adminPhotos(propertyId: number, channel: OtaChannel): Promise<string[]> {
   const db = getDb();
-  const listing = db
+  const listing = await db
     .select()
     .from(listings)
     .where(and(eq(listings.propertyId, propertyId), eq(listings.channel, channel)))
     .get();
   if (!listing) return [];
-  const page = getPages(listing.id).find((entry) => /photo/.test(entry.key) && entry.images.length > 0);
+  const page = (await getPages(listing.id)).find(
+    (entry) => /photo/.test(entry.key) && entry.images.length > 0,
+  );
   return page?.images ?? [];
 }

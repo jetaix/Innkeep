@@ -11,17 +11,20 @@ describe("ingestReservations", () => {
   let loft: number;
   let cabin: number;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     const db = getDb();
-    const property = (name: string, title: string) =>
-      db
-        .insert(properties)
-        .values({ name, title, icalToken: name, createdAt: 0 })
-        .returning({ id: properties.id })
-        .get().id;
-    loft = property("Loft", "Bright loft on the canal");
-    cabin = property("Cabin", "Pine cabin");
-    db.insert(listings)
+    const property = async (name: string, title: string) =>
+      (
+        await db
+          .insert(properties)
+          .values({ name, title, icalToken: name, createdAt: 0 })
+          .returning({ id: properties.id })
+          .get()
+      ).id;
+    loft = await property("Loft", "Bright loft on the canal");
+    cabin = await property("Cabin", "Pine cabin");
+    await db
+      .insert(listings)
       .values([
         { propertyId: loft, channel: "airbnb" },
         { propertyId: cabin, channel: "airbnb" },
@@ -29,7 +32,8 @@ describe("ingestReservations", () => {
       .run();
 
     const stay = { source: "airbnb" as const, createdAt: 0 };
-    db.insert(reservations)
+    await db
+      .insert(reservations)
       .values([
         // As the calendar feed imports them: dates and a reservation link, no name.
         {
@@ -54,8 +58,8 @@ describe("ingestReservations", () => {
       .run();
   });
 
-  const byUid = (uid: string) =>
-    getDb().select().from(reservations).where(eq(reservations.externalUid, uid)).get()!;
+  const byUid = async (uid: string) =>
+    (await getDb().select().from(reservations).where(eq(reservations.externalUid, uid)).get())!;
   const row = (code: string, checkIn: string, checkOut: string, extra = {}) => ({
     code,
     checkIn,
@@ -67,13 +71,13 @@ describe("ingestReservations", () => {
     ...extra,
   });
 
-  it("matches by confirmation code even when the dates on the page differ", () => {
-    const result = ingestReservations({
+  it("matches by confirmation code even when the dates on the page differ", async () => {
+    const result = await ingestReservations({
       source: "airbnb",
       reservations: [row("HMAAAAAAAA", "2099-01-05", "2099-01-08")],
     });
     expect(result).toEqual({ updated: 1, unchanged: 0, added: 0, cancelled: 0, unmatched: [] });
-    expect(byUid("a")).toMatchObject({
+    expect(await byUid("a")).toMatchObject({
       guestName: "Camille Durand",
       guests: 2,
       amount: 34_356,
@@ -83,34 +87,35 @@ describe("ingestReservations", () => {
     });
   });
 
-  it("is idempotent", () => {
-    const result = ingestReservations({
+  it("is idempotent", async () => {
+    const result = await ingestReservations({
       source: "airbnb",
       reservations: [row("HMAAAAAAAA", "2099-01-04", "2099-01-08")],
     });
     expect(result).toMatchObject({ updated: 0, unchanged: 1, unmatched: [] });
   });
 
-  it("uses the listing name when two properties have the same dates, and refuses to guess without it", () => {
-    const ambiguous = ingestReservations({
+  it("uses the listing name when two properties have the same dates, and refuses to guess without it", async () => {
+    const ambiguous = await ingestReservations({
       source: "airbnb",
       reservations: [row("HMBBBBBBBB", "2099-02-01", "2099-02-05")],
     });
     expect(ambiguous.unmatched).toEqual(["HMBBBBBBBB"]);
 
-    const named = ingestReservations({
+    const named = await ingestReservations({
       source: "airbnb",
       reservations: [row("HMBBBBBBBB", "2099-02-01", "2099-02-05", { listingName: "Pine cabin | Chamonix" })],
     });
     expect(named.updated).toBe(1);
-    expect(byUid("c").guestName).toBe("Camille Durand");
-    expect(byUid("b").guestName).toBe("");
+    expect((await byUid("c")).guestName).toBe("Camille Durand");
+    expect((await byUid("b")).guestName).toBe("");
   });
 
-  it("matches Booking.com rows by dates, then remembers the property id for next time", () => {
+  it("matches Booking.com rows by dates, then remembers the property id for next time", async () => {
     const db = getDb();
-    db.insert(listings).values({ propertyId: loft, channel: "booking" }).run();
-    db.insert(reservations)
+    await db.insert(listings).values({ propertyId: loft, channel: "booking" }).run();
+    await db
+      .insert(reservations)
       .values({
         propertyId: loft,
         source: "booking",
@@ -124,24 +129,24 @@ describe("ingestReservations", () => {
       })
       .run();
 
-    const result = ingestReservations({
+    const result = await ingestReservations({
       source: "booking",
       listingId: "14170000",
       reservations: [row("5000000001", "2099-05-01", "2099-05-04", { payout: 21_909 })],
     });
     expect(result.updated).toBe(1);
-    expect(byUid("bk")).toMatchObject({
+    expect(await byUid("bk")).toMatchObject({
       guestName: "Camille Durand",
       amount: 21_909,
       externalCode: "5000000001",
     });
-    const listing = db.select().from(listings).where(eq(listings.channel, "booking")).get();
+    const listing = await db.select().from(listings).where(eq(listings.channel, "booking")).get();
     expect(listing?.externalId).toBe("14170000");
   });
 
-  it("keeps a name the host typed and never creates a booking", () => {
-    const before = getDb().select().from(reservations).all().length;
-    const result = ingestReservations({
+  it("keeps a name the host typed and never creates a booking", async () => {
+    const before = (await getDb().select().from(reservations).all()).length;
+    const result = await ingestReservations({
       source: "airbnb",
       reservations: [
         row("HMDDDDDDDD", "2099-03-01", "2099-03-03"),
@@ -149,11 +154,11 @@ describe("ingestReservations", () => {
       ],
     });
     expect(result).toMatchObject({ updated: 1, unmatched: ["HMZZZZZZZZ"] });
-    expect(byUid("d")).toMatchObject({ guestName: "Nickname I typed", amount: 34_356 });
-    expect(getDb().select().from(reservations).all()).toHaveLength(before);
+    expect(await byUid("d")).toMatchObject({ guestName: "Nickname I typed", amount: 34_356 });
+    expect(await getDb().select().from(reservations).all()).toHaveLength(before);
   });
 
-  it("keeps a cancelled row as a cancelled stay, without touching the stay that shares its dates", () => {
+  it("keeps a cancelled row as a cancelled stay, without touching the stay that shares its dates", async () => {
     const cancelled = row("HMCANCELLED", "2099-03-01", "2099-03-03", {
       status: "cancelled",
       statusText: "Cancelled by guest",
@@ -161,12 +166,14 @@ describe("ingestReservations", () => {
       payout: 0,
       listingName: "Pine cabin",
     });
-    const result = ingestReservations({ source: "airbnb", reservations: [cancelled] });
+    const result = await ingestReservations({ source: "airbnb", reservations: [cancelled] });
     expect(result).toMatchObject({ updated: 0, cancelled: 1, unmatched: [] });
-    expect(byUid("d")).toMatchObject({ externalCode: "HMDDDDDDDD", status: "confirmed" });
+    expect(await byUid("d")).toMatchObject({ externalCode: "HMDDDDDDDD", status: "confirmed" });
 
-    ingestReservations({ source: "airbnb", reservations: [cancelled] });
-    const stored = getDb()
+    await ingestReservations({ source: "airbnb", reservations: [cancelled] });
+    const stored = await (
+      await getDb()
+    )
       .select()
       .from(reservations)
       .where(eq(reservations.externalCode, "HMCANCELLED"))
@@ -181,14 +188,16 @@ describe("ingestReservations", () => {
     });
   });
 
-  it("treats a payout of zero as cancelled when an older extension sends no status", () => {
-    ingestReservations({
+  it("treats a payout of zero as cancelled when an older extension sends no status", async () => {
+    await ingestReservations({
       source: "airbnb",
       reservations: [
         row("HMOLDCLIENT", "2020-01-01", "2020-01-03", { payout: 0, listingName: "Pine cabin" }),
       ],
     });
-    const stored = getDb()
+    const stored = await (
+      await getDb()
+    )
       .select()
       .from(reservations)
       .where(eq(reservations.externalCode, "HMOLDCLIENT"))
@@ -196,18 +205,20 @@ describe("ingestReservations", () => {
     expect(stored).toMatchObject({ status: "cancelled" });
   });
 
-  it("adds a finished stay the calendar no longer lists, once, on the property its listing names", () => {
+  it("adds a finished stay the calendar no longer lists, once, on the property its listing names", async () => {
     const past = row("HMPAST00001", "2020-06-01", "2020-06-04", {
       listingName: "Pine cabin | Lake view",
       statusText: "Ancien voyageur",
       bookedOn: "2020-05-02",
     });
-    expect(ingestReservations({ source: "airbnb", reservations: [past] })).toMatchObject({ added: 1 });
-    expect(ingestReservations({ source: "airbnb", reservations: [past] })).toMatchObject({
+    expect(await ingestReservations({ source: "airbnb", reservations: [past] })).toMatchObject({ added: 1 });
+    expect(await ingestReservations({ source: "airbnb", reservations: [past] })).toMatchObject({
       added: 0,
       unchanged: 1,
     });
-    const stored = getDb()
+    const stored = await (
+      await getDb()
+    )
       .select()
       .from(reservations)
       .where(eq(reservations.externalCode, "HMPAST00001"))
@@ -224,22 +235,22 @@ describe("ingestReservations", () => {
     });
   });
 
-  it("does not guess the property of a finished stay", () => {
-    const result = ingestReservations({
+  it("does not guess the property of a finished stay", async () => {
+    const result = await ingestReservations({
       source: "airbnb",
       reservations: [row("HMPAST00002", "2020-07-01", "2020-07-04", { listingName: "Somewhere else" })],
     });
     expect(result).toMatchObject({ added: 0, unmatched: ["HMPAST00002"] });
   });
 
-  it("stores the price and commission Booking.com shows", () => {
-    ingestReservations({
+  it("stores the price and commission Booking.com shows", async () => {
+    await ingestReservations({
       source: "booking",
       listingId: "14170000",
       reservations: [
         row("5000000001", "2099-05-01", "2099-05-04", { payout: 21_909, price: 26_861, fees: 4_952 }),
       ],
     });
-    expect(byUid("bk")).toMatchObject({ amount: 21_909, grossAmount: 26_861, channelFees: 4_952 });
+    expect(await byUid("bk")).toMatchObject({ amount: 21_909, grossAmount: 26_861, channelFees: 4_952 });
   });
 });

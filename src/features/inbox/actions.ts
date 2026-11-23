@@ -13,7 +13,11 @@ export async function sendMessage(conversationId: number, form: FormData) {
   const { body } = parsed.data;
 
   const db = getDb();
-  const conversation = db.select().from(conversations).where(eq(conversations.id, conversationId)).get();
+  const conversation = await db
+    .select()
+    .from(conversations)
+    .where(eq(conversations.id, conversationId))
+    .get();
   if (!conversation) return;
 
   // Direct guests have no channel to deliver to; channel guests need a messaging adapter.
@@ -25,7 +29,11 @@ export async function sendMessage(conversationId: number, form: FormData) {
   }
 
   const now = Date.now();
-  db.insert(messages).values({ conversationId, direction: "out", body, delivery, sentAt: now }).run();
-  db.update(conversations).set({ lastMessageAt: now }).where(eq(conversations.id, conversationId)).run();
+  await db.insert(messages).values({ conversationId, direction: "out", body, delivery, sentAt: now }).run();
+  await db
+    .update(conversations)
+    .set({ lastMessageAt: now })
+    .where(eq(conversations.id, conversationId))
+    .run();
   refresh();
 }

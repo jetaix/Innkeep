@@ -30,14 +30,14 @@ export default function OverviewPage() {
 
 async function Overview() {
   await connection();
-  const properties = getProperties();
+  const properties = await getProperties();
   if (properties.length === 0) return <Welcome />;
   const { locale, m, fmt } = await getI18n();
   const t = m.overview;
 
   const now = today();
   // Asking from yesterday keeps the stays that end today, for the departures line.
-  const recent = getStays(addDays(now, -1));
+  const recent = await getStays(addDays(now, -1));
   const stays = recent.filter((stay) => stay.checkOut > now);
   const conflicts = findConflicts(stays);
   const guests = stays.filter((stay) => stay.kind === "reservation");
@@ -45,12 +45,12 @@ async function Overview() {
   const departures = recent.filter((stay) => stay.kind === "reservation" && stay.checkOut === now);
   const inHouse = guests.filter((stay) => stay.checkIn < now);
 
-  const revenue = getRevenue({ monthsBack: 0, monthsAhead: 1 });
+  const revenue = await getRevenue({ monthsBack: 0, monthsAhead: 1 });
   const [thisMonth, nextMonth] = revenue.summaries;
   const occupancy =
     properties.reduce((sum, property) => sum + occupancyAhead(property.id, guests, now, 30), 0) /
     properties.length;
-  const { active: suggestions } = getSuggestions(locale);
+  const { active: suggestions } = await getSuggestions(locale);
 
   const names = (list: typeof guests) =>
     list.map((stay) => stay.guestName || properties.find((p) => p.id === stay.propertyId)?.name).join(", ");

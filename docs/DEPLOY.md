@@ -5,20 +5,62 @@ is open. This page is for the next step: an Innkeep that is always on, that
 you and your partner open from any phone or computer, and that can message
 you on Telegram.
 
-## What it needs
+There are two ways to do it. Both give the same Innkeep.
 
-- **A small machine that stays on**, with Docker and a disk that survives
-  restarts: a €4 to €6 a month virtual server, Fly.io, Railway, or a
-  Raspberry Pi at home. 512 MB of memory is enough.
-- **Not a serverless host** such as Vercel or Netlify. Innkeep keeps its data
-  in one SQLite file and syncs calendars from a timer inside the server; those
-  hosts have no lasting disk and no process that stays awake. Vercel is fine
-  for the public landing page only (`LANDING_ONLY=1`).
-- **No separate database.** The SQLite file is the database. For two people
-  and a few properties it is faster and simpler than a database server, and a
-  backup is a copy of one file.
+|                       | Vercel and Turso                      | Your own server (Docker)       |
+| --------------------- | ------------------------------------- | ------------------------------ |
+| Cost                  | Free plans are enough for a household | A few euros a month, or a Pi   |
+| Upkeep                | None: updates deploy on every push    | You update and back up         |
+| Database              | Turso, a hosted SQLite                | A SQLite file on a volume      |
+| Sync and messages     | A scheduler calls Innkeep             | A timer inside Innkeep         |
+| HTTPS, public address | Included                              | Your reverse proxy or a tunnel |
 
-## Start it
+## Option 1: Vercel and Turso
+
+1. **Database.** On [turso.tech](https://turso.tech) create a database in a
+   region near you, then a token for it. Innkeep creates its tables on the
+   first request. To bring an existing `data/innkeep.db` along, upload that
+   file when you create the database instead of starting empty.
+2. **Project.** Import the repository on [vercel.com](https://vercel.com) and
+   set its function region to the one closest to the database.
+3. **Environment variables**, in the Vercel project's settings:
+
+   | Variable             | Value                                                 |
+   | -------------------- | ----------------------------------------------------- |
+   | `TURSO_DATABASE_URL` | The database address, `libsql://…`                    |
+   | `TURSO_AUTH_TOKEN`   | The database token                                    |
+   | `APP_PASSWORD`       | A long sentence only the two of you know              |
+   | `CRON_SECRET`        | A long random value                                   |
+   | `TELEGRAM_…`         | See [Telegram notifications](#telegram-notifications) |
+
+4. **Deploy**, open the address and sign in.
+
+### The scheduler
+
+Vercel keeps no process awake, so something has to ask Innkeep to sync the
+calendars and send the Telegram messages: a `GET /api/cron` with the header
+`Authorization: Bearer <CRON_SECRET>`.
+
+- `vercel.json` already asks Vercel to do it **once a day**, which is all the
+  free plan allows. On a paid plan, change the schedule there to
+  `*/15 * * * *` and nothing else is needed.
+- For every 15 minutes on the free plan, this repository has a GitHub Actions
+  workflow, [sync.yml](../.github/workflows/sync.yml). In the repository's
+  settings, under _Secrets and variables_ then _Actions_, add the variable
+  `INNKEEP_URL` (your address) and the secret `CRON_SECRET` (the same value as
+  on Vercel). GitHub may run it a few minutes late, and pauses schedules in a
+  repository with no activity for 60 days. Any other scheduler that can send
+  the header works as well.
+
+Opening Innkeep also syncs calendars that are out of date, whatever the
+scheduler does.
+
+## Option 2: Your own server
+
+It needs a small machine that stays on, with Docker and a disk that survives
+restarts: a €4 to €6 a month virtual server, Fly.io, Railway, or a Raspberry
+Pi at home. 512 MB of memory is enough. There is no database to set up: the
+SQLite file is the database, and a backup is a copy of one file.
 
 ```bash
 docker build -t innkeep .
@@ -39,7 +81,9 @@ docker run -d --name innkeep --restart unless-stopped \
 - The volume mounted at `/data` holds the database. Without it, every update
   starts from empty.
 - Put it behind HTTPS. Fly.io and Railway do that for you; on your own server
-  use a reverse proxy such as Caddy, which gets a certificate by itself.
+  use a reverse proxy such as Caddy, which gets a certificate by itself. Airbnb
+  and Booking.com must be able to reach the calendar links, so a private
+  network alone is not enough.
 - Add `EXTENSION_TOKEN` if you use the browser extension, and enter the
   public address in the extension's settings.
 
@@ -74,14 +118,16 @@ cleaning is no longer needed.
 4. Restart Innkeep with the two variables, open **Settings** and press
    **Send a test message**.
 
-Messages go out after each calendar sync, every 15 minutes by default. The
-first run tells you about every cleaning already planned, in one message.
+Messages go out after each calendar sync: every 15 minutes on your own
+server, or each time the scheduler calls on Vercel. The first run tells you about every cleaning already planned, in one message.
 
 ## Backups and updates
 
-Back up by copying the volume's `innkeep.db` (with its `-wal` file if there is
-one) while Innkeep is stopped, or with `sqlite3 innkeep.db ".backup copy.db"`
-while it runs.
+On Vercel, updates deploy when you push, and the database upgrades itself on
+the next request. Turso's free plan can restore the last day only, so export
+a copy now and then with `turso db shell <name> .dump > backup.sql`.
 
-To update: pull the code, build the image again, remove the container and run
-it again with the same volume. The database upgrades itself on start.
+On your own server, back up by copying the volume's `innkeep.db` (with its
+`-wal` file if there is one) while Innkeep is stopped. To update: pull the
+code, build the image again, remove the container and run it again with the
+same volume.

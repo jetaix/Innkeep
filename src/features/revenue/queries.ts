@@ -5,19 +5,19 @@ import { getProperties, getStays } from "@/features/reservations/queries";
 import { today } from "@/lib/dates";
 import { addMonths, monthOf, monthStart, summariseMonth, type Month } from "./compute";
 
-export function getCharges() {
-  return getDb().select().from(charges).orderBy(asc(charges.createdAt)).all();
+export async function getCharges() {
+  return await getDb().select().from(charges).orderBy(asc(charges.createdAt)).all();
 }
 
 /** Monthly summaries from `monthsBack` months ago to `monthsAhead` months ahead. */
-export function getRevenue({ monthsBack = 1, monthsAhead = 4 } = {}) {
-  const properties = getProperties();
-  const allCharges = getCharges();
+export async function getRevenue({ monthsBack = 1, monthsAhead = 4 } = {}) {
+  const properties = await getProperties();
+  const allCharges = await getCharges();
   const current = monthOf(today());
   const first = addMonths(current, -monthsBack);
   const months: Month[] = Array.from({ length: monthsBack + monthsAhead + 1 }, (_, i) => addMonths(first, i));
 
-  const guestStays = getStays(monthStart(first)).filter((stay) => stay.kind === "reservation");
+  const guestStays = (await getStays(monthStart(first))).filter((stay) => stay.kind === "reservation");
   const summaries = months.map((month) => summariseMonth(month, guestStays, allCharges, properties));
 
   return {

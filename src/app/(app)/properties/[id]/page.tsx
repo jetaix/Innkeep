@@ -44,10 +44,10 @@ async function PropertyDetail({ params }: Pick<PageProps<"/properties/[id]">, "p
   const id = Number((await params).id);
   const db = getDb();
   const property = Number.isInteger(id)
-    ? db.select().from(properties).where(eq(properties.id, id)).get()
+    ? await db.select().from(properties).where(eq(properties.id, id)).get()
     : undefined;
   if (!property) notFound();
-  const propertyListings = db.select().from(listings).where(eq(listings.propertyId, id)).all();
+  const propertyListings = await db.select().from(listings).where(eq(listings.propertyId, id)).all();
 
   const requestHeaders = await headers();
   const origin =
@@ -405,7 +405,7 @@ async function SyncStatus({ listing }: { listing: Listing | undefined }) {
  * every photo, the policies. Reference only, in the host's own language.
  */
 async function AdminPages({ adapter, listing }: { adapter: ChannelAdapter; listing: Listing }) {
-  const pages = getPages(listing.id);
+  const pages = await getPages(listing.id);
   if (pages.length === 0) return null;
   const { m, fmt } = await getI18n();
   const t = m.properties.adminPages;

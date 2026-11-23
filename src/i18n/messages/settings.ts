@@ -15,6 +15,7 @@ const en = {
       name: "Calendar sync",
       every: (minutes: number) => `Every ${minutes} minute${minutes === 1 ? "" : "s"}`,
       manual: "Manual only",
+      scheduled: "When the scheduler calls",
       body: "Imports every connected Airbnb and Booking.com calendar in the background.",
     },
     ai: {
@@ -83,6 +84,7 @@ const fr: typeof en = {
       name: "Synchronisation des calendriers",
       every: (minutes) => (minutes > 1 ? `Toutes les ${minutes} minutes` : "Toutes les minutes"),
       manual: "Manuelle uniquement",
+      scheduled: "À chaque appel du planificateur",
       body: "Importe en arrière-plan tous les calendriers Airbnb et Booking.com connectés.",
     },
     ai: {

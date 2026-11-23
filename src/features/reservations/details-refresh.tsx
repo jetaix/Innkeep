@@ -15,7 +15,7 @@ import { reservationLinks } from "./platform-links";
 export async function DetailsRefresh() {
   if (!process.env.EXTENSION_TOKEN) return null;
 
-  const links = reservationLinks();
+  const links = await reservationLinks();
   if (links.length === 0) return null;
   const { m } = await getI18n();
   const t = m.reservations.refresh;

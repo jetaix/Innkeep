@@ -16,37 +16,40 @@ const listing = {
 };
 
 describe("ingestListing", () => {
-  it("creates the property from a listing it has not seen", () => {
-    const result = ingestListing(listing);
+  it("creates the property from a listing it has not seen", async () => {
+    const result = await ingestListing(listing);
     expect(result.status).toBe("created");
-    const property = getDb().select().from(properties).all()[0];
+    const property = (await getDb().select().from(properties).all())[0];
     expect(property).toMatchObject({ name: "Sea view flat", title: listing.title, maxGuests: 2 });
-    expect(getDb().select().from(listings).all()[0]).toMatchObject({
+    expect((await getDb().select().from(listings).all())[0]).toMatchObject({
       channel: "airbnb",
       externalId: listing.listingId,
       listingUrl: listing.listingUrl,
     });
   });
 
-  it("leaves a known listing untouched, even if the host renamed the property here", () => {
-    getDb().update(properties).set({ name: "My flat", maxGuests: 3 }).run();
-    const result = ingestListing({ ...listing, title: "Changed on Airbnb", maxGuests: 4 });
+  it("leaves a known listing untouched, even if the host renamed the property here", async () => {
+    await getDb().update(properties).set({ name: "My flat", maxGuests: 3 }).run();
+    const result = await ingestListing({ ...listing, title: "Changed on Airbnb", maxGuests: 4 });
     expect(result.status).toBe("known");
-    expect(getDb().select().from(properties).all()).toHaveLength(1);
-    expect(getDb().select().from(properties).all()[0]).toMatchObject({ name: "My flat", maxGuests: 3 });
+    expect(await getDb().select().from(properties).all()).toHaveLength(1);
+    expect((await getDb().select().from(properties).all())[0]).toMatchObject({
+      name: "My flat",
+      maxGuests: 3,
+    });
   });
 
-  it("links the same property when it is also listed on the other channel under the same title", () => {
-    const result = ingestListing({ ...listing, source: "booking", listingId: "14170000" });
+  it("links the same property when it is also listed on the other channel under the same title", async () => {
+    const result = await ingestListing({ ...listing, source: "booking", listingId: "14170000" });
     expect(result.status).toBe("linked");
-    expect(getDb().select().from(properties).all()).toHaveLength(1);
-    expect(getDb().select().from(listings).all()).toHaveLength(2);
+    expect(await getDb().select().from(properties).all()).toHaveLength(1);
+    expect(await getDb().select().from(listings).all()).toHaveLength(2);
   });
 
-  it("fills in what the host has not set, and keeps the editor's cards", () => {
+  it("fills in what the host has not set, and keeps the editor's cards", async () => {
     const db = getDb();
-    db.update(properties).set({ checkOutTime: "12:00" }).run();
-    const result = ingestListing({
+    await db.update(properties).set({ checkOutTime: "12:00" }).run();
+    const result = await ingestListing({
       source: "airbnb",
       listingId: listing.listingId,
       listingUrl: listing.listingUrl,
@@ -58,7 +61,7 @@ describe("ingestListing", () => {
       details: { pricing: ["Pricing", "55 € – 300 € per night"] },
     });
     expect(result.status).toBe("updated");
-    expect(db.select().from(properties).all()[0]).toMatchObject({
+    expect((await db.select().from(properties).all())[0]).toMatchObject({
       name: "My flat",
       maxGuests: 3,
       description: "Quiet flat near the harbour.",
@@ -70,26 +73,26 @@ describe("ingestListing", () => {
     });
 
     // A later visit to another editor tab adds cards and leaves the first ones.
-    ingestListing({
+    await ingestListing({
       source: "airbnb",
       listingId: listing.listingId,
       listingUrl: listing.listingUrl,
       details: { "house-rules": ["House rules", "No pets"] },
     });
-    const stored = db.select().from(listings).where(eq(listings.channel, "airbnb")).get()!;
+    const stored = (await db.select().from(listings).where(eq(listings.channel, "airbnb")).get())!;
     expect(JSON.parse(stored.channelDetails!)).toEqual({
       pricing: ["Pricing", "55 € – 300 € per night"],
       "house-rules": ["House rules", "No pets"],
     });
   });
 
-  it("asks for the details tab when it meets an unknown listing without a title", () => {
-    const result = ingestListing({
+  it("asks for the details tab when it meets an unknown listing without a title", async () => {
+    const result = await ingestListing({
       source: "airbnb",
       listingId: "1400000000000000099",
       listingUrl: "https://www.airbnb.com/rooms/1400000000000000099",
     });
     expect(result.status).toBe("unknown");
-    expect(getDb().select().from(properties).all()).toHaveLength(1);
+    expect(await getDb().select().from(properties).all()).toHaveLength(1);
   });
 });

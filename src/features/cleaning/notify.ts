@@ -29,11 +29,11 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
   scope.__innkeepNotifying = true;
   try {
     const db = getDb();
-    const { today, properties, schedule } = getCleaning();
+    const { today, properties, schedule } = await getCleaning();
     const { needed, cancelled } = cleaningNotices({
       today,
       schedule,
-      records: db.select().from(cleanings).all(),
+      records: await db.select().from(cleanings).all(),
     });
     if (needed.length + cancelled.length === 0) return { needed: 0, cancelled: 0 };
 
@@ -66,15 +66,17 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
     await sendTelegram(blocks.join("\n\n"));
 
     const now = Date.now();
-    db.transaction((tx) => {
+    await db.transaction(async (tx) => {
       for (const entry of needed) {
-        tx.insert(cleanings)
+        await tx
+          .insert(cleanings)
           .values({ propertyId: entry.propertyId, date: entry.date, notifiedAt: now })
           .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: { notifiedAt: now } })
           .run();
       }
       for (const record of cancelled) {
-        tx.update(cleanings)
+        await tx
+          .update(cleanings)
           .set({ notifiedAt: null })
           .where(and(eq(cleanings.propertyId, record.propertyId), eq(cleanings.date, record.date)))
           .run();

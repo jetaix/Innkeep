@@ -45,6 +45,8 @@ async function Settings() {
     `${requestHeaders.get("x-forwarded-proto") ?? "http"}://${requestHeaders.get("host")}`;
 
   const interval = Number(process.env.SYNC_INTERVAL_MINUTES ?? 15);
+  // On a serverless host a scheduler calls /api/cron; there is no timer to show.
+  const hosted = Boolean(process.env.VERCEL);
   const mcpOn = Boolean(process.env.MCP_TOKEN);
   const mcpConfig = JSON.stringify(
     {
@@ -84,16 +86,16 @@ async function Settings() {
           <ul className="divide-y divide-line">
             <Integration
               name={i.sync.name}
-              on={interval > 0}
-              status={interval > 0 ? i.sync.every(interval) : i.sync.manual}
-              variable="SYNC_INTERVAL_MINUTES"
+              on={hosted ? Boolean(process.env.CRON_SECRET) : interval > 0}
+              status={hosted ? i.sync.scheduled : interval > 0 ? i.sync.every(interval) : i.sync.manual}
+              variable={hosted ? "CRON_SECRET" : "SYNC_INTERVAL_MINUTES"}
             >
               {i.sync.body}
             </Integration>
             <Integration
               name={i.ai.name}
-              on={aiConfigured()}
-              status={aiConfigured() ? AI_MODEL : i.off}
+              on={await aiConfigured()}
+              status={(await aiConfigured()) ? AI_MODEL : i.off}
               variable="ANTHROPIC_API_KEY"
             >
               {i.ai.body}

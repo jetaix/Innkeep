@@ -11,13 +11,10 @@ const HISTORY_DAYS = 400;
  * The host's own reservations page on each connected platform, opened on the
  * view that lists the most: finished stays as well as upcoming ones.
  */
-export function reservationLinks(): PlatformLink[] {
+export async function reservationLinks(): Promise<PlatformLink[]> {
   const now = today();
   return (
-    getDb()
-      .select()
-      .from(listings)
-      .all()
+    (await getDb().select().from(listings).all())
       .flatMap((listing): PlatformLink[] => {
         if (listing.channel === "airbnb") {
           // Stay on the Airbnb domain the host uses (airbnb.fr, airbnb.co.uk…). The
@@ -52,11 +49,8 @@ export function reservationLinks(): PlatformLink[] {
  * The host's own calendar on each connected platform, where the price of
  * every night is shown. Needs the platform's id for the listing.
  */
-export function calendarLinks(propertyId: number): PlatformLink[] {
-  return getDb()
-    .select()
-    .from(listings)
-    .all()
+export async function calendarLinks(propertyId: number): Promise<PlatformLink[]> {
+  return (await getDb().select().from(listings).all())
     .filter((listing) => listing.propertyId === propertyId && listing.externalId)
     .map((listing) => {
       const origin = URL.canParse(listing.listingUrl)
@@ -75,14 +69,14 @@ export function calendarLinks(propertyId: number): PlatformLink[] {
  * sees it. Airbnb needs the listing's id; Booking.com needs the listing page
  * address saved on the property page.
  */
-export function guestViewLinks(
+export async function guestViewLinks(
   propertyId: number,
   checkIn: string,
   checkOut: string,
   adults: number,
-): Partial<Record<OtaChannel, string>> {
+): Promise<Partial<Record<OtaChannel, string>>> {
   const links: Partial<Record<OtaChannel, string>> = {};
-  for (const listing of getDb().select().from(listings).all()) {
+  for (const listing of await getDb().select().from(listings).all()) {
     if (listing.propertyId !== propertyId) continue;
     const url = URL.canParse(listing.listingUrl) ? new URL(listing.listingUrl) : null;
     if (listing.channel === "airbnb" && listing.externalId) {
@@ -108,9 +102,9 @@ export function guestViewLinks(
 }
 
 /** The public page of a property on each platform, with no dates: the listing itself. */
-export function publicPageLinks(propertyId: number): Partial<Record<OtaChannel, string>> {
+export async function publicPageLinks(propertyId: number): Promise<Partial<Record<OtaChannel, string>>> {
   const links: Partial<Record<OtaChannel, string>> = {};
-  for (const listing of getDb().select().from(listings).all()) {
+  for (const listing of await getDb().select().from(listings).all()) {
     if (listing.propertyId !== propertyId) continue;
     const url = URL.canParse(listing.listingUrl) ? new URL(listing.listingUrl) : null;
     if (listing.channel === "airbnb" && listing.externalId) {
@@ -128,8 +122,8 @@ export function publicPageLinks(propertyId: number): Partial<Record<OtaChannel, 
 }
 
 /** The public page of a property on each platform, opened on its list of reviews. */
-export function reviewPageLinks(propertyId: number): Partial<Record<OtaChannel, string>> {
-  const pages = publicPageLinks(propertyId);
+export async function reviewPageLinks(propertyId: number): Promise<Partial<Record<OtaChannel, string>>> {
+  const pages = await publicPageLinks(propertyId);
   return {
     ...(pages.airbnb ? { airbnb: `${pages.airbnb}/reviews` } : {}),
     // The query part makes this a different address from the listing itself, so a

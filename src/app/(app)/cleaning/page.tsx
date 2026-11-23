@@ -44,7 +44,7 @@ async function CleaningView() {
   await connection();
   const { m, fmt } = await getI18n();
   const t = m.cleaning;
-  const { today, properties, cleaners, assignments, schedule } = getCleaning();
+  const { today, properties, cleaners, assignments, schedule } = await getCleaning();
   if (properties.length === 0) return <EmptyState title={t.noProperty.title}>{t.noProperty.body}</EmptyState>;
 
   const names = new Map(properties.map((property) => [property.id, property]));

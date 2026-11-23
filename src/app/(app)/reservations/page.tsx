@@ -38,12 +38,12 @@ async function Reservations() {
   const { m, fmt } = await getI18n();
   const t = m.reservations;
   const now = today();
-  const properties = getProperties();
-  const stays = getStays(now);
+  const properties = await getProperties();
+  const stays = await getStays(now);
   const guests = stays.filter((stay) => stay.kind === "reservation");
   const conflicts = findConflicts(stays);
   // Finished stays, most recent first. Calendar links drop them; the extension brings them in.
-  const past = getStays(addDays(now, -365), now)
+  const past = (await getStays(addDays(now, -365), now))
     .filter((stay) => stay.kind === "reservation" && stay.checkOut <= now)
     .reverse();
 

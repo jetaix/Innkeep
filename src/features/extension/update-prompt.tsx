@@ -24,16 +24,16 @@ import { getExtensionStatus } from "./status";
  */
 export async function UpdatePrompt() {
   await connection();
-  const extension = getExtensionStatus();
+  const extension = await getExtensionStatus();
   // Without the extension the links would do nothing; the setup button covers that case.
   if (extension.state === "off" || extension.state === "missing") return null;
 
-  const old = olderThanADay(getDataSources());
+  const old = olderThanADay(await getDataSources());
   if (old.length === 0) return null;
 
   const { m, fmt } = await getI18n();
   const t = m.extension.prompt;
-  const properties = getProperties();
+  const properties = await getProperties();
   // "Reservations only" helps only when reservations are among what is old.
   const reservationsOld = old.some((source) => source.kind === "reservations");
 

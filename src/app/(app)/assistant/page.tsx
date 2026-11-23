@@ -58,28 +58,31 @@ async function Assistant() {
   await connection();
   const { m, fmt } = await getI18n();
   const t = m.assistant;
-  const key = getKeyStatus();
-  const connected = aiConfigured();
-  const stored = getAdvice();
+  const key = await getKeyStatus();
+  const connected = await aiConfigured();
+  const stored = await getAdvice();
 
   // How much real data the model would get today, so thin advice is no surprise.
   const db = getDb();
   const now = today();
   const realStays =
-    db
-      .select({ total: count() })
-      .from(reservations)
-      .where(
-        and(
-          eq(reservations.kind, "reservation"),
-          eq(reservations.status, "confirmed"),
-          lte(reservations.checkOut, now),
-          gte(reservations.amount, 1),
-        ),
-      )
-      .get()?.total ?? 0;
+    (
+      await db
+        .select({ total: count() })
+        .from(reservations)
+        .where(
+          and(
+            eq(reservations.kind, "reservation"),
+            eq(reservations.status, "confirmed"),
+            lte(reservations.checkOut, now),
+            gte(reservations.amount, 1),
+          ),
+        )
+        .get()
+    )?.total ?? 0;
   const freePrices =
-    db.select({ total: count() }).from(nightlyPrices).where(gte(nightlyPrices.date, now)).get()?.total ?? 0;
+    (await db.select({ total: count() }).from(nightlyPrices).where(gte(nightlyPrices.date, now)).get())
+      ?.total ?? 0;
 
   return (
     <div className="max-w-3xl space-y-6">

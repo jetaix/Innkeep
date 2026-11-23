@@ -32,7 +32,9 @@ export async function createProperty(form: FormData) {
   const parsed = parseForm(z.object({ name: text.min(1) }), form);
   if (!parsed.success) return;
   const { name } = parsed.data;
-  const row = getDb()
+  const row = await (
+    await getDb()
+  )
     .insert(properties)
     .values({ name, title: name, icalToken: newToken(), createdAt: Date.now() })
     .returning({ id: properties.id })
@@ -43,12 +45,12 @@ export async function createProperty(form: FormData) {
 export async function updateProperty(id: number, form: FormData) {
   const parsed = parseForm(propertyDetails, form);
   if (!parsed.success) return;
-  getDb().update(properties).set(parsed.data).where(eq(properties.id, id)).run();
+  await getDb().update(properties).set(parsed.data).where(eq(properties.id, id)).run();
   refresh();
 }
 
 export async function deleteProperty(id: number) {
-  getDb().delete(properties).where(eq(properties.id, id)).run();
+  await getDb().delete(properties).where(eq(properties.id, id)).run();
   redirect("/properties");
 }
 
@@ -64,7 +66,9 @@ export async function saveListing(propertyId: number, channel: string, form: For
   const parsed = parseForm(listingSettings, form);
   if (!parsedChannel.success || !parsed.success) return;
 
-  const row = getDb()
+  const row = await (
+    await getDb()
+  )
     .insert(listings)
     .values({ propertyId, channel: parsedChannel.data, ...parsed.data })
     .onConflictDoUpdate({ target: [listings.propertyId, listings.channel], set: parsed.data })
@@ -89,7 +93,7 @@ const STALE_AFTER_MS = 10 * 60_000;
  * Returns whether anything was refreshed.
  */
 export async function syncIfStale(): Promise<boolean> {
-  const feeds = getDb().select().from(listings).where(ne(listings.icalUrl, "")).all();
+  const feeds = await getDb().select().from(listings).where(ne(listings.icalUrl, "")).all();
   if (feeds.length === 0) return false;
   const newest = Math.max(...feeds.map((feed) => feed.lastSyncedAt ?? 0));
   if (Date.now() - newest < STALE_AFTER_MS) return false;
@@ -109,14 +113,15 @@ export async function syncAllAction() {
  */
 export async function markPublished(listingId: number) {
   const db = getDb();
-  const listing = db.select().from(listings).where(eq(listings.id, listingId)).get();
+  const listing = await db.select().from(listings).where(eq(listings.id, listingId)).get();
   if (!listing) return;
-  const property = db.select().from(properties).where(eq(properties.id, listing.propertyId)).get();
+  const property = await db.select().from(properties).where(eq(properties.id, listing.propertyId)).get();
   if (!property) return;
 
   const content = effectiveContent(property, listing);
   await CHANNELS[listing.channel].pushContent?.(listing.listingUrl, content);
-  db.update(listings)
+  await db
+    .update(listings)
     .set({ publishedHash: contentHash(content), publishedAt: Date.now() })
     .where(eq(listings.id, listingId))
     .run();
@@ -129,6 +134,6 @@ export async function loadDemoData() {
 }
 
 export async function removeSampleDataAction() {
-  removeSampleData();
+  await removeSampleData();
   redirect("/overview");
 }

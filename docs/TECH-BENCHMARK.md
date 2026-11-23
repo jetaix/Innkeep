@@ -10,7 +10,7 @@ minutes and a contributor can understand in an afternoon.
 | ---------------- | ------------------------------------ | -------------------------------- | ----------------------------------------------------------------------------------- |
 | App framework    | **Next.js 16 (App Router)**          | Vite + React SPA with a Hono API | One codebase and one process for UI, API routes, server actions and background sync |
 | Language         | **TypeScript**                       | —                                | Shared types from database to UI                                                    |
-| Database         | **SQLite** (better-sqlite3)          | PostgreSQL                       | Zero setup; a host's data is a few thousand rows                                    |
+| Database         | **SQLite** (libSQL, file or Turso)   | PostgreSQL                       | Zero setup; a host's data is a few thousand rows                                    |
 | ORM              | **Drizzle**                          | Prisma                           | SQL-shaped, no codegen step, no engine binary, portable to Postgres later           |
 | Styling          | **Tailwind CSS 4**                   | CSS modules                      | Fast to write, no component library lock-in                                         |
 | Calendar UI      | **Custom CSS timeline**              | FullCalendar                     | The multi-property timeline is FullCalendar's paid tier; ours is ~100 lines         |

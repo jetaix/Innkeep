@@ -10,7 +10,7 @@ import { getExtensionStatus } from "./status";
  */
 export async function ExtensionSetupButton() {
   await connection();
-  const { state } = getExtensionStatus();
+  const { state } = await getExtensionStatus();
   if (state === "ready") return null;
   const t = (await getI18n()).m.extension.button;
 

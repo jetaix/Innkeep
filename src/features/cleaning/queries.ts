@@ -9,18 +9,18 @@ import { buildSchedule } from "./compute";
 export const AHEAD_DAYS = 120;
 const BEHIND_DAYS = 3;
 
-export function getCleaning() {
+export async function getCleaning() {
   const db = getDb();
   const now = today();
-  const properties = getProperties();
-  const allCleaners = db.select().from(cleaners).orderBy(asc(cleaners.name)).all();
-  const assignments = db.select().from(cleanerAssignments).all();
+  const properties = await getProperties();
+  const allCleaners = await db.select().from(cleaners).orderBy(asc(cleaners.name)).all();
+  const assignments = await db.select().from(cleanerAssignments).all();
   const schedule = buildSchedule({
     from: addDays(now, -BEHIND_DAYS),
     days: AHEAD_DAYS + BEHIND_DAYS,
     properties,
-    stays: db.select().from(reservations).all(),
-    records: db.select().from(cleanings).all(),
+    stays: await db.select().from(reservations).all(),
+    records: await db.select().from(cleanings).all(),
     cleaners: allCleaners,
     assignments,
   });

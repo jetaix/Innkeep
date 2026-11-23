@@ -27,7 +27,9 @@ export async function addCharge(form: FormData) {
   const amount = parseMoney(parsed.data.amount);
   if (amount == null || amount <= 0) return;
 
-  getDb()
+  await (
+    await getDb()
+  )
     .insert(charges)
     .values({ ...parsed.data, amount, createdAt: Date.now() })
     .run();
@@ -35,6 +37,6 @@ export async function addCharge(form: FormData) {
 }
 
 export async function deleteCharge(id: number) {
-  getDb().delete(charges).where(eq(charges.id, id)).run();
+  await getDb().delete(charges).where(eq(charges.id, id)).run();
   refresh();
 }

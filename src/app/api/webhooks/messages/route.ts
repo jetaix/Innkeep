@@ -37,27 +37,30 @@ export async function POST(request: Request) {
   }
 
   const db = getDb();
-  if (!db.select({ id: properties.id }).from(properties).where(eq(properties.id, propertyId)).get()) {
+  if (!(await db.select({ id: properties.id }).from(properties).where(eq(properties.id, propertyId)).get())) {
     return Response.json({ error: "Unknown propertyId" }, { status: 404 });
   }
 
   // Without a thread id, one conversation per guest and property.
   const threadId = String(payload?.threadId ?? `${propertyId}:${guestName.toLowerCase()}`);
-  const conversationId = db.transaction((tx) => {
-    const existing = tx
+  const conversationId = await db.transaction(async (tx) => {
+    const existing = await tx
       .select({ id: conversations.id })
       .from(conversations)
       .where(and(eq(conversations.source, source), eq(conversations.externalThreadId, threadId)))
       .get();
     const id =
       existing?.id ??
-      tx
-        .insert(conversations)
-        .values({ propertyId, source, guestName, externalThreadId: threadId, lastMessageAt: sentAt })
-        .returning({ id: conversations.id })
-        .get().id;
-    tx.insert(messages).values({ conversationId: id, direction: "in", body, sentAt }).run();
-    tx.update(conversations)
+      (
+        await tx
+          .insert(conversations)
+          .values({ propertyId, source, guestName, externalThreadId: threadId, lastMessageAt: sentAt })
+          .returning({ id: conversations.id })
+          .get()
+      ).id;
+    await tx.insert(messages).values({ conversationId: id, direction: "in", body, sentAt }).run();
+    await tx
+      .update(conversations)
       .set({ unread: sql`${conversations.unread} + 1`, lastMessageAt: sentAt })
       .where(eq(conversations.id, id))
       .run();

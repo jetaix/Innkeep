@@ -3,7 +3,7 @@
 FROM node:22-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-# No install scripts: better-sqlite3 ships its compiled binary, so nothing has to be built here.
+# No install scripts: the database driver ships its compiled binary, so nothing has to be built here.
 RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY . .
 RUN npm run build && npm prune --omit=dev --ignore-scripts
