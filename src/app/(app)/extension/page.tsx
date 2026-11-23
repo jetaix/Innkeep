@@ -130,6 +130,7 @@ async function Guide() {
                 href="/extension/start?scope=all"
                 target="_blank"
                 className={buttonClass({ size: "sm", variant: "primary" })}
+                rel="noopener"
               >
                 {t.prompt.refresh.everything}
                 <span className="sr-only">{m.common.actions.newTab}</span>
@@ -138,6 +139,7 @@ async function Guide() {
                 href="/extension/start?scope=reservations"
                 target="_blank"
                 className={buttonClass({ size: "sm" })}
+                rel="noopener"
               >
                 {t.prompt.refresh.reservations}
                 <span className="sr-only">{m.common.actions.newTab}</span>

@@ -27,9 +27,7 @@ export async function addCharge(form: FormData) {
   const amount = parseMoney(parsed.data.amount);
   if (amount == null || amount <= 0) return;
 
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(charges)
     .values({ ...parsed.data, amount, createdAt: Date.now() })
     .run();

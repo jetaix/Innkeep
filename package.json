@@ -7,12 +7,12 @@
     "start": "next start",
     "app": "node scripts/start.mjs",
     "package:extension": "node scripts/package-extension.mjs",
-    "lint": "eslint",
+    "lint": "biome lint .",
     "test": "vitest run",
-    "typecheck": "next typegen && tsc --noEmit",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "typecheck": "next typegen && tsc --noEmit && bun scripts/check-awaits.ts",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check . && bun run typecheck && bun run test && bun run build",
     "prepare": "node scripts/hooks.mjs"
   },
   "dependencies": {
@@ -31,14 +31,11 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.8",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^26.6.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.6",
-    "prettier": "^3.10.1",
-    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^5",
@@ -49,5 +46,6 @@
   "description": "Open-source, self-hosted channel manager for hosts with one or two rentals",
   "engines": {
     "node": ">=22"
-  }
+  },
+  "packageManager": "bun@1.4.4"
 }

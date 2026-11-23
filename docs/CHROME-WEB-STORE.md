@@ -7,7 +7,7 @@ same review as a public extension.
 Everything to paste is below. Build the file to upload with:
 
 ```bash
-npm run package:extension
+bun run package:extension
 ```
 
 It writes `dist/innkeep-companion-<version>.zip`.
@@ -141,7 +141,7 @@ The only network requests the extension makes go to the address saved in step 3 
   steps. They still open **Settings** in the extension to paste their Innkeep
   address and token.
 - To publish an update: raise `version` in `extension/manifest.json`, run
-  `npm run package:extension`, upload the new zip under **Package**, and
+  `bun run package:extension`, upload the new zip under **Package**, and
   submit. Installed copies update by themselves within a day or so.
 - If the review asks for changes, answer in the dashboard; rejections name
   the policy concerned.

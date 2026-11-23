@@ -32,9 +32,7 @@ export async function createProperty(form: FormData) {
   const parsed = parseForm(z.object({ name: text.min(1) }), form);
   if (!parsed.success) return;
   const { name } = parsed.data;
-  const row = await (
-    await getDb()
-  )
+  const row = await (await getDb())
     .insert(properties)
     .values({ name, title: name, icalToken: newToken(), createdAt: Date.now() })
     .returning({ id: properties.id })
@@ -66,9 +64,7 @@ export async function saveListing(propertyId: number, channel: string, form: For
   const parsed = parseForm(listingSettings, form);
   if (!parsedChannel.success || !parsed.success) return;
 
-  const row = await (
-    await getDb()
-  )
+  const row = await (await getDb())
     .insert(listings)
     .values({ propertyId, channel: parsedChannel.data, ...parsed.data })
     .onConflictDoUpdate({ target: [listings.propertyId, listings.channel], set: parsed.data })

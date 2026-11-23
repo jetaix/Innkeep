@@ -23,7 +23,7 @@ export function ConnectForm() {
           autoComplete="off"
           spellCheck={false}
           placeholder="sk-ant-…"
-          className="font-mono text-xs"
+          className="font-mono md:text-xs"
           aria-describedby={state.error ? "apiKey-error" : undefined}
         />
       </Field>

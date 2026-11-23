@@ -88,7 +88,7 @@ export function CommandMenu({ syncAction }: { syncAction: () => Promise<void> })
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-8 w-full items-center gap-2 rounded-md border border-line bg-bg px-2.5 text-[13px] text-muted transition-colors hover:border-line-strong hover:text-ink"
+        className="flex h-8 w-full items-center gap-2 rounded-md border border-line bg-bg px-2.5 text-[13px] text-muted transition-colors hover:border-line-strong hover:text-ink pointer-coarse:h-10"
       >
         <Search aria-hidden className="size-3.5" />
         <span className="flex-1 text-left">{c.open}</span>
@@ -104,7 +104,7 @@ export function CommandMenu({ syncAction }: { syncAction: () => Promise<void> })
       >
         <Command.Input
           placeholder={c.placeholder}
-          className="h-12 w-full border-b border-line bg-transparent px-4 text-sm outline-none placeholder:text-faint"
+          className="h-12 w-full border-b border-line bg-transparent px-4 text-base outline-none placeholder:text-faint md:text-sm"
         />
         <Command.List className="max-h-[50vh] overflow-y-auto p-1.5">
           <Command.Empty className="px-3 py-6 text-center text-[13px] text-muted">{c.empty}</Command.Empty>

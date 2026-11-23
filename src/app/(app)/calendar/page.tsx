@@ -153,7 +153,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/calendar">, "searchPa
       )}
 
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start">
-        <Card className="min-w-0 flex-1 overflow-x-auto">
+        <Card className="min-w-0 flex-1 relative overflow-x-auto">
           <div style={{ width: NAME_COL + DAYS * CELL }}>
             <div className="flex border-b border-line text-xs text-muted" aria-hidden>
               <div

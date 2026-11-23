@@ -18,5 +18,8 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it describes the folder layout an
 - Money is stored in minor units; use `formatMoney` / `parseMoney`.
 - Use the colour tokens in `src/app/globals.css`. Colour is reserved for booking sources and states.
 - Every control is keyboard reachable and labelled. Page shortcuts use `data-shortcut`.
+- Every page works on a phone (390 px wide): no sideways scrolling of the page, wide tables inside a `relative overflow-x-auto` wrapper, grids start at `grid-cols-1`, form fields at 16 px. Check it before finishing.
 - No user-visible text in components: add it to `src/i18n/messages/<area>.ts` in English and French, read it with `getI18n()` (server) or `useI18n()` (client), and format dates and amounts with `fmt` from the same call.
-- Run `npm run check` before finishing.
+- Use bun for installs and scripts (`bun install`, `bun run <script>`), and Biome for formatting and linting.
+- Tests run with Vitest: `bun run test`, not `bun test`.
+- Run `bun run check` before finishing.

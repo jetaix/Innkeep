@@ -31,9 +31,7 @@ export async function getKeyStatus(): Promise<KeyStatus> {
 }
 
 export async function saveApiKey(key: string) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(appState)
     .values({ key: KEY, value: key })
     .onConflictDoUpdate({ target: appState.key, set: { value: key } })

@@ -1,5 +1,5 @@
 # Never upload a host's data or settings, even if a deploy is started from a working copy.
-data
+/data
 .env*
 !.env.example
 .claude

@@ -63,7 +63,7 @@ async function Settings() {
   );
 
   return (
-    <div className="grid max-w-5xl items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 max-w-5xl items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <div className="space-y-6">
         <Card>
           <div className="border-b border-line px-4 py-3">
@@ -150,7 +150,7 @@ async function Settings() {
                   <span className="text-xs font-medium text-ink">{i.mcp.config}</span>
                   <CopyButton value={mcpConfig} />
                 </span>
-                <pre className="overflow-x-auto rounded-md border border-line bg-subtle p-3 font-mono text-xs leading-relaxed text-ink">
+                <pre className="relative overflow-x-auto rounded-md border border-line bg-subtle p-3 font-mono text-xs leading-relaxed text-ink">
                   {mcpConfig}
                 </pre>
               </span>

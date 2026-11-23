@@ -99,7 +99,7 @@ async function Overview() {
         />
       </dl>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card>
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <SectionTitle>{t.reservations.title}</SectionTitle>

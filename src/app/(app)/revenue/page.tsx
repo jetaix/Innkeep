@@ -44,7 +44,7 @@ async function Revenue() {
   const monthName = (month: string) => formatMonth(month, "long", INTL_LOCALE[locale]);
 
   return (
-    <div className="grid max-w-6xl items-start gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 max-w-6xl items-start gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
       <div className="space-y-6">
         <Card>
           <div className="border-b border-line px-4 py-3">
@@ -59,7 +59,7 @@ async function Revenue() {
             </p>
           </div>
           <MonthChart summaries={summaries} current={current} currency={currency} />
-          <div className="overflow-x-auto border-t border-line">
+          <div className="relative overflow-x-auto border-t border-line">
             <table className="w-full text-left tabular-nums">
               <thead className="text-xs text-muted">
                 <tr>

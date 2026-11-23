@@ -67,9 +67,7 @@ const GUESTS: Record<string, string[]> = {
 /** True while any property still reads from a built-in sample calendar. */
 export async function hasSampleData(): Promise<boolean> {
   return Boolean(
-    await (
-      await getDb()
-    )
+    await (await getDb())
       .select({ id: listings.id })
       .from(listings)
       .where(like(listings.icalUrl, `${DEMO_SCHEME}%`))

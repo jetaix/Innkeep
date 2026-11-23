@@ -246,7 +246,8 @@ const statements = (script: string) =>
 async function migrate(client: Client) {
   await client.execute("CREATE TABLE IF NOT EXISTS innkeep_schema (version INTEGER NOT NULL)");
   let current = (await client.execute("SELECT version FROM innkeep_schema")).rows[0]?.version as
-    number | undefined;
+    | number
+    | undefined;
   if (current == null) {
     const legacy = await client.execute("PRAGMA user_version").catch(() => null);
     current = Number(legacy?.rows[0]?.user_version ?? 0);

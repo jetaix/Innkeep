@@ -60,7 +60,7 @@ imports, so it can move into one unchanged.
 | Hosting                                | Any VPS, Docker volume, Fly, Railway | Anywhere, including serverless |
 | Serverless platforms (Vercel, Netlify) | Not suitable: no persistent disk     | Works                          |
 
-SQLite keeps the "clone, `npm run dev`, done" promise. The trade-off is that
+SQLite keeps the "clone, `bun run dev`, done" promise. The trade-off is that
 Innkeep needs a host with a persistent disk. Drizzle's query code is nearly
 identical for Postgres, so a hosted multi-tenant version would swap the driver
 and schema imports rather than rewrite queries.

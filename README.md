@@ -40,15 +40,15 @@ Requires Node.js 22 or later.
 ```bash
 git clone https://github.com/jetaix/Innkeep
 cd Innkeep
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Open http://localhost:3000/overview and click **Load sample data**, or add your
 first property. Data lives in `data/innkeep.db` (SQLite); there is nothing else
 to set up.
 
-For production: `npm run build && npm start`, behind HTTPS, on a machine with a
+For production: `bun run build && bun run start`, behind HTTPS, on a machine with a
 persistent disk.
 
 ## Features
@@ -234,7 +234,7 @@ was considered instead. [CONTRIBUTING.md](CONTRIBUTING.md) describes how the
 code is organised.
 
 ```bash
-npm run check   # format, lint, types, tests, build
+bun run check   # format, lint, types, tests, build
 ```
 
 ## Roadmap

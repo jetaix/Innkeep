@@ -65,11 +65,21 @@ async function Sources() {
             ))}
           </ul>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <a href="/extension/start?scope=all" target="_blank" className={buttonClass({ variant: "primary" })}>
+            <a
+              href="/extension/start?scope=all"
+              target="_blank"
+              className={buttonClass({ variant: "primary" })}
+              rel="noopener"
+            >
               {m.extension.prompt.refresh.everything}
               <span className="sr-only">{m.common.actions.newTab}</span>
             </a>
-            <a href="/extension/start?scope=reservations" target="_blank" className={buttonClass()}>
+            <a
+              href="/extension/start?scope=reservations"
+              target="_blank"
+              className={buttonClass()}
+              rel="noopener"
+            >
               {m.extension.prompt.refresh.reservations}
               <span className="sr-only">{m.common.actions.newTab}</span>
             </a>
@@ -83,7 +93,7 @@ async function Sources() {
           <div className="border-b border-line px-4 py-3">
             <SectionTitle>{group.title}</SectionTitle>
           </div>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full text-left">
               <thead className="text-xs text-muted">
                 <tr>
@@ -162,7 +172,9 @@ async function SourceRow({ source }: { source: DataSource }) {
         <Badge tone={source.error ? "critical" : STATE_TONE[source.state]}>
           {source.error ? t.state.failed : t.state[source.state]}
         </Badge>
-        {source.error && <span className="mt-1 block max-w-[28ch] text-xs text-critical">{source.error}</span>}
+        {source.error && (
+          <span className="mt-1 block max-w-[28ch] text-xs text-critical">{source.error}</span>
+        )}
       </td>
       <td className="px-4 py-2.5 text-right align-top">
         <SourceAction source={source} platform={platform} />
@@ -197,7 +209,11 @@ async function SourceAction({ source, platform }: { source: DataSource; platform
     case "sync":
       return (
         <form action={syncListingAction.bind(null, action.listingId)} className="inline">
-          <SubmitButton size="sm" variant={source.error ? "primary" : "secondary"} pendingLabel={t.actions.syncing}>
+          <SubmitButton
+            size="sm"
+            variant={source.error ? "primary" : "secondary"}
+            pendingLabel={t.actions.syncing}
+          >
             {t.actions.sync}
           </SubmitButton>
         </form>
@@ -209,7 +225,9 @@ async function SourceAction({ source, platform }: { source: DataSource; platform
         </Link>
       );
     case "popup":
-      return <span className="inline-block max-w-[26ch] text-left text-xs text-muted">{t.actions.popup}</span>;
+      return (
+        <span className="inline-block max-w-[26ch] text-left text-xs text-muted">{t.actions.popup}</span>
+      );
     case "blocked": {
       const blocked = t.blocked[action.reason];
       const href =

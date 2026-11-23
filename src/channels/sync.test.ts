@@ -84,9 +84,7 @@ describe("syncListing", () => {
   });
 
   it("exports to a channel only the stays that channel does not already know", async () => {
-    await (
-      await getDb()
-    )
+    await (await getDb())
       .insert(reservations)
       .values({
         propertyId,

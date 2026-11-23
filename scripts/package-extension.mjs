@@ -2,7 +2,7 @@
 /**
  * Builds the file to upload to the Chrome Web Store:
  * `dist/innkeep-companion-<version>.zip`, holding the extension's files and
- * nothing else (no README, no tests). Run with `npm run package:extension`.
+ * nothing else (no README, no tests). Run with `bun run package:extension`.
  */
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readdirSync, readFileSync, rmSync } from "node:fs";

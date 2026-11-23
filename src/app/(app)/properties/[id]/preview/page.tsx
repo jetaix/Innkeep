@@ -98,7 +98,7 @@ async function Previews({ params }: Pick<PageProps<"/properties/[id]/preview">, 
           {t.back}: {property.name}
         </Link>
       </p>
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         {sides.map((side) => (
           <ListingCard
             key={side.channel}
@@ -249,7 +249,7 @@ async function ListingCard({
               {preview.amenities.length > 0 && (
                 <div>
                   <h4 className="text-[13px] font-semibold">{t.amenities}</h4>
-                  <ul className="mt-1.5 grid gap-x-4 gap-y-1 text-[13px] sm:grid-cols-2">
+                  <ul className="mt-1.5 grid grid-cols-1 gap-x-4 gap-y-1 text-[13px] sm:grid-cols-2">
                     {preview.amenities.map((amenity) => (
                       <li key={amenity}>{amenity}</li>
                     ))}
@@ -296,7 +296,7 @@ async function Photos({ preview }: { preview: Preview }) {
   const photo = (url: string, index: number, width: number) => (
     <div key={url} className="relative min-h-0 overflow-hidden bg-sunken">
       {/* Photos come from the platforms' own image servers, which next/image is not set up for. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers */}
       <img
         src={sized(url, width)}
         alt={t.photoAlt(index + 1, preview.title)}
@@ -386,7 +386,7 @@ async function Comparison({ sides, currency }: { sides: Side[]; currency: string
         <SectionTitle>{t.title}</SectionTitle>
         <p className="mt-0.5 text-xs text-muted">{t.subtitle}</p>
       </div>
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full text-left">
           <thead className="text-xs text-muted">
             <tr>

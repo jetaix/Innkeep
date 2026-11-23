@@ -39,9 +39,10 @@ export async function UpdatePrompt() {
 
   return (
     <DismissForNow>
+      {/* The extension runs in a desktop browser, so a phone is not asked to start it. */}
       <section
         aria-labelledby="update-heading"
-        className="border-b border-line bg-subtle px-4 py-4 md:px-8 print:hidden"
+        className="hidden border-b border-line bg-subtle px-4 py-4 md:block md:px-8 print:hidden"
       >
         <div className="max-w-3xl">
           <h2 id="update-heading" className="font-semibold">
@@ -63,13 +64,19 @@ export async function UpdatePrompt() {
               href="/extension/start?scope=all"
               target="_blank"
               className={buttonClass({ variant: "primary" })}
+              rel="noopener"
             >
               {t.refresh.everything}
               <span className="font-normal opacity-70">{t.refresh.everythingHint}</span>
               <span className="sr-only">{m.common.actions.newTab}</span>
             </a>
             {reservationsOld && (
-              <a href="/extension/start?scope=reservations" target="_blank" className={buttonClass()}>
+              <a
+                href="/extension/start?scope=reservations"
+                target="_blank"
+                className={buttonClass()}
+                rel="noopener"
+              >
                 {t.refresh.reservations}
                 <span className="font-normal text-muted">{t.refresh.reservationsHint}</span>
                 <span className="sr-only">{m.common.actions.newTab}</span>

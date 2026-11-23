@@ -9,9 +9,7 @@ export async function getProperties() {
 
 /** Confirmed stays and blocks that overlap [from, to). Omit `to` for everything still ahead. */
 export async function getStays(from: ISODate, to?: ISODate): Promise<Reservation[]> {
-  return await (
-    await getDb()
-  )
+  return await (await getDb())
     .select()
     .from(reservations)
     .where(

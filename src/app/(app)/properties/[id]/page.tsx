@@ -69,7 +69,7 @@ async function PropertyDetail({ params }: Pick<PageProps<"/properties/[id]">, "p
         </Link>
       </div>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <Card className="p-5">
           <section aria-labelledby="details-heading">
             <SectionTitle id="details-heading">{t.details.heading}</SectionTitle>
@@ -113,7 +113,7 @@ async function DetailsForm({ property }: { property: Property }) {
   const t = m.properties.details;
   return (
     <form action={updateProperty.bind(null, property.id)} className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label={t.name} htmlFor="name">
           <Input id="name" name="name" defaultValue={property.name} required />
         </Field>
@@ -165,7 +165,7 @@ async function DetailsForm({ property }: { property: Property }) {
 function CopyField({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
-      <Input readOnly value={value} aria-label={label} className="font-mono text-xs" />
+      <Input readOnly value={value} aria-label={label} className="font-mono md:text-xs" />
       <CopyButton value={value} />
     </div>
   );
@@ -226,7 +226,7 @@ async function ChannelCard({
               name="icalUrl"
               defaultValue={listing?.icalUrl ?? ""}
               placeholder="https://…ics"
-              className="font-mono text-xs"
+              className="font-mono md:text-xs"
               spellCheck={false}
             />
           </Field>
@@ -368,7 +368,7 @@ async function ChannelFacts({ adapter, listing }: { adapter: ChannelAdapter; lis
         <p className="mt-1 text-xs text-muted">{t.empty}</p>
       ) : (
         <>
-          <dl className="mt-2 grid gap-x-4 gap-y-2 text-xs sm:grid-cols-[minmax(0,10rem)_1fr]">
+          <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 text-xs sm:grid-cols-[minmax(0,10rem)_1fr]">
             {cards.map(([heading, ...values]) => (
               <div key={heading} className="contents">
                 <dt className="text-muted">{heading}</dt>
@@ -434,7 +434,7 @@ async function AdminPages({ adapter, listing }: { adapter: ChannelAdapter; listi
                   <div className="mb-2 grid grid-cols-4 gap-1 sm:grid-cols-6">
                     {page.images.slice(0, 24).map((image) => (
                       // Photos load from the platform's own image servers.
-                      // eslint-disable-next-line @next/next/no-img-element
+                      // biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers
                       <img
                         key={image}
                         src={image}

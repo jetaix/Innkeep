@@ -75,7 +75,7 @@ async function CleaningView() {
     .trim();
 
   return (
-    <div className="grid max-w-6xl items-start gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 max-w-6xl items-start gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <div className="space-y-6">
         <Card className="flex flex-wrap items-center justify-between gap-3 p-4 print:hidden">
           <p className="flex flex-wrap items-center gap-2">
@@ -177,7 +177,10 @@ async function CleaningView() {
               ))}
             </ul>
           )}
-          <form action={addCleaner} className="grid gap-3 border-t border-line p-5 sm:grid-cols-2">
+          <form
+            action={addCleaner}
+            className="grid grid-cols-1 gap-3 border-t border-line p-5 sm:grid-cols-2"
+          >
             <Field label={t.team.name} htmlFor="cleaner-name">
               <Input id="cleaner-name" name="name" required maxLength={80} autoComplete="off" />
             </Field>
@@ -210,7 +213,7 @@ async function CleaningView() {
                     </form>
                   </div>
                   {property.cleaningEnabled ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {([0, 1] as const).map((priority) => {
                         const id = `assign-${property.id}-${priority}`;
                         return (
@@ -347,7 +350,7 @@ async function Row({
         <form
           key={`${entry.notes}-${entry.reassigned ? entry.cleaner?.id : ""}`}
           action={updateCleaning.bind(null, entry.propertyId, entry.date)}
-          className="mt-2 grid max-w-xl gap-3 sm:grid-cols-[1fr_12rem]"
+          className="mt-2 grid grid-cols-1 max-w-xl gap-3 sm:grid-cols-[1fr_12rem]"
         >
           <Field label={t.notes} htmlFor={`notes-${key}`}>
             <Textarea

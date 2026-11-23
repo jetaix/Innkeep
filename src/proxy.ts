@@ -32,6 +32,10 @@ export function proxy(request: NextRequest) {
   if (process.env.LANDING_ONLY !== "1") {
     const password = appPassword();
     if (password) return passwordGate(request, password);
+    // A public host with no password would hand the dashboard to anyone who finds the address.
+    if (process.env.VERCEL && !pathname.startsWith("/api/") && !PUBLIC_FILES.test(pathname)) {
+      return new NextResponse("Innkeep is not configured: set APP_PASSWORD, then redeploy.", { status: 503 });
+    }
     // Nothing to sign in to: the page would only confuse.
     if (pathname === "/login") return NextResponse.redirect(new URL("/overview", request.url), 307);
     return NextResponse.next();

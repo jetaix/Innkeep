@@ -17,9 +17,7 @@ async function upsertCleaning(
   date: string,
   changes: Partial<typeof cleanings.$inferInsert>,
 ) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(cleanings)
     .values({ propertyId, date, ...changes })
     .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: changes })
@@ -29,9 +27,7 @@ async function upsertCleaning(
 export async function addCleaner(form: FormData) {
   const parsed = parseForm(z.object({ name: text.min(1).max(80), phone: text.max(40) }), form);
   if (!parsed.success) return;
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(cleaners)
     .values({ ...parsed.data, createdAt: Date.now() })
     .run();
@@ -64,9 +60,7 @@ export async function assignCleaner(propertyId: number, priority: number, form: 
 }
 
 export async function setCleaningEnabled(propertyId: number, enabled: boolean) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .update(properties)
     .set({ cleaningEnabled: enabled })
     .where(eq(properties.id, propertyId))
@@ -108,9 +102,7 @@ export async function addManualCleaning(form: FormData) {
   const parsed = parseForm(z.object({ ...day.shape, notes: text.max(500) }), form);
   if (!parsed.success) return;
   const { propertyId, date, notes } = parsed.data;
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .insert(cleanings)
     .values({ propertyId, date, notes, manual: true })
     .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: { manual: true, notes } })
@@ -120,9 +112,7 @@ export async function addManualCleaning(form: FormData) {
 
 /** Removes a cleaning the host added by hand. */
 export async function removeManualCleaning(propertyId: number, date: string) {
-  await (
-    await getDb()
-  )
+  await (await getDb())
     .delete(cleanings)
     .where(and(eq(cleanings.propertyId, propertyId), eq(cleanings.date, date), eq(cleanings.manual, true)))
     .run();

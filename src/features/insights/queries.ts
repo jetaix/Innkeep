@@ -45,13 +45,7 @@ async function gatherInput(): Promise<InsightInput> {
     // A day of history keeps today's departures in view for turnover checks.
     stays: await getStays(addDays(now, -1)),
     conversations: lastMessages,
-    chargeCount:
-      (
-        await db
-          .select({ count: sql<number>`count(*)` })
-          .from(charges)
-          .get()
-      )?.count ?? 0,
+    chargeCount: (await db.select({ count: sql<number>`count(*)` }).from(charges).get())?.count ?? 0,
   };
 }
 

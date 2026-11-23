@@ -115,7 +115,7 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
             );
           })}
         </div>
-        <dl className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2">
+        <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2">
           {OTA_CHANNELS.map((channel) => {
             const stats = reviewStats(all, channel);
             const lastSeen = Math.max(
