@@ -506,6 +506,87 @@
     };
   }
 
+  const WEEKDAYS = [
+    ["dimanche", "sunday"],
+    ["lundi", "monday"],
+    ["mardi", "tuesday"],
+    ["mercredi", "wednesday"],
+    ["jeudi", "thursday"],
+    ["vendredi", "friday"],
+    ["samedi", "saturday"],
+  ];
+
+  /**
+   * When a message was sent, as Airbnb's inbox says it: "Hier, 21:18",
+   * "Aujourd'hui, 9:05", "lundi, 14:30", "12 nov., 08:15" or "12 nov. 2026,
+   * 08:15". Answers a timestamp in the browser's own time zone, or null when
+   * the day cannot be told with certainty.
+   */
+  function parseMessageWhen(when, lang, now) {
+    const time = /(\d{1,2})[:h](\d{2})\s*([ap]m)?/i.exec(when);
+    if (!time) return null;
+    let hour = Number(time[1]);
+    const minute = Number(time[2]);
+    if (time[3]) hour = (hour % 12) + (/p/i.test(time[3]) ? 12 : 0);
+    if (hour > 23 || minute > 59) return null;
+
+    const dayText = when
+      .slice(0, time.index)
+      .replace(/[,\s]+$/, "")
+      .trim();
+    const word = fold(dayText).replace(/[^a-z]/g, "");
+    const date = new Date(now);
+    date.setHours(0, 0, 0, 0);
+    if (word === "" || /^(aujourdhui|today)$/.test(word)) {
+      // Today.
+    } else if (/^(hier|yesterday)$/.test(word)) {
+      date.setDate(date.getDate() - 1);
+    } else if (WEEKDAYS.some((names) => names.includes(word))) {
+      const target = WEEKDAYS.findIndex((names) => names.includes(word));
+      // A weekday on its own is the most recent one, never today.
+      date.setDate(date.getDate() - ((date.getDay() - target + 7) % 7 || 7));
+    } else {
+      const withYear = /\b(19|20)\d{2}\b/.test(dayText);
+      let iso = parseDate(withYear ? dayText : `${dayText} ${date.getFullYear()}`, lang);
+      if (!iso) return null;
+      // Without a year the date is in the past: "28 déc." read in January was last year.
+      if (!withYear && new Date(`${iso}T00:00:00`).getTime() > date.getTime() + 86_400_000) {
+        iso = parseDate(`${dayText} ${date.getFullYear() - 1}`, lang);
+        if (!iso) return null;
+      }
+      const [year, month, day] = iso.split("-").map(Number);
+      date.setFullYear(year, month - 1, day);
+    }
+    date.setHours(hour, minute, 0, 0);
+    return date.getTime();
+  }
+
+  /**
+   * One message of an Airbnb conversation, from the sentence the inbox gives
+   * screen readers: "Camille a envoyé Bonjour. Envoyé à Hier, 21:23. Lu par
+   * Jonathan", sometimes after "Hier." or "Dernier message.". A notice from
+   * Airbnb itself ("Message du service Airbnb : …") is marked as such.
+   */
+  function parseAirbnbMessage(label, lang, now) {
+    const text = (label ?? "").replace(/\s+/g, " ").trim();
+    // The last "sent at": the message itself may contain those words.
+    const tails = [
+      ...text.matchAll(/\. (?:Envoyé à|Envoyé|Sent at|Sent) (.*?\d{1,2}[:h]\d{2}(?:\s?[ap]m)?)(?=\.|$)/gi),
+    ];
+    const tail = tails.at(-1);
+    if (!tail) return null;
+    const head = text.slice(0, tail.index);
+    const sentAt = parseMessageWhen(tail[1], lang, now);
+
+    const service =
+      /(?:^|\. )(?:Message du service Airbnb|Message from Airbnb(?: service)?) ?: ?([\s\S]*)$/i.exec(head);
+    if (service) return { service: true, author: "Airbnb", body: service[1].trim().slice(0, 5000), sentAt };
+    const person = /(?:^|\. )([^.:]{1,60}?) (?:a envoyé|sent) ([\s\S]+)$/.exec(head);
+    if (!person) return null;
+    const body = person[2].trim().slice(0, 5000);
+    return body ? { service: false, author: person[1].trim(), body, sentAt } : null;
+  }
+
   /**
    * Extranet pages worth keeping as they are shown: the ones that describe
    * the property. Pages about money, the account, guests or messages are
@@ -574,6 +655,8 @@
     findDate,
     parseAirbnbReview,
     parseBookingReview,
+    parseMessageWhen,
+    parseAirbnbMessage,
     extranetPage,
     editorSection,
     buildPage,

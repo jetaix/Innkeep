@@ -195,7 +195,9 @@ it would be counted twice.
 
 ## Not supported yet
 
-- Guest messages on either platform.
+- Guest messages on Booking.com. On Airbnb, a conversation you open is kept only
+  if you turn that on in the settings; the extension does not go through your
+  inbox by itself.
 - The payout breakdown on a reservation's own page (cleaning fee, taxes).
 - Photos, and the parts of a listing the editor only shows after a click: the
   full amenities list, every house rule, per-night prices.

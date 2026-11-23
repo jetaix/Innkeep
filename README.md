@@ -115,16 +115,16 @@ Airbnb and Booking.com give every host calendar links. Everything else
 (reservation details, listing content, messaging, rates) is reserved for
 approved software partners, and Innkeep is not one.
 
-| Capability                     | Status       | How                                                           |
-| ------------------------------ | ------------ | ------------------------------------------------------------- |
-| Calendar sync, both directions | Works        | iCal import and export                                        |
-| Double-booking detection       | Works        | Overlap check across channels                                 |
-| Guest names, payouts, history  | Extension    | The browser extension reads them from your reservations pages |
-| Listing details on platforms   | Semi-manual  | Edit once, copy into each platform, mark as published         |
-| Receiving guest messages       | Via webhook  | Anything that sees the message posts it to Innkeep            |
-| Replying to guests             | Semi-manual  | Draft here, paste into the platform's inbox                   |
-| Changing prices on platforms   | No           | Suggestions tell you what to change; you change it there      |
-| Login and multiple users       | One password | `APP_PASSWORD` protects every page; no separate accounts yet  |
+| Capability                     | Status                        | How                                                                            |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| Calendar sync, both directions | Works                         | iCal import and export                                                         |
+| Double-booking detection       | Works                         | Overlap check across channels                                                  |
+| Guest names, payouts, history  | Extension                     | The browser extension reads them from your reservations pages                  |
+| Listing details on platforms   | Semi-manual                   | Edit once, copy into each platform, mark as published                          |
+| Receiving guest messages       | Via webhook, or the extension | A webhook posts them; the extension can keep the Airbnb conversations you open |
+| Replying to guests             | Semi-manual                   | Draft here, paste into the platform's inbox                                    |
+| Changing prices on platforms   | No                            | Suggestions tell you what to change; you change it there                       |
+| Login and multiple users       | One password                  | `APP_PASSWORD` protects every page; no separate accounts yet                   |
 
 iCal is not instant: platforms re-read links on their own schedule, so a
 double booking is still possible in the gap. Innkeep flags it; it cannot
