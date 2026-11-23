@@ -5,6 +5,8 @@
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  // A landing-only deployment has no calendars to sync.
+  if (process.env.LANDING_ONLY === "1") return;
 
   const minutes = Number(process.env.SYNC_INTERVAL_MINUTES ?? 15);
   if (!Number.isFinite(minutes) || minutes <= 0) return;

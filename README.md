@@ -137,16 +137,17 @@ free tiers.
 Every setting is optional. Copy [.env.example](.env.example) to `.env.local`.
 The Settings page shows what is switched on.
 
-| Variable                | Default             | Purpose                                         |
-| ----------------------- | ------------------- | ----------------------------------------------- |
-| `DATABASE_PATH`         | `./data/innkeep.db` | SQLite file location                            |
-| `APP_URL`               | from the request    | Public URL used in export links                 |
-| `SYNC_INTERVAL_MINUTES` | `15`                | Background sync period, `0` to disable          |
-| `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Assistant page |
-| `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                        |
-| `WEBHOOK_SECRET`        | unset               | Turns on the inbound messages webhook           |
-| `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`           |
-| `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details         |
+| Variable                | Default             | Purpose                                               |
+| ----------------------- | ------------------- | ----------------------------------------------------- |
+| `DATABASE_PATH`         | `./data/innkeep.db` | SQLite file location                                  |
+| `APP_URL`               | from the request    | Public URL used in export links                       |
+| `SYNC_INTERVAL_MINUTES` | `15`                | Background sync period, `0` to disable                |
+| `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Assistant page       |
+| `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                              |
+| `WEBHOOK_SECRET`        | unset               | Turns on the inbound messages webhook                 |
+| `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                 |
+| `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details               |
+| `LANDING_ONLY`          | unset               | `1` publishes only the landing and Alternatives pages |
 
 ### Browser extension
 

@@ -5,7 +5,7 @@ import { Puzzle } from "lucide-react";
 import { CopyButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
 import { Badge, Kbd } from "@/components/ui/primitives";
-import { site } from "@/config/site";
+import { landingOnly, site } from "@/config/site";
 import { CalendarPreview } from "@/features/marketing/calendar-preview";
 import { SiteFooter, SiteHeader } from "@/features/marketing/site-chrome";
 import { getI18n } from "@/i18n/server";
@@ -36,9 +36,11 @@ export default async function LandingPage() {
             <a href={site.repo} className={buttonClass({ variant: "primary", size: "lg" })}>
               {t.hero.github}
             </a>
-            <Link href="/overview" className={buttonClass({ size: "lg" })}>
-              {t.hero.dashboard}
-            </Link>
+            {!landingOnly && (
+              <Link href="/overview" className={buttonClass({ size: "lg" })}>
+                {t.hero.dashboard}
+              </Link>
+            )}
           </div>
           <p className="mt-6 flex max-w-[64ch] animate-rise items-start gap-2.5 text-[15px] leading-relaxed text-muted [animation-delay:240ms]">
             <Puzzle aria-hidden className="mt-1 size-4 shrink-0 text-ink" strokeWidth={1.75} />

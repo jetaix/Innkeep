@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { LanguageSwitch, ThemeSwitch } from "@/components/shell/preferences";
 import { buttonClass } from "@/components/ui/button";
-import { site } from "@/config/site";
+import { landingOnly, site } from "@/config/site";
 import { getI18n } from "@/i18n/server";
 
 /** The header shared by the public pages: the landing page and the comparisons. */
@@ -30,9 +30,11 @@ export async function SiteHeader() {
         <a href={site.repo} className="rounded-md px-3 py-1.5 text-muted hover:text-ink">
           GitHub
         </a>
-        <Link href="/overview" className={buttonClass({}, "ml-2")}>
-          {t.nav.dashboard}
-        </Link>
+        {!landingOnly && (
+          <Link href="/overview" className={buttonClass({}, "ml-2")}>
+            {t.nav.dashboard}
+          </Link>
+        )}
       </nav>
     </header>
   );

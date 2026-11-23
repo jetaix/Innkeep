@@ -6,3 +6,9 @@ export const site = {
   repo: "https://github.com/jetaix/Innkeep",
   license: "MIT",
 } as const;
+
+/**
+ * True when only the public pages are published (see `src/proxy.ts`): links
+ * into the dashboard are then left out, since there is no dashboard to open.
+ */
+export const landingOnly = process.env.LANDING_ONLY === "1";
