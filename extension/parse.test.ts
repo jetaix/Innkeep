@@ -17,6 +17,8 @@ type Parse = {
   amenityLines(lines: string[]): string[];
   parseMonthYear(text: string, lang: string): string | null;
   findDate(text: string, lang: string): string | null;
+  parseMessageWhen(when: string, lang: string, now: number): number | null;
+  parseAirbnbMessage(label: string, lang: string, now: number): Record<string, unknown> | null;
   parseAirbnbReview(
     id: string,
     header: string[],
@@ -565,5 +567,61 @@ describe("admin pages", () => {
       images: ["https://img.example/1.jpg"],
     });
     expect(buildPage("photos", "Photos", [], [])).toBeNull();
+  });
+});
+
+describe("Airbnb conversations", () => {
+  const { parseMessageWhen, parseAirbnbMessage } = (globalThis as unknown as { InnkeepParse: Parse })
+    .InnkeepParse;
+  // Tuesday 24 November 2026, 10:00 in the machine's own time zone.
+  const now = new Date(2026, 10, 24, 10, 0).getTime();
+  const at = (year: number, month: number, day: number, hour: number, minute: number) =>
+    new Date(year, month - 1, day, hour, minute).getTime();
+
+  it("reads when a message was sent, as the inbox words it", () => {
+    expect(parseMessageWhen("Hier, 21:18", "fr", now)).toBe(at(2026, 11, 23, 21, 18));
+    expect(parseMessageWhen("Aujourd’hui, 9:05", "fr", now)).toBe(at(2026, 11, 24, 9, 5));
+    expect(parseMessageWhen("09:05", "fr", now)).toBe(at(2026, 11, 24, 9, 5));
+    expect(parseMessageWhen("samedi, 14:30", "fr", now)).toBe(at(2026, 11, 21, 14, 30));
+    expect(parseMessageWhen("mardi, 14:30", "fr", now)).toBe(at(2026, 11, 17, 14, 30));
+    expect(parseMessageWhen("12 nov., 08:15", "fr", now)).toBe(at(2026, 11, 12, 8, 15));
+    expect(parseMessageWhen("28 déc., 08:15", "fr", now)).toBe(at(2025, 12, 28, 8, 15));
+    expect(parseMessageWhen("3 janv. 2026, 18:00", "fr", now)).toBe(at(2026, 1, 3, 18, 0));
+    expect(parseMessageWhen("Yesterday, 9:23 PM", "en", now)).toBe(at(2026, 11, 23, 21, 23));
+    expect(parseMessageWhen("bientôt", "fr", now)).toBeNull();
+  });
+
+  // Wording as on the live fr inbox; every name and sentence here is invented.
+  it("reads who wrote a message, what and when", () => {
+    expect(
+      parseAirbnbMessage(
+        "Camille a envoyé Bonjour. Nous arrivons vers 18 h. Envoyé à Hier, 21:23. Lu par Paul",
+        "fr",
+        now,
+      ),
+    ).toEqual({
+      service: false,
+      author: "Camille",
+      body: "Bonjour. Nous arrivons vers 18 h",
+      sentAt: at(2026, 11, 23, 21, 23),
+    });
+    expect(
+      parseAirbnbMessage(
+        "Dernier message. Paul a envoyé Parfait, à demain. Envoyé à Hier, 21:25. Lu par Camille",
+        "fr",
+        now,
+      ),
+    ).toMatchObject({ author: "Paul", body: "Parfait, à demain" });
+  });
+
+  it("tells a notice from Airbnb apart, and refuses what is not a message", () => {
+    expect(
+      parseAirbnbMessage(
+        "Hier. Message du service Airbnb : Réservation confirmée · 1–4 mai 2027. Envoyé à Hier, 21:18",
+        "fr",
+        now,
+      ),
+    ).toMatchObject({ service: true, body: "Réservation confirmée · 1–4 mai 2027" });
+    expect(parseAirbnbMessage("Début de la conversation", "fr", now)).toBeNull();
   });
 });

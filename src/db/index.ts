@@ -248,6 +248,11 @@ WHERE channel = 'airbnb'
   AND instr(ical_url, '/calendar/ical/') > 0
   AND CAST(substr(ical_url, instr(ical_url, '/calendar/ical/') + 15) AS INTEGER) > 0;
 `,
+  // 16: messages read from a platform's inbox are recognised when read again
+  `
+ALTER TABLE messages ADD COLUMN external_key TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS messages_external ON messages (conversation_id, external_key);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

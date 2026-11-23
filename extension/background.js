@@ -35,6 +35,7 @@ const ALLOWED_PATHS = [
   "/api/ingest/preview",
   "/api/ingest/reviews",
   "/api/ingest/page",
+  "/api/ingest/messages",
 ];
 
 /**

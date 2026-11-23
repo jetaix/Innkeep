@@ -266,3 +266,67 @@ InnkeepUI.reservations({
     }),
   });
 })();
+
+// A conversation of the host's inbox, only when the host turned this on in
+// the settings: the messages on screen, to read in Innkeep. Nothing is ever
+// typed or sent on Airbnb, and other conversations are not opened.
+(async () => {
+  // Off unless the host asked for it: nothing below is even set up.
+  if ((await InnkeepUI.option("readMessages")) !== true) return;
+
+  const threadId = () => /^\/hosting\/messages\/(\d+)/.exec(location.pathname)?.[1] ?? null;
+
+  const read = () => {
+    const list = document.querySelector('[data-testid="message-list"]');
+    if (!list || !threadId()) return null;
+    const lang = document.documentElement.lang || navigator.language;
+    const rows = [...list.querySelectorAll(':scope > [role="group"][aria-label]')].flatMap((row) => {
+      const message = InnkeepParse.parseAirbnbMessage(row.getAttribute("aria-label"), lang, Date.now());
+      if (!message || message.service) return [];
+      // A guest's message carries their small profile photo; the host's own do not.
+      const avatar = [...row.querySelectorAll("img")].some(
+        (image) => image.getBoundingClientRect().width <= 56,
+      );
+      return [{ ...message, avatar }];
+    });
+    if (rows.length === 0) return null;
+    const guests = new Set(rows.filter((row) => row.avatar).map((row) => row.author));
+    const title = document.querySelector('[data-testid="thread-header-title-button"]')?.textContent ?? "";
+    const guestName = ([...guests][0] ?? title).replace(/\s+/g, " ").trim().slice(0, 80);
+    if (!guestName) return null;
+    return {
+      threadId: threadId(),
+      guestName,
+      messages: rows.map((row) => ({
+        direction: guests.has(row.author) ? "in" : "out",
+        body: row.body,
+        sentAt: row.sentAt,
+      })),
+    };
+  };
+
+  InnkeepUI.mount({
+    isActive: () => read() !== null,
+    prompt: "Innkeep can keep this conversation.",
+    button: "Send to Innkeep",
+    keepOpen: true,
+    autoKey: () => {
+      const conversation = read();
+      return conversation
+        ? `${conversation.threadId}:${conversation.messages.length}:${conversation.messages.at(-1).body.length}`
+        : null;
+    },
+    collect: () => {
+      const conversation = read();
+      return conversation
+        ? { path: "/api/ingest/messages", payload: { source: "airbnb", ...conversation } }
+        : { error: "Could not read this conversation." };
+    },
+    describe: (result) => ({
+      tone: "good",
+      text: result.added
+        ? `${result.added} new messages in Innkeep.`
+        : "This conversation is up to date in Innkeep.",
+    }),
+  });
+})();

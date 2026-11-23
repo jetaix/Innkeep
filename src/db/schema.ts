@@ -128,6 +128,8 @@ export const messages = sqliteTable("messages", {
    */
   delivery: text("delivery").$type<"delivered" | "local">().notNull().default("delivered"),
   sentAt: integer("sent_at").notNull(),
+  /** Tells a message read from a platform's inbox apart from its neighbours, so reading it twice keeps one. */
+  externalKey: text("external_key"),
 });
 
 export const CHARGE_FREQUENCIES = ["once", "monthly", "yearly", "per_stay", "per_night", "percent"] as const;
