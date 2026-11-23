@@ -1,7 +1,8 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, listings, OTA_CHANNELS, type Listing } from "@/db";
+import { findListingForPage } from "./link";
 
 /**
  * A listing as a platform's public page shows it to guests, read by the
@@ -31,11 +32,13 @@ export type Preview = z.infer<typeof previewSchema>;
 export const previewIngestSchema = z.object({
   source: z.enum(OTA_CHANNELS),
   listingId: z.string().trim().min(3).max(40),
+  /** The public page that was read; lets a listing with no platform number yet be recognised. */
+  listingUrl: z.url().max(500).nullish(),
   preview: previewSchema,
 });
 
 export async function savePreview(listingRowId: number, preview: Preview) {
-  await (await getDb())
+  await getDb()
     .update(listings)
     .set({ publicPreview: JSON.stringify(preview), publicPreviewAt: Date.now() })
     .where(eq(listings.id, listingRowId))
@@ -46,12 +49,8 @@ export async function savePreview(listingRowId: number, preview: Preview) {
 export async function ingestPreview(
   input: z.input<typeof previewIngestSchema>,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { source, listingId, preview } = previewIngestSchema.parse(input);
-  const listing = await (await getDb())
-    .select()
-    .from(listings)
-    .where(and(eq(listings.channel, source), eq(listings.externalId, listingId)))
-    .get();
+  const { source, listingId, listingUrl, preview } = previewIngestSchema.parse(input);
+  const listing = await findListingForPage(source, listingId, listingUrl);
   if (!listing) return { ok: false, error: "This is not one of your listings in Innkeep." };
   await savePreview(listing.id, preview);
   return { ok: true };

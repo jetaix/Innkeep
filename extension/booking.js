@@ -63,6 +63,8 @@ InnkeepUI.reservations({
 (() => {
   const isPublic = () => location.hostname === "www.booking.com";
   const hotelId = () => document.querySelector('input[name="hotel_id"]')?.value ?? null;
+  // Which page this is, so Innkeep can recognise a listing it has no Booking.com number for yet.
+  const pageUrl = () => location.origin + location.pathname;
   const blockLines = (testId) => [
     ...new Set(
       (document.querySelector(`[data-testid="${testId}"]`)?.innerText ?? "")
@@ -126,9 +128,17 @@ InnkeepUI.reservations({
     collect() {
       const quote = readQuote();
       const preview = readPreview();
-      if (quote) return { path: "/api/ingest/quote", payload: { source: "booking", ...quote, preview } };
+      if (quote) {
+        return {
+          path: "/api/ingest/quote",
+          payload: { source: "booking", listingUrl: pageUrl(), ...quote, preview },
+        };
+      }
       return preview
-        ? { path: "/api/ingest/preview", payload: { source: "booking", listingId: hotelId(), preview } }
+        ? {
+            path: "/api/ingest/preview",
+            payload: { source: "booking", listingId: hotelId(), listingUrl: pageUrl(), preview },
+          }
         : { error: "Could not read this page." };
     },
     describe: () => ({ tone: "good", text: "Saved in Innkeep." }),
@@ -193,7 +203,12 @@ InnkeepUI.reservations({
     autoKey: () => (seen.size ? `reviews:${seen.size}` : null),
     collect: () => ({
       path: "/api/ingest/reviews",
-      payload: { source: "booking", listingId: hotelId(), reviews: [...seen.values()] },
+      payload: {
+        source: "booking",
+        listingId: hotelId(),
+        listingUrl: location.origin + location.pathname,
+        reviews: [...seen.values()],
+      },
     }),
     describe: (result) => ({
       tone: "good",
