@@ -29,10 +29,15 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         {m.common.nav.skipToContent}
       </a>
       <aside className="flex shrink-0 flex-col gap-3 border-b border-line bg-subtle px-3 py-3 md:sticky md:top-0 md:h-dvh md:w-56 md:border-r md:border-b-0 print:hidden">
-        <Link href="/overview" className="self-start rounded-md px-2 py-1">
-          <Logo />
-        </Link>
-        <CommandMenu syncAction={syncAllAction} />
+        {/* One row on a phone, so the page itself starts higher up. */}
+        <div className="flex items-center gap-2 md:flex-col md:items-stretch md:gap-3">
+          <Link href="/overview" className="shrink-0 rounded-md px-2 py-1 md:self-start">
+            <Logo />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <CommandMenu syncAction={syncAllAction} />
+          </div>
+        </div>
         {/* The outer boundary lets the fallback itself read the pathname on dynamic routes. */}
         <Suspense>
           <Suspense fallback={<SidebarNav />}>

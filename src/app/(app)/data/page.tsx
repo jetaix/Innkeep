@@ -93,7 +93,7 @@ async function Sources() {
           <div className="border-b border-line px-4 py-3">
             <SectionTitle>{group.title}</SectionTitle>
           </div>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full text-left">
               <thead className="text-xs text-muted">
                 <tr>

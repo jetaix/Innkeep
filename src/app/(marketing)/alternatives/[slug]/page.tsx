@@ -42,7 +42,7 @@ export default async function ComparisonPage({ params }: PageProps<"/alternative
           <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-muted">{t.vs.lead}</p>
         </section>
 
-        <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
           <div className="bg-bg p-6 sm:p-8">
             <h2 className="text-lg font-semibold tracking-tight">{t.vs.chooseThem(product.name)}</h2>
             <p className="mt-2 text-[15px] leading-relaxed text-muted">{theirs.chooseThem}</p>
@@ -55,7 +55,7 @@ export default async function ComparisonPage({ params }: PageProps<"/alternative
 
         <section className="pt-12">
           <p className="mb-3 text-[13px] text-muted">{t.priceNote}</p>
-          <div className="overflow-x-auto rounded-xl border border-line">
+          <div className="relative overflow-x-auto rounded-xl border border-line">
             <table className="w-full min-w-[40rem] text-left text-[14px]">
               <thead className="text-xs text-muted">
                 <tr>

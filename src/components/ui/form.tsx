@@ -1,8 +1,9 @@
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
+// 16px on phones: iOS zooms the page when a smaller field takes focus. Touch screens get a taller target.
 const CONTROL =
-  "block w-full rounded-md border border-line-strong bg-bg px-2.5 text-[13px] text-ink placeholder:text-faint read-only:bg-subtle read-only:text-muted";
+  "block w-full rounded-md border border-line-strong bg-bg px-2.5 text-base text-ink placeholder:text-faint read-only:bg-subtle read-only:text-muted md:text-[13px] pointer-coarse:min-h-10";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cn(CONTROL, "h-8", className)} {...props} />;

@@ -44,7 +44,7 @@ export default async function AlternativesPage() {
 
         <section className="pt-20">
           <h2 className="text-3xl font-semibold tracking-[-0.025em]">{t.fit.title}</h2>
-          <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
+          <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
             {[t.fit.stronger, t.fit.weaker].map((side) => (
               <div key={side.title} className="bg-bg p-6 sm:p-8">
                 <h3 className="text-lg font-semibold tracking-tight">{side.title}</h3>
@@ -88,7 +88,7 @@ async function Group({ title, intro, products }: { title: string; intro: string;
       <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
       <p className="mt-2 max-w-[75ch] text-[15px] leading-relaxed text-muted">{intro}</p>
       <p className="mt-1 text-[13px] text-muted">{t.priceNote}</p>
-      <div className="mt-6 overflow-x-auto rounded-xl border border-line">
+      <div className="mt-6 relative overflow-x-auto rounded-xl border border-line">
         <table className="w-full min-w-[60rem] text-left text-[13px]">
           <thead className="text-xs text-muted">
             <tr>

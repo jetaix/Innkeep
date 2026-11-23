@@ -39,9 +39,10 @@ export async function UpdatePrompt() {
 
   return (
     <DismissForNow>
+      {/* The extension runs in a desktop browser, so a phone is not asked to start it. */}
       <section
         aria-labelledby="update-heading"
-        className="border-b border-line bg-subtle px-4 py-4 md:px-8 print:hidden"
+        className="hidden border-b border-line bg-subtle px-4 py-4 md:block md:px-8 print:hidden"
       >
         <div className="max-w-3xl">
           <h2 id="update-heading" className="font-semibold">

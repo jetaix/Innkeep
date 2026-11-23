@@ -226,7 +226,7 @@ async function Tiles({ pricing, currency }: { pricing: Pricing; currency: string
   ];
 
   return (
-    <dl className="grid overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 xl:grid-cols-4 [&>div]:bg-bg">
+    <dl className="grid grid-cols-1 overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 xl:grid-cols-4 [&>div]:bg-bg">
       {tiles.map((tile) => (
         <div key={tile.label} className="m-px px-4 py-3">
           <dt className="text-xs text-muted">{tile.label}</dt>
@@ -268,7 +268,7 @@ async function GuestChecks({ property, pricing }: { property: Property; pricing:
       {rows.length === 0 ? (
         <p className="px-4 py-4 text-[13px] text-muted">{t.none}</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full text-left tabular-nums">
             <thead className="text-xs text-muted">
               <tr>
@@ -412,7 +412,7 @@ async function NightTable({ pricing, currency }: { pricing: Pricing; currency: s
       <div className="border-b border-line px-4 py-3">
         <SectionTitle>{t.title}</SectionTitle>
       </div>
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full text-left tabular-nums">
           <thead className="text-xs text-muted">
             <tr>

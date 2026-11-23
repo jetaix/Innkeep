@@ -65,6 +65,17 @@ Conventions:
   in `globals.css`, never raw hex values.
 - **Keyboard and screen readers.** Every action must be reachable by keyboard
   and every control labelled. Add page shortcuts with `data-shortcut="key"`.
+- **Phones first-class.** Hosts check bookings and cleanings from a phone, so
+  every page must work at 390 px wide. The page itself never scrolls
+  sideways: a wide table or calendar goes inside a `relative overflow-x-auto`
+  wrapper (`relative` keeps screen-reader-only text from widening the page),
+  and a grid that gains columns at a breakpoint starts at `grid-cols-1`.
+  Form fields are 16 px on phones, or iOS zooms in on focus; the shared
+  `Input`, `Select` and `Textarea` do this, so do not override their text
+  size below `md:`. Buttons and fields grow to 40 px on touch screens. What
+  only makes sense on a computer, such as starting the browser extension, is
+  hidden below `md:`. Look at your change in a phone-sized window before
+  opening a pull request.
 - **Copy** is plain and specific: say what happened and what to do next.
 - **Every string is in two languages.** No text in components: add it to
   `src/i18n/messages/<area>.ts` in English and French (the French object is

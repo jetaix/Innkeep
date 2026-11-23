@@ -56,7 +56,7 @@ export default async function LandingPage() {
           </h2>
           <p className="mt-4 max-w-[60ch] text-base leading-relaxed text-muted">{f.intro}</p>
 
-          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
+          <div className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
             <Feature title={f.sync.title} body={f.sync.body}>
               <ul className="space-y-2 text-[13px]">
                 <SyncRow
@@ -118,7 +118,7 @@ export default async function LandingPage() {
           <p className="mt-3 text-xs text-muted">{f.note}</p>
         </section>
 
-        <section id="limits" className="grid scroll-mt-8 gap-10 pt-28 md:grid-cols-[1fr_1.4fr]">
+        <section id="limits" className="grid grid-cols-1 scroll-mt-8 gap-10 pt-28 md:grid-cols-[1fr_1.4fr]">
           <div>
             <h2 className="text-3xl font-semibold tracking-[-0.025em] text-balance sm:text-4xl">
               {t.limits.title}
@@ -134,7 +134,7 @@ export default async function LandingPage() {
           </dl>
         </section>
 
-        <section className="grid items-center gap-10 pt-28 md:grid-cols-2">
+        <section className="grid grid-cols-1 items-center gap-10 pt-28 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-semibold tracking-[-0.025em] text-balance sm:text-4xl">
               {t.open.title}
@@ -147,7 +147,7 @@ export default async function LandingPage() {
             </a>
           </div>
           <pre
-            className="overflow-x-auto rounded-xl border border-line bg-subtle p-5 font-mono text-[13px] leading-7"
+            className="relative overflow-x-auto rounded-xl border border-line bg-subtle p-5 font-mono text-[13px] leading-7"
             aria-label={t.open.install}
           >
             <code>
@@ -239,7 +239,7 @@ function SuggestionRow({
 
 function Limit({ term, children }: { term: string; children: ReactNode }) {
   return (
-    <div className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-6">
+    <div className="grid grid-cols-1 gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-6">
       <dt className="font-medium">{term}</dt>
       <dd className="leading-relaxed text-muted">{children}</dd>
     </div>
