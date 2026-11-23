@@ -3,9 +3,17 @@ import { Card } from "@/components/ui/primitives";
 import type { Property, Reservation } from "@/db/schema";
 import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
-import { addDays, dayOfWeek, type ISODate } from "@/lib/dates";
+import { addDays, dayOfWeek, diffDays, type ISODate } from "@/lib/dates";
 import { barOf } from "./bars";
 import { addMonths, bookedNights, monthWeeks, nightsOf } from "./compute";
+
+/**
+ * A small bubble above a square while the pointer is on it, written from its
+ * `data-tip`. Pure CSS: a year of squares needs no script and no extra nodes.
+ */
+const TIP =
+  "relative hover:z-30 hover:after:absolute hover:after:bottom-full hover:after:mb-1 hover:after:rounded-md hover:after:bg-ink hover:after:px-2 hover:after:py-1 hover:after:text-[11px] hover:after:font-normal hover:after:whitespace-nowrap hover:after:text-inverse hover:after:shadow-pop hover:after:content-[attr(data-tip)]";
+const TIP_CENTRED = "after:left-1/2 after:-translate-x-1/2";
 
 /** Monday to Sunday, from a week known to start on a Monday. */
 const WEEK = Array.from({ length: 7 }, (_, index) => addDays("2026-11-02", index));
@@ -131,6 +139,20 @@ export async function YearGrid({
   const t = m.calendar;
   const months = Array.from({ length: 12 }, (_, index) => addMonths(year, index));
   const end = addMonths(year, 12);
+  /** "Léa Martin · 21 Nov to 25 Nov · 4 nights · Airbnb": just enough to know what a square is. */
+  const describe = (stay: Reservation) => {
+    const source = m.common.sources[stay.source];
+    const who =
+      stay.kind === "block"
+        ? stay.notes || (stay.source === "booking" ? t.grid.closedOnBooking : t.grid.blocked)
+        : stay.guestName || source;
+    return [
+      who,
+      t.grid.range(fmt.date(stay.checkIn), fmt.date(stay.checkOut)),
+      m.common.count.nights(diffDays(stay.checkIn, stay.checkOut)),
+      ...(who === source ? [] : [source]),
+    ].join(" · ");
+  };
 
   return (
     <div className="min-w-0 flex-1 space-y-6">
@@ -163,10 +185,19 @@ export async function YearGrid({
                         return (
                           <span
                             key={index}
+                            // What the square stands for, shown on hover.
+                            data-tip={stay ? describe(stay) : undefined}
                             className={cn(
                               "flex h-6 items-center justify-center rounded-[3px]",
                               day && !stay && "text-muted",
-                              stay && cn("border-l-2 font-medium text-ink", barOf(stay)),
+                              stay && cn("border-l-2 font-medium text-ink", barOf(stay), TIP),
+                              // Near an edge the bubble opens inwards, so it never leaves the card.
+                              stay &&
+                                (index % 7 < 2
+                                  ? "after:left-0"
+                                  : index % 7 > 4
+                                    ? "after:right-0"
+                                    : TIP_CENTRED),
                               day === today && "ring-2 ring-ink",
                             )}
                           >
