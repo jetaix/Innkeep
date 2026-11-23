@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   // Sent with every page. The referrer policy keeps sending the origin, which
   // the browser extension uses to recognise a tab opened from Innkeep.
+  // Pages that became sections of another page: old links and bookmarks still land in the right place.
+  async redirects() {
+    return [
+      { source: "/assistant", destination: "/suggestions#claude", permanent: false },
+      { source: "/data", destination: "/settings#data", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

@@ -59,7 +59,7 @@ export function AdvicePanel({
         {!configured && (
           <p className="max-w-[70ch] px-4 py-4 leading-relaxed text-muted">
             {cta.before}
-            <Link href="/assistant" className="font-medium text-ink underline underline-offset-2">
+            <Link href="#claude" className="font-medium text-ink underline underline-offset-2">
               {cta.link}
             </Link>
             {cta.after}

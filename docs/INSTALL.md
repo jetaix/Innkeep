@@ -118,7 +118,7 @@ itself for a few minutes, then returns to Innkeep with your data.
 
 Innkeep can ask Claude, an AI assistant made by Anthropic, for advice based on
 your own figures. This needs an Anthropic account and costs a few cents per
-request. Click **Assistant** in the left menu and follow its three steps.
+request. Click **Suggestions** in the left menu and follow the three steps of its Claude section.
 
 ## Keeping your data safe
 

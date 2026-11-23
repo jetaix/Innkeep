@@ -28,6 +28,6 @@ export async function GET(request: Request) {
     ok: true,
     steps: await tourSteps(scope),
     // Where the run ends: the page that shows what is now up to date.
-    doneUrl: `${origin}/${scope === "all" ? "data" : "reservations"}`,
+    doneUrl: `${origin}/${scope === "all" ? "settings#data" : "reservations"}`,
   });
 }

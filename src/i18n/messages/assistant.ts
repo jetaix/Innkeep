@@ -1,6 +1,6 @@
-/** The Assistant page: connecting Claude with an API key, what it is sent, and other assistants over MCP. */
+/** The Claude section of the Suggestions page: connecting Claude with an API key, what it is sent, and other assistants over MCP. */
 const en = {
-  title: "Assistant",
+  title: "Claude",
   description: "Connect Claude to get advice written from your own reservations, payouts and nightly prices.",
   status: {
     connected: "Connected",
@@ -82,7 +82,7 @@ const en = {
 };
 
 const fr: typeof en = {
-  title: "Assistant",
+  title: "Claude",
   description:
     "Connectez Claude pour obtenir des conseils rédigés à partir de vos propres réservations, versements et prix par nuit.",
   status: {

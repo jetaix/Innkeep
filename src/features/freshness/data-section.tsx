@@ -1,37 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
 import { ExternalLink } from "lucide-react";
-import { connection } from "next/server";
 import { CHANNELS } from "@/channels";
 import { SubmitButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
-import { Loading } from "@/components/ui/loading";
-import { Badge, Card, PageHeader, SectionTitle, SourceDot } from "@/components/ui/primitives";
+import { Badge, Card, SectionTitle, SourceDot } from "@/components/ui/primitives";
 import { SyncCta } from "@/features/extension/sync-cta";
 import { countToRefresh, getDataSources, type DataSource } from "@/features/freshness/sources";
 import { syncListingAction } from "@/features/properties/actions";
 import { getProperties } from "@/features/reservations/queries";
 import { getI18n } from "@/i18n/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getI18n()).m.data.title };
-}
-
-export default async function DataPage() {
-  const t = (await getI18n()).m.data;
-  return (
-    <>
-      <PageHeader title={t.title} description={t.description} />
-      <Suspense fallback={<Loading />}>
-        <Sources />
-      </Suspense>
-    </>
-  );
-}
-
-async function Sources() {
-  await connection();
+/**
+ * Where each piece of data comes from, how fresh it is and the one thing to
+ * press to refresh it. Shown as a section of the Settings page.
+ */
+export async function DataSection() {
   const { m } = await getI18n();
   const t = m.data;
   const sources = await getDataSources();
@@ -233,7 +216,7 @@ async function SourceAction({ source, platform }: { source: DataSource; platform
         action.reason === "extension"
           ? "/extension"
           : action.reason === "claude"
-            ? "/assistant"
+            ? "/suggestions#claude"
             : action.reason === "listingId"
               ? null
               : source.propertyId

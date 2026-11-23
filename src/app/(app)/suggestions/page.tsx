@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/ui/actions";
 import { Card, PageHeader, SectionTitle } from "@/components/ui/primitives";
 import { Loading } from "@/components/ui/loading";
 import { restoreSuggestions } from "@/features/insights/actions";
+import { ClaudeSection } from "@/features/assistant/claude-section";
 import { AdvicePanel } from "@/features/insights/advice-panel";
 import { aiConfigured } from "@/features/insights/ai";
 import { getAdvice, getSuggestions } from "@/features/insights/queries";
@@ -59,6 +60,17 @@ async function Suggestions() {
         advice={stored?.advice ?? null}
         generatedLabel={stored ? t.advice.generated(fmt.dateTime(stored.generatedAt), stored.model) : null}
       />
+
+      {/* What used to be the Assistant page: the advice above is Claude's, set up here. */}
+      <section id="claude" aria-labelledby="claude-heading" className="scroll-mt-6 space-y-3 pt-4">
+        <div className="px-1">
+          <h2 id="claude-heading" className="font-semibold">
+            {m.assistant.title}
+          </h2>
+          <p className="mt-0.5 text-[13px] text-muted">{m.assistant.description}</p>
+        </div>
+        <ClaudeSection />
+      </section>
     </div>
   );
 }

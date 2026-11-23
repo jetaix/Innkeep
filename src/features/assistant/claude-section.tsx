@@ -1,41 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Suspense } from "react";
 import { and, count, eq, gte, lte } from "drizzle-orm";
 import { ExternalLink } from "lucide-react";
-import { connection } from "next/server";
 import { ConfirmButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
-import { Loading } from "@/components/ui/loading";
-import { Badge, Card, PageHeader, SectionTitle } from "@/components/ui/primitives";
+import { Badge, Card, SectionTitle } from "@/components/ui/primitives";
 import { getDb, nightlyPrices, reservations } from "@/db";
 import { disconnectClaude } from "@/features/assistant/actions";
 import { ConnectForm } from "@/features/assistant/connect-form";
 import { getKeyStatus } from "@/features/assistant/key";
-import { AdvicePanel } from "@/features/insights/advice-panel";
 import { AI_MODEL, aiConfigured } from "@/features/insights/ai";
-import { getAdvice } from "@/features/insights/queries";
 import { getI18n } from "@/i18n/server";
 import { today } from "@/lib/dates";
 
 const CONSOLE_KEYS = "https://console.anthropic.com/settings/keys";
-
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getI18n()).m.assistant.title };
-}
-
-export default async function AssistantPage() {
-  const t = (await getI18n()).m.assistant;
-  return (
-    <>
-      <PageHeader title={t.title} description={t.description} />
-      <Suspense fallback={<Loading />}>
-        <Assistant />
-      </Suspense>
-    </>
-  );
-}
 
 function Step({ title, done, children }: { title: string; done?: boolean; children: ReactNode }) {
   return (
@@ -54,13 +32,16 @@ function Step({ title, done, children }: { title: string; done?: boolean; childr
   );
 }
 
-async function Assistant() {
-  await connection();
-  const { m, fmt } = await getI18n();
+/**
+ * Connecting Claude for the written advice: whether it is connected, the
+ * steps to connect it, and exactly what is sent. A section of the
+ * Suggestions page.
+ */
+export async function ClaudeSection() {
+  const { m } = await getI18n();
   const t = m.assistant;
   const key = await getKeyStatus();
   const connected = await aiConfigured();
-  const stored = await getAdvice();
 
   // How much real data the model would get today, so thin advice is no surprise.
   const db = getDb();
@@ -85,7 +66,7 @@ async function Assistant() {
       ?.total ?? 0;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <Card className="flex flex-wrap items-center justify-between gap-3 p-5">
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 font-medium">
@@ -142,16 +123,6 @@ async function Assistant() {
             <Step title={t.steps.ask.title}>{connected ? t.steps.ask.body : t.steps.ask.waiting}</Step>
           </ol>
         </Card>
-      )}
-
-      {connected && (
-        <AdvicePanel
-          configured
-          advice={stored?.advice ?? null}
-          generatedLabel={
-            stored ? m.insights.advice.generated(fmt.dateTime(stored.generatedAt), stored.model) : null
-          }
-        />
       )}
 
       <Card className="p-5">

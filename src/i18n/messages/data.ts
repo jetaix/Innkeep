@@ -1,4 +1,4 @@
-/** The Data page: every outside source of data, how old it is and how to refresh it. */
+/** The Data section of Settings: every outside source of data, how old it is and how to refresh it. */
 const en = {
   title: "Data",
   description:
@@ -47,7 +47,7 @@ const en = {
     sync: "Sync now",
     syncing: "Syncing…",
     pricing: "Go to Pricing",
-    assistant: "Go to Assistant",
+    assistant: "Go to Suggestions",
     popup: "Use “Read everything” in the extension",
     pages: (n: number) => `${n} page${n === 1 ? "" : "s"} kept`,
     hint: "Opens your own page. The extension reads it; this tab updates when you come back.",
@@ -149,7 +149,7 @@ const fr: typeof en = {
     sync: "Synchroniser",
     syncing: "Synchronisation…",
     pricing: "Aller aux Tarifs",
-    assistant: "Aller à l’Assistant",
+    assistant: "Aller aux Suggestions",
     popup: "Utilisez « Read everything » dans l’extension",
     pages: (n) => `${n} page${n > 1 ? "s" : ""} conservée${n > 1 ? "s" : ""}`,
     hint: "Ouvre votre propre page. L’extension la lit ; cet onglet se met à jour à votre retour.",
