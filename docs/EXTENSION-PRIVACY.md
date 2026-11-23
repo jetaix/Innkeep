@@ -33,10 +33,10 @@ Only from pages you open, or that it opens during a run you start yourself:
 
 - Passwords, cookies, session tokens or payment card details.
 - Guest phone numbers.
-- Guest messages, unless you tick "Also keep the Airbnb conversations I open" in
+- Guest messages, unless you tick "Also keep my Airbnb conversations" in
   its settings. It is off by default. When on, the messages of an Airbnb
-  conversation you open yourself are sent to your own Innkeep and nowhere
-  else; nothing is ever written or sent on Airbnb.
+  conversation you open yourself, and of those your inbox lists during a
+  run you start, are sent to your own Innkeep and nowhere else; nothing is ever written or sent on Airbnb.
 - Door codes, directions, wifi details and check-in instructions.
 - Pages about payouts to your bank, invoices, bank details, taxes or your
   account's users.

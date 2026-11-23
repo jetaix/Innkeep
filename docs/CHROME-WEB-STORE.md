@@ -66,7 +66,7 @@ HOW IT WORKS
 • It has no server of its own. Its authors receive nothing: no data, no statistics.
 
 WHAT IT DOES NOT DO
-• It does not read passwords, cookies, payment details, guest phone numbers, door codes or wifi details. Guest messages are read only if you turn that on in its settings, for the Airbnb conversations you open yourself.
+• It does not read passwords, cookies, payment details, guest phone numbers, door codes or wifi details. Guest messages are read only if you turn that on in its settings, for the Airbnb conversations you open yourself or that your inbox lists during a run you start.
 • It does not click, type or submit anything on Airbnb or Booking.com, and does not call their APIs.
 • It does not run in the background or on a schedule.
 

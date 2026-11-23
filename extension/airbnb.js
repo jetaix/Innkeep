@@ -305,6 +305,20 @@ InnkeepUI.reservations({
     };
   };
 
+  // During a run, tell it which conversations the inbox lists, so each is opened in turn.
+  // Only what the inbox shows by itself: nothing is scrolled or clicked to load more.
+  const reportInbox = () => {
+    if (!location.pathname.startsWith("/hosting/messages")) return;
+    const pages = [...document.querySelectorAll('[data-testid^="inbox_list_"]')].flatMap((item) => {
+      const id = /^inbox_list_(\d+)$/.exec(item.dataset.testid)?.[1];
+      return id ? [{ url: `${location.origin}/hosting/messages/${id}`, label: "Airbnb: conversation" }] : [];
+    });
+    if (pages.length) void InnkeepUI.ask({ type: "innkeep:tour-found", pages });
+  };
+  // The list fills in after the page: look twice.
+  setTimeout(reportInbox, 1500);
+  setTimeout(reportInbox, 3500);
+
   InnkeepUI.mount({
     isActive: () => read() !== null,
     prompt: "Innkeep can keep this conversation.",

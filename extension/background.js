@@ -51,6 +51,9 @@ const STEP_LIMIT_MS = 14_000;
 const SETTLE_MS = 3_000;
 /** Pages found in a site's own menu may be added to a run, up to this many. */
 const MAX_FOUND = 15;
+/** Conversations listed by the inbox may be added to a run, up to this many. */
+const MAX_CONVERSATIONS = 40;
+const isInbox = (url) => /^\/hosting\/messages(\/|$)/.test(new URL(url).pathname);
 
 let tour = null;
 
@@ -77,12 +80,22 @@ async function startTour(query, tabId) {
   if (tour) return { ok: false, error: "A run is already going." };
   const plan = await callInnkeep("GET", `/api/extension/tour?${query}`);
   if (!plan.ok) return plan;
-  if (!plan.steps?.length)
-    return { ok: false, error: "Innkeep has no page to read yet. Add a listing first." };
+  // The inbox is only visited when the host chose to keep conversations.
+  const { readMessages } = await chrome.storage.local.get("readMessages");
+  const steps = (plan.steps ?? []).filter((step) => readMessages === true || !isInbox(step.url));
+  if (!steps.length) return { ok: false, error: "Innkeep has no page to read yet. Add a listing first." };
 
-  const first = { url: plan.steps[0].url, active: true };
+  const first = { url: steps[0].url, active: true };
   const tab = tabId == null ? await chrome.tabs.create(first) : await chrome.tabs.update(tabId, first);
-  tour = { tabId: tab.id, steps: plan.steps, index: 0, found: 0, doneUrl: plan.doneUrl, timer: null };
+  tour = {
+    tabId: tab.id,
+    steps,
+    index: 0,
+    found: 0,
+    conversations: readMessages === true ? 0 : MAX_CONVERSATIONS,
+    doneUrl: plan.doneUrl,
+    timer: null,
+  };
   armTimer(STEP_LIMIT_MS);
   return { ok: true, total: plan.steps.length };
 }
@@ -180,12 +193,14 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       if (!tour || tabId !== tour.tabId || !Array.isArray(message.pages)) return false;
       const origin = new URL(sender.url ?? sender.tab.url).origin;
       for (const page of message.pages) {
-        if (tour.found >= MAX_FOUND) break;
         if (typeof page?.url !== "string" || !page.url.startsWith(`${origin}/`)) continue;
+        // Conversations have their own allowance, so a long inbox does not crowd out a site's menu.
+        const counter = isInbox(page.url) ? "conversations" : "found";
+        if (tour[counter] >= (counter === "found" ? MAX_FOUND : MAX_CONVERSATIONS)) continue;
         const path = new URL(page.url).pathname;
         if (tour.steps.some((step) => new URL(step.url).pathname === path)) continue;
         tour.steps.push({ url: page.url, label: String(page.label ?? path).slice(0, 80) });
-        tour.found++;
+        tour[counter]++;
       }
       return false;
     }

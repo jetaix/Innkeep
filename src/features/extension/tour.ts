@@ -47,6 +47,17 @@ export async function tourSteps(scope: "reservations" | "all"): Promise<TourStep
   if (scope === "reservations") return steps;
 
   const allListings = await getDb().select().from(listings).all();
+
+  // The host's Airbnb inbox. The extension leaves it out unless the host chose to
+  // keep conversations, and adds the conversations the inbox lists once it is there.
+  const airbnbInbox = allListings.find((listing) => listing.channel === "airbnb");
+  if (airbnbInbox) {
+    const origin = URL.canParse(airbnbInbox.listingUrl)
+      ? new URL(airbnbInbox.listingUrl).origin
+      : "https://www.airbnb.com";
+    steps.push({ url: `${origin}/hosting/messages`, label: "Airbnb: messages" });
+  }
+
   for (const property of await getProperties()) {
     for (const link of await calendarLinks(property.id)) {
       steps.push({ url: link.href, label: `${CHANNELS[link.channel].label}: calendar and prices` });
