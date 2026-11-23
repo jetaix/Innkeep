@@ -33,7 +33,8 @@ There are two ways to do it. Both give the same Innkeep.
    | `CRON_SECRET`        | A long random value                                   |
    | `TELEGRAM_…`         | See [Telegram notifications](#telegram-notifications) |
 
-4. **Deploy**, open the address and sign in.
+4. **Deploy**, open the address and sign in. Without `APP_PASSWORD` the pages
+   refuse to open, so an unfinished setup never shows your data.
 
 ### The scheduler
 
