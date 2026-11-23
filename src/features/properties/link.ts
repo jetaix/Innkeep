@@ -19,6 +19,17 @@ export function samePublicPage(a: string, b: string): boolean {
 }
 
 /**
+ * An Airbnb listing's number, which its public address carries
+ * ("https://www.airbnb.fr/rooms/123456"). Null for any other address.
+ */
+export function airbnbListingId(address: string): string | null {
+  if (!URL.canParse(address)) return null;
+  const url = new URL(address);
+  if (!/(^|\.)airbnb\.[a-z.]+$/.test(url.hostname)) return null;
+  return /^\/rooms\/(\d{3,20})(?:\/|$)/.exec(url.pathname)?.[1] ?? null;
+}
+
+/**
  * The listing a public page belongs to. Normally Innkeep already knows the
  * platform's number for it. Booking.com only reveals that number on the
  * extranet's reservations page, so a host who has not read that page yet has

@@ -229,6 +229,15 @@ CREATE UNIQUE INDEX IF NOT EXISTS cleanings_day ON cleanings (property_id, date)
   `
 ALTER TABLE cleanings ADD COLUMN notified_at INTEGER;
 `,
+  // 14: an Airbnb listing's number is in its address ("/rooms/123"): fill it in where it is missing
+  `
+UPDATE listings
+SET external_id = CAST(CAST(substr(listing_url, instr(listing_url, '/rooms/') + 7) AS INTEGER) AS TEXT)
+WHERE channel = 'airbnb'
+  AND external_id IS NULL
+  AND instr(listing_url, '/rooms/') > 0
+  AND CAST(substr(listing_url, instr(listing_url, '/rooms/') + 7) AS INTEGER) > 0;
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

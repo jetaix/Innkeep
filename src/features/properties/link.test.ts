@@ -5,9 +5,24 @@ vi.mock("server-only", () => ({}));
 
 import { eq } from "drizzle-orm";
 import { getDb, listings, properties } from "@/db";
-import { findListingForPage, samePublicPage } from "./link";
+import { airbnbListingId, findListingForPage, samePublicPage } from "./link";
 
 const PAGE = "https://www.booking.com/hotel/fr/charmant-appartement.fr.html";
+
+describe("airbnbListingId", () => {
+  it("reads the number from an Airbnb listing address, whatever the country", () => {
+    expect(airbnbListingId("https://www.airbnb.fr/rooms/1400000000000000001?guests=2")).toBe(
+      "1400000000000000001",
+    );
+    expect(airbnbListingId("https://www.airbnb.co.uk/rooms/12345678/")).toBe("12345678");
+  });
+
+  it("answers nothing for other pages", () => {
+    expect(airbnbListingId("https://www.airbnb.fr/hosting/listings")).toBeNull();
+    expect(airbnbListingId("https://example.com/rooms/12345678")).toBeNull();
+    expect(airbnbListingId("12345678")).toBeNull();
+  });
+});
 
 describe("samePublicPage", () => {
   it("ignores the language in the file name, the query and the hash", () => {
