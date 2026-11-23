@@ -130,8 +130,8 @@ vos données.
 
 Innkeep peut demander à Claude, un assistant IA conçu par Anthropic, des
 conseils fondés sur vos propres chiffres. Il faut un compte Anthropic, et
-chaque demande coûte quelques centimes. Cliquez sur **Assistant** dans le menu
-de gauche et suivez ses trois étapes.
+chaque demande coûte quelques centimes. Cliquez sur **Suggestions** dans le menu
+de gauche et suivez les trois étapes de sa section Claude.
 
 ## Protéger vos données
 

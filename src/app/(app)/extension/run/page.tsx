@@ -34,7 +34,7 @@ export default async function RunPage() {
             <Link href="/extension" className={buttonClass({ size: "sm" })}>
               {t.stuck.guide}
             </Link>
-            <Link href="/data" className={buttonClass({ size: "sm" })}>
+            <Link href="/settings#data" className={buttonClass({ size: "sm" })}>
               {t.stuck.data}
             </Link>
           </div>

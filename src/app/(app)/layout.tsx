@@ -98,5 +98,5 @@ async function NavWithBadges() {
     (suggestion) => suggestion.severity === "urgent",
   ).length;
   const toRefresh = countToRefresh(await getDataSources());
-  return <SidebarNav badges={{ "/suggestions": urgent, "/data": toRefresh }} />;
+  return <SidebarNav badges={{ "/suggestions": urgent, "/settings": toRefresh }} />;
 }

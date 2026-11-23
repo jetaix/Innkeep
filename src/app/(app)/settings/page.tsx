@@ -14,6 +14,7 @@ import { getTelegramChat } from "@/features/cleaning/telegram-chat";
 import { TelegramFind } from "@/features/cleaning/telegram-find";
 import { TelegramTest } from "@/features/cleaning/telegram-test";
 import { AI_MODEL, aiConfigured } from "@/features/insights/ai";
+import { DataSection } from "@/features/freshness/data-section";
 import { getI18n } from "@/i18n/server";
 import { appPassword } from "@/lib/session";
 import { telegramBot } from "@/lib/telegram";
@@ -31,8 +32,25 @@ export default async function SettingsPage() {
       <Suspense fallback={<Loading />}>
         <Settings />
       </Suspense>
+      <section id="data" aria-labelledby="data-heading" className="mt-10 scroll-mt-6">
+        <div className="mb-4 px-1">
+          <h2 id="data-heading" className="font-semibold">
+            {m.data.title}
+          </h2>
+          <p className="mt-0.5 text-[13px] text-muted">{m.data.description}</p>
+        </div>
+        <Suspense fallback={<Loading />}>
+          <Data />
+        </Suspense>
+      </section>
     </>
   );
+}
+
+/** Request-time data: where everything comes from and how fresh it is. */
+async function Data() {
+  await connection();
+  return <DataSection />;
 }
 
 async function Settings() {

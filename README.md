@@ -77,7 +77,7 @@ persistent disk.
 - **Listing preview.** Each platform's public listing as guests see it, side
   by side: title, photos, rating, description, amenities and the price shown
   for the same stay.
-- **Data freshness.** One page lists everything read from the platforms and
+- **Data freshness.** A section of Settings lists everything read from the platforms and
   from Claude, how old it is and the button that refreshes it; the sidebar
   counts what has gone stale.
 - **Reviews.** What guests wrote on Airbnb and Booking.com in one list, with
@@ -145,7 +145,7 @@ The Settings page shows what is switched on.
 | `CRON_SECRET`           | unset               | Turns on `/api/cron` for a scheduler (serverless hosts) |
 | `APP_URL`               | from the request    | Public URL used in export links                         |
 | `SYNC_INTERVAL_MINUTES` | `15`                | Background sync period, `0` to disable                  |
-| `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Assistant page         |
+| `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Suggestions page       |
 | `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                                |
 | `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                   |
 | `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details                 |
@@ -168,7 +168,7 @@ take by using it: the platforms' terms restrict automated data collection.
 
 ### Claude (AI advice)
 
-Open **Assistant** in the sidebar, create an API key in the Anthropic Console,
+Open **Suggestions** in the sidebar and go to its Claude section, create an API key in the Anthropic Console,
 paste it and press **Test and connect**. Innkeep checks the key before keeping
 it in your local database; setting `ANTHROPIC_API_KEY` on the server works too
 and takes precedence.

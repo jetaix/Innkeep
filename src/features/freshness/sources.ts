@@ -217,7 +217,7 @@ export async function getDataSources(now = Date.now()): Promise<DataSource[]> {
     state: freshness(advice?.generatedAt ?? null, "advice", now),
     automatic: false,
     action: (await aiConfigured())
-      ? { type: "go", href: "/assistant" }
+      ? { type: "go", href: "/suggestions#claude" }
       : { type: "blocked", reason: "claude" },
   });
 
