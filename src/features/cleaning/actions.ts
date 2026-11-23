@@ -6,8 +6,9 @@ import { z } from "zod";
 import { cleanerAssignments, cleaners, cleanings, CLEANING_STATUSES, getDb, properties } from "@/db";
 import { MESSAGES } from "@/i18n/messages";
 import { isoDate, parseForm, text } from "@/lib/form";
-import { sendTelegram } from "@/lib/telegram";
+import { findTelegramChats, sendTelegram, type TelegramChat } from "@/lib/telegram";
 import { notifyCleanings, telegramLocale } from "./notify";
+import { getTelegramChat, saveTelegramChat } from "./telegram-chat";
 
 const day = z.object({ propertyId: z.coerce.number().int().positive(), date: isoDate });
 
@@ -124,10 +125,38 @@ export type TelegramTestState = { sent: boolean; error: string | null };
 /** Checks the Telegram settings with a real message, then sends whatever is waiting. */
 export async function sendTelegramTest(): Promise<TelegramTestState> {
   try {
-    await sendTelegram(MESSAGES[telegramLocale()].cleaning.telegram.test);
+    await sendTelegram(
+      MESSAGES[telegramLocale()].cleaning.telegram.test,
+      (await getTelegramChat())?.id ?? null,
+    );
     await notifyCleanings();
     return { sent: true, error: null };
   } catch (cause) {
     return { sent: false, error: cause instanceof Error ? cause.message : String(cause) };
   }
+}
+
+export type TelegramChatsState = { chats: TelegramChat[] | null; error: string | null };
+
+/** Asks Telegram which chats the bot was recently written to in. */
+export async function findTelegramChatsAction(): Promise<TelegramChatsState> {
+  try {
+    return { chats: await findTelegramChats(), error: null };
+  } catch (cause) {
+    return { chats: null, error: cause instanceof Error ? cause.message : String(cause) };
+  }
+}
+
+const chosenChat = z.object({ id: z.string().regex(/^-?\d{3,20}$/), title: text.max(80) });
+
+/** Keeps the chat the host picked, and proves it works with a first message. */
+export async function chooseTelegramChat(form: FormData) {
+  const parsed = parseForm(chosenChat, form);
+  if (!parsed.success) return;
+  // Only a chat Telegram itself listed for this bot can be chosen.
+  const listed = (await findTelegramChats().catch(() => [])).some((chat) => chat.id === parsed.data.id);
+  if (!listed) return;
+  await saveTelegramChat(parsed.data);
+  await sendTelegram(MESSAGES[telegramLocale()].cleaning.telegram.test, parsed.data.id).catch(() => {});
+  refresh();
 }
