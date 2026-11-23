@@ -5,6 +5,7 @@ import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
 import { addDays, dayOfWeek, diffDays, type ISODate } from "@/lib/dates";
 import { barOf } from "./bars";
+import { stayValue } from "@/features/revenue/compute";
 import { addMonths, bookedNights, monthWeeks, nightsOf } from "./compute";
 
 /**
@@ -139,17 +140,23 @@ export async function YearGrid({
   const t = m.calendar;
   const months = Array.from({ length: 12 }, (_, index) => addMonths(year, index));
   const end = addMonths(year, 12);
-  /** "Léa Martin · 21 Nov to 25 Nov · 4 nights · Airbnb": just enough to know what a square is. */
+  /** "Léa Martin · 21 Nov to 25 Nov · 4 nights · €480 · Airbnb": just enough to know what a square is. */
   const describe = (stay: Reservation) => {
     const source = m.common.sources[stay.source];
     const who =
       stay.kind === "block"
         ? stay.notes || (stay.source === "booking" ? t.grid.closedOnBooking : t.grid.blocked)
         : stay.guestName || source;
+    // The payout when it is known; otherwise the nightly rate stands in, and the sign says so.
+    const value = stay.kind === "reservation" ? stayValue(stay, properties) : null;
+    const currency = properties.find((property) => property.id === stay.propertyId)?.currency ?? "EUR";
     return [
       who,
       t.grid.range(fmt.date(stay.checkIn), fmt.date(stay.checkOut)),
       m.common.count.nights(diffDays(stay.checkIn, stay.checkOut)),
+      ...(value
+        ? [`${value.estimated ? "≈ " : ""}${fmt.money(value.total, currency, { cents: false })}`]
+        : []),
       ...(who === source ? [] : [source]),
     ].join(" · ");
   };
