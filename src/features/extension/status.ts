@@ -3,7 +3,7 @@ import { eq, isNotNull } from "drizzle-orm";
 import { appState, getDb, reservations, type OtaChannel } from "@/db";
 
 /** The oldest Innkeep Companion that sends everything this version of Innkeep stores. */
-export const REQUIRED_EXTENSION = "0.12.0";
+export const REQUIRED_EXTENSION = "0.13.1";
 
 const KEY = "extension";
 

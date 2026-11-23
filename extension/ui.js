@@ -45,8 +45,8 @@
   const RELOAD = "Innkeep Companion was updated. Reload this page to use it here.";
 
   const ready = (async () => {
-    const [stored, status] = await Promise.all([stored("baseUrl"), ask({ type: "innkeep:tour-status" })]);
-    baseUrl = stored.baseUrl ?? "";
+    const [saved, status] = await Promise.all([stored("baseUrl"), ask({ type: "innkeep:tour-status" })]);
+    baseUrl = saved.baseUrl ?? "";
     tour = status?.active && status.thisTab ? status : null;
     trusted = Boolean(tour) || (Boolean(baseUrl) && document.referrer.startsWith(baseUrl));
     if (tour) showTour();
