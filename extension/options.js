@@ -2,12 +2,10 @@ const form = document.getElementById("form");
 const baseUrl = document.getElementById("baseUrl");
 const token = document.getElementById("token");
 const autoSend = document.getElementById("autoSend");
-const readMessages = document.getElementById("readMessages");
 const result = document.getElementById("result");
 
-chrome.storage.local.get(["baseUrl", "token", "autoSend", "readMessages"]).then((saved) => {
+chrome.storage.local.get(["baseUrl", "token", "autoSend"]).then((saved) => {
   autoSend.checked = saved.autoSend ?? true;
-  readMessages.checked = saved.readMessages === true;
   baseUrl.value = saved.baseUrl ?? "";
   token.value = saved.token ?? "";
 });
@@ -33,7 +31,6 @@ form.addEventListener("submit", async (event) => {
     baseUrl: origin,
     token: token.value.trim(),
     autoSend: autoSend.checked,
-    readMessages: readMessages.checked,
   });
   result.textContent = "Testing…";
   const response = await chrome.runtime.sendMessage({ type: "innkeep:test" });

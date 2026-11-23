@@ -3,17 +3,7 @@ import { and, asc, eq, inArray, like } from "drizzle-orm";
 import { DEMO_SCHEME } from "@/channels/demo";
 import { syncAll } from "@/channels/sync";
 import { addDays, diffDays, today } from "@/lib/dates";
-import {
-  aiAdvice,
-  charges,
-  conversations,
-  dismissedSuggestions,
-  getDb,
-  listings,
-  messages,
-  properties,
-  reservations,
-} from "./index";
+import { aiAdvice, charges, dismissedSuggestions, getDb, listings, properties, reservations } from "./index";
 
 export const newToken = () => randomBytes(18).toString("base64url");
 
@@ -100,7 +90,7 @@ export async function removeSampleData(): Promise<void> {
   });
 }
 
-/** Fills an empty database with sample properties, bookings and conversations. */
+/** Fills an empty database with sample properties and bookings. */
 export async function seedDemo(): Promise<void> {
   const db = getDb();
   if (await db.select({ id: properties.id }).from(properties).limit(1).get()) return;
@@ -229,60 +219,4 @@ export async function seedDemo(): Promise<void> {
       },
     ])
     .run();
-
-  const hour = 3_600_000;
-  const threads = [
-    {
-      propertyId: ids[0],
-      source: "airbnb" as const,
-      guestName: "Tom Becker",
-      unread: 1,
-      thread: [
-        ["in", "Hi! We land at CDG around 9am. Any chance of an early check-in?", 5 * hour],
-        ["out", "Hi Tom, the loft is free the night before, so you can come from 11:00.", 4 * hour],
-        ["in", "Perfect, thank you! Is there somewhere to leave a stroller downstairs?", 0.5 * hour],
-      ],
-    },
-    {
-      propertyId: ids[1],
-      source: "booking" as const,
-      guestName: "Hugo Lambert",
-      unread: 1,
-      thread: [["in", "Bonjour, is the wood for the stove included in the price?", 2 * hour]],
-    },
-    {
-      propertyId: ids[2],
-      source: "airbnb" as const,
-      guestName: "Paula Gómez",
-      unread: 0,
-      thread: [
-        ["in", "We just arrived, the studio is lovely. Where do we put the recycling?", 26 * hour],
-        [
-          "out",
-          "Welcome! Yellow bins are in the courtyard, glass goes to the container by the port.",
-          25 * hour,
-        ],
-      ],
-    },
-  ] as const;
-
-  for (const { thread, ...conversation } of threads) {
-    const last = Date.now() - Math.min(...thread.map(([, , ago]) => ago));
-    const row = await db
-      .insert(conversations)
-      .values({ ...conversation, externalThreadId: `demo-${conversation.guestName}`, lastMessageAt: last })
-      .returning({ id: conversations.id })
-      .get();
-    await db
-      .insert(messages)
-      .values(
-        thread.map(([direction, body, ago]) => ({
-          conversationId: row.id,
-          direction,
-          body,
-          sentAt: Date.now() - ago,
-        })),
-      )
-      .run();
-  }
 }

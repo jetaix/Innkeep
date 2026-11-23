@@ -124,7 +124,7 @@ const en = {
     price: "Free",
     free: "Free",
     connection: "iCal both ways for dates; other details read from your own pages by a browser extension",
-    inbox: "Yes, fed by a webhook; replies pasted",
+    inbox: "No",
     automation: "Rules, price comparison, optional advice from Claude, MCP server",
     site: "Direct bookings and blocks, no public site",
     license: "MIT / Yes",
@@ -412,7 +412,7 @@ const fr: typeof en = {
     free: "Gratuit",
     connection:
       "iCal dans les deux sens pour les dates ; les autres informations sont lues sur vos propres pages par une extension de navigateur",
-    inbox: "Oui, alimentée par un webhook ; réponses à coller",
+    inbox: "Non",
     automation: "Règles, comparaison des prix, conseils de Claude en option, serveur MCP",
     site: "Réservations directes et blocages, pas de site public",
     license: "MIT / Oui",

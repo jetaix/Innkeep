@@ -8,7 +8,6 @@ import { revenue } from "./revenue";
 import { pricing } from "./pricing";
 import { insights } from "./insights";
 import { assistant } from "./assistant";
-import { inbox } from "./inbox";
 import { reviews } from "./reviews";
 import { properties } from "./properties";
 import { preview } from "./preview";
@@ -33,7 +32,6 @@ const AREAS = {
   pricing,
   insights,
   assistant,
-  inbox,
   reviews,
   properties,
   preview,

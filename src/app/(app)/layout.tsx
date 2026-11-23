@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { sql } from "drizzle-orm";
 import { connection } from "next/server";
 import { Logo } from "@/components/brand/logo";
 import { CommandMenu } from "@/components/shell/command-menu";
 import { SidebarNav } from "@/components/shell/sidebar";
-import { conversations, getDb } from "@/db";
 import { getSuggestions } from "@/features/insights/queries";
 import { ConfirmButton } from "@/components/ui/actions";
 import { hasSampleData } from "@/db/seed";
@@ -92,19 +90,9 @@ async function SampleDataBanner() {
 
 async function NavWithBadges() {
   await connection();
-  const unread =
-    (
-      await (
-        await getDb()
-      )
-        .select({ total: sql<number>`coalesce(sum(${conversations.unread}), 0)` })
-        .from(conversations)
-        .where(sql`${conversations.unread} > 0`)
-        .get()
-    )?.total ?? 0;
   const urgent = (await getSuggestions((await getI18n()).locale)).active.filter(
     (suggestion) => suggestion.severity === "urgent",
   ).length;
   const toRefresh = countToRefresh(await getDataSources());
-  return <SidebarNav badges={{ "/inbox": unread, "/suggestions": urgent, "/data": toRefresh }} />;
+  return <SidebarNav badges={{ "/suggestions": urgent, "/data": toRefresh }} />;
 }

@@ -98,6 +98,11 @@ export const reservations = sqliteTable(
   (t) => [uniqueIndex("reservations_external").on(t.propertyId, t.source, t.externalUid)],
 );
 
+/**
+ * Guest conversations and their messages. Innkeep no longer reads or shows
+ * guest messages; the two tables stay so that what an earlier version stored
+ * is not lost.
+ */
 export const conversations = sqliteTable(
   "conversations",
   {

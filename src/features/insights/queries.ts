@@ -1,7 +1,7 @@
 import "server-only";
-import { desc, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { publishState } from "@/channels/content";
-import { aiAdvice, charges, conversations, dismissedSuggestions, getDb, listings, messages } from "@/db";
+import { aiAdvice, charges, dismissedSuggestions, getDb, listings } from "@/db";
 import { getProperties, getStays } from "@/features/reservations/queries";
 import type { Locale } from "@/i18n/config";
 import { createFormat } from "@/i18n/format";
@@ -15,25 +15,6 @@ async function gatherInput(): Promise<InsightInput> {
   const properties = await getProperties();
   const now = today();
 
-  const threads = await db.select().from(conversations).all();
-  const lastMessages = await Promise.all(
-    threads.map(async (conversation) => {
-      const last = await db
-        .select({ direction: messages.direction })
-        .from(messages)
-        .where(eq(messages.conversationId, conversation.id))
-        .orderBy(desc(messages.sentAt))
-        .limit(1)
-        .get();
-      return {
-        id: conversation.id,
-        guestName: conversation.guestName,
-        lastDirection: last?.direction ?? ("out" as const),
-        lastMessageAt: conversation.lastMessageAt,
-      };
-    }),
-  );
-
   return {
     today: now,
     now: Date.now(),
@@ -44,7 +25,6 @@ async function gatherInput(): Promise<InsightInput> {
     }),
     // A day of history keeps today's departures in view for turnover checks.
     stays: await getStays(addDays(now, -1)),
-    conversations: lastMessages,
     chargeCount: (await db.select({ count: sql<number>`count(*)` }).from(charges).get())?.count ?? 0,
   };
 }

@@ -35,7 +35,6 @@ const ALLOWED_PATHS = [
   "/api/ingest/preview",
   "/api/ingest/reviews",
   "/api/ingest/page",
-  "/api/ingest/messages",
 ];
 
 /**
@@ -51,9 +50,6 @@ const STEP_LIMIT_MS = 14_000;
 const SETTLE_MS = 3_000;
 /** Pages found in a site's own menu may be added to a run, up to this many. */
 const MAX_FOUND = 15;
-/** Conversations listed by the inbox may be added to a run, up to this many. */
-const MAX_CONVERSATIONS = 40;
-const isInbox = (url) => /^\/hosting\/messages(\/|$)/.test(new URL(url).pathname);
 
 let tour = null;
 
@@ -80,9 +76,7 @@ async function startTour(query, tabId) {
   if (tour) return { ok: false, error: "A run is already going." };
   const plan = await callInnkeep("GET", `/api/extension/tour?${query}`);
   if (!plan.ok) return plan;
-  // The inbox is only visited when the host chose to keep conversations.
-  const { readMessages } = await chrome.storage.local.get("readMessages");
-  const steps = (plan.steps ?? []).filter((step) => readMessages === true || !isInbox(step.url));
+  const steps = plan.steps ?? [];
   if (!steps.length) return { ok: false, error: "Innkeep has no page to read yet. Add a listing first." };
 
   const first = { url: steps[0].url, active: true };
@@ -92,7 +86,6 @@ async function startTour(query, tabId) {
     steps,
     index: 0,
     found: 0,
-    conversations: readMessages === true ? 0 : MAX_CONVERSATIONS,
     turnedAway: new Set(),
     doneUrl: plan.doneUrl,
     timer: null,
@@ -220,13 +213,11 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       for (const page of message.pages) {
         if (typeof page?.url !== "string" || !page.url.startsWith(`${origin}/`)) continue;
         if (tour.turnedAway.has(hostOf(page.url))) continue;
-        // Conversations have their own allowance, so a long inbox does not crowd out a site's menu.
-        const counter = isInbox(page.url) ? "conversations" : "found";
-        if (tour[counter] >= (counter === "found" ? MAX_FOUND : MAX_CONVERSATIONS)) continue;
+        if (tour.found >= MAX_FOUND) break;
         const path = new URL(page.url).pathname;
         if (tour.steps.some((step) => new URL(step.url).pathname === path)) continue;
         tour.steps.push({ url: page.url, label: String(page.label ?? path).slice(0, 80) });
-        tour[counter]++;
+        tour.found++;
       }
       return false;
     }

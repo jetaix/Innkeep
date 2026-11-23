@@ -89,11 +89,6 @@ const en = {
       title: (property: string) => `Connect a calendar for ${property}`,
       body: "Paste the calendar link from Airbnb or Booking.com and Innkeep starts importing bookings every 15 minutes.",
     },
-    unanswered: {
-      title: (guest: string, hours: number) => `${guest} has waited ${hours} h for a reply`,
-      body: "A guest asking a question is often writing to several hosts at once. A short answer now beats a full one tomorrow.",
-      action: "Reply",
-    },
     noCharges: {
       title: "Add your costs to see what you really earn",
       body: "Revenue is shown before cleaning, platform commission and subscriptions. Add them once and every month shows the net figure.",
@@ -221,11 +216,6 @@ const fr: typeof en = {
     noChannel: {
       title: (property) => `Connectez un calendrier pour ${property}`,
       body: "Collez le lien de calendrier d’Airbnb ou de Booking.com et Innkeep importe les réservations toutes les 15 minutes.",
-    },
-    unanswered: {
-      title: (guest, hours) => `${guest} attend une réponse depuis ${hours} h`,
-      body: "Un voyageur qui pose une question écrit souvent à plusieurs hôtes à la fois. Une réponse courte maintenant vaut mieux qu’une réponse complète demain.",
-      action: "Répondre",
     },
     noCharges: {
       title: "Ajoutez vos charges pour voir ce que vous gagnez vraiment",

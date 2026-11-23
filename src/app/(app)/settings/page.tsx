@@ -105,16 +105,6 @@ async function Settings() {
               {i.ai.body}
             </Integration>
             <Integration
-              name={i.webhook.name}
-              on={Boolean(process.env.WEBHOOK_SECRET)}
-              status={state(Boolean(process.env.WEBHOOK_SECRET))}
-              variable="WEBHOOK_SECRET"
-            >
-              {i.webhook.before}{" "}
-              <code className="font-mono text-xs text-ink">POST {origin}/api/webhooks/messages</code>{" "}
-              {i.webhook.after}
-            </Integration>
-            <Integration
               name={i.extension.name}
               on={Boolean(process.env.EXTENSION_TOKEN)}
               status={state(Boolean(process.env.EXTENSION_TOKEN))}
@@ -188,7 +178,6 @@ async function Settings() {
           <Shortcut keys={["N"]}>{t.shortcuts.add}</Shortcut>
           <Shortcut keys={["←", "→"]}>{t.shortcuts.move}</Shortcut>
           <Shortcut keys={["T"]}>{t.shortcuts.today}</Shortcut>
-          <Shortcut keys={["J", "K"]}>{t.shortcuts.conversations}</Shortcut>
           <Shortcut keys={["Esc"]}>{t.shortcuts.close}</Shortcut>
         </dl>
       </Card>

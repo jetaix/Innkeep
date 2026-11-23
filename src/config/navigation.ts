@@ -3,7 +3,6 @@ import {
   ClipboardList,
   Home,
   type LucideIcon,
-  MessageSquare,
   RefreshCw,
   Lightbulb,
   Building2,
@@ -23,7 +22,6 @@ export type NavItem = {
     | "calendar"
     | "reservations"
     | "cleaning"
-    | "inbox"
     | "reviews"
     | "revenue"
     | "pricing"
@@ -42,7 +40,6 @@ export const NAV: NavItem[] = [
   { href: "/calendar", id: "calendar", icon: CalendarDays, key: "c" },
   { href: "/reservations", id: "reservations", icon: ClipboardList, key: "r" },
   { href: "/cleaning", id: "cleaning", icon: SprayCan, key: "m" },
-  { href: "/inbox", id: "inbox", icon: MessageSquare, key: "i" },
   { href: "/reviews", id: "reviews", icon: Star, key: "w" },
   { href: "/revenue", id: "revenue", icon: Wallet, key: "v" },
   { href: "/pricing", id: "pricing", icon: Tags, key: "t" },

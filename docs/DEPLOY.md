@@ -98,7 +98,7 @@ passed.
 
 The addresses that machines call keep their own secrets and do not use the
 password: the calendar links you give Airbnb and Booking.com, the browser
-extension, the messages webhook and the MCP server.
+extension and the MCP server.
 
 ## Telegram notifications
 

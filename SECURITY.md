@@ -6,7 +6,6 @@ authenticates. Only these routes are designed to be reachable from the
 internet, each protected by a secret:
 
 - `/api/ical/<token>/…` (random per-property token; exposes booked dates, never guest names)
-- `/api/webhooks/messages` (`WEBHOOK_SECRET` bearer token)
 - `/api/mcp` (`MCP_TOKEN` bearer token)
 - `/api/ingest/reservations` and `/api/ingest/listing` (`EXTENSION_TOKEN` bearer token)
 
