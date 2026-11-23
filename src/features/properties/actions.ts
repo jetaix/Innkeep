@@ -71,8 +71,11 @@ export async function saveListing(propertyId: number, channel: string, form: For
     .onConflictDoUpdate({ target: [listings.propertyId, listings.channel], set: parsed.data })
     .returning({ id: listings.id, icalUrl: listings.icalUrl })
     .get();
-  // Airbnb's address names the listing, so the extension can read its pages without a first run.
-  const airbnbId = parsedChannel.data === "airbnb" ? airbnbListingId(parsed.data.listingUrl) : null;
+  // Airbnb's own addresses name the listing, so the extension can read its pages without a first run.
+  const airbnbId =
+    parsedChannel.data === "airbnb"
+      ? (airbnbListingId(parsed.data.listingUrl) ?? airbnbListingId(parsed.data.icalUrl))
+      : null;
   if (airbnbId) {
     await getDb()
       .update(listings)

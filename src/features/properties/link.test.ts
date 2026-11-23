@@ -17,8 +17,17 @@ describe("airbnbListingId", () => {
     expect(airbnbListingId("https://www.airbnb.co.uk/rooms/12345678/")).toBe("12345678");
   });
 
+  it("reads it from the exported calendar link and from the host's own pages", () => {
+    expect(airbnbListingId("https://www.airbnb.fr/calendar/ical/12345678.ics?s=abcdef")).toBe("12345678");
+    expect(airbnbListingId("https://www.airbnb.fr/hosting/listings/editor/12345678/details")).toBe(
+      "12345678",
+    );
+    expect(airbnbListingId("https://www.airbnb.fr/multicalendar/12345678")).toBe("12345678");
+  });
+
   it("answers nothing for other pages", () => {
     expect(airbnbListingId("https://www.airbnb.fr/hosting/listings")).toBeNull();
+    expect(airbnbListingId("https://www.airbnb.fr/h/mon-appartement")).toBeNull();
     expect(airbnbListingId("https://example.com/rooms/12345678")).toBeNull();
     expect(airbnbListingId("12345678")).toBeNull();
   });

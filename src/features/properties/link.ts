@@ -19,14 +19,19 @@ export function samePublicPage(a: string, b: string): boolean {
 }
 
 /**
- * An Airbnb listing's number, which its public address carries
- * ("https://www.airbnb.fr/rooms/123456"). Null for any other address.
+ * An Airbnb listing's number, read from any of the host's own addresses that
+ * carry it: the public page ("/rooms/123"), the calendar link Airbnb exports
+ * ("/calendar/ical/123.ics"), the listing editor or the calendar. Null for
+ * any other address, such as a custom "/h/name" link.
  */
 export function airbnbListingId(address: string): string | null {
   if (!URL.canParse(address)) return null;
   const url = new URL(address);
   if (!/(^|\.)airbnb\.[a-z.]+$/.test(url.hostname)) return null;
-  return /^\/rooms\/(\d{3,20})(?:\/|$)/.exec(url.pathname)?.[1] ?? null;
+  const match =
+    /^\/(?:rooms|multicalendar|hosting\/listings(?:\/editor)?)\/(\d{3,20})(?:\/|$)/.exec(url.pathname) ??
+    /^\/calendar\/ical\/(\d{3,20})\.ics$/.exec(url.pathname);
+  return match?.[1] ?? null;
 }
 
 /**

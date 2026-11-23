@@ -238,6 +238,16 @@ WHERE channel = 'airbnb'
   AND instr(listing_url, '/rooms/') > 0
   AND CAST(substr(listing_url, instr(listing_url, '/rooms/') + 7) AS INTEGER) > 0;
 `,
+  // 15: the calendar link Airbnb exports carries the number too ("/calendar/ical/123.ics")
+  `
+UPDATE listings
+SET external_id = CAST(CAST(substr(ical_url, instr(ical_url, '/calendar/ical/') + 15) AS INTEGER) AS TEXT)
+WHERE channel = 'airbnb'
+  AND external_id IS NULL
+  AND instr(ical_url, 'airbnb.') > 0
+  AND instr(ical_url, '/calendar/ical/') > 0
+  AND CAST(substr(ical_url, instr(ical_url, '/calendar/ical/') + 15) AS INTEGER) > 0;
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */
