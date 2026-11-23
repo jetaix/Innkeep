@@ -33,9 +33,9 @@ async function Sources() {
   await connection();
   const { m } = await getI18n();
   const t = m.data;
-  const sources = getDataSources();
+  const sources = await getDataSources();
   const toRefresh = countToRefresh(sources);
-  const properties = getProperties();
+  const properties = await getProperties();
   const groups = [
     { key: "account", title: t.account, rows: sources.filter((source) => source.propertyId == null) },
     ...properties.map((property) => ({

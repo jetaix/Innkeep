@@ -3,13 +3,15 @@ import { and, asc, eq, gt, lt } from "drizzle-orm";
 import { getDb, properties, reservations, type Reservation } from "@/db";
 import { rangesOverlap, type ISODate } from "@/lib/dates";
 
-export function getProperties() {
-  return getDb().select().from(properties).orderBy(asc(properties.createdAt)).all();
+export async function getProperties() {
+  return await getDb().select().from(properties).orderBy(asc(properties.createdAt)).all();
 }
 
 /** Confirmed stays and blocks that overlap [from, to). Omit `to` for everything still ahead. */
-export function getStays(from: ISODate, to?: ISODate): Reservation[] {
-  return getDb()
+export async function getStays(from: ISODate, to?: ISODate): Promise<Reservation[]> {
+  return await (
+    await getDb()
+  )
     .select()
     .from(reservations)
     .where(

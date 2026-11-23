@@ -1,0 +1,25 @@
+name: Sync
+
+# Wakes a hosted Innkeep every 15 minutes: it has no timer of its own on a
+# serverless host. Does nothing until the repository has an INNKEEP_URL
+# variable and a CRON_SECRET secret (Settings, Secrets and variables, Actions).
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sync:
+    if: vars.INNKEEP_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Sync calendars and send notifications
+        env:
+          INNKEEP_URL: ${{ vars.INNKEEP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -H "Authorization: Bearer $CRON_SECRET" "${INNKEEP_URL%/}/api/cron"

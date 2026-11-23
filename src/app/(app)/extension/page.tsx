@@ -59,7 +59,7 @@ async function Guide() {
   const { m, fmt } = await getI18n();
   const t = m.extension;
   const s = t.setup;
-  const status = getExtensionStatus();
+  const status = await getExtensionStatus();
   const token = process.env.EXTENSION_TOKEN;
   const requestHeaders = await headers();
   const origin =

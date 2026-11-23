@@ -10,34 +10,36 @@ import { appState, getDb } from "@/db";
  */
 const KEY = "anthropic-key";
 
-function savedKey(): string | null {
-  return getDb().select().from(appState).where(eq(appState.key, KEY)).get()?.value ?? null;
+async function savedKey(): Promise<string | null> {
+  return (await getDb().select().from(appState).where(eq(appState.key, KEY)).get())?.value ?? null;
 }
 
-export function getApiKey(): string | null {
-  return process.env.ANTHROPIC_API_KEY || savedKey();
+export async function getApiKey(): Promise<string | null> {
+  return process.env.ANTHROPIC_API_KEY || (await savedKey());
 }
 
 export type KeyStatus =
   /** Set in the server's environment; the page cannot change it. */
   { source: "environment"; ending: string } | { source: "saved"; ending: string } | { source: null };
 
-export function getKeyStatus(): KeyStatus {
+export async function getKeyStatus(): Promise<KeyStatus> {
   const ending = (key: string) => key.slice(-4);
   if (process.env.ANTHROPIC_API_KEY)
     return { source: "environment", ending: ending(process.env.ANTHROPIC_API_KEY) };
-  const saved = savedKey();
+  const saved = await savedKey();
   return saved ? { source: "saved", ending: ending(saved) } : { source: null };
 }
 
-export function saveApiKey(key: string) {
-  getDb()
+export async function saveApiKey(key: string) {
+  await (
+    await getDb()
+  )
     .insert(appState)
     .values({ key: KEY, value: key })
     .onConflictDoUpdate({ target: appState.key, set: { value: key } })
     .run();
 }
 
-export function removeApiKey() {
-  getDb().delete(appState).where(eq(appState.key, KEY)).run();
+export async function removeApiKey() {
+  await getDb().delete(appState).where(eq(appState.key, KEY)).run();
 }

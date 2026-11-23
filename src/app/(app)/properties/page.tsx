@@ -34,8 +34,8 @@ async function PropertyList() {
   await connection();
   const { m } = await getI18n();
   const t = m.properties;
-  const properties = getProperties();
-  const allListings = getDb().select().from(listings).all();
+  const properties = await getProperties();
+  const allListings = await getDb().select().from(listings).all();
 
   return (
     <div className="max-w-3xl space-y-3">

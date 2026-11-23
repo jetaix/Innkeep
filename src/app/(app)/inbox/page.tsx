@@ -39,9 +39,10 @@ async function Inbox({ searchParams }: Pick<PageProps<"/inbox">, "searchParams">
   const db = getDb();
 
   // Opening a conversation marks it as read.
-  if (selectedId) db.update(conversations).set({ unread: 0 }).where(eq(conversations.id, selectedId)).run();
+  if (selectedId)
+    await db.update(conversations).set({ unread: 0 }).where(eq(conversations.id, selectedId)).run();
 
-  const all = db
+  const all = await db
     .select({ conversation: conversations, propertyName: properties.name })
     .from(conversations)
     .innerJoin(properties, eq(properties.id, conversations.propertyId))
@@ -63,7 +64,7 @@ async function Inbox({ searchParams }: Pick<PageProps<"/inbox">, "searchParams">
   const nextId = all[selectedIndex + 1]?.conversation.id ?? (selected ? undefined : all[0].conversation.id);
   const previousId = selectedIndex > 0 ? all[selectedIndex - 1].conversation.id : undefined;
   const thread = selected
-    ? db
+    ? await db
         .select()
         .from(messages)
         .where(eq(messages.conversationId, selected.conversation.id))
@@ -71,16 +72,21 @@ async function Inbox({ searchParams }: Pick<PageProps<"/inbox">, "searchParams">
         .all()
     : [];
   const previews = new Map(
-    all.map(({ conversation }) => [
-      conversation.id,
-      db
-        .select({ body: messages.body, direction: messages.direction })
-        .from(messages)
-        .where(eq(messages.conversationId, conversation.id))
-        .orderBy(desc(messages.sentAt))
-        .limit(1)
-        .get(),
-    ]),
+    await Promise.all(
+      all.map(
+        async ({ conversation }) =>
+          [
+            conversation.id,
+            await db
+              .select({ body: messages.body, direction: messages.direction })
+              .from(messages)
+              .where(eq(messages.conversationId, conversation.id))
+              .orderBy(desc(messages.sentAt))
+              .limit(1)
+              .get(),
+          ] as const,
+      ),
+    ),
   );
 
   return (

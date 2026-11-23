@@ -11,28 +11,31 @@ import { hasBearerToken } from "@/lib/auth";
  *   POST /api/ingest/reservations   { source, reservations: [...] }
  *   Authorization: Bearer $EXTENSION_TOKEN
  */
-function authorise(request: Request): Response | null {
+async function authorise(request: Request): Promise<Response | null> {
   const token = process.env.EXTENSION_TOKEN;
   if (!token) return Response.json({ error: "Set EXTENSION_TOKEN to enable the extension" }, { status: 503 });
   if (!hasBearerToken(request, token)) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  recordExtension(request);
+  await recordExtension(request);
   return null;
 }
 
 export async function GET(request: Request) {
   return (
-    authorise(request) ??
+    (await authorise(request)) ??
     Response.json({
       ok: true,
       app: "innkeep",
       // Where the extension's settings page sends the host next.
-      links: reservationLinks().map((link) => ({ label: CHANNELS[link.channel].label, href: link.href })),
+      links: (await reservationLinks()).map((link) => ({
+        label: CHANNELS[link.channel].label,
+        href: link.href,
+      })),
     })
   );
 }
 
 export async function POST(request: Request) {
-  const denied = authorise(request);
+  const denied = await authorise(request);
   if (denied) return denied;
 
   const parsed = ingestSchema.safeParse(await request.json().catch(() => null));
@@ -42,7 +45,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const result = ingestReservations(parsed.data);
-  recordUpdate(parsed.data.source, result.updated + result.unchanged + result.added);
+  const result = await ingestReservations(parsed.data);
+  await recordUpdate(parsed.data.source, result.updated + result.unchanged + result.added);
   return Response.json({ ok: true, ...result });
 }

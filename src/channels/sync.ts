@@ -48,7 +48,7 @@ async function loadFeedPatiently(url: string): Promise<string> {
  */
 export async function syncListing(listingId: number): Promise<SyncResult> {
   const db = getDb();
-  const listing = db.select().from(listings).where(eq(listings.id, listingId)).get();
+  const listing = await db.select().from(listings).where(eq(listings.id, listingId)).get();
   if (!listing) return { ok: false, error: "Listing not found" };
   if (!listing.icalUrl) return { ok: false, error: "No iCal URL configured" };
 
@@ -57,7 +57,7 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
     events = parseICal(await loadFeedPatiently(listing.icalUrl));
   } catch (cause) {
     const error = cause instanceof Error ? cause.message : String(cause);
-    db.update(listings).set({ lastSyncError: error }).where(eq(listings.id, listingId)).run();
+    await db.update(listings).set({ lastSyncError: error }).where(eq(listings.id, listingId)).run();
     return { ok: false, error };
   }
 
@@ -68,10 +68,11 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
   const seen = new Set(relevant.map((event) => event.uid));
   let cancelled = 0;
 
-  db.transaction((tx) => {
+  await db.transaction(async (tx) => {
     for (const event of relevant) {
       const { kind, channelInfo } = adapter.classifyEvent(event);
-      tx.insert(reservations)
+      await tx
+        .insert(reservations)
         .values({
           propertyId: listing.propertyId,
           source: listing.channel,
@@ -96,7 +97,7 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
         .run();
     }
 
-    const upcoming = tx
+    const upcoming = await tx
       .select({ id: reservations.id, uid: reservations.externalUid })
       .from(reservations)
       .where(
@@ -111,11 +112,12 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
       .all();
     for (const row of upcoming) {
       if (seen.has(row.uid!)) continue;
-      tx.update(reservations).set({ status: "cancelled" }).where(eq(reservations.id, row.id)).run();
+      await tx.update(reservations).set({ status: "cancelled" }).where(eq(reservations.id, row.id)).run();
       cancelled++;
     }
 
-    tx.update(listings)
+    await tx
+      .update(listings)
       .set({ lastSyncedAt: Date.now(), lastSyncError: null })
       .where(eq(listings.id, listingId))
       .run();
@@ -125,7 +127,13 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
 }
 
 export async function syncAll(): Promise<{ synced: number; failed: number }> {
-  const rows = getDb().select({ id: listings.id }).from(listings).where(ne(listings.icalUrl, "")).all();
+  const rows = await (
+    await getDb()
+  )
+    .select({ id: listings.id })
+    .from(listings)
+    .where(ne(listings.icalUrl, ""))
+    .all();
   const results = await Promise.all(rows.map((row) => syncListing(row.id)));
   const failed = results.filter((result) => !result.ok).length;
   return { synced: results.length - failed, failed };
@@ -136,9 +144,12 @@ export async function syncAll(): Promise<{ synced: number; failed: number }> {
  * property that did NOT come from that channel. Excluding the channel's own
  * bookings avoids echoing them back as blocks.
  */
-export function exportEvents(propertyId: number, forChannel: OtaChannel | "all"): CalendarEvent[] {
+export async function exportEvents(
+  propertyId: number,
+  forChannel: OtaChannel | "all",
+): Promise<CalendarEvent[]> {
   const db = getDb();
-  const rows = db
+  const rows = await db
     .select()
     .from(reservations)
     .where(
@@ -162,6 +173,6 @@ export function exportEvents(propertyId: number, forChannel: OtaChannel | "all")
     }));
 }
 
-export function findPropertyByToken(token: string) {
-  return getDb().select().from(properties).where(eq(properties.icalToken, token)).get();
+export async function findPropertyByToken(token: string) {
+  return await getDb().select().from(properties).where(eq(properties.icalToken, token)).get();
 }

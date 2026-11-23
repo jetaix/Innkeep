@@ -85,6 +85,15 @@ const en = {
     switchOn: "Plan cleanings",
     offHint: "Switched off: this place does not appear in the schedule. Nothing is lost.",
   },
+  telegram: {
+    needed: (n: number) => (n === 1 ? "Cleaning to arrange" : `${n} cleanings to arrange`),
+    cancelled: (n: number) => (n === 1 ? "Cleaning no longer needed" : `${n} cleanings no longer needed`),
+    test: "Innkeep can reach you here. You will get a message each time a cleaning has to be arranged.",
+    testButton: "Send a test message",
+    testSending: "Sending…",
+    testSent: "Sent. Check Telegram.",
+    testFailed: (reason: string) => `Telegram refused the message: ${reason}`,
+  },
   credit: "The idea of this schedule comes from RentTools.io, an open-source project under the MIT licence.",
 };
 
@@ -178,6 +187,16 @@ const fr: typeof en = {
     switchOff: "Ne plus planifier",
     switchOn: "Planifier les ménages",
     offHint: "Désactivé : ce logement n’apparaît pas dans le planning. Rien n’est perdu.",
+  },
+  telegram: {
+    needed: (n) => (n === 1 ? "Ménage à demander" : `${n} ménages à demander`),
+    cancelled: (n) =>
+      n === 1 ? "Ménage qui n’est plus nécessaire" : `${n} ménages qui ne sont plus nécessaires`,
+    test: "Innkeep peut vous écrire ici. Vous recevrez un message chaque fois qu’un ménage est à demander.",
+    testButton: "Envoyer un message de test",
+    testSending: "Envoi…",
+    testSent: "Envoyé. Regardez Telegram.",
+    testFailed: (reason) => `Telegram a refusé le message : ${reason}`,
   },
   credit: "L’idée de ce planning vient de RentTools.io, un projet open source sous licence MIT.",
 };

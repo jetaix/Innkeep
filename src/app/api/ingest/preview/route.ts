@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const token = process.env.EXTENSION_TOKEN;
   if (!token) return Response.json({ error: "Set EXTENSION_TOKEN to enable the extension" }, { status: 503 });
   if (!hasBearerToken(request, token)) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  recordExtension(request);
+  await recordExtension(request);
 
   const parsed = previewIngestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
@@ -21,6 +21,6 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const result = ingestPreview(parsed.data);
+  const result = await ingestPreview(parsed.data);
   return result.ok ? Response.json(result) : Response.json({ error: result.error }, { status: 409 });
 }

@@ -66,7 +66,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 /** Shown on every page while sample data is loaded, so it is never mistaken for real bookings. */
 async function SampleDataBanner() {
   await connection();
-  if (!hasSampleData()) return null;
+  if (!(await hasSampleData())) return null;
   const { m } = await getI18n();
   return (
     <div
@@ -88,14 +88,18 @@ async function SampleDataBanner() {
 async function NavWithBadges() {
   await connection();
   const unread =
-    getDb()
-      .select({ total: sql<number>`coalesce(sum(${conversations.unread}), 0)` })
-      .from(conversations)
-      .where(sql`${conversations.unread} > 0`)
-      .get()?.total ?? 0;
-  const urgent = getSuggestions((await getI18n()).locale).active.filter(
+    (
+      await (
+        await getDb()
+      )
+        .select({ total: sql<number>`coalesce(sum(${conversations.unread}), 0)` })
+        .from(conversations)
+        .where(sql`${conversations.unread} > 0`)
+        .get()
+    )?.total ?? 0;
+  const urgent = (await getSuggestions((await getI18n()).locale)).active.filter(
     (suggestion) => suggestion.severity === "urgent",
   ).length;
-  const toRefresh = countToRefresh(getDataSources());
+  const toRefresh = countToRefresh(await getDataSources());
   return <SidebarNav badges={{ "/inbox": unread, "/suggestions": urgent, "/data": toRefresh }} />;
 }

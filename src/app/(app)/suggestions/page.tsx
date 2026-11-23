@@ -31,8 +31,8 @@ async function Suggestions() {
   await connection();
   const { locale, m, fmt } = await getI18n();
   const t = m.insights;
-  const { active, dismissed } = getSuggestions(locale);
-  const stored = getAdvice();
+  const { active, dismissed } = await getSuggestions(locale);
+  const stored = await getAdvice();
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -55,7 +55,7 @@ async function Suggestions() {
       </Card>
 
       <AdvicePanel
-        configured={aiConfigured()}
+        configured={await aiConfigured()}
         advice={stored?.advice ?? null}
         generatedLabel={stored ? t.advice.generated(fmt.dateTime(stored.generatedAt), stored.model) : null}
       />

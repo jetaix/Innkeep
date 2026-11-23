@@ -20,6 +20,7 @@ import {
 } from "@/features/cleaning/actions";
 import { unassigned, type Cleaning } from "@/features/cleaning/compute";
 import { getCleaning } from "@/features/cleaning/queries";
+import { cleaningDay, cleaningLines, cleaningWindow } from "@/features/cleaning/text";
 import { getI18n } from "@/i18n/server";
 import { addDays } from "@/lib/dates";
 
@@ -43,7 +44,7 @@ async function CleaningView() {
   await connection();
   const { m, fmt } = await getI18n();
   const t = m.cleaning;
-  const { today, properties, cleaners, assignments, schedule } = getCleaning();
+  const { today, properties, cleaners, assignments, schedule } = await getCleaning();
   if (properties.length === 0) return <EmptyState title={t.noProperty.title}>{t.noProperty.body}</EmptyState>;
 
   const names = new Map(properties.map((property) => [property.id, property]));
@@ -59,7 +60,7 @@ async function CleaningView() {
   const thisWeek = open.filter((entry) => entry.date < weekEnd).length;
   const nobody = unassigned(schedule).length;
   const clashes = open.filter((entry) => entry.clash).length;
-  const day = (date: string) => fmt.date(date, { weekday: "short", day: "numeric", month: "short" });
+  const day = (date: string) => cleaningDay(date, fmt);
 
   // What the host sends to the cleaner: dates, places and times. No guest names, no prices.
   const toShare = open.filter((entry) => entry.date >= today);
@@ -68,22 +69,7 @@ async function CleaningView() {
     "",
     ...(toShare.length === 0
       ? [t.share.nothing]
-      : toShare.flatMap((entry) => {
-          const place = names.get(entry.propertyId)!;
-          return [
-            t.share.line(day(entry.date), place.name),
-            ...(place.address ? [`  ${t.share.address(place.address)}`] : []),
-            `  ${window(entry, place, t.row)}`,
-            ...(entry.next
-              ? [
-                  `  ${t.row.next(day(entry.next.checkIn), entry.next.guests ? m.common.count.guests(entry.next.guests) : null)}`,
-                ]
-              : []),
-            ...(entry.cleaner ? [`  ${t.share.cleaner(entry.cleaner.name)}`] : []),
-            ...(entry.notes ? [`  ${t.share.note(entry.notes)}`] : []),
-            "",
-          ];
-        })),
+      : toShare.flatMap((entry) => [...cleaningLines(entry, names.get(entry.propertyId)!, m, fmt), ""])),
   ]
     .join("\n")
     .trim();
@@ -261,16 +247,6 @@ async function CleaningView() {
   );
 }
 
-type RowMessages = Awaited<ReturnType<typeof getI18n>>["m"]["cleaning"]["row"];
-
-/** The time there is to clean, in words: a same-day window in hours, otherwise from when and how long. */
-function window(entry: Cleaning, place: Property, t: RowMessages): string {
-  if (entry.sameDay) return t.sameDay(entry.from, place.checkInTime, entry.hours ?? 0);
-  const from = t.from(entry.from);
-  if (entry.hours == null) return from;
-  return `${from}, ${entry.hours < 48 ? t.hours(entry.hours) : t.days(Math.floor(entry.hours / 24))}`;
-}
-
 async function Row({
   entry,
   place,
@@ -301,7 +277,7 @@ async function Row({
             {entry.status === "done" && <Badge tone="good">{t.done}</Badge>}
             {entry.status === "skipped" && <Badge>{t.skipped}</Badge>}
             {entry.sameDay && entry.status === "pending" && (
-              <Badge tone="warn">{window(entry, place, t)}</Badge>
+              <Badge tone="warn">{cleaningWindow(entry, place, t)}</Badge>
             )}
           </p>
           <p className="mt-1 text-[13px] text-muted">
@@ -318,7 +294,7 @@ async function Row({
                 )
               : t.noNext}
           </p>
-          {!entry.sameDay && <p className="mt-0.5 text-xs text-muted">{window(entry, place, t)}</p>}
+          {!entry.sameDay && <p className="mt-0.5 text-xs text-muted">{cleaningWindow(entry, place, t)}</p>}
           <p className="mt-1.5 flex flex-wrap items-center gap-2 text-[13px]">
             {entry.cleaner ? (
               <span>

@@ -15,10 +15,10 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/ical/[token
     return new Response("Not found", { status: 404 });
   }
 
-  const property = findPropertyByToken(token);
+  const property = await findPropertyByToken(token);
   if (!property) return new Response("Not found", { status: 404 });
 
-  const body = generateICal(property.name, exportEvents(property.id, target as OtaChannel | "all"));
+  const body = generateICal(property.name, await exportEvents(property.id, target as OtaChannel | "all"));
   return new Response(body, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",

@@ -65,9 +65,11 @@ const GUESTS: Record<string, string[]> = {
 };
 
 /** True while any property still reads from a built-in sample calendar. */
-export function hasSampleData(): boolean {
+export async function hasSampleData(): Promise<boolean> {
   return Boolean(
-    getDb()
+    await (
+      await getDb()
+    )
       .select({ id: listings.id })
       .from(listings)
       .where(like(listings.icalUrl, `${DEMO_SCHEME}%`))
@@ -80,21 +82,22 @@ export function hasSampleData(): boolean {
  * Deletes the sample properties with everything attached to them. If nothing
  * else is left, the sample charges and stored advice go too.
  */
-export function removeSampleData(): void {
+export async function removeSampleData(): Promise<void> {
   const db = getDb();
-  db.transaction((tx) => {
-    const sampleIds = tx
-      .select({ id: listings.propertyId })
-      .from(listings)
-      .where(like(listings.icalUrl, `${DEMO_SCHEME}%`))
-      .all()
-      .map((row) => row.id);
+  await db.transaction(async (tx) => {
+    const sampleIds = (
+      await tx
+        .select({ id: listings.propertyId })
+        .from(listings)
+        .where(like(listings.icalUrl, `${DEMO_SCHEME}%`))
+        .all()
+    ).map((row) => row.id);
     if (sampleIds.length === 0) return;
-    tx.delete(properties).where(inArray(properties.id, sampleIds)).run();
-    if (!tx.select({ id: properties.id }).from(properties).limit(1).get()) {
-      tx.delete(charges).run();
-      tx.delete(dismissedSuggestions).run();
-      tx.delete(aiAdvice).run();
+    await tx.delete(properties).where(inArray(properties.id, sampleIds)).run();
+    if (!(await tx.select({ id: properties.id }).from(properties).limit(1).get())) {
+      await tx.delete(charges).run();
+      await tx.delete(dismissedSuggestions).run();
+      await tx.delete(aiAdvice).run();
     }
   });
 }
@@ -102,16 +105,18 @@ export function removeSampleData(): void {
 /** Fills an empty database with sample properties, bookings and conversations. */
 export async function seedDemo(): Promise<void> {
   const db = getDb();
-  if (db.select({ id: properties.id }).from(properties).limit(1).get()) return;
+  if (await db.select({ id: properties.id }).from(properties).limit(1).get()) return;
 
-  const ids = PROPERTIES.map((property, index) => {
-    const row = db
+  const ids: number[] = [];
+  for (const [index, property] of PROPERTIES.entries()) {
+    const row = await db
       .insert(properties)
       .values({ ...property, icalToken: newToken(), createdAt: Date.now() + index })
       .returning({ id: properties.id })
       .get();
     for (const channel of ["airbnb", "booking"] as const) {
-      db.insert(listings)
+      await db
+        .insert(listings)
         .values({
           propertyId: row.id,
           channel,
@@ -121,16 +126,16 @@ export async function seedDemo(): Promise<void> {
         })
         .run();
     }
-    return row.id;
-  });
+    ids.push(row.id);
+  }
 
   await syncAll();
 
   // iCal feeds never carry guest names, so hosts add them by hand. Do the same here.
-  ids.forEach((propertyId, index) => {
+  for (const [index, propertyId] of ids.entries()) {
     for (const channel of ["airbnb", "booking"] as const) {
       const names = GUESTS[`${index + 1}/${channel}`] ?? [];
-      const rows = db
+      const rows = await db
         .select({ id: reservations.id, checkIn: reservations.checkIn, checkOut: reservations.checkOut })
         .from(reservations)
         .where(
@@ -143,11 +148,12 @@ export async function seedDemo(): Promise<void> {
         )
         .orderBy(asc(reservations.checkIn))
         .all();
-      rows.forEach((row, i) => {
+      for (const [i, row] of rows.entries()) {
         // Leave the last stay of each feed untouched, as a freshly imported booking looks.
-        if (!names[i] || i === rows.length - 1) return;
+        if (!names[i] || i === rows.length - 1) continue;
         const nights = diffDays(row.checkIn, row.checkOut);
-        db.update(reservations)
+        await db
+          .update(reservations)
           .set({
             // What the browser extension would add from the reservations page.
             kind: "reservation",
@@ -159,12 +165,13 @@ export async function seedDemo(): Promise<void> {
           })
           .where(eq(reservations.id, row.id))
           .run();
-      });
+      }
     }
-  });
+  }
 
   const now = today();
-  db.insert(reservations)
+  await db
+    .insert(reservations)
     .values([
       {
         propertyId: ids[1],
@@ -191,7 +198,8 @@ export async function seedDemo(): Promise<void> {
 
   const yearStart = `${now.slice(0, 4)}-01-01`;
   const charge = { propertyId: null, appliesTo: "all" as const, startsOn: yearStart, createdAt: Date.now() };
-  db.insert(charges)
+  await db
+    .insert(charges)
     .values([
       { ...charge, label: "Cleaning", category: "cleaning", frequency: "per_stay", amount: 5_500 },
       {
@@ -262,12 +270,13 @@ export async function seedDemo(): Promise<void> {
 
   for (const { thread, ...conversation } of threads) {
     const last = Date.now() - Math.min(...thread.map(([, , ago]) => ago));
-    const row = db
+    const row = await db
       .insert(conversations)
       .values({ ...conversation, externalThreadId: `demo-${conversation.guestName}`, lastMessageAt: last })
       .returning({ id: conversations.id })
       .get();
-    db.insert(messages)
+    await db
+      .insert(messages)
       .values(
         thread.map(([direction, body, ago]) => ({
           conversationId: row.id,

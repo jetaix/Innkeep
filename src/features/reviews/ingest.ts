@@ -36,10 +36,10 @@ export const reviewsSchema = z.object({
 export type ReviewsResult = { ok: true; saved: number } | { ok: false; error: string };
 
 /** Only for a listing Innkeep knows by its platform id: anyone else's reviews are refused. */
-export function ingestReviews(input: z.input<typeof reviewsSchema>): ReviewsResult {
+export async function ingestReviews(input: z.input<typeof reviewsSchema>): Promise<ReviewsResult> {
   const parsed = reviewsSchema.parse(input);
   const db = getDb();
-  const listing = db
+  const listing = await db
     .select()
     .from(listings)
     .where(and(eq(listings.channel, parsed.source), eq(listings.externalId, parsed.listingId)))
@@ -47,7 +47,7 @@ export function ingestReviews(input: z.input<typeof reviewsSchema>): ReviewsResu
   if (!listing) return { ok: false, error: "This is not one of your listings in Innkeep." };
 
   const seenAt = Date.now();
-  db.transaction((tx) => {
+  await db.transaction(async (tx) => {
     for (const { key, ...review } of parsed.reviews) {
       const values = {
         ...review,
@@ -55,7 +55,8 @@ export function ingestReviews(input: z.input<typeof reviewsSchema>): ReviewsResu
         reviewedOn: review.reviewedOn ?? null,
         seenAt,
       };
-      tx.insert(reviews)
+      await tx
+        .insert(reviews)
         .values({ propertyId: listing.propertyId, source: parsed.source, externalKey: key, ...values })
         .onConflictDoUpdate({
           target: [reviews.propertyId, reviews.source, reviews.externalKey],

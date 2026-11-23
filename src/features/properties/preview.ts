@@ -34,8 +34,10 @@ export const previewIngestSchema = z.object({
   preview: previewSchema,
 });
 
-export function savePreview(listingRowId: number, preview: Preview) {
-  getDb()
+export async function savePreview(listingRowId: number, preview: Preview) {
+  await (
+    await getDb()
+  )
     .update(listings)
     .set({ publicPreview: JSON.stringify(preview), publicPreviewAt: Date.now() })
     .where(eq(listings.id, listingRowId))
@@ -43,17 +45,19 @@ export function savePreview(listingRowId: number, preview: Preview) {
 }
 
 /** Only for a listing Innkeep knows by its platform id: anyone else's page is refused. */
-export function ingestPreview(
+export async function ingestPreview(
   input: z.input<typeof previewIngestSchema>,
-): { ok: true } | { ok: false; error: string } {
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const { source, listingId, preview } = previewIngestSchema.parse(input);
-  const listing = getDb()
+  const listing = await (
+    await getDb()
+  )
     .select()
     .from(listings)
     .where(and(eq(listings.channel, source), eq(listings.externalId, listingId)))
     .get();
   if (!listing) return { ok: false, error: "This is not one of your listings in Innkeep." };
-  savePreview(listing.id, preview);
+  await savePreview(listing.id, preview);
   return { ok: true };
 }
 

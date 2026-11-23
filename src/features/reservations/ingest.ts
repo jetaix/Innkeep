@@ -96,14 +96,14 @@ function withStored(details: Details, stay: Reservation, guestName = "") {
 
 const normalise = (value: string) => value.toLowerCase().replace(/\s+/g, " ").trim();
 
-export function ingestReservations(input: IngestInput): IngestResult {
+export async function ingestReservations(input: IngestInput): Promise<IngestResult> {
   const { source, listingId, reservations: rows } = ingestSchema.parse(input);
   const db = getDb();
   const result: IngestResult = { updated: 0, unchanged: 0, added: 0, cancelled: 0, unmatched: [] };
   const now = today();
 
   // Listing titles as the channel shows them, to tell properties apart when dates collide.
-  const titles = db
+  const titles = await db
     .select({
       propertyId: properties.id,
       title: properties.title,
@@ -116,7 +116,7 @@ export function ingestReservations(input: IngestInput): IngestResult {
 
   // When this listing id is already known, only that property's stays can match.
   const knownListing = listingId
-    ? db
+    ? await db
         .select()
         .from(listings)
         .where(and(eq(listings.channel, source), eq(listings.externalId, listingId)))
@@ -139,7 +139,7 @@ export function ingestReservations(input: IngestInput): IngestResult {
     return named.length === 1 ? named[0].propertyId : null;
   };
 
-  db.transaction((tx) => {
+  await db.transaction(async (tx) => {
     for (const row of rows) {
       // Extension versions before 0.4 sent no status; a payout of zero is what a cancelled row shows.
       const cancelled = row.status === "cancelled" || row.payout === 0;
@@ -157,19 +157,21 @@ export function ingestReservations(input: IngestInput): IngestResult {
 
       if (cancelled) {
         // Only its own code may match a cancelled row: its dates often belong to the booking that replaced it.
-        const known = tx
+        const known = await tx
           .select()
           .from(reservations)
           .where(and(eq(reservations.source, source), eq(reservations.externalCode, row.code)))
           .get();
         const propertyId = known?.propertyId ?? propertyFor(row.listingName);
         if (known) {
-          tx.update(reservations)
+          await tx
+            .update(reservations)
             .set({ ...withStored(details, known), status: "cancelled" })
             .where(eq(reservations.id, known.id))
             .run();
         } else if (propertyId != null) {
-          tx.insert(reservations)
+          await tx
+            .insert(reservations)
             .values({
               ...details,
               propertyId,
@@ -190,7 +192,7 @@ export function ingestReservations(input: IngestInput): IngestResult {
       const fromSource = eq(reservations.source, source);
 
       // 1. The confirmation code: stored from an earlier run, or inside the feed's reservation link.
-      let matches = tx
+      let matches = await tx
         .select()
         .from(reservations)
         .where(
@@ -203,7 +205,7 @@ export function ingestReservations(input: IngestInput): IngestResult {
 
       // 2. Otherwise the same dates on that channel (Booking.com feeds carry no code).
       if (matches.length === 0) {
-        matches = tx
+        matches = await tx
           .select()
           .from(reservations)
           .where(
@@ -236,7 +238,8 @@ export function ingestReservations(input: IngestInput): IngestResult {
           result.unmatched.push(row.code);
           continue;
         }
-        tx.insert(reservations)
+        await tx
+          .insert(reservations)
           .values({
             ...details,
             propertyId,
@@ -263,14 +266,15 @@ export function ingestReservations(input: IngestInput): IngestResult {
         result.unchanged++;
         continue;
       }
-      tx.update(reservations).set(changes).where(eq(reservations.id, stay.id)).run();
+      await tx.update(reservations).set(changes).where(eq(reservations.id, stay.id)).run();
       result.updated++;
     }
 
     // Remember which property this listing id belongs to once the rows agree on one.
     if (listingId && !knownListing && matchedProperties.size === 1) {
       const [propertyId] = matchedProperties;
-      tx.update(listings)
+      await tx
+        .update(listings)
         .set({ externalId: listingId })
         .where(and(eq(listings.propertyId, propertyId), eq(listings.channel, source)))
         .run();

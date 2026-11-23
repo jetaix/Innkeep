@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import Database from "better-sqlite3";
-import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { createClient, type Client, type Transaction } from "@libsql/client";
+import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
 /**
- * Migrations run in order on startup and are tracked with SQLite's
- * `user_version`, so a fresh clone and an upgraded install both end up on the
- * latest schema with no manual step. Append to this list; never edit an entry
+ * Migrations run in order before the first query and are tracked in the
+ * `innkeep_schema` table, so a fresh clone, an upgraded install and a hosted
+ * database all end up on the latest schema with no manual step. Append to this list; never edit an entry
  * that has shipped.
  */
 const MIGRATIONS: string[] = [
@@ -225,28 +225,126 @@ CREATE TABLE IF NOT EXISTS cleanings (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS cleanings_day ON cleanings (property_id, date);
 `,
+  // 13: when the host was told on Telegram that a cleaning is needed
+  `
+ALTER TABLE cleanings ADD COLUMN notified_at INTEGER;
+`,
 ];
 
-function migrate(sqlite: Database.Database) {
-  const current = sqlite.pragma("user_version", { simple: true }) as number;
+/** One statement per entry: a hosted database takes them as a batch, not as a script. */
+const statements = (script: string) =>
+  script
+    .split(/;\s*(?:\n|$)/)
+    .map((statement) => statement.trim())
+    .filter(Boolean);
+
+/**
+ * Brings the schema up to date. The version used to live in SQLite's
+ * `user_version`, which a hosted database does not keep, so it is read once
+ * from there and kept in a table from then on.
+ */
+async function migrate(client: Client) {
+  await client.execute("CREATE TABLE IF NOT EXISTS innkeep_schema (version INTEGER NOT NULL)");
+  let current = (await client.execute("SELECT version FROM innkeep_schema")).rows[0]?.version as
+    number | undefined;
+  if (current == null) {
+    const legacy = await client.execute("PRAGMA user_version").catch(() => null);
+    current = Number(legacy?.rows[0]?.user_version ?? 0);
+    await client.execute({ sql: "INSERT INTO innkeep_schema (version) VALUES (?)", args: [current] });
+  }
   for (let version = current; version < MIGRATIONS.length; version++) {
-    sqlite.transaction(() => {
-      sqlite.exec(MIGRATIONS[version]);
-      sqlite.pragma(`user_version = ${version + 1}`);
-    })();
+    await client.batch(
+      [
+        ...statements(MIGRATIONS[version]),
+        { sql: "UPDATE innkeep_schema SET version = ?", args: [version + 1] },
+      ],
+      "write",
+    );
   }
 }
 
-export type Db = BetterSQLite3Database<typeof schema>;
+export type Db = LibSQLDatabase<typeof schema>;
 
-function open(): Db {
+/**
+ * Where the data lives. `TURSO_DATABASE_URL` (with `TURSO_AUTH_TOKEN`) is a
+ * hosted database, for an Innkeep on a host with no disk of its own.
+ * Otherwise it is a SQLite file on this machine.
+ */
+function connect(): Client {
+  const url = process.env.TURSO_DATABASE_URL;
+  if (url) return createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
+
   const file = process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "innkeep.db");
-  if (file !== ":memory:") fs.mkdirSync(path.dirname(file), { recursive: true });
-  const sqlite = new Database(file);
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
-  migrate(sqlite);
-  return drizzle(sqlite, { schema });
+  if (file === ":memory:") return createClient({ url: ":memory:" });
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  return createClient({ url: `file:${file}` });
+}
+
+/**
+ * The client drizzle talks to. Every call first waits for the migrations, so
+ * no query can run against an old schema, whoever asks first. Transactions
+ * run one at a time: two calendar syncs finishing together would otherwise
+ * fight over SQLite's single writer.
+ */
+function open(): Db {
+  const client = connect();
+  const ready: Promise<void> = migrate(client);
+  // Reported by the first query that awaits it; this only keeps Node from calling it unhandled.
+  ready.catch(() => {});
+  // An in-memory database has one connection, so nothing else may run during a transaction.
+  const single = client.protocol === "file" && process.env.DATABASE_PATH === ":memory:";
+  let queue: Promise<void> = Promise.resolve();
+
+  const waiting = new Proxy(client, {
+    get(target, property) {
+      const value: unknown = Reflect.get(target, property, target);
+      if (typeof value !== "function") return value;
+      const call = (args: unknown[]): unknown => value.apply(target, args);
+      if (property !== "transaction") {
+        return async (...args: unknown[]) => {
+          await ready;
+          if (single) await queue;
+          return call(args);
+        };
+      }
+      return async (...args: unknown[]) => {
+        await ready;
+        const before = queue;
+        let release = () => {};
+        queue = new Promise((resolve) => (release = resolve));
+        await before;
+        try {
+          return releasing((await call(args)) as Transaction, release);
+        } catch (error) {
+          release();
+          throw error;
+        }
+      };
+    },
+  });
+  return drizzle(waiting, { schema });
+}
+
+/** Lets the next transaction start once this one is committed, rolled back or closed. */
+function releasing(transaction: Transaction, release: () => void): Transaction {
+  return new Proxy(transaction, {
+    get(target, property) {
+      const value: unknown = Reflect.get(target, property, target);
+      if (typeof value !== "function") return value;
+      if (property !== "commit" && property !== "rollback" && property !== "close") return value.bind(target);
+      return (...args: unknown[]): unknown => {
+        try {
+          const result: unknown = value.apply(target, args);
+          if (result instanceof Promise) return result.finally(release);
+          release();
+          return result;
+        } catch (error) {
+          release();
+          throw error;
+        }
+      };
+    },
+  });
 }
 
 // Reuse one connection across dev hot reloads.

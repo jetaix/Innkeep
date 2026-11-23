@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Cleaner, CleanerAssignment, CleaningRecord } from "@/db/schema";
-import { buildSchedule, unassigned } from "./compute";
+import { buildSchedule, cleaningNotices, unassigned } from "./compute";
 
 const place = (id: number, extra = {}) => ({
   id,
@@ -41,6 +41,7 @@ const record = (propertyId: number, date: string, extra: Partial<CleaningRecord>
   notes: "",
   manual: false,
   doneAt: null,
+  notifiedAt: null,
   ...extra,
 });
 
@@ -144,5 +145,33 @@ describe("unassigned", () => {
       records: [record(1, "2027-03-05", { status: "skipped" })],
     });
     expect(unassigned(result).map((entry) => entry.date)).toEqual(["2027-03-09"]);
+  });
+});
+
+describe("cleaningNotices", () => {
+  const stays = [stay(1, "2027-03-02", "2027-03-05"), stay(1, "2027-03-07", "2027-03-09")];
+
+  it("asks once for each cleaning still to do from today on", () => {
+    const records = [record(1, "2027-03-09", { notifiedAt: 1 })];
+    const result = cleaningNotices({ today: "2027-03-01", schedule: schedule({ stays, records }), records });
+    expect(result.needed.map((entry) => entry.date)).toEqual(["2027-03-05"]);
+    expect(result.cancelled).toEqual([]);
+  });
+
+  it("leaves out past days and cleanings already done or skipped", () => {
+    const records = [record(1, "2027-03-09", { status: "done" })];
+    const result = cleaningNotices({ today: "2027-03-06", schedule: schedule({ stays, records }), records });
+    expect(result.needed).toEqual([]);
+  });
+
+  it("reports a cleaning the host was told about once its stay is gone", () => {
+    const records = [record(1, "2027-03-05", { notifiedAt: 1 }), record(1, "2027-03-12", { notifiedAt: 1 })];
+    const result = cleaningNotices({
+      today: "2027-03-01",
+      schedule: schedule({ stays: [stays[0]], records }),
+      records,
+    });
+    expect(result.needed).toEqual([]);
+    expect(result.cancelled.map((entry) => entry.date)).toEqual(["2027-03-12"]);
   });
 });

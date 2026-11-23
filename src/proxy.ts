@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { appPassword, SESSION_COOKIE, sessionValid } from "@/lib/session";
 
 /**
  * Landing-only mode, for publishing the public pages without the app.
@@ -11,9 +12,30 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC_PAGES = /^\/(?:alternatives(?:\/[a-z0-9-]+)?)?$/;
 const PUBLIC_FILES = /^\/(?:icon\.svg|opengraph-image|favicon\.ico|robots\.txt)$/;
 
-export function proxy(request: NextRequest) {
-  if (process.env.LANDING_ONLY !== "1") return NextResponse.next();
+/**
+ * With `APP_PASSWORD` every page asks for it first. API routes are left to
+ * their own tokens (the extension, the webhook, MCP, the calendar links), so
+ * the machines that call them keep working.
+ */
+function passwordGate(request: NextRequest, password: string) {
   const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/api/") || PUBLIC_FILES.test(pathname)) return NextResponse.next();
+  const signedIn = sessionValid(request.cookies.get(SESSION_COOKIE)?.value, password);
+  if (pathname === "/login") {
+    return signedIn ? NextResponse.redirect(new URL("/overview", request.url), 307) : NextResponse.next();
+  }
+  return signedIn ? NextResponse.next() : NextResponse.redirect(new URL("/login", request.url), 307);
+}
+
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (process.env.LANDING_ONLY !== "1") {
+    const password = appPassword();
+    if (password) return passwordGate(request, password);
+    // Nothing to sign in to: the page would only confuse.
+    if (pathname === "/login") return NextResponse.redirect(new URL("/overview", request.url), 307);
+    return NextResponse.next();
+  }
   if (PUBLIC_PAGES.test(pathname) || PUBLIC_FILES.test(pathname)) return NextResponse.next();
   // Machines get a plain "not found"; a person following an old link lands on the home page.
   if (pathname.startsWith("/api/")) return new NextResponse(null, { status: 404 });

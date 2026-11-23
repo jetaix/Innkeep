@@ -68,26 +68,27 @@ export function parseChannelDetails(stored: string | null): Record<string, strin
   }
 }
 
-export function ingestListing(input: ListingInput): ListingResult {
+export async function ingestListing(input: ListingInput): Promise<ListingResult> {
   const db = getDb();
-  return db.transaction((tx): ListingResult => {
+  return await db.transaction(async (tx): Promise<ListingResult> => {
     /** Fills in missing facts and keeps the editor's cards; says whether anything changed. */
-    const absorb = (propertyId: number) => {
-      const property = tx.select().from(properties).where(eq(properties.id, propertyId)).get()!;
+    const absorb = async (propertyId: number) => {
+      const property = (await tx.select().from(properties).where(eq(properties.id, propertyId)).get())!;
       const facts = missingFacts(property, input);
       const hasFacts = Object.keys(facts).length > 0;
-      if (hasFacts) tx.update(properties).set(facts).where(eq(properties.id, propertyId)).run();
+      if (hasFacts) await tx.update(properties).set(facts).where(eq(properties.id, propertyId)).run();
 
-      const listing = tx
+      const listing = (await tx
         .select()
         .from(listings)
         .where(and(eq(listings.propertyId, propertyId), eq(listings.channel, input.source)))
-        .get()!;
+        .get())!;
       // The editor spreads its cards over tabs, so each visit adds to what is stored.
       const merged = JSON.stringify({ ...parseChannelDetails(listing.channelDetails), ...input.details });
       const hasDetails = input.details != null && merged !== listing.channelDetails;
       if (hasDetails) {
-        tx.update(listings)
+        await tx
+          .update(listings)
           .set({ channelDetails: merged, channelDetailsAt: Date.now() })
           .where(eq(listings.id, listing.id))
           .run();
@@ -95,13 +96,13 @@ export function ingestListing(input: ListingInput): ListingResult {
       return hasFacts || hasDetails;
     };
 
-    const known = tx
+    const known = await tx
       .select()
       .from(listings)
       .where(and(eq(listings.channel, input.source), eq(listings.externalId, input.listingId)))
       .get();
     if (known) {
-      return { status: absorb(known.propertyId) ? "updated" : "known", propertyId: known.propertyId };
+      return { status: (await absorb(known.propertyId)) ? "updated" : "known", propertyId: known.propertyId };
     }
     if (!input.title) {
       return { status: "unknown", error: "Open this listing's details tab first, so Innkeep can add it." };
@@ -110,18 +111,19 @@ export function ingestListing(input: ListingInput): ListingResult {
     const link = { externalId: input.listingId, listingUrl: input.listingUrl };
 
     // A property with the same title that has no listing id for this channel yet: link it.
-    const sameTitle = tx.select().from(properties).where(eq(properties.title, input.title)).all();
+    const sameTitle = await tx.select().from(properties).where(eq(properties.title, input.title)).all();
     if (sameTitle.length === 1) {
       const propertyId = sameTitle[0].id;
-      tx.insert(listings)
+      await tx
+        .insert(listings)
         .values({ propertyId, channel: input.source, ...link })
         .onConflictDoUpdate({ target: [listings.propertyId, listings.channel], set: link })
         .run();
-      absorb(propertyId);
+      await absorb(propertyId);
       return { status: "linked", propertyId };
     }
 
-    const property = tx
+    const property = await tx
       .insert(properties)
       .values({
         name: input.title.split("|")[0].trim().slice(0, 60) || input.title,
@@ -131,10 +133,11 @@ export function ingestListing(input: ListingInput): ListingResult {
       })
       .returning({ id: properties.id })
       .get();
-    tx.insert(listings)
+    await tx
+      .insert(listings)
       .values({ propertyId: property.id, channel: input.source, ...link })
       .run();
-    absorb(property.id);
+    await absorb(property.id);
     return { status: "created", propertyId: property.id };
   });
 }

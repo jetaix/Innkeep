@@ -40,10 +40,10 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
   const { locale, m, fmt } = await getI18n();
   const t = m.reviews;
   const params = await searchParams;
-  const properties = getProperties();
+  const properties = await getProperties();
   if (properties.length === 0) return <EmptyState title={t.empty.title}>{t.empty.noProperty}</EmptyState>;
 
-  const all = getDb().select().from(reviewsTable).all();
+  const all = await getDb().select().from(reviewsTable).all();
   const show = SHOW.find((value) => value === one(params.show)) ?? "all";
   const platform = OTA_CHANNELS.find((channel) => channel === one(params.platform)) ?? null;
   const shown = newestFirst(all).filter(
@@ -61,16 +61,21 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
   };
   const number = (value: number) =>
     value.toLocaleString(INTL_LOCALE[locale], { maximumFractionDigits: 2, minimumFractionDigits: 1 });
-  const extension = getExtensionStatus();
+  const extension = await getExtensionStatus();
   const canRead = extension.state === "ready" || extension.state === "outdated";
   const names = new Map(properties.map((property) => [property.id, property.name]));
+  const pageLinks = new Map(
+    await Promise.all(
+      properties.map(async (property) => [property.id, await reviewPageLinks(property.id)] as const),
+    ),
+  );
 
   return (
     <div className="max-w-4xl space-y-6">
       <Card className="space-y-3 p-4">
         <div className="space-y-2">
           {properties.map((property) => {
-            const links = reviewPageLinks(property.id);
+            const links = pageLinks.get(property.id)!;
             const channels = OTA_CHANNELS.filter((channel) => links[channel]);
             return (
               <div
@@ -184,7 +189,7 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
                   <ReviewCard
                     review={review}
                     propertyName={properties.length > 1 ? (names.get(review.propertyId) ?? null) : null}
-                    replyHref={reviewPageLinks(review.propertyId)[review.source] ?? null}
+                    replyHref={pageLinks.get(review.propertyId)?.[review.source] ?? null}
                     number={number}
                   />
                 </li>

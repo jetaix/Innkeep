@@ -15,6 +15,7 @@ const en = {
       name: "Calendar sync",
       every: (minutes: number) => `Every ${minutes} minute${minutes === 1 ? "" : "s"}`,
       manual: "Manual only",
+      scheduled: "When the scheduler calls",
       body: "Imports every connected Airbnb and Booking.com calendar in the background.",
     },
     ai: {
@@ -31,6 +32,15 @@ const en = {
       name: "Browser extension",
       body: "Lets the Innkeep Companion extension add guest names, payouts, past stays and listing details from your own Airbnb and Booking.com pages.",
       link: "How to install it",
+    },
+    telegram: {
+      name: "Telegram notifications",
+      body: "Sends you a Telegram message each time a cleaning has to be arranged: a new check-out, or a cleaning added by hand. Needs a bot token and a chat.",
+    },
+    password: {
+      name: "Password",
+      body: "Asks for a password before any page opens. Set it before putting Innkeep on the internet.",
+      signOut: "Sign out",
     },
     mcp: {
       name: "MCP server",
@@ -74,6 +84,7 @@ const fr: typeof en = {
       name: "Synchronisation des calendriers",
       every: (minutes) => (minutes > 1 ? `Toutes les ${minutes} minutes` : "Toutes les minutes"),
       manual: "Manuelle uniquement",
+      scheduled: "À chaque appel du planificateur",
       body: "Importe en arrière-plan tous les calendriers Airbnb et Booking.com connectés.",
     },
     ai: {
@@ -89,6 +100,15 @@ const fr: typeof en = {
       name: "Extension de navigateur",
       body: "Permet à l’extension Innkeep Companion d’ajouter les noms des voyageurs, les versements, les séjours passés et les détails des annonces à partir de vos propres pages Airbnb et Booking.com.",
       link: "Comment l’installer",
+    },
+    telegram: {
+      name: "Notifications Telegram",
+      body: "Vous envoie un message Telegram chaque fois qu’un ménage est à demander : un nouveau départ, ou un ménage ajouté à la main. Nécessite le jeton d’un bot et une conversation.",
+    },
+    password: {
+      name: "Mot de passe",
+      body: "Demande un mot de passe avant d’ouvrir la moindre page. À définir avant de mettre Innkeep sur Internet.",
+      signOut: "Se déconnecter",
     },
     mcp: {
       name: "Serveur MCP",

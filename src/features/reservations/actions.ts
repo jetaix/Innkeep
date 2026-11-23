@@ -26,7 +26,9 @@ export async function createReservation(returnTo: string, form: FormData) {
   if (!parsed.success) return;
   const { amount, ...values } = parsed.data;
 
-  getDb()
+  await (
+    await getDb()
+  )
     .insert(reservations)
     .values({
       ...values,
@@ -46,7 +48,7 @@ const stayEdit = z.object({
 
 export async function updateReservation(id: number, returnTo: string, form: FormData) {
   const db = getDb();
-  const existing = db.select().from(reservations).where(eq(reservations.id, id)).get();
+  const existing = await db.select().from(reservations).where(eq(reservations.id, id)).get();
   const parsed = parseForm(stayEdit, form);
   if (!existing || !parsed.success) return;
 
@@ -61,12 +63,14 @@ export async function updateReservation(id: number, returnTo: string, form: Form
     if (!dates.success) return;
     Object.assign(changes, dates.data);
   }
-  db.update(reservations).set(changes).where(eq(reservations.id, id)).run();
+  await db.update(reservations).set(changes).where(eq(reservations.id, id)).run();
   redirect(returnTo);
 }
 
 export async function deleteReservation(id: number, returnTo: string) {
-  getDb()
+  await (
+    await getDb()
+  )
     .delete(reservations)
     .where(and(eq(reservations.id, id), eq(reservations.source, "direct")))
     .run();

@@ -49,7 +49,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/calendar">, "searchPa
   const end = addDays(start, DAYS);
   const days = Array.from({ length: DAYS }, (_, i) => addDays(start, i));
 
-  const properties = getProperties();
+  const properties = await getProperties();
   if (properties.length === 0) {
     return (
       <EmptyState
@@ -65,14 +65,10 @@ async function Calendar({ searchParams }: Pick<PageProps<"/calendar">, "searchPa
     );
   }
 
-  const stays = getStays(addDays(start, -1), end);
+  const stays = await getStays(addDays(start, -1), end);
   const conflicts = findConflicts(stays);
 
-  const feeds = getDb()
-    .select()
-    .from(listings)
-    .all()
-    .filter((listing) => listing.icalUrl);
+  const feeds = (await getDb().select().from(listings).all()).filter((listing) => listing.icalUrl);
   const lastSync = Math.max(0, ...feeds.map((listing) => listing.lastSyncedAt ?? 0));
   const failing = feeds.filter((listing) => listing.lastSyncError).length;
 

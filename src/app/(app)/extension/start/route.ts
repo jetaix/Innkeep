@@ -15,6 +15,6 @@ export async function GET(request: Request) {
   const scope = url.searchParams.get("scope") === "all" ? "all" : "reservations";
   const target = new URL("/extension/run", url);
   target.searchParams.set("scope", scope);
-  target.searchParams.set("key", createRunKey(scope));
+  target.searchParams.set("key", await createRunKey(scope));
   return Response.redirect(target, 303);
 }

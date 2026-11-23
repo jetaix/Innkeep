@@ -148,3 +148,27 @@ export function buildSchedule(input: {
 export function unassigned(schedule: Cleaning[]): Cleaning[] {
   return schedule.filter((entry) => entry.status === "pending" && !entry.cleaner);
 }
+
+/**
+ * What the host has not been told yet: cleanings to arrange that are new since
+ * the last message, and ones they were told about that are no longer needed
+ * (the stay was cancelled or its check-out moved).
+ */
+export function cleaningNotices(input: { today: ISODate; schedule: Cleaning[]; records: CleaningRecord[] }): {
+  needed: Cleaning[];
+  cancelled: CleaningRecord[];
+} {
+  const { today, schedule, records } = input;
+  const key = (row: { propertyId: number; date: string }) => `${row.propertyId}:${row.date}`;
+  const told = records.filter((record) => record.notifiedAt != null);
+  const toldKeys = new Set(told.map(key));
+  const planned = new Set(schedule.map(key));
+  return {
+    needed: schedule.filter(
+      (entry) => entry.status === "pending" && entry.date >= today && !toldKeys.has(key(entry)),
+    ),
+    cancelled: told.filter(
+      (record) => record.status === "pending" && record.date >= today && !planned.has(key(record)),
+    ),
+  };
+}

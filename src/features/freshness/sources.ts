@@ -43,14 +43,14 @@ export type DataSource = {
     | { type: "blocked"; reason: "extension" | "listingId" | "listingUrl" | "calendarLink" | "claude" };
 };
 
-export function getDataSources(now = Date.now()): DataSource[] {
+export async function getDataSources(now = Date.now()): Promise<DataSource[]> {
   const db = getDb();
-  const extension = getExtensionStatus();
+  const extension = await getExtensionStatus();
   const extensionReady = extension.state === "ready" || extension.state === "outdated";
-  const properties = getProperties();
-  const allListings = db.select().from(listings).all();
-  const priceRows = db.select().from(nightlyPrices).all();
-  const reviewRows = db.select().from(reviews).all();
+  const properties = await getProperties();
+  const allListings = await db.select().from(listings).all();
+  const priceRows = await db.select().from(nightlyPrices).all();
+  const reviewRows = await db.select().from(reviews).all();
   const sources: DataSource[] = [];
 
   /** A page the extension reads when the host opens it. */
@@ -62,10 +62,10 @@ export function getDataSources(now = Date.now()): DataSource[] {
         : { type: "blocked", reason: missing };
 
   // Reservations: one page per platform, shared by every property on it.
-  const reservationPages = reservationLinks();
+  const reservationPages = await reservationLinks();
   for (const channel of ["airbnb", "booking"] as const) {
     if (!allListings.some((listing) => listing.channel === channel)) continue;
-    const at = getLastUpdate(channel)?.at ?? null;
+    const at = (await getLastUpdate(channel))?.at ?? null;
     sources.push({
       id: `reservations:${channel}`,
       kind: "reservations",
@@ -80,10 +80,10 @@ export function getDataSources(now = Date.now()): DataSource[] {
 
   for (const property of properties) {
     const own = allListings.filter((listing) => listing.propertyId === property.id);
-    const calendars = calendarLinks(property.id);
-    const publicPages = publicPageLinks(property.id);
-    const reviewPages = reviewPageLinks(property.id);
-    const pricing = getPricing(property.id);
+    const calendars = await calendarLinks(property.id);
+    const publicPages = await publicPageLinks(property.id);
+    const reviewPages = await reviewPageLinks(property.id);
+    const pricing = await getPricing(property.id);
 
     for (const listing of own) {
       const { channel } = listing;
@@ -151,7 +151,7 @@ export function getDataSources(now = Date.now()): DataSource[] {
       });
 
       // Admin pages kept as shown: every amenity, photo, policy.
-      const pagesSeen = getPages(listing.id).map((page) => page.seenAt);
+      const pagesSeen = (await getPages(listing.id)).map((page) => page.seenAt);
       const pagesAt = pagesSeen.length ? Math.min(...pagesSeen) : null;
       sources.push({
         ...base,
@@ -207,7 +207,7 @@ export function getDataSources(now = Date.now()): DataSource[] {
   }
 
   // Claude's advice, written from all of the above.
-  const advice = getAdvice();
+  const advice = await getAdvice();
   sources.push({
     id: "advice",
     kind: "advice",
@@ -216,7 +216,9 @@ export function getDataSources(now = Date.now()): DataSource[] {
     at: advice?.generatedAt ?? null,
     state: freshness(advice?.generatedAt ?? null, "advice", now),
     automatic: false,
-    action: aiConfigured() ? { type: "go", href: "/assistant" } : { type: "blocked", reason: "claude" },
+    action: (await aiConfigured())
+      ? { type: "go", href: "/assistant" }
+      : { type: "blocked", reason: "claude" },
   });
 
   return sources;

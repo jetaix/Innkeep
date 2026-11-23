@@ -15,16 +15,16 @@ import {
 /** How many nights ahead the Pricing page can show; the first is the default. */
 export const PRICING_WINDOWS = [120, 240, 365] as const;
 
-export function getPricing(propertyId: number, wantedPlan?: string, days: number = PRICING_WINDOWS[0]) {
+export async function getPricing(propertyId: number, wantedPlan?: string, days: number = PRICING_WINDOWS[0]) {
   const db = getDb();
   const now = today();
-  const prices = db
+  const prices = await db
     .select()
     .from(nightlyPrices)
     .where(eq(nightlyPrices.propertyId, propertyId))
     .orderBy(asc(nightlyPrices.date))
     .all();
-  const stays = db.select().from(reservations).where(eq(reservations.propertyId, propertyId)).all();
+  const stays = await db.select().from(reservations).where(eq(reservations.propertyId, propertyId)).all();
 
   const { plans, plan } = pickPlan(prices, wantedPlan);
   const measured = bookingFeeRate(stays);
@@ -46,7 +46,7 @@ export function getPricing(propertyId: number, wantedPlan?: string, days: number
   };
 
   // Sample stays to check on the public listing page, with what a guest was shown when one was read.
-  const quotes = db.select().from(guestQuotes).where(eq(guestQuotes.propertyId, propertyId)).all();
+  const quotes = await db.select().from(guestQuotes).where(eq(guestQuotes.propertyId, propertyId)).all();
   const quoteFor = (source: OtaChannel, sample: { checkIn: string; checkOut: string }) =>
     quotes.find(
       (quote) =>
@@ -74,4 +74,4 @@ export function getPricing(propertyId: number, wantedPlan?: string, days: number
   };
 }
 
-export type Pricing = ReturnType<typeof getPricing>;
+export type Pricing = Awaited<ReturnType<typeof getPricing>>;

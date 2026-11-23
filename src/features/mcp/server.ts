@@ -31,7 +31,7 @@ export function createMcpServer(): McpServer {
     },
     async () =>
       json(
-        getProperties().map((property) => ({
+        (await getProperties()).map((property) => ({
           id: property.id,
           name: property.name,
           address: property.address,
@@ -61,8 +61,8 @@ export function createMcpServer(): McpServer {
     },
     async ({ from, to, propertyId }) => {
       const start = from ?? today();
-      const properties = getProperties();
-      const stays = getStays(start, to ?? addDays(start, 90));
+      const properties = await getProperties();
+      const stays = await getStays(start, to ?? addDays(start, 90));
       const conflicts = findConflicts(stays);
       return json(
         stays
@@ -110,10 +110,10 @@ export function createMcpServer(): McpServer {
       annotations: { readOnlyHint: true },
     },
     async ({ month, months }) => {
-      const properties = getProperties();
+      const properties = await getProperties();
       const first = month ?? monthOf(today());
-      const stays = getStays(monthStart(first)).filter((stay) => stay.kind === "reservation");
-      const charges = getCharges();
+      const stays = (await getStays(monthStart(first))).filter((stay) => stay.kind === "reservation");
+      const charges = await getCharges();
       return json({
         currency: properties[0]?.currency ?? "EUR",
         months: Array.from({ length: months ?? 3 }, (_, index) => {
@@ -142,7 +142,7 @@ export function createMcpServer(): McpServer {
     },
     async () =>
       json(
-        getSuggestions().active.map(({ severity, area, title, body }) => ({
+        (await getSuggestions()).active.map(({ severity, area, title, body }) => ({
           severity,
           area,
           title,
@@ -168,9 +168,10 @@ export function createMcpServer(): McpServer {
     async ({ propertyId, checkIn, checkOut, reason }) => {
       const fail = (text: string) => ({ isError: true, content: [{ type: "text" as const, text }] });
       if (checkOut <= checkIn) return fail("checkOut must be after checkIn.");
-      if (!getProperties().some((property) => property.id === propertyId)) return fail("Unknown propertyId.");
+      if (!(await getProperties()).some((property) => property.id === propertyId))
+        return fail("Unknown propertyId.");
 
-      const clash = getStays(checkIn, checkOut).find(
+      const clash = (await getStays(checkIn, checkOut)).find(
         (stay) => stay.propertyId === propertyId && rangesOverlap(stay, { checkIn, checkOut }),
       );
       if (clash) {
@@ -179,7 +180,9 @@ export function createMcpServer(): McpServer {
         );
       }
 
-      const row = getDb()
+      const row = await (
+        await getDb()
+      )
         .insert(reservations)
         .values({
           propertyId,

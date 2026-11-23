@@ -34,7 +34,9 @@ async function Revenue() {
   await connection();
   const { locale, m, fmt } = await getI18n();
   const t = m.revenue;
-  const { currency, current, summaries, thisMonth, charges, properties } = getRevenue({ monthsBack: 12 });
+  const { currency, current, summaries, thisMonth, charges, properties } = await getRevenue({
+    monthsBack: 12,
+  });
   if (properties.length === 0) {
     return <EmptyState title={t.empty.title}>{t.empty.body}</EmptyState>;
   }
