@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, ne } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { contentHash, effectiveContent } from "@/channels/content";
 import { syncAll, syncListing } from "@/channels/sync";
 import { getDb, listings, OTA_CHANNELS, properties } from "@/db";
 import { newToken, removeSampleData, seedDemo } from "@/db/seed";
+import { airbnbListingId } from "./link";
 import { parseForm, text, wholeNumber } from "@/lib/form";
 
 const time = z.string().regex(/^\d{2}:\d{2}$/);
@@ -64,12 +65,21 @@ export async function saveListing(propertyId: number, channel: string, form: For
   const parsed = parseForm(listingSettings, form);
   if (!parsedChannel.success || !parsed.success) return;
 
-  const row = await (await getDb())
+  const row = await getDb()
     .insert(listings)
     .values({ propertyId, channel: parsedChannel.data, ...parsed.data })
     .onConflictDoUpdate({ target: [listings.propertyId, listings.channel], set: parsed.data })
     .returning({ id: listings.id, icalUrl: listings.icalUrl })
     .get();
+  // Airbnb's address names the listing, so the extension can read its pages without a first run.
+  const airbnbId = parsedChannel.data === "airbnb" ? airbnbListingId(parsed.data.listingUrl) : null;
+  if (airbnbId) {
+    await getDb()
+      .update(listings)
+      .set({ externalId: airbnbId })
+      .where(and(eq(listings.id, row.id), isNull(listings.externalId)))
+      .run();
+  }
   // Import straight away so a wrong link is reported while the host is looking.
   if (row.icalUrl) await syncListing(row.id);
   refresh();
