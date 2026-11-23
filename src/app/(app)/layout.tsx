@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -14,6 +15,9 @@ import { getI18n } from "@/i18n/server";
 import { ExtensionSetupButton } from "@/features/extension/setup-button";
 import { UpdatePrompt } from "@/features/extension/update-prompt";
 import { countToRefresh, getDataSources } from "@/features/freshness/sources";
+
+/** A host's own dashboard is nobody else's business: keep it out of search results. */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const { m } = await getI18n();

@@ -10,7 +10,9 @@ import { appPassword, SESSION_COOKIE, sessionValid } from "@/lib/session";
  * Without the variable this does nothing and Innkeep runs in full.
  */
 const PUBLIC_PAGES = /^\/(?:alternatives(?:\/[a-z0-9-]+)?)?$/;
-const PUBLIC_FILES = /^\/(?:icon\.svg|opengraph-image|favicon\.ico|robots\.txt)$/;
+// Icons, the app manifest and the notes for search engines are fetched without a session: never gate them.
+const PUBLIC_FILES =
+  /^\/(?:icon\.svg|favicon\.ico|apple-icon(?:\.png)?|icons\/[a-z0-9-]+\.png|manifest\.webmanifest|opengraph-image|robots\.txt|sitemap\.xml)$/;
 
 /**
  * With `APP_PASSWORD` every page asks for it first. API routes are left to
