@@ -54,7 +54,10 @@ const en = {
   },
   blocked: {
     extension: { text: "Needs the browser extension.", link: "Set it up" },
-    listingId: { text: "Innkeep does not know this listing's id yet. Refresh Reservations first.", link: "" },
+    listingId: {
+      text: "Innkeep does not know this listing's id yet. Reading your reservations tells it.",
+      link: "",
+    },
     listingUrl: { text: "Needs your public page address.", link: "Add it on the property" },
     calendarLink: { text: "No calendar link yet.", link: "Add it on the property" },
     claude: { text: "Claude is not connected.", link: "Connect it" },
@@ -154,7 +157,7 @@ const fr: typeof en = {
   blocked: {
     extension: { text: "Nécessite l’extension de navigateur.", link: "L’installer" },
     listingId: {
-      text: "Innkeep ne connaît pas encore l’identifiant de cette annonce. Mettez d’abord à jour les Réservations.",
+      text: "Innkeep ne connaît pas encore l’identifiant de cette annonce. La lecture de vos réservations le lui apprend.",
       link: "",
     },
     listingUrl: { text: "Nécessite l’adresse de votre page publique.", link: "L’ajouter sur le logement" },

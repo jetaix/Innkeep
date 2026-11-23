@@ -13,6 +13,7 @@ import { reviewPageLinks } from "@/features/reservations/platform-links";
 import { getProperties } from "@/features/reservations/queries";
 import { isLow, newestFirst, reviewStats } from "@/features/reviews/compute";
 import { INTL_LOCALE } from "@/i18n/config";
+import { SyncCta } from "@/features/extension/sync-cta";
 import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
 
@@ -147,6 +148,11 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
                     ? t.read.readAt(CHANNELS[channel].label, fmt.timeAgo(lastSeen))
                     : t.read.never(CHANNELS[channel].label)}
                 </dd>
+                {!lastSeen && (
+                  <dd className="mt-2">
+                    <SyncCta scope="all" />
+                  </dd>
+                )}
               </div>
             );
           })}

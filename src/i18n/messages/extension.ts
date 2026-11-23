@@ -88,6 +88,10 @@ const en = {
     add: "Add the browser extension",
     update: "Update the browser extension",
   },
+  cta: {
+    /** Shown on a phone in place of the button that starts a run. */
+    computer: "To read it, open Innkeep on a computer.",
+  },
   prompt: {
     title: "Update your reservations",
     body: "Open each page below. It opens in a new tab, the extension reads your reservations, and the tab closes by itself. Come back here and the line is ticked.",
@@ -226,6 +230,9 @@ const fr: typeof en = {
   button: {
     add: "Ajouter l’extension de navigateur",
     update: "Mettre à jour l’extension de navigateur",
+  },
+  cta: {
+    computer: "Pour le lire, ouvrez Innkeep sur un ordinateur.",
   },
   prompt: {
     title: "Mettez à jour vos réservations",
