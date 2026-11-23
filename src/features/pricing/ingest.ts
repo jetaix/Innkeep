@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { findListingForPage } from "@/features/properties/link";
 import { getDb, guestQuotes, listings, nightlyPrices, OTA_CHANNELS, properties } from "@/db";
 import { previewSchema, savePreview } from "@/features/properties/preview";
 import { addDays, today } from "@/lib/dates";
@@ -87,6 +88,8 @@ export async function ingestPrices(input: z.input<typeof pricesSchema>): Promise
 export const quoteSchema = z.object({
   source: z.enum(OTA_CHANNELS),
   listingId: z.string().trim().min(3).max(40),
+  /** The public page that was read; lets a listing with no platform number yet be recognised. */
+  listingUrl: z.url().max(500).nullish(),
   checkIn: z.iso.date(),
   checkOut: z.iso.date(),
   guests: z.number().int().min(1).max(50).nullish(),
@@ -106,11 +109,7 @@ export async function ingestQuote(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const quote = quoteSchema.parse(input);
   const db = getDb();
-  const listing = await db
-    .select()
-    .from(listings)
-    .where(and(eq(listings.channel, quote.source), eq(listings.externalId, quote.listingId)))
-    .get();
+  const listing = await findListingForPage(quote.source, quote.listingId, quote.listingUrl);
   if (!listing) return { ok: false, error: "This is not one of your listings in Innkeep." };
 
   const values = {

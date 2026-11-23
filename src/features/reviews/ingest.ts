@@ -1,7 +1,8 @@
 import "server-only";
-import { and, eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { z } from "zod";
-import { getDb, listings, OTA_CHANNELS, reviews } from "@/db";
+import { getDb, OTA_CHANNELS, reviews } from "@/db";
+import { findListingForPage } from "@/features/properties/link";
 
 /**
  * Reviews sent by the browser extension from a listing's public page. A
@@ -11,6 +12,8 @@ import { getDb, listings, OTA_CHANNELS, reviews } from "@/db";
 export const reviewsSchema = z.object({
   source: z.enum(OTA_CHANNELS),
   listingId: z.string().trim().min(3).max(40),
+  /** The public page that was read; lets a listing with no platform number yet be recognised. */
+  listingUrl: z.url().max(500).nullish(),
   reviews: z
     .array(
       z.object({
@@ -39,11 +42,7 @@ export type ReviewsResult = { ok: true; saved: number } | { ok: false; error: st
 export async function ingestReviews(input: z.input<typeof reviewsSchema>): Promise<ReviewsResult> {
   const parsed = reviewsSchema.parse(input);
   const db = getDb();
-  const listing = await db
-    .select()
-    .from(listings)
-    .where(and(eq(listings.channel, parsed.source), eq(listings.externalId, parsed.listingId)))
-    .get();
+  const listing = await findListingForPage(parsed.source, parsed.listingId, parsed.listingUrl);
   if (!listing) return { ok: false, error: "This is not one of your listings in Innkeep." };
 
   const seenAt = Date.now();
