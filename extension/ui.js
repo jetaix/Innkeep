@@ -83,9 +83,6 @@
     /** Whether this tab may be read without the host pressing anything on it. */
     trusted: () => trusted,
 
-    /** One of the host's choices from the settings page; undefined when never set. */
-    option: async (key) => (await stored(key))[key],
-
     /** Message the background script from a page script; safe on a page that outlived the extension. */
     ask,
 

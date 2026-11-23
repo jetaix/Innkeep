@@ -34,7 +34,7 @@ src/
   app/                 Routes only: pages compose features, API routes stay thin
     (marketing)/       Landing page
     (app)/             The dashboard, behind the sidebar shell
-    api/               iCal export, messages webhook, MCP
+    api/               iCal export, extension ingest, MCP
   features/<name>/     One folder per product area
     queries.ts         Reads (server only)
     actions.ts         Writes, as server actions validated with zod

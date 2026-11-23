@@ -6,7 +6,6 @@ import { buildSuggestions as build, type InsightInput } from "./rules";
 
 const buildSuggestions = (data: InsightInput) => build(data, MESSAGES.en.insights.rules, createFormat("en"));
 
-const HOUR = 3_600_000;
 const now = Date.parse("2027-03-01T12:00:00Z");
 
 const property: Property = {
@@ -80,7 +79,6 @@ const input = (extra: Partial<InsightInput> = {}): InsightInput => ({
   properties: [property],
   listings: [listing(), listing({ id: 2, channel: "booking" })],
   stays: [],
-  conversations: [],
   chargeCount: 1,
   ...extra,
 });
@@ -126,20 +124,6 @@ describe("buildSuggestions", () => {
       ],
     });
     expect(result).toEqual(expect.arrayContaining(["sync-error", "drift", "single-channel"]));
-  });
-
-  it("escalates guests who have waited a long time", () => {
-    const conversations = [
-      { id: 1, guestName: "Tom", lastDirection: "in" as const, lastMessageAt: now - 2 * HOUR },
-      { id: 2, guestName: "Ana", lastDirection: "in" as const, lastMessageAt: now - 20 * HOUR },
-      { id: 3, guestName: "Answered", lastDirection: "out" as const, lastMessageAt: now - 30 * HOUR },
-      { id: 4, guestName: "Just now", lastDirection: "in" as const, lastMessageAt: now - 60_000 },
-    ];
-    const result = buildSuggestions(input({ conversations })).filter((s) => s.area === "guests");
-    expect(result.map((s) => [s.title.split(" ")[0], s.severity])).toEqual([
-      ["Ana", "urgent"],
-      ["Tom", "recommended"],
-    ]);
   });
 
   it("asks for costs and payouts when revenue is only an estimate", () => {

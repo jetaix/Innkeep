@@ -14,7 +14,7 @@ const PUBLIC_FILES = /^\/(?:icon\.svg|opengraph-image|favicon\.ico|robots\.txt)$
 
 /**
  * With `APP_PASSWORD` every page asks for it first. API routes are left to
- * their own tokens (the extension, the webhook, MCP, the calendar links), so
+ * their own tokens (the extension, MCP, the calendar links), so
  * the machines that call them keep working.
  */
 function passwordGate(request: NextRequest, password: string) {

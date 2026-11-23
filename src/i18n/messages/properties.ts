@@ -26,8 +26,7 @@ const en = {
     title: "Property",
     saving: "Saving…",
     delete: "Delete property",
-    confirmDelete: (name: string) =>
-      `Delete ${name} with its reservations and conversations? This cannot be undone.`,
+    confirmDelete: (name: string) => `Delete ${name} with its reservations? This cannot be undone.`,
   },
   details: {
     heading: "Listing details",
@@ -140,8 +139,7 @@ const fr: typeof en = {
     title: "Logement",
     saving: "Enregistrement…",
     delete: "Supprimer le logement",
-    confirmDelete: (name) =>
-      `Supprimer ${name} avec ses réservations et ses conversations ? Cette action est irréversible.`,
+    confirmDelete: (name) => `Supprimer ${name} avec ses réservations ? Cette action est irréversible.`,
   },
   details: {
     heading: "Détails de l’annonce",

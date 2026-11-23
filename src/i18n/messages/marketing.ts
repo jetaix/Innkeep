@@ -41,10 +41,10 @@ const en = {
     },
     suggestions: {
       title: "It tells you what to fix",
-      body: "Suggestions come from your own data: a calendar that stopped syncing, a guest waiting for an answer, a single unsold night between two stays. Add an Anthropic API key and Claude writes advice for your listings.",
+      body: "Suggestions come from your own data: a calendar that stopped syncing, a single unsold night between two stays. Add an Anthropic API key and Claude writes advice for your listings.",
       rows: [
         { tone: "critical", label: "Urgent", text: "Double booking at Harbour Studio" },
-        { tone: "warn", label: "Recommended", text: "Hugo has waited 2 h for a reply" },
+        { tone: "warn", label: "Recommended", text: "Canal Loft’s Booking.com calendar stopped syncing" },
         { tone: "neutral", label: "Idea", text: "One free night on 24 November" },
       ] as { tone: "critical" | "warn" | "neutral"; label: string; text: string }[],
     },
@@ -71,8 +71,8 @@ const en = {
         body: "Calendar links are re-read on each platform's own schedule. A double booking in that window is rare but possible; Innkeep flags it, it cannot prevent it.",
       },
       {
-        term: "You send replies yourself",
-        body: "Guest messages arrive through a webhook and are drafted in one inbox. You paste the reply into the platform.",
+        term: "No guest messaging",
+        body: "Innkeep does not read or send guest messages. You talk to your guests on each platform.",
       },
       {
         term: "Listing changes are copied across",
@@ -157,10 +157,14 @@ const fr: typeof en = {
     },
     suggestions: {
       title: "Il vous dit quoi corriger",
-      body: "Les suggestions viennent de vos propres données : un calendrier qui ne se synchronise plus, un voyageur qui attend une réponse, une nuit isolée invendue entre deux séjours. Ajoutez une clé d’API Anthropic et Claude rédige des conseils pour vos annonces.",
+      body: "Les suggestions viennent de vos propres données : un calendrier qui ne se synchronise plus, une nuit isolée invendue entre deux séjours. Ajoutez une clé d’API Anthropic et Claude rédige des conseils pour vos annonces.",
       rows: [
         { tone: "critical", label: "Urgent", text: "Double réservation à Harbour Studio" },
-        { tone: "warn", label: "Recommandé", text: "Hugo attend une réponse depuis 2 h" },
+        {
+          tone: "warn",
+          label: "Recommandé",
+          text: "Le calendrier Booking.com de Canal Loft ne se synchronise plus",
+        },
         { tone: "neutral", label: "Idée", text: "Une nuit libre le 24 novembre" },
       ],
     },
@@ -187,8 +191,8 @@ const fr: typeof en = {
         body: "Chaque plateforme relit les liens de calendrier à son propre rythme. Dans cet intervalle, une double réservation est rare mais possible ; Innkeep la signale, il ne peut pas l’empêcher.",
       },
       {
-        term: "Vous envoyez les réponses vous-même",
-        body: "Les messages des voyageurs arrivent par un webhook et les réponses se rédigent dans une boîte unique. Vous collez la réponse sur la plateforme.",
+        term: "Pas de messagerie",
+        body: "Innkeep ne lit et n’envoie aucun message de voyageur. Vous échangez avec vos voyageurs sur chaque plateforme.",
       },
       {
         term: "Les modifications d’annonce sont à recopier",

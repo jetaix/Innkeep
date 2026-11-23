@@ -35,7 +35,6 @@ export type InsightInput = {
   listings: (Listing & { publishState: PublishState })[];
   /** Confirmed stays and blocks that have not ended yet. */
   stays: Reservation[];
-  conversations: { id: number; guestName: string; lastDirection: "in" | "out"; lastMessageAt: number }[];
   chargeCount: number;
 };
 
@@ -236,20 +235,6 @@ export function buildSuggestions(
         action: { label: t.connectCalendar, href: `/properties/${property.id}` },
       });
     }
-  }
-
-  // Guests waiting for an answer
-  for (const conversation of input.conversations) {
-    const waited = now - conversation.lastMessageAt;
-    if (conversation.lastDirection !== "in" || waited < HOUR) continue;
-    suggestions.push({
-      key: `unanswered:${conversation.id}:${conversation.lastMessageAt}`,
-      severity: waited > 12 * HOUR ? "urgent" : "recommended",
-      area: "guests",
-      title: t.unanswered.title(conversation.guestName, Math.round(waited / HOUR)),
-      body: t.unanswered.body,
-      action: { label: t.unanswered.action, href: `/inbox?c=${conversation.id}` },
-    });
   }
 
   // Money

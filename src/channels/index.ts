@@ -5,10 +5,9 @@ import type { OtaChannel, Source } from "@/db/schema";
  * A channel adapter describes how Innkeep talks to one booking platform.
  *
  * Today both adapters work over iCal, the only integration Airbnb and
- * Booking.com offer without a partner agreement. `pushContent` and
- * `sendMessage` are the seams for their partner APIs: implement them in an
- * adapter and the rest of the app (publish buttons, inbox delivery) picks
- * them up through `capabilities`.
+ * Booking.com offer without a partner agreement. `pushContent` is the seam
+ * for their partner APIs: implement it in an adapter and the rest of the app
+ * (the publish buttons) picks it up through `capabilities`.
  */
 export type ChannelAdapter = {
   id: OtaChannel;
@@ -16,20 +15,15 @@ export type ChannelAdapter = {
   capabilities: {
     /** Listing content can be pushed through an API. */
     content: boolean;
-    /** Guest messages can be sent through an API. */
-    messaging: boolean;
   };
   /** Where the host edits calendar sync settings on the channel. */
   calendarHelp: string;
-  /** Where the host answers guests on the channel. */
-  inboxUrl: string;
   /** Turns a feed event into reservation fields. */
   classifyEvent(event: CalendarEvent): {
     kind: "reservation" | "block";
     channelInfo: string;
   };
   pushContent?(listingUrl: string, content: ListingContent): Promise<void>;
-  sendMessage?(externalThreadId: string, body: string): Promise<void>;
 };
 
 export type ListingContent = {
@@ -48,9 +42,8 @@ export type ListingContent = {
 const airbnb: ChannelAdapter = {
   id: "airbnb",
   label: "Airbnb",
-  capabilities: { content: false, messaging: false },
+  capabilities: { content: false },
   calendarHelp: "Airbnb → Calendar → Availability → Connect calendars",
-  inboxUrl: "https://www.airbnb.com/hosting/messages",
   classifyEvent(event) {
     // Airbnb exports "Reserved" for bookings and "Airbnb (Not available)"
     // for dates the host blocked by hand.
@@ -65,9 +58,8 @@ const airbnb: ChannelAdapter = {
 const booking: ChannelAdapter = {
   id: "booking",
   label: "Booking.com",
-  capabilities: { content: false, messaging: false },
+  capabilities: { content: false },
   calendarHelp: "Booking.com extranet → Rates & Availability → Sync calendars",
-  inboxUrl: "https://admin.booking.com/",
   classifyEvent() {
     // Booking.com exports every unavailable night as "CLOSED - Not available",
     // whether a guest booked it or the host closed it. Treat it as closed dates;

@@ -82,8 +82,6 @@ persistent disk.
   counts what has gone stale.
 - **Reviews.** What guests wrote on Airbnb and Booking.com in one list, with
   ratings, your replies, and filters for unanswered and lower-rated ones.
-- **Inbox.** Guest conversations from every channel in one list, fed by a
-  webhook.
 - **Keyboard.** Command menu (`⌘K`), `G` then a letter to jump between pages,
   per-page shortcuts.
 - **MCP server.** Lets an AI assistant read your calendar, revenue and
@@ -115,16 +113,15 @@ Airbnb and Booking.com give every host calendar links. Everything else
 (reservation details, listing content, messaging, rates) is reserved for
 approved software partners, and Innkeep is not one.
 
-| Capability                     | Status                        | How                                                                            |
-| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------ |
-| Calendar sync, both directions | Works                         | iCal import and export                                                         |
-| Double-booking detection       | Works                         | Overlap check across channels                                                  |
-| Guest names, payouts, history  | Extension                     | The browser extension reads them from your reservations pages                  |
-| Listing details on platforms   | Semi-manual                   | Edit once, copy into each platform, mark as published                          |
-| Receiving guest messages       | Via webhook, or the extension | A webhook posts them; the extension can keep the Airbnb conversations you open |
-| Replying to guests             | Semi-manual                   | Draft here, paste into the platform's inbox                                    |
-| Changing prices on platforms   | No                            | Suggestions tell you what to change; you change it there                       |
-| Login and multiple users       | One password                  | `APP_PASSWORD` protects every page; no separate accounts yet                   |
+| Capability                     | Status       | How                                                              |
+| ------------------------------ | ------------ | ---------------------------------------------------------------- |
+| Calendar sync, both directions | Works        | iCal import and export                                           |
+| Double-booking detection       | Works        | Overlap check across channels                                    |
+| Guest names, payouts, history  | Extension    | The browser extension reads them from your reservations pages    |
+| Listing details on platforms   | Semi-manual  | Edit once, copy into each platform, mark as published            |
+| Guest messages                 | No           | Read and answered on each platform; Innkeep does not handle them |
+| Changing prices on platforms   | No           | Suggestions tell you what to change; you change it there         |
+| Login and multiple users       | One password | `APP_PASSWORD` protects every page; no separate accounts yet     |
 
 iCal is not instant: platforms re-read links on their own schedule, so a
 double booking is still possible in the gap. Innkeep flags it; it cannot
@@ -150,7 +147,6 @@ The Settings page shows what is switched on.
 | `SYNC_INTERVAL_MINUTES` | `15`                | Background sync period, `0` to disable                  |
 | `ANTHROPIC_API_KEY`     | unset               | Claude's key; or paste it on the Assistant page         |
 | `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                                |
-| `WEBHOOK_SECRET`        | unset               | Turns on the inbound messages webhook                   |
 | `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                   |
 | `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details                 |
 | `APP_PASSWORD`          | unset               | Asks for this password before any page opens            |
@@ -204,21 +200,6 @@ snippet for your address):
 Tools: `list_properties`, `list_reservations`, `get_revenue`,
 `list_suggestions`, `block_dates`.
 
-### Messages webhook
-
-Set `WEBHOOK_SECRET`, then post messages from an email parser, n8n, Zapier or
-your own bridge:
-
-```bash
-curl -X POST https://your-innkeep/api/webhooks/messages \
-  -H "Authorization: Bearer $WEBHOOK_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"propertyId": 1, "source": "airbnb", "guestName": "Tom", "body": "Hi, can we check in early?"}'
-```
-
-Optional fields: `threadId` (groups messages into a conversation; defaults to
-guest name + property) and `sentAt` (milliseconds since epoch).
-
 ## Security
 
 There is no login yet. Run Innkeep on a private network or behind a reverse
@@ -240,7 +221,6 @@ bun run check   # format, lint, types, tests, build
 ## Roadmap
 
 - Separate accounts for each person
-- Message templates and scheduled messages
 - Per-night pricing and minimum stays
 - Partner-API adapters for hosts who have credentials
 

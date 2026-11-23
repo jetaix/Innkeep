@@ -22,12 +22,6 @@ const en = {
       name: "AI advice",
       body: "Lets the Suggestions page ask Claude for advice written for your listings. Listing text and totals are sent; guest names and messages are not.",
     },
-    webhook: {
-      name: "Messages webhook",
-      /** Followed by the endpoint, then `after`. */
-      before: "Accepts guest messages at",
-      after: "from an email parser or automation.",
-    },
     extension: {
       name: "Browser extension",
       body: "Lets the Innkeep Companion extension add guest names, payouts, past stays and listing details from your own Airbnb and Booking.com pages.",
@@ -62,7 +56,6 @@ const en = {
     add: "Add a booking or block (Calendar, Reservations)",
     move: "Move the calendar by four weeks",
     today: "Back to today in the calendar",
-    conversations: "Next and previous conversation",
     close: "Close the open panel",
   },
 };
@@ -90,11 +83,6 @@ const fr: typeof en = {
     ai: {
       name: "Conseils par IA",
       body: "Permet à la page Suggestions de demander à Claude des conseils rédigés pour vos annonces. Le texte des annonces et les totaux sont envoyés ; les noms des voyageurs et les messages ne le sont pas.",
-    },
-    webhook: {
-      name: "Webhook des messages",
-      before: "Reçoit les messages des voyageurs sur",
-      after: "depuis un analyseur d’e-mails ou une automatisation.",
     },
     extension: {
       name: "Extension de navigateur",
@@ -129,7 +117,6 @@ const fr: typeof en = {
     add: "Ajouter une réservation ou un blocage (Calendrier, Réservations)",
     move: "Déplacer le calendrier de quatre semaines",
     today: "Revenir à aujourd’hui dans le calendrier",
-    conversations: "Conversation suivante et précédente",
     close: "Fermer le panneau ouvert",
   },
 };
