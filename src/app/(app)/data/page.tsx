@@ -8,6 +8,7 @@ import { SubmitButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
 import { Loading } from "@/components/ui/loading";
 import { Badge, Card, PageHeader, SectionTitle, SourceDot } from "@/components/ui/primitives";
+import { SyncCta } from "@/features/extension/sync-cta";
 import { countToRefresh, getDataSources, type DataSource } from "@/features/freshness/sources";
 import { syncListingAction } from "@/features/properties/actions";
 import { getProperties } from "@/features/reservations/queries";
@@ -225,9 +226,7 @@ async function SourceAction({ source, platform }: { source: DataSource; platform
         </Link>
       );
     case "popup":
-      return (
-        <span className="inline-block max-w-[26ch] text-left text-xs text-muted">{t.actions.popup}</span>
-      );
+      return <SyncCta scope="all" variant={variant} />;
     case "blocked": {
       const blocked = t.blocked[action.reason];
       const href =
@@ -247,6 +246,11 @@ async function SourceAction({ source, platform }: { source: DataSource; platform
             <Link href={href} className="text-ink underline underline-offset-2">
               {blocked.link}
             </Link>
+          )}
+          {action.reason === "listingId" && (
+            <span className="mt-1.5 block">
+              <SyncCta scope="reservations" />
+            </span>
           )}
         </span>
       );

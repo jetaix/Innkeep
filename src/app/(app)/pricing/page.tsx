@@ -13,6 +13,7 @@ import { PriceChart } from "@/features/pricing/price-chart";
 import { getPricing, PRICING_WINDOWS, type Pricing } from "@/features/pricing/queries";
 import { calendarLinks, guestViewLinks } from "@/features/reservations/platform-links";
 import { getProperties } from "@/features/reservations/queries";
+import { SyncCta } from "@/features/extension/sync-cta";
 import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
 
@@ -192,7 +193,7 @@ async function ReadPrices({ property, pricing }: { property: Property; pricing: 
           const covered = pricing.coverage[channel];
           const label = CHANNELS[channel].label;
           return (
-            <li key={channel} className="flex items-center gap-1.5">
+            <li key={channel} className="flex flex-wrap items-center gap-1.5">
               <SourceDot source={channel} />
               {covered
                 ? t.read.covered(
@@ -202,6 +203,7 @@ async function ReadPrices({ property, pricing }: { property: Property; pricing: 
                     fmt.timeAgo(covered.seenAt),
                   )
                 : t.read.never(label)}
+              {!covered && <SyncCta scope="all" />}
             </li>
           );
         })}
