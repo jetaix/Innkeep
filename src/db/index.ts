@@ -300,10 +300,14 @@ export type Db = LibSQLDatabase<typeof schema>;
  * Otherwise it is a SQLite file on this machine.
  */
 function connect(): Client {
+  const testing = Boolean(process.env.VITEST);
   const url = process.env.TURSO_DATABASE_URL;
+  // Tests delete whole tables. `vitest.setup.ts` already clears the address; this is the second lock.
+  if (url && testing) throw new Error("Tests must not use the hosted database: unset TURSO_DATABASE_URL");
   if (url) return createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
 
-  const file = process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "innkeep.db");
+  const file =
+    process.env.DATABASE_PATH ?? (testing ? ":memory:" : path.join(process.cwd(), "data", "innkeep.db"));
   if (file === ":memory:") return createClient({ url: ":memory:" });
   fs.mkdirSync(path.dirname(file), { recursive: true });
   return createClient({ url: `file:${file}` });
