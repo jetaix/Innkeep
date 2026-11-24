@@ -1,3 +1,4 @@
+import { Download as DownloadIcon } from "lucide-react";
 import type { Metadata } from "next";
 import path from "node:path";
 import type { ReactNode } from "react";
@@ -11,6 +12,7 @@ import { Loading } from "@/components/ui/loading";
 import { getExtensionStatus, REQUIRED_EXTENSION } from "@/features/extension/status";
 import { DetailsRefresh } from "@/features/reservations/details-refresh";
 import { getI18n } from "@/i18n/server";
+import manifest from "../../../../extension/manifest.json";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).m.extension.title };
@@ -66,6 +68,8 @@ async function Guide() {
     process.env.APP_URL?.replace(/\/$/, "") ??
     `${requestHeaders.get("x-forwarded-proto") ?? "http"}://${requestHeaders.get("host")}`;
   const folder = path.join(process.cwd(), "extension");
+  // On a server there is no folder on the host's computer to point at: the extension is downloaded.
+  const hosted = Boolean(process.env.VERCEL);
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -85,6 +89,8 @@ async function Guide() {
           {t.outdated.before(status.version, REQUIRED_EXTENSION)}{" "}
           <code className="font-mono text-xs">chrome://extensions</code>
           {t.outdated.after}
+          <span className="mt-2 block">{s.update}</span>
+          <Download />
         </Notice>
       )}
 
@@ -107,8 +113,11 @@ async function Guide() {
             <Copyable value="chrome://extensions" label={s.copyAddress} />
           </Step>
           <Step title={s.load.title}>
-            {s.load.before} <strong className="font-medium text-ink">{s.load.strong}</strong> {s.load.after}
-            <Copyable value={folder} label={s.copyPath} />
+            {s.load.before} <strong className="font-medium text-ink">{s.load.strong}</strong>{" "}
+            {hosted ? s.load.afterHosted : s.load.after}
+            {!hosted && <Copyable value={folder} label={s.copyPath} />}
+            {!hosted && <span className="mt-3 block text-xs">{s.load.elsewhere}</span>}
+            <Download />
           </Step>
           <Step title={s.pin.title}>{s.pin.body}</Step>
           <Step title={s.connect.title}>
@@ -172,5 +181,23 @@ async function Guide() {
         <p className="mt-3 text-xs leading-relaxed text-muted">{t.reads.terms}</p>
       </Card>
     </div>
+  );
+}
+
+/** The extension as a ZIP, written to `public/` by `scripts/zip-extension.mjs` before each build. */
+async function Download() {
+  const s = (await getI18n()).m.extension.setup;
+  return (
+    <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+      <a
+        href="/innkeep-extension.zip"
+        download={`innkeep-extension-${manifest.version}.zip`}
+        className={buttonClass({ size: "sm", variant: "primary" })}
+      >
+        <DownloadIcon aria-hidden />
+        {s.download(manifest.version)}
+      </a>
+      <span className="text-xs text-muted">{s.downloadHint}</span>
+    </span>
   );
 }
