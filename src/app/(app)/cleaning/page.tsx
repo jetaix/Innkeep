@@ -20,7 +20,7 @@ import {
 } from "@/features/cleaning/actions";
 import { unassigned, type Cleaning } from "@/features/cleaning/compute";
 import { getCleaning } from "@/features/cleaning/queries";
-import { cleaningDay, cleaningLines, cleaningWindow } from "@/features/cleaning/text";
+import { cleaningDay, cleaningLines, cleaningRequest, cleaningWindow } from "@/features/cleaning/text";
 import { getI18n } from "@/i18n/server";
 import { addDays } from "@/lib/dates";
 
@@ -263,8 +263,10 @@ async function Row({
   overdue: boolean;
   day: (date: string) => string;
 }) {
-  const { m } = await getI18n();
+  const { m, fmt } = await getI18n();
   const t = m.cleaning.row;
+  const r = m.cleaning.request;
+  const request = cleaningRequest(entry, place, m, fmt);
   const key = `${entry.propertyId}-${entry.date}`;
   const setStatus = (status: string) => setCleaningStatus.bind(null, entry.propertyId, entry.date, status);
 
@@ -344,6 +346,28 @@ async function Row({
           )}
         </div>
       </div>
+
+      {entry.status === "pending" && (
+        <div className="mt-3 max-w-xl rounded-md border border-line bg-subtle p-3 print:hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-medium text-muted">{r.title}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              {entry.cleaner?.phone && (
+                // Opens the phone's or the Mac's Messages app on a new message to the cleaner.
+                <a
+                  href={`sms:${entry.cleaner.phone.replace(/[^\d+]/g, "")}?&body=${encodeURIComponent(request)}`}
+                  className={buttonClass({ size: "sm" })}
+                >
+                  {r.send}
+                </a>
+              )}
+              <CopyButton value={request} label={r.copy} />
+            </div>
+          </div>
+          <p className="mt-2 text-[13px] leading-relaxed whitespace-pre-line">{request}</p>
+          <p className="mt-2 text-xs text-muted">{r.hint}</p>
+        </div>
+      )}
 
       <details className="mt-2 print:hidden">
         <summary className="cursor-pointer text-xs text-muted underline underline-offset-2">{t.edit}</summary>

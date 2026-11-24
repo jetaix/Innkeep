@@ -38,3 +38,23 @@ export function cleaningLines(entry: Cleaning, place: Property, m: Messages, fmt
     ...(entry.notes ? [`  ${t.share.note(entry.notes)}`] : []),
   ];
 }
+
+/**
+ * The message a host sends to ask whether a cleaning is possible: the day in
+ * full, the time there is, and the place. Written to be pasted as it is.
+ */
+export function cleaningRequest(entry: Cleaning, place: Property, m: Messages, fmt: Format): string {
+  const t = m.cleaning.request;
+  const date = fmt.date(entry.date, { weekday: "long", day: "numeric", month: "long" });
+  const question = entry.sameDay
+    ? t.between(date, t.time(entry.from), t.time(place.checkInTime), place.name)
+    : t.from(date, t.time(entry.from), place.name);
+  return [
+    t.greeting(entry.cleaner?.name ?? null),
+    "",
+    question,
+    ...(entry.notes ? ["", m.cleaning.share.note(entry.notes)] : []),
+    "",
+    t.thanks,
+  ].join("\n");
+}
