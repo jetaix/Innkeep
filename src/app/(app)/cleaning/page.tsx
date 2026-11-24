@@ -108,6 +108,7 @@ async function CleaningView() {
                       <Row
                         entry={entry}
                         place={names.get(entry.propertyId)!}
+                        named={properties.length > 1}
                         cleaners={cleaners}
                         overdue={entry.status === "pending" && entry.date < today}
                         day={day}
@@ -253,12 +254,15 @@ async function CleaningView() {
 async function Row({
   entry,
   place,
+  named,
   cleaners,
   overdue,
   day,
 }: {
   entry: Cleaning;
   place: Property;
+  /** Whether the message to the cleaner names the place: only with several. */
+  named: boolean;
   cleaners: Cleaner[];
   overdue: boolean;
   day: (date: string) => string;
@@ -266,7 +270,7 @@ async function Row({
   const { m, fmt } = await getI18n();
   const t = m.cleaning.row;
   const r = m.cleaning.request;
-  const request = cleaningRequest(entry, place, m, fmt);
+  const request = cleaningRequest(entry, place, m, fmt, named);
   const key = `${entry.propertyId}-${entry.date}`;
   const setStatus = (status: string) => setCleaningStatus.bind(null, entry.propertyId, entry.date, status);
 

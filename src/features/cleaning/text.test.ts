@@ -30,7 +30,7 @@ describe("cleaningRequest", () => {
       [
         "Bonjour Sandrine,",
         "",
-        "Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le samedi 23 janvier, entre 10 h et 16 h, dans le logement Bastia ?",
+        "Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le samedi 23 janvier, entre 10 h et 16 h, dans le logement ?",
         "",
         "Merci !",
       ].join("\n"),
@@ -43,6 +43,7 @@ describe("cleaningRequest", () => {
       place,
       MESSAGES.fr,
       createFormat("fr"),
+      true,
     );
     expect(text).toContain("Bonjour,\n");
     expect(text).toContain("à partir de 10 h 30, dans le logement Bastia");
@@ -51,7 +52,7 @@ describe("cleaningRequest", () => {
 
   it("is written in English for an English interface", () => {
     expect(cleaningRequest(entry(), place, MESSAGES.en, createFormat("en"))).toContain(
-      "Could you confirm that you can clean Bastia on Saturday 23 January, between 10:00 and 16:00?",
+      "Could you confirm that you can clean the place on Saturday 23 January, between 10:00 and 16:00?",
     );
   });
 });

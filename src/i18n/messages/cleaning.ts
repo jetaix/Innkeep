@@ -52,11 +52,12 @@ const en = {
     send: "Open in Messages",
     greeting: (name: string | null) => (name ? `Hello ${name},` : "Hello,"),
     /** The next guests arrive the same day: the cleaning has a start and an end. */
-    between: (date: string, from: string, until: string, place: string) =>
-      `Could you confirm that you can clean ${place} on ${date}, between ${from} and ${until}?`,
+    /** `place` is named only when there are several places to tell apart. */
+    between: (date: string, from: string, until: string, place: string | null): string =>
+      `Could you confirm that you can clean ${place ?? "the place"} on ${date}, between ${from} and ${until}?`,
     /** Nobody arrives that day: only the time the place is free from matters. */
-    from: (date: string, from: string, place: string) =>
-      `Could you confirm that you can clean ${place} on ${date}, from ${from}?`,
+    from: (date: string, from: string, place: string | null): string =>
+      `Could you confirm that you can clean ${place ?? "the place"} on ${date}, from ${from}?`,
     time: (clock: string) => clock,
     thanks: "Thank you!",
   },
@@ -186,9 +187,9 @@ const fr: typeof en = {
     send: "Ouvrir dans Messages",
     greeting: (name) => (name ? `Bonjour ${name},` : "Bonjour,"),
     between: (date, from, until, place) =>
-      `Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le ${date}, entre ${from} et ${until}, dans le logement ${place} ?`,
+      `Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le ${date}, entre ${from} et ${until}, dans le logement${place ? ` ${place}` : ""} ?`,
     from: (date, from, place) =>
-      `Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le ${date}, à partir de ${from}, dans le logement ${place} ?`,
+      `Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le ${date}, à partir de ${from}, dans le logement${place ? ` ${place}` : ""} ?`,
     // "10:00" se dit "10 h", "10:30" se dit "10 h 30".
     time: (clock) =>
       clock.replace(/^0?(\d{1,2}):(\d{2})$/, (_, hour, minute) =>
