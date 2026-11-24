@@ -84,3 +84,18 @@ const FRESH_FOR_MS = 12 * 60 * 60_000;
 export function isFresh(last: LastUpdate | null, now = Date.now()): boolean {
   return last != null && now - last.at < FRESH_FOR_MS;
 }
+
+/** Remembers when the extension last set off on a full run, whatever that run then managed to read. */
+export async function recordFullRun() {
+  const value = String(Date.now());
+  await getDb()
+    .insert(appState)
+    .values({ key: "run:all", value })
+    .onConflictDoUpdate({ target: appState.key, set: { value } })
+    .run();
+}
+
+export async function getLastFullRun(): Promise<number | null> {
+  const row = await getDb().select().from(appState).where(eq(appState.key, "run:all")).get();
+  return row ? Number(row.value) || null : null;
+}

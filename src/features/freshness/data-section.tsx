@@ -209,7 +209,16 @@ async function SourceAction({ source, platform }: { source: DataSource; platform
         </Link>
       );
     case "popup":
-      return <SyncCta scope="all" variant={variant} />;
+      return (
+        <>
+          {source.tried && (
+            <span className="mb-1.5 block max-w-[30ch] text-left text-xs leading-relaxed text-muted">
+              {t.actions.tried}
+            </span>
+          )}
+          <SyncCta scope="all" variant={source.tried ? "secondary" : variant} />
+        </>
+      );
     case "blocked": {
       const blocked = t.blocked[action.reason];
       const href =

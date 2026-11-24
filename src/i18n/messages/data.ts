@@ -49,6 +49,8 @@ const en = {
     pricing: "Go to Pricing",
     assistant: "Go to Suggestions",
     popup: "Use “Read everything” in the extension",
+    tried:
+      "A full run did not manage to read these. The platform may have asked you to sign in again: sign in there, then run once more.",
     pages: (n: number) => `${n} page${n === 1 ? "" : "s"} kept`,
     hint: "Opens your own page. The extension reads it; this tab updates when you come back.",
   },
@@ -151,6 +153,8 @@ const fr: typeof en = {
     pricing: "Aller aux Tarifs",
     assistant: "Aller aux Suggestions",
     popup: "Utilisez « Read everything » dans l’extension",
+    tried:
+      "Un passage complet n’a pas réussi à les lire. La plateforme vous a peut-être demandé de vous reconnecter : connectez-vous-y, puis relancez.",
     pages: (n) => `${n} page${n > 1 ? "s" : ""} conservée${n > 1 ? "s" : ""}`,
     hint: "Ouvre votre propre page. L’extension la lit ; cet onglet se met à jour à votre retour.",
   },
