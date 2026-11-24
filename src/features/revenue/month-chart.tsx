@@ -17,10 +17,13 @@ export async function MonthChart({
   summaries,
   current,
   currency,
+  unit = "month",
 }: {
   summaries: MonthSummary[];
   current: Month;
   currency: string;
+  /** With "year", each summary is a whole year and its `month` is the year itself. */
+  unit?: "month" | "year";
 }) {
   const highest = Math.max(0, ...summaries.map((s) => s.net));
   const lowest = Math.max(0, ...summaries.map((s) => -s.net));
@@ -29,10 +32,17 @@ export async function MonthChart({
   const { locale, m, fmt } = await getI18n();
   const t = m.revenue.months;
   const money = (value: number) => fmt.money(value, currency, { cents: false });
-  const monthName = (month: Month) => formatMonth(month, "long", INTL_LOCALE[locale]);
+  const monthName = (month: Month) =>
+    unit === "year" ? month : formatMonth(month, "long", INTL_LOCALE[locale]);
+  const shortName = (month: Month) =>
+    unit === "year" ? month : formatMonth(month, "short", INTL_LOCALE[locale]);
 
   return (
-    <div className="flex gap-2 px-4 pt-10 pb-3 sm:gap-4" role="group" aria-label={t.title}>
+    <div
+      className="flex gap-2 px-4 pt-10 pb-3 sm:gap-4"
+      role="group"
+      aria-label={unit === "year" ? m.revenue.years.title : t.title}
+    >
       {summaries.map((summary) => {
         const isCurrent = summary.month === current;
         const size = Math.max(2, Math.round((Math.abs(summary.net) / range) * HEIGHT));
@@ -85,7 +95,7 @@ export async function MonthChart({
               </div>
             </div>
             <span className={cn("mt-2 text-xs", isCurrent ? "font-medium text-ink" : "text-muted")}>
-              {t.label(formatMonth(summary.month, "short", INTL_LOCALE[locale]))}
+              {t.label(shortName(summary.month))}
             </span>
           </div>
         );

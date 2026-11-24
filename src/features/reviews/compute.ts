@@ -18,6 +18,17 @@ const LOW_BELOW = 0.8;
 export const isLow = (review: Pick<Review, "rating" | "scale">) =>
   review.rating != null && review.rating / review.scale < LOW_BELOW;
 
+/**
+ * A rating as 1 to 5 stars whatever the platform's scale: Booking.com's 8.4
+ * out of 10 is 4 stars. Null without a rating.
+ */
+export function stars(review: Pick<Review, "rating" | "scale">): 1 | 2 | 3 | 4 | 5 | null {
+  if (review.rating == null || review.scale <= 0) return null;
+  return Math.min(5, Math.max(1, Math.round((review.rating / review.scale) * 5))) as 1 | 2 | 3 | 4 | 5;
+}
+
+export const STARS = [5, 4, 3, 2, 1] as const;
+
 export function reviewStats(reviews: Review[], source: OtaChannel): ReviewStats {
   const own = reviews.filter((review) => review.source === source);
   const rated = own.flatMap((review) => (review.rating == null ? [] : [review.rating]));

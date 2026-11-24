@@ -11,7 +11,7 @@ import { getDb, OTA_CHANNELS, reviews as reviewsTable, type OtaChannel, type Rev
 import { getExtensionStatus } from "@/features/extension/status";
 import { reviewPageLinks } from "@/features/reservations/platform-links";
 import { getProperties } from "@/features/reservations/queries";
-import { isLow, newestFirst, reviewStats } from "@/features/reviews/compute";
+import { isLow, newestFirst, reviewStats, STARS, stars } from "@/features/reviews/compute";
 import { INTL_LOCALE } from "@/i18n/config";
 import { SyncCta } from "@/features/extension/sync-cta";
 import { getI18n } from "@/i18n/server";
@@ -47,17 +47,21 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
   const all = await getDb().select().from(reviewsTable).all();
   const show = SHOW.find((value) => value === one(params.show)) ?? "all";
   const platform = OTA_CHANNELS.find((channel) => channel === one(params.platform)) ?? null;
+  const star = STARS.find((value) => String(value) === one(params.stars)) ?? null;
   const shown = newestFirst(all).filter(
     (review) =>
       (!platform || review.source === platform) &&
+      (star == null || stars(review) === star) &&
       (show === "all" || (show === "unanswered" ? !review.reply : isLow(review))),
   );
-  const href = (next: { show?: string; platform?: string | null }) => {
+  const href = (next: { show?: string; platform?: string | null; stars?: number | null }) => {
     const query = new URLSearchParams();
     const nextShow = next.show ?? show;
     const nextPlatform = next.platform === undefined ? platform : next.platform;
     if (nextShow !== "all") query.set("show", nextShow);
     if (nextPlatform) query.set("platform", nextPlatform);
+    const nextStars = next.stars === undefined ? star : next.stars;
+    if (nextStars) query.set("stars", String(nextStars));
     return query.size ? `/reviews?${query}` : "/reviews";
   };
   const number = (value: number) =>
@@ -183,6 +187,18 @@ async function Reviews({ searchParams }: Pick<PageProps<"/reviews">, "searchPara
                 })),
               ]}
             />
+            <Choice
+              label={t.filters.stars}
+              options={[
+                { label: t.filters.anyStars, href: href({ stars: null }), current: star == null },
+                ...STARS.map((value) => ({
+                  label: `${value} ★`,
+                  title: t.filters.starsLabel(value),
+                  href: href({ stars: value }),
+                  current: value === star,
+                })),
+              ]}
+            />
             <p className="ml-auto text-xs text-muted tabular-nums">{t.count(shown.length, all.length)}</p>
           </div>
 
@@ -214,7 +230,7 @@ function Choice({
   options,
 }: {
   label: string;
-  options: { label: string; href: string; current: boolean }[];
+  options: { label: string; title?: string; href: string; current: boolean }[];
 }) {
   return (
     <nav aria-label={label} className="flex flex-wrap items-center gap-1.5">
@@ -224,6 +240,8 @@ function Choice({
           key={option.href + option.label}
           href={option.href}
           aria-current={option.current ? "true" : undefined}
+          aria-label={option.title}
+          title={option.title}
           className={cn(
             "flex h-7 items-center rounded-md border px-2.5 text-xs font-medium transition-colors",
             option.current

@@ -31,6 +31,10 @@ const en = {
     low: "Lower ratings",
     platform: "Platform",
     both: "Both",
+    stars: "Stars",
+    anyStars: "Any",
+    /** Read aloud for the "4 ★" choice. */
+    starsLabel: (n: number): string => `${n} star${n === 1 ? "" : "s"}`,
   },
   count: (shown: number, total: number) =>
     shown === total ? `${total} review${total === 1 ? "" : "s"}` : `${shown} of ${total} reviews`,
@@ -79,6 +83,9 @@ const fr: typeof en = {
     low: "Notes plus basses",
     platform: "Plateforme",
     both: "Les deux",
+    stars: "Étoiles",
+    anyStars: "Toutes",
+    starsLabel: (n) => `${n} étoile${n > 1 ? "s" : ""}`,
   },
   count: (shown, total) => (shown === total ? `${total} avis` : `${shown} avis sur ${total}`),
   nothing: "Aucun avis ne correspond à ces filtres.",
