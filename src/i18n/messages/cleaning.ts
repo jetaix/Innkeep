@@ -104,6 +104,10 @@ const en = {
   telegram: {
     needed: (n: number) => (n === 1 ? "Cleaning to arrange" : `${n} cleanings to arrange`),
     cancelled: (n: number) => (n === 1 ? "Cleaning no longer needed" : `${n} cleanings no longer needed`),
+    requestsFollow: (n: number): string =>
+      n === 1
+        ? "The message to send your cleaner follows, ready to forward."
+        : "The messages to send your cleaner follow, one for each cleaning, ready to forward.",
     test: "Innkeep can reach you here. You will get a message each time a cleaning has to be arranged.",
     testButton: "Send a test message",
     testSending: "Sending…",
@@ -237,6 +241,10 @@ const fr: typeof en = {
     needed: (n) => (n === 1 ? "Ménage à demander" : `${n} ménages à demander`),
     cancelled: (n) =>
       n === 1 ? "Ménage qui n’est plus nécessaire" : `${n} ménages qui ne sont plus nécessaires`,
+    requestsFollow: (n) =>
+      n === 1
+        ? "Le message à envoyer à la personne du ménage suit, prêt à transférer."
+        : "Les messages à envoyer à la personne du ménage suivent, un par ménage, prêts à transférer.",
     test: "Innkeep peut vous écrire ici. Vous recevrez un message chaque fois qu’un ménage est à demander.",
     testButton: "Envoyer un message de test",
     testSending: "Envoi…",
