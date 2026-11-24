@@ -6,7 +6,11 @@
 async function callInnkeep(method, path, body) {
   const { baseUrl, token } = await chrome.storage.local.get(["baseUrl", "token"]);
   if (!baseUrl || !token)
-    return { ok: false, error: "Open the extension settings and connect your Innkeep first." };
+    return {
+      ok: false,
+      reconnect: true,
+      error: "This extension is not connected to your Innkeep yet.",
+    };
 
   try {
     const response = await fetch(`${baseUrl}${path}`, {
@@ -20,6 +24,20 @@ async function callInnkeep(method, path, body) {
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      // Innkeep's own refusal is JSON; anything else is a sign-in wall in front of it.
+      return data.error
+        ? {
+            ok: false,
+            reconnect: true,
+            error:
+              "Innkeep refused this extension's token: it no longer matches the one in Innkeep. Reconnect with the current token.",
+          }
+        : {
+            ok: false,
+            error: `Something in front of Innkeep at ${baseUrl} asks for a sign-in, so the extension cannot reach it. Turn that protection off for this address.`,
+          };
+    }
     if (!response.ok) return { ok: false, error: data.error ?? `Innkeep answered ${response.status}.` };
     return { ok: true, ...data };
   } catch {
@@ -181,6 +199,10 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     case "innkeep:close-tab":
       // Only ever closes the tab that asked, and never the tab of a run.
       if (tabId != null && tabId !== tour?.tabId) chrome.tabs.remove(tabId);
+      return false;
+
+    case "innkeep:open-settings":
+      chrome.runtime.openOptionsPage();
       return false;
 
     case "innkeep:test":

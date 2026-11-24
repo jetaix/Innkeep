@@ -105,6 +105,14 @@
         pill.style.borderColor = tone === "error" ? "#c62a2f" : tone === "good" ? "#18794e" : "#d4d4d0";
       };
 
+      /** The box's one button: send the page, or, when Innkeep refused the token, open the settings. */
+      let action = "send";
+      const setAction = (next) => {
+        action = next;
+        const button = pill?.querySelector("button");
+        if (button) button.textContent = next === "reconnect" ? "Reconnect" : page.button;
+      };
+
       async function send() {
         const collected = page.collect();
         if ("error" in collected) return (setStatus(collected.error, "error"), false);
@@ -112,6 +120,7 @@
         setStatus("Sending…");
         if (!alive()) return (setStatus(RELOAD, "error"), false);
         const result = await ask({ type: "innkeep:send", ...collected });
+        setAction(result?.reconnect ? "reconnect" : "send");
         if (!result?.ok) return (setStatus(result?.error ?? "Sending failed.", "error"), false);
         const { text, tone } = page.describe?.(result) ?? { text: "Saved in Innkeep.", tone: "good" };
         setStatus(text, tone);
@@ -174,7 +183,13 @@
         button.style.cssText =
           "flex:none;height:28px;padding:0 10px;border:0;border-radius:6px;background:#18181b;color:#fff;" +
           "font:500 12px system-ui,sans-serif;cursor:pointer";
-        button.addEventListener("click", send);
+        button.addEventListener("click", () => {
+          if (action !== "reconnect") return void send();
+          // The settings open in a tab; once saved there, this button sends again.
+          void ask({ type: "innkeep:open-settings" });
+          setAction("send");
+          setStatus("Paste the token from Innkeep in the settings tab, save, then send again.");
+        });
 
         pill.append(status, button);
         document.body.append(pill);
