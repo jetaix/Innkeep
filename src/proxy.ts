@@ -9,7 +9,7 @@ import { appPassword, SESSION_COOKIE, sessionValid } from "@/lib/session";
  * a public host has no database to keep and must never expose a host's data.
  * Without the variable this does nothing and Innkeep runs in full.
  */
-const PUBLIC_PAGES = /^\/(?:(?:alternatives|guides)(?:\/[a-z0-9-]+)?)?$/;
+const PUBLIC_PAGES = /^\/(?:(?:alternatives|guides)(?:\/[a-z0-9-]+)?|ai)?$/;
 // Icons, the app manifest and the notes for search engines are fetched without a session: never gate them.
 const PUBLIC_FILES =
   /^\/(?:icon\.svg|favicon\.ico|apple-icon(?:\.png)?|icons\/[a-z0-9-]+\.png|manifest\.webmanifest|opengraph-image|twitter-image|robots\.txt|sitemap\.xml)$/;

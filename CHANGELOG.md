@@ -21,6 +21,8 @@ minor version may change how things work.
   for the cleaner.
 - Month and year views in the calendar; a view by month and an overview on the
   Reservations page; a view by year on Revenue; filtering reviews by stars.
+- An AI page on the website: what an assistant can do through the MCP server,
+  how to connect one, and where it stops.
 - A button to download the browser extension as a ZIP from the Extension page.
 - Home-screen icons and an app manifest, so Innkeep installs like an app.
 

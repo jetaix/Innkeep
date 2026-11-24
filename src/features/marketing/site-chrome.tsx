@@ -31,12 +31,16 @@ export async function SiteHeader() {
           <Link href="/guides" className={cn(NAV_LINK, "hidden md:block")}>
             {m.guides.nav}
           </Link>
+          <Link href="/ai" className={cn(NAV_LINK, "hidden md:block")}>
+            {m.ai.nav}
+          </Link>
           <a href={site.repo} className={NAV_LINK}>
             GitHub
           </a>
           {takesAccessRequests ? (
             <Link href="/#access" className={cn(pillClass("primary"), "ml-2")}>
-              {t.nav.access}
+              <span className="sm:hidden">{t.nav.accessShort}</span>
+              <span className="max-sm:hidden">{t.nav.access}</span>
             </Link>
           ) : (
             <Link href="/overview" className={cn(pillClass("primary"), "ml-2")}>
@@ -62,6 +66,9 @@ export async function SiteFooter() {
         </a>
         <Link href="/alternatives" className="hover:text-ink">
           {t.footer.alternatives}
+        </Link>
+        <Link href="/ai" className="hover:text-ink">
+          {m.ai.nav}
         </Link>
         <Link href="/guides" className="hover:text-ink">
           {m.guides.nav}

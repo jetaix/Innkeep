@@ -10,6 +10,7 @@ const en = {
     limits: "Limits",
     install: "Install",
     access: "Request early access",
+    accessShort: "Early access",
     dashboard: "Open dashboard",
   },
   hero: {
@@ -152,6 +153,7 @@ const en = {
       request: "Block the loft from 3 to 5 December for the plumber.",
       assistant: "Assistant:",
       answer: "Blocked. Both platforms close those nights at the next sync.",
+      more: "What an assistant can do with Innkeep",
     },
     note: "Names and figures on this page are examples.",
   },
@@ -227,6 +229,7 @@ const fr: typeof en = {
     limits: "Limites",
     install: "Installer",
     access: "Demander un accès anticipé",
+    accessShort: "Accès anticipé",
     dashboard: "Tableau de bord",
   },
   hero: {
@@ -374,6 +377,7 @@ const fr: typeof en = {
       request: "Bloque le loft du 3 au 5 décembre pour le plombier.",
       assistant: "Assistant :",
       answer: "C’est bloqué. Les deux plateformes ferment ces nuits à la prochaine synchronisation.",
+      more: "Ce qu’un assistant peut faire avec Innkeep",
     },
     note: "Les noms et les chiffres de cette page sont des exemples.",
   },

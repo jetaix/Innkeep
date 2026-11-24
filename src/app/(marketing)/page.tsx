@@ -186,6 +186,12 @@ export default async function LandingPage() {
                   <br />
                   <span className="text-muted">{f.keyboard.assistant}</span> {f.keyboard.answer}
                 </p>
+                <Link
+                  href="/ai"
+                  className="inline-block font-medium underline decoration-line-strong underline-offset-4 hover:decoration-ink"
+                >
+                  {f.keyboard.more}
+                </Link>
               </div>
             </Feature>
           </div>

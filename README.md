@@ -218,7 +218,9 @@ snippet for your address):
 ```
 
 Tools: `list_properties`, `list_reservations`, `get_revenue`,
-`list_suggestions`, `block_dates`.
+`list_suggestions`, `block_dates`. The website's
+[AI page](https://innkeep-seven.vercel.app/ai) shows what each one does, with an
+example conversation and its limits.
 
 ## Security
 
