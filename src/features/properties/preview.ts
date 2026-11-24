@@ -64,3 +64,11 @@ export function readPreview(listing: Pick<Listing, "publicPreview">): Preview | 
     return null;
   }
 }
+
+/** Airbnb's image server resizes on request; asking for a sensible width keeps the page light. */
+export function sizedPhoto(url: string, width: number): string {
+  const parsed = new URL(url);
+  if (parsed.hostname.endsWith("muscache.com") && !parsed.search)
+    parsed.searchParams.set("im_w", String(width));
+  return parsed.toString();
+}

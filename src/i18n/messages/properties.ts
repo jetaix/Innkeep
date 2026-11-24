@@ -4,9 +4,26 @@ const en = {
   description: "Listing details and channel connections.",
   list: {
     noAddress: "No address",
-    /** "12 Canal St, sleeps 4, 120 EUR a night" */
-    summary: (address: string, guests: number, price: number, currency: string) =>
-      `${address}, sleeps ${guests}, ${price} ${currency} a night`,
+    bedrooms: (n: number): string => `${n} bedroom${n === 1 ? "" : "s"}`,
+    bathrooms: (n: number): string => `${n} bathroom${n === 1 ? "" : "s"}`,
+    /** "€120 a night" */
+    perNight: (price: string): string => `${price} a night`,
+    /** "4.9 out of 5, 23 reviews" */
+    rating: (channel: string, value: string, scale: number, reviews: number | null): string =>
+      `${channel}: ${value} out of ${scale}${reviews == null ? "" : `, ${reviews} review${reviews === 1 ? "" : "s"}`}`,
+    nextArrival: (date: string): string => `Next arrival ${date}`,
+    stayingNow: "Guests staying now",
+    noArrival: "No arrival booked",
+    /** "35% booked this month" */
+    occupancy: (percent: string): string => `${percent} booked this month`,
+    photoAlt: (name: string): string => `Photo of ${name}`,
+    noPhoto: "No photo yet. Read the public page with the extension to show one.",
+    view: "View the listing",
+    manage: "Manage",
+    empty: {
+      title: "No property yet",
+      body: "Add your first place, then connect its Airbnb and Booking.com calendars.",
+    },
     /** "Airbnb: connected" */
     badge: (channel: string, status: string) => `${channel}: ${status}`,
     status: {
@@ -17,7 +34,10 @@ const en = {
     },
   },
   create: {
-    label: "New property",
+    open: "Add a property",
+    title: "New property",
+    hint: "Start with a name. You fill in the details and connect the calendars on the next page.",
+    label: "Name",
     placeholder: "A name only you see, e.g. Canal Loft",
     submit: "Add property",
     pending: "Adding…",
@@ -119,8 +139,23 @@ const fr: typeof en = {
   description: "Détails des annonces et connexions aux plateformes.",
   list: {
     noAddress: "Sans adresse",
-    summary: (address, guests, price, currency) =>
-      `${address}, ${guests} voyageur${guests > 1 ? "s" : ""}, ${price} ${currency} par nuit`,
+    bedrooms: (n) => `${n} chambre${n > 1 ? "s" : ""}`,
+    bathrooms: (n) => `${n} salle${n > 1 ? "s" : ""} de bain`,
+    perNight: (price) => `${price} par nuit`,
+    rating: (channel, value, scale, reviews) =>
+      `${channel} : ${value} sur ${scale}${reviews == null ? "" : `, ${reviews} avis`}`,
+    nextArrival: (date) => `Prochaine arrivée le ${date}`,
+    stayingNow: "Des voyageurs sont sur place",
+    noArrival: "Aucune arrivée réservée",
+    occupancy: (percent) => `Rempli à ${percent} ce mois-ci`,
+    photoAlt: (name) => `Photo de ${name}`,
+    noPhoto: "Pas encore de photo. Lisez la page publique avec l’extension pour en afficher une.",
+    view: "Voir l’annonce",
+    manage: "Gérer",
+    empty: {
+      title: "Aucun logement",
+      body: "Ajoutez votre premier logement, puis connectez ses calendriers Airbnb et Booking.com.",
+    },
     badge: (channel, status) => `${channel} : ${status}`,
     status: {
       notConnected: "non connecté",
@@ -130,7 +165,10 @@ const fr: typeof en = {
     },
   },
   create: {
-    label: "Nouveau logement",
+    open: "Ajouter un logement",
+    title: "Nouveau logement",
+    hint: "Commencez par un nom. Vous complétez les détails et connectez les calendriers sur la page suivante.",
+    label: "Nom",
     placeholder: "Un nom que vous seul voyez, par ex. Loft du canal",
     submit: "Ajouter le logement",
     pending: "Ajout…",

@@ -34,12 +34,12 @@ export function Modal({
       <Button className={className} {...style} onClick={() => dialog.current?.showModal()}>
         {label}
       </Button>
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: the keyboard closes it with Escape or the close button */}
       <dialog
         ref={dialog}
         aria-labelledby={heading}
         className="m-auto w-[calc(100vw-2rem)] max-w-md rounded-lg border border-line bg-bg p-0 text-ink shadow-xl backdrop:bg-black/40"
         // A click on the backdrop lands on the dialog element itself. Escape is the dialog's own.
-        // biome-ignore lint/a11y/useKeyWithClickEvents: the keyboard closes it with Escape or the close button
         onClick={(event) => {
           if (event.target === event.currentTarget) event.currentTarget.close();
         }}
