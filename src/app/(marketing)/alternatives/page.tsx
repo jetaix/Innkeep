@@ -6,7 +6,7 @@ import { getI18n } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = (await getI18n()).m.alternatives;
-  return { title: t.heading, description: t.description };
+  return { title: t.heading, description: t.description, alternates: { canonical: "/alternatives" } };
 }
 
 export default async function AlternativesPage() {
@@ -17,11 +17,11 @@ export default async function AlternativesPage() {
   const openSource = ALTERNATIVES.filter((alternative) => alternative.kind === "open-source");
 
   return (
-    <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <>
       <SiteHeader />
-      <main>
+      <main className="mx-auto max-w-6xl px-5 sm:px-8">
         <section className="pt-16 pb-10 sm:pt-20">
-          <h1 className="max-w-[18ch] text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-6xl">
+          <h1 className="max-w-[18ch] font-display text-4xl leading-[1.05] tracking-[-0.03em] text-balance sm:text-6xl">
             {t.heading}
           </h1>
           <p className="mt-6 max-w-[68ch] text-lg leading-relaxed text-muted">{t.intro}</p>
@@ -34,7 +34,7 @@ export default async function AlternativesPage() {
         <Group title={t.kinds.openSource.title} intro={t.kinds.openSource.intro} products={openSource} />
 
         <section className="pt-16">
-          <h2 className="text-2xl font-semibold tracking-tight">{t.otherOpenSource.title}</h2>
+          <h2 className="font-display text-2xl tracking-tight">{t.otherOpenSource.title}</h2>
           <ul className="mt-4 max-w-[80ch] list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-muted">
             {t.otherOpenSource.items.map((item) => (
               <li key={item}>{item}</li>
@@ -43,7 +43,7 @@ export default async function AlternativesPage() {
         </section>
 
         <section className="pt-20">
-          <h2 className="text-3xl font-semibold tracking-[-0.025em]">{t.fit.title}</h2>
+          <h2 className="font-display text-3xl tracking-[-0.025em]">{t.fit.title}</h2>
           <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-2">
             {[t.fit.stronger, t.fit.weaker].map((side) => (
               <div key={side.title} className="bg-bg p-6 sm:p-8">
@@ -65,7 +65,7 @@ export default async function AlternativesPage() {
         />
       </main>
       <SiteFooter />
-    </div>
+    </>
   );
 }
 
@@ -85,7 +85,7 @@ async function Group({ title, intro, products }: { title: string; intro: string;
 
   return (
     <section className="pt-14">
-      <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+      <h2 className="font-display text-2xl tracking-tight">{title}</h2>
       <p className="mt-2 max-w-[75ch] text-[15px] leading-relaxed text-muted">{intro}</p>
       <p className="mt-1 text-[13px] text-muted">{t.priceNote}</p>
       <div className="mt-6 relative overflow-x-auto rounded-xl border border-line">

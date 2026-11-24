@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-24T22:08:14.951Z",
+  "title": "Design System: Innkeep",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Mineral Ground",
+        "canonical": "oklch(96.5% 0.007 116)",
+        "tonalRamp": ["#0b0c08", "#262723", "#454541", "#666762", "#898a85", "#adaeaa", "#d4d5d0", "#eeefea"]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Subtle",
+        "canonical": "oklch(93.9% 0.011 118)",
+        "tonalRamp": ["#0b0c07", "#262721", "#44463f", "#656760", "#888a83", "#adafa7", "#d3d5cd", "#eef0e8"]
+      },
+      "sunken": {
+        "role": "neutral",
+        "displayName": "Sunken",
+        "canonical": "oklch(91.4% 0.014 120)",
+        "tonalRamp": ["#0a0c06", "#252820", "#44463e", "#65675f", "#888a81", "#acafa6", "#d3d6cc", "#edf0e6"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(88.9% 0.015 119)",
+        "tonalRamp": ["#0a0c06", "#25281f", "#44463d", "#65675e", "#888b80", "#adafa5", "#d3d6cb", "#edf0e5"]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "oklch(81.2% 0.020 123)",
+        "tonalRamp": ["#0a0d04", "#24281d", "#43473b", "#64685c", "#878b7e", "#abb0a2", "#d1d7c8", "#ecf1e2"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(20.5% 0.010 268)",
+        "tonalRamp": ["#090b10", "#24262c", "#43454b", "#63666c", "#868990", "#abaeb5", "#d1d4db", "#ebeef6"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "oklch(46.6% 0.013 257)",
+        "tonalRamp": ["#080b11", "#22272d", "#41454c", "#61666e", "#848a91", "#a9aeb6", "#cfd5dd", "#e9eff7"]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint",
+        "canonical": "oklch(63.4% 0.010 248)",
+        "tonalRamp": ["#080c0f", "#23272b", "#41464a", "#62676b", "#858a8f", "#a9afb4", "#cfd5da", "#eaeff5"]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel White",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": ["#0b0b0b", "#262626", "#454545", "#666666", "#898989", "#aeaeae", "#d4d4d4", "#eeeeee"]
+      },
+      "glass-coral": {
+        "role": "secondary",
+        "displayName": "Glass Coral (Airbnb)",
+        "canonical": "oklch(69.6% 0.196 16)",
+        "tonalRamp": ["#200003", "#4e0013", "#840027", "#bc113e", "#e74660", "#fe838d", "#fec3c5", "#ffe8e9"]
+      },
+      "glass-blue": {
+        "role": "secondary",
+        "displayName": "Glass Blue (Booking.com)",
+        "canonical": "oklch(57.9% 0.207 265)",
+        "tonalRamp": ["#010038", "#04007e", "#0f2eb1", "#2b57da", "#4e7ffe", "#87acfe", "#c0d4ff", "#e7effe"]
+      },
+      "glass-green": {
+        "role": "secondary",
+        "displayName": "Glass Green (direct)",
+        "canonical": "oklch(65.5% 0.119 177)",
+        "tonalRamp": ["#000f0b", "#002e26", "#035144", "#067765", "#0b9f87", "#44c6ac", "#71eed2", "#bbffed"]
+      },
+      "overlap": {
+        "role": "primary",
+        "displayName": "Overlap Violet",
+        "canonical": "oklch(43.3% 0.210 283)",
+        "tonalRamp": ["#0b0030", "#250070", "#4118ae", "#5e46d7", "#7e6ffe", "#a3a2ff", "#cecffe", "#ecedff"]
+      },
+      "overlap-wash": {
+        "role": "primary",
+        "displayName": "Overlap Wash",
+        "canonical": "oklch(93.7% 0.034 297)",
+        "tonalRamp": ["#0d0818", "#282335", "#474155", "#686278", "#8b859c", "#b0aac2", "#d6d0e9", "#f0ebfe"]
+      },
+      "block": {
+        "role": "neutral",
+        "displayName": "Block Grey",
+        "canonical": "oklch(64.8% 0.009 254)",
+        "tonalRamp": ["#090b0f", "#24272b", "#42454a", "#63666b", "#86898e", "#aaaeb3", "#d0d5da", "#eaeff4"]
+      },
+      "ground-dark": {
+        "role": "neutral",
+        "displayName": "Mineral Ground (dark)",
+        "pairedWith": "ground"
+      },
+      "subtle-dark": {
+        "role": "neutral",
+        "displayName": "Subtle (dark)",
+        "pairedWith": "subtle"
+      },
+      "sunken-dark": {
+        "role": "neutral",
+        "displayName": "Sunken (dark)",
+        "pairedWith": "sunken"
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "pairedWith": "line"
+      },
+      "line-strong-dark": {
+        "role": "neutral",
+        "displayName": "Strong Hairline (dark)",
+        "pairedWith": "line-strong"
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink (dark)",
+        "pairedWith": "ink"
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted (dark)",
+        "pairedWith": "muted"
+      },
+      "faint-dark": {
+        "role": "neutral",
+        "displayName": "Faint (dark)",
+        "pairedWith": "faint"
+      },
+      "panel-dark": {
+        "role": "neutral",
+        "displayName": "Panel (dark)",
+        "pairedWith": "panel"
+      },
+      "glass-coral-dark": {
+        "role": "secondary",
+        "displayName": "Glass Coral (dark)",
+        "pairedWith": "glass-coral"
+      },
+      "glass-blue-dark": {
+        "role": "secondary",
+        "displayName": "Glass Blue (dark)",
+        "pairedWith": "glass-blue"
+      },
+      "glass-green-dark": {
+        "role": "secondary",
+        "displayName": "Glass Green (dark)",
+        "pairedWith": "glass-green"
+      },
+      "overlap-dark": {
+        "role": "primary",
+        "displayName": "Overlap Violet (dark)",
+        "pairedWith": "overlap"
+      },
+      "overlap-wash-dark": {
+        "role": "primary",
+        "displayName": "Overlap Wash (dark)",
+        "pairedWith": "overlap-wash"
+      },
+      "block-dark": {
+        "role": "neutral",
+        "displayName": "Block Grey (dark)",
+        "pairedWith": "block"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The landing headline only; 48px below 640px."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings and read-page titles; 36px below 640px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Feature-row and call-to-action headings; 30px below 640px."
+      },
+      "title-sm": {
+        "displayName": "Small title",
+        "purpose": "Headings inside a panel, guide sections, demo scene captions, a headline figure."
+      },
+      "term": {
+        "displayName": "Term",
+        "purpose": "The term of a definition pair."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The muted paragraph under a headline; 18px below 640px."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Supporting copy and definitions, 62 to 68 characters at most."
+      },
+      "prose": {
+        "displayName": "Prose",
+        "purpose": "Long-form guide paragraphs and numbered steps."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Navigation, small pills, panel headers, footer."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Slab labels, chips, day numbers (11px), key caps."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Terminal commands only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-panel",
+        "value": "0 1px 0 rgb(255 255 255 / 0.9) inset, 0 40px 80px -40px rgb(21 23 28 / 0.28), 0 12px 28px -18px rgb(21 23 28 / 0.18), 0 0 0 1px rgb(21 23 28 / 0.05)",
+        "purpose": "Panel float: every white panel in light mode."
+      },
+      {
+        "name": "shadow-panel-dark",
+        "value": "0 1px 0 rgb(255 255 255 / 0.06) inset, 0 40px 80px -40px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.07)",
+        "purpose": "Panel float in dark mode."
+      },
+      {
+        "name": "glass-cast",
+        "value": "inset 0 2px 0 var(--glass-hi), inset 0 0 0 1.5px color-mix(in oklab, var(--glass-hi) 55%, transparent), inset 0 -32px 48px -32px rgb(0 0 0 / 0.22), 0 56px 90px -44px color-mix(in oklab, var(--g) 75%, transparent)",
+        "purpose": "Every decorative glass shape: highlight, rim, foot shade and a cast in its own colour."
+      },
+      {
+        "name": "slab-cast",
+        "value": "inset 0 1.5px 0 var(--glass-hi), inset 0 0 0 1px color-mix(in oklab, var(--glass-hi) 50%, transparent), 0 12px 20px -12px var(--g)",
+        "purpose": "A booking slab in the calendar."
+      },
+      {
+        "name": "pill-lift",
+        "value": "0 0 0 1px var(--line), 0 8px 20px -14px rgb(0 0 0 / 0.4)",
+        "purpose": "Secondary pill at rest; ring moves to --line-strong with 0 10px 22px -14px rgb(0 0 0 / 0.5) on hover."
+      },
+      {
+        "name": "hairline-ring",
+        "value": "0 0 0 1px color-mix(in oklab, var(--ink) 7%, transparent)",
+        "purpose": "The floating header bar."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-settle",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Exponential ease-out for every entrance and scene change."
+      },
+      {
+        "name": "settle",
+        "value": "0.9s ease-settle both; from opacity 0, translate 0 28px, blur 10px; staggered 80ms (140ms between calendar slabs)",
+        "purpose": "How content and slabs arrive."
+      },
+      {
+        "name": "drift",
+        "value": "linear, scroll-driven; translate 0 var(--drift); hero planes -120px / -160px / -200px over 0 to 120vh, field shapes -36px over their view timeline",
+        "purpose": "Depth planes: nearer glass moves more."
+      },
+      {
+        "name": "scene-change",
+        "value": "500ms to 700ms ease-settle on opacity, translate, filter",
+        "purpose": "Demo readings, the clash chip and the late booking."
+      },
+      {
+        "name": "scene-duration",
+        "value": "5200ms",
+        "purpose": "Length of one demo scene; the progress segment fills linearly over it."
+      },
+      {
+        "name": "control",
+        "value": "200ms",
+        "purpose": "Pill hover and press (scale 0.97)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "No drift, no autoplay; the demo rests on the clash scene."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "glass": {
+      "opacity": "0.82 (0.5 for a far echo, blurred 2px)",
+      "blend": "multiply in light mode, normal in dark mode",
+      "tint": "#ffffff light, #0d0f13 dark",
+      "highlight": "rgb(255 255 255 / 0.55) light, rgb(255 255 255 / 0.14) dark",
+      "fieldMix": "16% glass colour into the ground, 30% in a top-right radial glow",
+      "slabMix": "56% source colour into the panel"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "button-primary-lg",
+      "description": "The one main action of a group: ink pill, 48px (36px in the header).",
+      "html": "<a class=\"ds-pill ds-pill-primary\" href=\"#\">Watch the demo</a>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; border: 0; border-radius: 999px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 500; white-space: nowrap; cursor: pointer; text-decoration: none; transition: background-color 200ms, box-shadow 200ms, scale 200ms; } .ds-pill:active { scale: 0.97; } .ds-pill:focus-visible { outline: 2px solid #4b2bbd; outline-offset: 2px; } .ds-pill-md { height: 36px; padding: 0 16px; font-size: 13px; } .ds-pill-primary { background: #15171c; color: #ffffff; } .ds-pill-primary:hover { background: color-mix(in oklab, #15171c 86%, #4b2bbd); }"
+    },
+    {
+      "name": "Secondary Pill",
+      "kind": "button",
+      "refersTo": "button-secondary-lg",
+      "description": "The second action beside a primary pill: white pill with a hairline ring and a soft lift.",
+      "html": "<a class=\"ds-pill ds-pill-secondary\" href=\"#\">Install Innkeep</a>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; border: 0; border-radius: 999px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 500; white-space: nowrap; cursor: pointer; text-decoration: none; transition: background-color 200ms, box-shadow 200ms, scale 200ms; } .ds-pill:active { scale: 0.97; } .ds-pill:focus-visible { outline: 2px solid #4b2bbd; outline-offset: 2px; } .ds-pill-md { height: 36px; padding: 0 16px; font-size: 13px; } .ds-pill-secondary { background: #ffffff; color: #15171c; box-shadow: 0 0 0 1px #d9dcd1, 0 8px 20px -14px rgb(0 0 0 / 0.4); } .ds-pill-secondary:hover { box-shadow: 0 0 0 1px #bfc4b6, 0 10px 22px -14px rgb(0 0 0 / 0.5); }"
+    },
+    {
+      "name": "Floating Header Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "The sticky pill-shaped header of every public page: wordmark, muted links, one small primary pill.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-logo\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" class=\"ds-mark\"><defs><clipPath id=\"ds-mark-clip\"><path d=\"M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z\"/></clipPath></defs><path fill=\"#ff5d73\" d=\"M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z\"/><path fill=\"#3d6df2\" d=\"M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z\"/><path fill=\"#4b2bbd\" clip-path=\"url(#ds-mark-clip)\" d=\"M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z\"/></svg>Innkeep</a><nav class=\"ds-nav-links\"><a href=\"#\">Features</a><a href=\"#\">Limits</a><a href=\"#\">Guides</a><a class=\"ds-nav-cta\" href=\"#\">Install</a></nav></header>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 56px; padding: 0 8px 0 20px; border-radius: 999px; background: color-mix(in oklab, #f3f4ef 72%, transparent); box-shadow: 0 0 0 1px color-mix(in oklab, #15171c 7%, transparent); backdrop-filter: blur(24px) saturate(1.5); font-family: Geist, ui-sans-serif, system-ui, sans-serif; } .ds-nav-logo { display: inline-flex; align-items: center; gap: 8px; font-family: 'Funnel Display', Geist, ui-sans-serif, system-ui, sans-serif; font-weight: 400; font-weight: 500; font-size: 19px; letter-spacing: -0.025em; color: #15171c; text-decoration: none; } .ds-mark { width: 20px; height: 20px; } .ds-nav-links { display: flex; align-items: center; gap: 2px; font-size: 13px; } .ds-nav-links a { padding: 6px 12px; border-radius: 999px; color: #555a61; text-decoration: none; transition: color 150ms; } .ds-nav-links a:hover { color: #15171c; } .ds-nav-links a:focus-visible { outline: 2px solid #4b2bbd; outline-offset: 2px; } .ds-nav-links .ds-nav-cta { margin-left: 8px; display: inline-flex; align-items: center; height: 36px; padding: 0 16px; background: #15171c; color: #ffffff; font-weight: 500; } .ds-nav-links .ds-nav-cta:hover { color: #ffffff; background: color-mix(in oklab, #15171c 86%, #4b2bbd); }"
+    },
+    {
+      "name": "Panel on a Field",
+      "kind": "card",
+      "refersTo": "field",
+      "description": "The signature container: one white card with one reading, floating over a field of a single glass colour with a cropped glass shape behind it.",
+      "html": "<div class=\"ds-field\"><span class=\"ds-field-glass\" aria-hidden=\"true\"></span><div class=\"ds-field-card\"><div class=\"ds-row\"><span class=\"ds-dot\" style=\"background:#ff5d73\"></span><b>Airbnb</b><span>Synced 4 min ago</span></div><div class=\"ds-row\"><span class=\"ds-dot\" style=\"background:#3d6df2\"></span><b>Booking.com</b><span>Synced 4 min ago</span></div><div class=\"ds-row\"><span class=\"ds-dot\" style=\"background:#10a88f\"></span><b>Direct bookings</b><span>Shared with both</span></div></div></div>",
+      "css": ".ds-field { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(90% 70% at 85% 10%, color-mix(in oklab, #ff5d73 30%, #f3f4ef), transparent 60%), color-mix(in oklab, #ff5d73 16%, #f3f4ef); display: grid; place-items: center; min-height: 320px; padding: 48px; border-radius: 28px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; } .ds-field-glass { position: absolute; --g: #ff5d73; background: radial-gradient(120% 80% at 20% 0%, rgb(255 255 255 / 0.55), transparent 55%), linear-gradient(170deg, color-mix(in oklab, var(--g) 58%, #ffffff) 0%, var(--g) 78%); opacity: 0.82; mix-blend-mode: multiply; box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.55), inset 0 0 0 1.5px rgb(255 255 255 / 0.3), inset 0 -32px 48px -32px rgb(0 0 0 / 0.22), 0 56px 90px -44px color-mix(in oklab, var(--g) 75%, transparent); } .ds-field-glass::after { content: \"\"; position: absolute; inset: 0; border-radius: inherit; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\"); mix-blend-mode: soft-light; opacity: 0.95; pointer-events: none; } .ds-field-glass { right: -40px; bottom: -96px; width: 240px; height: 416px; rotate: 14deg; border-radius: 999px 999px 2rem 2rem; z-index: -1; } .ds-field-card { width: 100%; max-width: 448px; padding: 28px; border-radius: 16px; background: #ffffff; box-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 40px 80px -40px rgb(21 23 28 / 0.28), 0 12px 28px -18px rgb(21 23 28 / 0.18), 0 0 0 1px rgb(21 23 28 / 0.05); display: grid; gap: 14px; font-size: 14px; color: #15171c; } .ds-row { display: flex; align-items: center; gap: 10px; } .ds-row b { flex: 1; font-weight: 500; } .ds-row span:last-child { font-size: 13px; color: #555a61; } .ds-dot { width: 10px; height: 10px; border-radius: 999px; }"
+    },
+    {
+      "name": "Glass Arch",
+      "kind": "custom",
+      "refersTo": "rounded.arch",
+      "description": "The decorative material of the world: a tinted arch with grain, a top highlight and a coloured cast shadow. Always cropped, rotated and behind content.",
+      "html": "<div class=\"ds-glass-stage\"><span class=\"ds-glass ds-glass-a\" aria-hidden=\"true\"></span><span class=\"ds-glass ds-glass-b\" aria-hidden=\"true\"></span></div>",
+      "css": ".ds-glass-stage { position: relative; height: 280px; overflow: hidden; background: #f3f4ef; border-radius: 28px; } .ds-glass { position: absolute; --g: #ff5d73; background: radial-gradient(120% 80% at 20% 0%, rgb(255 255 255 / 0.55), transparent 55%), linear-gradient(170deg, color-mix(in oklab, var(--g) 58%, #ffffff) 0%, var(--g) 78%); opacity: 0.82; mix-blend-mode: multiply; box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.55), inset 0 0 0 1.5px rgb(255 255 255 / 0.3), inset 0 -32px 48px -32px rgb(0 0 0 / 0.22), 0 56px 90px -44px color-mix(in oklab, var(--g) 75%, transparent); } .ds-glass::after { content: \"\"; position: absolute; inset: 0; border-radius: inherit; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\"); mix-blend-mode: soft-light; opacity: 0.95; pointer-events: none; } .ds-glass { border-radius: 999px 999px 2rem 2rem; } .ds-glass-a { left: 22%; top: 40px; width: 150px; height: 320px; rotate: -8deg; } .ds-glass-b { --g: #3d6df2; left: 40%; top: 70px; width: 150px; height: 320px; rotate: 10deg; }"
+    },
+    {
+      "name": "Booking Slabs with a Clash",
+      "kind": "custom",
+      "refersTo": "booking-slab",
+      "description": "Bookings in the demo calendar: glass slabs in the source colour with an ink label; the shared nights are drawn as a violet block and named by the clash chip.",
+      "html": "<div class=\"ds-cal\"><div class=\"ds-cal-head\"><span>November</span><span class=\"ds-clash\">Double booking at Harbour Studio</span></div><div class=\"ds-cal-row\"><span class=\"ds-slab ds-slab-coral\" style=\"left:8%;width:38%\">Sam Wright</span><span class=\"ds-slab ds-slab-blue\" style=\"left:38%;width:40%\"><span style=\"margin-left:25%\">Ines Ferreira</span></span><span class=\"ds-overlap\" style=\"left:38%;width:8%\" aria-hidden=\"true\"></span></div></div>",
+      "css": ".ds-cal { border-radius: 28px; background: #ffffff; overflow: hidden; box-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 40px 80px -40px rgb(21 23 28 / 0.28), 0 12px 28px -18px rgb(21 23 28 / 0.18), 0 0 0 1px rgb(21 23 28 / 0.05); font-family: Geist, ui-sans-serif, system-ui, sans-serif; color: #15171c; } .ds-cal-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid #d9dcd1; font-size: 13px; font-weight: 500; } .ds-clash { padding: 4px 10px; border-radius: 999px; background: #ece6ff; color: #4b2bbd; font-size: 12px; font-weight: 500; } .ds-cal-row { position: relative; height: 80px; background-image: linear-gradient(to right, #d9dcd1 1px, transparent 1px); background-size: 7.1429% 100%; } .ds-slab { position: absolute; top: 14px; bottom: 14px; display: flex; align-items: center; padding: 0 12px; overflow: hidden; border-radius: 12px; font-size: 12px; font-weight: 500; white-space: nowrap; background: color-mix(in oklab, var(--g) 56%, #ffffff); mix-blend-mode: multiply; box-shadow: inset 0 1.5px 0 rgb(255 255 255 / 0.55), inset 0 0 0 1px rgb(255 255 255 / 0.28), 0 12px 20px -12px var(--g); } .ds-slab::after { content: \"\"; position: absolute; inset: 0; border-radius: inherit; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\"); mix-blend-mode: soft-light; opacity: 0.95; pointer-events: none; } .ds-slab-coral { --g: #ff5d73; } .ds-slab-blue { --g: #3d6df2; } .ds-overlap { position: absolute; top: 14px; bottom: 14px; z-index: 1; border-radius: 6px; background: #4b2bbd; }"
+    },
+    {
+      "name": "State Badge and Source Dot",
+      "kind": "chip",
+      "refersTo": "clash-chip",
+      "description": "Small product chips: the urgent badge in violet on its wash, and a source dot that always sits beside the written name.",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-badge\">Urgent</span><span class=\"ds-source\"><span class=\"ds-source-dot\"></span>Booking.com</span><kbd class=\"ds-kbd\">K</kbd></div>",
+      "css": ".ds-chips { display: flex; align-items: center; gap: 16px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; color: #15171c; } .ds-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #ece6ff; color: #4b2bbd; font-size: 11px; font-weight: 500; } .ds-source { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; } .ds-source-dot { width: 10px; height: 10px; border-radius: 999px; background: #3d6df2; } .ds-kbd { display: inline-flex; align-items: center; justify-content: center; height: 18px; min-width: 18px; padding: 0 4px; border-radius: 4px; border: 1px solid #bfc4b6; background: #eaece4; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 500; color: #555a61; }"
+    },
+    {
+      "name": "Definition List",
+      "kind": "custom",
+      "refersTo": "typography.term",
+      "description": "The reading register: display-face terms with muted definitions between hairlines, on the bare ground. Used for limits, trust items and guide questions.",
+      "html": "<dl class=\"ds-dl\"><div><dt>Sync takes minutes, not seconds</dt><dd>Calendar links are re-read on each platform's own schedule. A double booking in that window is rare but possible.</dd></div><div><dt>You send replies yourself</dt><dd>Guest messages arrive through a webhook and are drafted in one inbox.</dd></div></dl>",
+      "css": ".ds-dl { margin: 0; border-top: 1px solid #d9dcd1; border-bottom: 1px solid #d9dcd1; background: #f3f4ef; } .ds-dl > div { padding: 24px 0; } .ds-dl > div + div { border-top: 1px solid #d9dcd1; } .ds-dl dt { font-family: 'Funnel Display', Geist, ui-sans-serif, system-ui, sans-serif; font-weight: 400; font-size: 20px; letter-spacing: -0.01em; color: #15171c; } .ds-dl dd { margin: 8px 0 0; max-width: 62ch; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 1.625; color: #555a61; }"
+    },
+    {
+      "name": "Text Link",
+      "kind": "custom",
+      "refersTo": "colors.line-strong",
+      "description": "A link in content: ink, medium, with a strong-hairline underline that turns ink on hover.",
+      "html": "<a class=\"ds-link\" href=\"#\">What the extension reads</a>",
+      "css": ".ds-link { font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 500; color: #15171c; text-decoration: underline; text-decoration-color: #bfc4b6; text-underline-offset: 4px; transition: text-decoration-color 150ms; } .ds-link:hover { text-decoration-color: #15171c; } .ds-link:focus-visible { outline: 2px solid #4b2bbd; outline-offset: 2px; border-radius: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Glass Calendar",
+    "overview": "Every booking is a slab of tinted glass, and where two slabs overlap the colour deepens to violet. The double booking is visible before any text explains it, and the whole system is built outward from that one picture: the mark is two overlapping arches, the page furniture is large glass arches, pills and rounded tiles, and the product itself is shown on white panels that float over a field of a single glass colour.\n\nThe ground is a pale mineral grey-green with near-black ink. Pages are light, airy and centred, with long vertical pauses between sections. Glass is decorative and sits behind content; the white panel is where reading happens. The system has two registers: a persuading register (glass, fields, panels, motion) and a reading register (ground, ink and hairlines only, used for limits, guides and comparisons).\n\nDark mode is its own set of values, not an inversion: the ground goes near-black, the glass colours brighten, the overlap becomes a light violet, and glass stops multiplying with what is beneath it.\n\nThe dashboard under `src/app/(app)` is outside this system. It uses the monochrome `:root` tokens at the top of `src/app/globals.css` (white ground, Geist only, colour reserved for booking sources and states). The two worlds share the token names, the three source colours' meaning, and the mark, which the dashboard draws in a single ink tone.",
+    "keyCharacteristics": [
+      "Tinted glass shapes with grain, an inner highlight and a coloured cast shadow.",
+      "Three glass colours with fixed meaning; violet appears where two meet.",
+      "White product panels floating over a field of one glass colour.",
+      "Display type at regular weight, large and tightly tracked; never bold.",
+      "Pills for every control; no square buttons.",
+      "Slow, settling motion: glass drifts on scroll, nothing bounces."
+    ],
+    "rules": [
+      {
+        "name": "The Fixed Meaning Rule",
+        "body": "Coral is Airbnb, blue is Booking.com, green is a direct booking, on every surface and in the dashboard too. A glass colour is never chosen for variety when it sits next to product data.",
+        "section": "colors"
+      },
+      {
+        "name": "The Earned Violet Rule",
+        "body": "Violet is what two colours make together. Use it for a clash, for focus and selection, and as a field tint; never for a call to action. The primary action is ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Drawn Overlap Rule",
+        "body": "In light mode glass multiplies with what is under it; in dark mode it does not. The overlapping nights in the calendar are therefore drawn as their own violet block in both modes, never left to the blend.",
+        "section": "colors"
+      },
+      {
+        "name": "The Field Text Rule",
+        "body": "Paragraphs set directly on a field use ink mixed with the field's own colour (`color-mix(in oklab, ink 72%, field colour)`), which holds above 8:1; headings stay pure ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Regular Weight Rule",
+        "body": "Funnel Display is always set at 400. The one exception is the wordmark beside the mark, which is 500 at 19px. Emphasis in running text is Geist 500, never bold display.",
+        "section": "typography"
+      },
+      {
+        "name": "The Balanced Break Rule",
+        "body": "Headings use `text-wrap: balance` and lead paragraphs `text-wrap: pretty`, each with a character-width cap, so lines break by sense at every width.",
+        "section": "typography"
+      },
+      {
+        "name": "The Three Planes Rule",
+        "body": "Glass further away moves less. Decorative shapes drift upward on scroll at plane-specific distances (120px, 160px and 200px over the first 120vh in the hero; 36px inside a field), linearly, tied to scroll position. A far echo shape is blurred 2px at half opacity.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Settle Rule",
+        "body": "Things arrive by settling: 28px of rise, a 10px blur clearing, 0.9s on `cubic-bezier(0.16, 1, 0.3, 1)`, staggered 80ms apart. Controls respond in 200ms. Nothing bounces or overshoots. With reduced motion nothing drifts or plays, and the demo rests on the scene that shows the clash.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Material Rule",
+        "body": "Glass always carries grain (a soft-light noise layer) and a top highlight, so the colour reads as a material and not as a gradient.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep coral for Airbnb, blue for Booking.com and green for direct bookings wherever product data appears.",
+      "Do put product material on a white panel, and float that panel over a field of one glass colour.",
+      "Do give each panel one reading.",
+      "Do set Funnel Display at 400 and let size carry the hierarchy.",
+      "Do crop and rotate decorative glass, keep it behind content, and mark it `aria-hidden`.",
+      "Do use ink for the primary action and a white pill for the second.",
+      "Do drop to the reading register (ground, ink, hairlines) when the content is limits, steps or comparisons.",
+      "Do write the source's name beside its colour; colour never carries the meaning alone.",
+      "Do give dark mode its own values through the same token names."
+    ],
+    "donts": [
+      "Don't use violet for a button or a link; it marks a clash, focus and selection.",
+      "Don't set display type in bold, or in capitals.",
+      "Don't put text on a decorative glass shape; only booking slabs carry labels.",
+      "Don't use flat colour blocks or plain gradients where glass is meant; glass has grain, a highlight and a cast shadow.",
+      "Don't add hard, offset or grey drop shadows; shadows are long, soft and coloured or ambient.",
+      "Don't use `faint` for sentences, or `muted` for a label on a booking slab.",
+      "Don't rely on the blend mode to show an overlap; draw it.",
+      "Don't add motion that bounces, loops for decoration, or ignores the reduced-motion preference.",
+      "Don't bring the `.brand` tokens into the dashboard, or the dashboard's bordered cards into the public pages."
+    ]
+  }
+}

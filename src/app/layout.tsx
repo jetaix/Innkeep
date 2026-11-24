@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
-import { site, siteUrl } from "@/config/site";
+import { brand, site, siteUrl } from "@/config/site";
 import { LocaleProvider } from "@/i18n/client";
 import { LOCALE_COOKIE, THEME_KEY } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
@@ -19,13 +19,34 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: site.name, statusBarStyle: "default" },
   // A dashboard full of dates and amounts: none of them is a phone number to dial.
   formatDetection: { telephone: false },
-  openGraph: { title: site.name, description: site.description, type: "website", siteName: site.name },
-  twitter: { card: "summary_large_image", title: site.name, description: site.description },
+  keywords: [
+    "channel manager",
+    "Airbnb",
+    "Booking.com",
+    "calendar sync",
+    "open source",
+    "self-hosted",
+    "vacation rental",
+  ],
+  authors: [{ name: site.name, url: site.repo }],
+  openGraph: {
+    title: `${site.name} · ${site.tagline}`,
+    description: site.description,
+    type: "website",
+    siteName: site.name,
+    locale: "en",
+    alternateLocale: ["fr"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${site.name} · ${site.tagline}`,
+    description: site.description,
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: brand.ground },
     { media: "(prefers-color-scheme: dark)", color: "#0f0f11" },
   ],
 };

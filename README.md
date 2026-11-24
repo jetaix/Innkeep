@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/brand/innkeep-mark.svg" width="72" height="72" alt="" />
+</p>
+
 <h1 align="center">Innkeep</h1>
 
 <p align="center">
@@ -12,12 +16,20 @@
 </p>
 
 <p align="center">
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-15171c?labelColor=f3f4ef" />
+  <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-yes-10a88f?labelColor=f3f4ef" />
+  <img alt="English and French" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20FR-3d6df2?labelColor=f3f4ef" />
+</p>
+
+<p align="center">
   <a href="#quick-start">Quick start</a> ·
   <a href="#features">Features</a> ·
   <a href="#what-it-does-not-do">Limits</a> ·
   <a href="docs/ALTERNATIVES.md">Alternatives</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
+
+![The Innkeep landing page: one calendar for every place you rent](docs/screenshots/landing.png)
 
 ![Innkeep overview: revenue, next reservations and suggestions](docs/screenshots/overview.png)
 

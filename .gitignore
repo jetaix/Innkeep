@@ -23,3 +23,8 @@ next-env.d.ts
 npm-debug.log*
 .vercel
 .claude/
+
+# design review captures and decision rounds
+/.impeccable/review
+/.impeccable/decision
+/.impeccable/questions

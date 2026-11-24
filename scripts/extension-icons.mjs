@@ -6,20 +6,25 @@
  */
 import sharp from "sharp";
 
-// The mark: a rounded square with a doorway cut out. A white plate behind it
-// keeps the doorway white on any toolbar, light or dark.
+// The mark: two doorways that overlap, one per calendar, darker where they
+// meet. A pale plate behind it keeps the colours true on any toolbar.
+const LEFT = "M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z";
+const RIGHT = "M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z";
 const mark = (padding) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="${-padding} ${-padding} ${24 + padding * 2} ${24 + padding * 2}">
-  <rect x="2" y="2" width="20" height="20" rx="3" fill="#ffffff"/>
-  <path fill="#18181b" fill-rule="evenodd" d="M5 2h14a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3Zm3 20v-9a4 4 0 0 1 8 0v9H8Zm5.6-6.4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+  <defs><clipPath id="a"><path d="${LEFT}"/></clipPath></defs>
+  <rect x="0" y="0" width="24" height="24" rx="5" fill="#f3f4ef"/>
+  <path fill="#ff5d73" d="${LEFT}"/>
+  <path fill="#3d6df2" d="${RIGHT}"/>
+  <path fill="#4b2bbd" clip-path="url(#a)" d="${RIGHT}"/>
 </svg>`;
 
 // Chrome Web Store asks for 96 px of artwork inside the 128 px icon; the
 // small sizes fill their square so they stay legible in the toolbar.
 for (const [size, padding] of [
-  [16, -1.5],
-  [32, -1.5],
-  [48, -1],
+  [16, -1],
+  [32, -1],
+  [48, -0.5],
   [128, 2],
 ]) {
   await sharp(Buffer.from(mark(padding)), { density: 1200 })
