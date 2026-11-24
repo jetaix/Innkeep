@@ -10,7 +10,7 @@ import { createRunKey } from "@/features/extension/run";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   if (request.headers.get("sec-fetch-site") !== "same-origin") {
-    return Response.redirect(new URL("/settings#data", url), 303);
+    return Response.redirect(new URL("/settings?tab=data", url), 303);
   }
   const scope = url.searchParams.get("scope") === "all" ? "all" : "reservations";
   const target = new URL("/extension/run", url);

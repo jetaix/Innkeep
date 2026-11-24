@@ -109,7 +109,7 @@ export async function UpdatePrompt() {
             })}
           </ul>
           <p className="mt-3 text-xs text-muted">
-            <Link href="/settings#data" className="text-ink underline underline-offset-2">
+            <Link href="/settings?tab=data" className="text-ink underline underline-offset-2">
               {m.data.seeAll}
             </Link>
           </p>

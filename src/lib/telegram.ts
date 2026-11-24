@@ -9,7 +9,15 @@ import https from "node:https";
  */
 const LIMIT = 4000; // Telegram refuses a message over 4096 characters.
 
-type Answer = { status: number; data: { result?: unknown; description?: string } | null };
+type Answer = {
+  status: number;
+  data: {
+    result?: unknown;
+    description?: string;
+    /** Set when a group became a "supergroup": the same chat, under a new number. */
+    parameters?: { migrate_to_chat_id?: number | string };
+  } | null;
+};
 
 /**
  * One JSON request, over IPv4 only. Telegram also publishes an IPv6 address,
@@ -131,16 +139,34 @@ export function splitMessage(text: string, limit = LIMIT): string[] {
   return parts;
 }
 
-/** Sends a plain-text message. Throws with Telegram's own explanation when it is refused. */
-export async function sendTelegram(text: string, chat: string | null): Promise<void> {
+/**
+ * Sends a plain-text message. Throws with Telegram's own explanation when it
+ * is refused.
+ *
+ * Telegram turns a group into a "supergroup" on its own (when its history is
+ * made visible to new members, an admin is named, and so on) and gives it a
+ * new number; the old one is then refused, with the new one in the answer.
+ * The message is sent there instead, and `onMoved` is told so the new number
+ * can be kept.
+ */
+export async function sendTelegram(
+  text: string,
+  chat: string | null,
+  onMoved?: (from: string, to: string) => Promise<void>,
+): Promise<void> {
   if (!process.env.TELEGRAM_BOT_TOKEN || !chat) throw new Error("Set TELEGRAM_BOT_TOKEN and choose a chat");
 
+  let target = chat;
   for (const part of splitMessage(text)) {
-    const { status, data } = await telegram("sendMessage", {
-      chat_id: chat,
-      text: part,
-      disable_web_page_preview: true,
-    });
+    const send = () =>
+      telegram("sendMessage", { chat_id: target, text: part, disable_web_page_preview: true });
+    let { status, data } = await send();
+    const moved = data?.parameters?.migrate_to_chat_id;
+    if (status !== 200 && moved != null) {
+      await onMoved?.(target, String(moved));
+      target = String(moved);
+      ({ status, data } = await send());
+    }
     if (status !== 200) throw new Error(data?.description ?? `Telegram answered ${status}`);
   }
 }

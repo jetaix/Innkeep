@@ -16,6 +16,7 @@ import { TelegramTest } from "@/features/cleaning/telegram-test";
 import { AI_MODEL, aiConfigured } from "@/features/insights/ai";
 import { DataSection } from "@/features/freshness/data-section";
 import { getI18n } from "@/i18n/server";
+import { cn } from "@/lib/cn";
 import { appPassword } from "@/lib/session";
 import { telegramBot } from "@/lib/telegram";
 
@@ -23,40 +24,29 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).m.settings.title };
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: PageProps<"/settings">) {
   const { m } = await getI18n();
   const t = m.settings;
   return (
     <>
       <PageHeader title={t.title} description={t.description} />
       <Suspense fallback={<Loading />}>
-        <Settings />
+        <Settings searchParams={searchParams} />
       </Suspense>
-      <section id="data" aria-labelledby="data-heading" className="mt-10 scroll-mt-6">
-        <div className="mb-4 px-1">
-          <h2 id="data-heading" className="font-semibold">
-            {m.data.title}
-          </h2>
-          <p className="mt-0.5 text-[13px] text-muted">{m.data.description}</p>
-        </div>
-        <Suspense fallback={<Loading />}>
-          <Data />
-        </Suspense>
-      </section>
     </>
   );
 }
 
-/** Request-time data: where everything comes from and how fresh it is. */
-async function Data() {
-  await connection();
-  return <DataSection />;
-}
+/** The page in four parts, one on screen at a time. The first is the default. */
+const TABS = ["general", "connections", "assistant", "data"] as const;
+type Tab = (typeof TABS)[number];
 
-async function Settings() {
+async function Settings({ searchParams }: Pick<PageProps<"/settings">, "searchParams">) {
   await connection();
   const { m } = await getI18n();
   const t = m.settings;
+  const asked = (await searchParams).tab;
+  const tab: Tab = TABS.find((value) => value === asked) ?? "general";
   const i = t.integrations;
   const state = (on: boolean) => (on ? i.on : i.off);
   const requestHeaders = await headers();
@@ -102,25 +92,82 @@ async function Settings() {
   ];
 
   return (
-    <div className="grid grid-cols-1 max-w-5xl items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-      <div className="space-y-6">
-        <Card>
-          <div className="border-b border-line px-4 py-3">
-            <SectionTitle>{t.appearance.title}</SectionTitle>
-          </div>
-          <div className="divide-y divide-line">
-            <Preference label={m.common.preferences.theme} help={t.appearance.themeHelp}>
-              <ThemeSwitch withLabels />
-            </Preference>
-            <Preference label={m.common.preferences.language} help={t.appearance.languageHelp}>
-              <LanguageSwitch withLabels />
-            </Preference>
-          </div>
-        </Card>
+    <div className="max-w-3xl space-y-6">
+      <nav aria-label={t.tabs.label} className="flex gap-1 overflow-x-auto border-b border-line">
+        {TABS.map((value) => (
+          <Link
+            key={value}
+            href={value === "general" ? "/settings" : `/settings?tab=${value}`}
+            aria-current={value === tab ? "page" : undefined}
+            className={cn(
+              "-mb-px flex h-9 shrink-0 items-center border-b-2 px-3 text-[13px] font-medium whitespace-nowrap transition-colors pointer-coarse:h-11",
+              value === tab ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink",
+            )}
+          >
+            {t.tabs[value]}
+          </Link>
+        ))}
+      </nav>
 
+      {tab === "general" && (
+        <>
+          <Card>
+            <div className="border-b border-line px-4 py-3">
+              <SectionTitle>{t.appearance.title}</SectionTitle>
+            </div>
+            <div className="divide-y divide-line">
+              <Preference label={m.common.preferences.theme} help={t.appearance.themeHelp}>
+                <ThemeSwitch withLabels />
+              </Preference>
+              <Preference label={m.common.preferences.language} help={t.appearance.languageHelp}>
+                <LanguageSwitch withLabels />
+              </Preference>
+            </div>
+          </Card>
+          <Card>
+            <div className="border-b border-line px-4 py-3">
+              <SectionTitle>{t.tabs.access}</SectionTitle>
+            </div>
+            <ul className="divide-y divide-line">
+              <Integration
+                name={i.password.name}
+                on={Boolean(appPassword())}
+                status={state(Boolean(appPassword()))}
+                variable="APP_PASSWORD"
+              >
+                {i.password.body}
+                {appPassword() && (
+                  <form action={signOut} className="mt-3">
+                    <SubmitButton size="sm">{i.password.signOut}</SubmitButton>
+                  </form>
+                )}
+              </Integration>
+            </ul>
+          </Card>
+          <Card>
+            <div className="border-b border-line px-4 py-3">
+              <SectionTitle>{t.shortcuts.title}</SectionTitle>
+            </div>
+            <dl className="divide-y divide-line">
+              <Shortcut keys={["⌘", "K"]}>{t.shortcuts.commandMenu}</Shortcut>
+              {NAV.map((item) => (
+                <Shortcut key={item.href} keys={["G", item.key.toUpperCase()]}>
+                  {t.shortcuts.goTo(m.common.nav[item.id])}
+                </Shortcut>
+              ))}
+              <Shortcut keys={["N"]}>{t.shortcuts.add}</Shortcut>
+              <Shortcut keys={["←", "→"]}>{t.shortcuts.move}</Shortcut>
+              <Shortcut keys={["T"]}>{t.shortcuts.today}</Shortcut>
+              <Shortcut keys={["Esc"]}>{t.shortcuts.close}</Shortcut>
+            </dl>
+          </Card>
+        </>
+      )}
+
+      {tab === "connections" && (
         <Card>
           <div className="border-b border-line px-4 py-3">
-            <SectionTitle>{i.title}</SectionTitle>
+            <SectionTitle>{t.tabs.connections}</SectionTitle>
           </div>
           <ul className="divide-y divide-line">
             <Integration
@@ -130,14 +177,6 @@ async function Settings() {
               variable={hosted ? "CRON_SECRET" : "SYNC_INTERVAL_MINUTES"}
             >
               {i.sync.body}
-            </Integration>
-            <Integration
-              name={i.ai.name}
-              on={await aiConfigured()}
-              status={(await aiConfigured()) ? AI_MODEL : i.off}
-              variable="ANTHROPIC_API_KEY"
-            >
-              {i.ai.body}
             </Integration>
             <Integration
               name={i.extension.name}
@@ -164,18 +203,30 @@ async function Settings() {
               {telegramBot() && !telegramChat && <TelegramFind />}
             </Integration>
             <Integration
-              name={i.password.name}
-              on={Boolean(appPassword())}
-              status={state(Boolean(appPassword()))}
-              variable="APP_PASSWORD"
+              name={i.ai.name}
+              on={await aiConfigured()}
+              status={(await aiConfigured()) ? AI_MODEL : i.off}
+              variable="ANTHROPIC_API_KEY"
             >
-              {i.password.body}
-              {appPassword() && (
-                <form action={signOut} className="mt-3">
-                  <SubmitButton size="sm">{i.password.signOut}</SubmitButton>
-                </form>
-              )}
+              {i.ai.body}
             </Integration>
+          </ul>
+          <p className="border-t border-line px-4 py-3 text-xs text-muted">
+            {i.footer.beforeFile} <code className="font-mono">.env</code> {i.footer.afterFile}{" "}
+            <a href={`${site.repo}#configuration`} className="underline underline-offset-2 hover:text-ink">
+              {i.footer.link}
+            </a>{" "}
+            {i.footer.after}
+          </p>
+        </Card>
+      )}
+
+      {tab === "assistant" && (
+        <Card>
+          <div className="border-b border-line px-4 py-3">
+            <SectionTitle>{t.tabs.assistant}</SectionTitle>
+          </div>
+          <ul className="divide-y divide-line">
             <Integration name={i.mcp.name} on={mcpOn} status={state(mcpOn)} variable="MCP_TOKEN">
               {i.mcp.body}
               <span className="mt-3 block text-xs font-medium text-ink">{i.mcp.steps}</span>
@@ -209,25 +260,19 @@ async function Settings() {
             {i.footer.after}
           </p>
         </Card>
-      </div>
+      )}
 
-      <Card>
-        <div className="border-b border-line px-4 py-3">
-          <SectionTitle>{t.shortcuts.title}</SectionTitle>
-        </div>
-        <dl className="divide-y divide-line">
-          <Shortcut keys={["⌘", "K"]}>{t.shortcuts.commandMenu}</Shortcut>
-          {NAV.map((item) => (
-            <Shortcut key={item.href} keys={["G", item.key.toUpperCase()]}>
-              {t.shortcuts.goTo(m.common.nav[item.id])}
-            </Shortcut>
-          ))}
-          <Shortcut keys={["N"]}>{t.shortcuts.add}</Shortcut>
-          <Shortcut keys={["←", "→"]}>{t.shortcuts.move}</Shortcut>
-          <Shortcut keys={["T"]}>{t.shortcuts.today}</Shortcut>
-          <Shortcut keys={["Esc"]}>{t.shortcuts.close}</Shortcut>
-        </dl>
-      </Card>
+      {tab === "data" && (
+        <section aria-labelledby="data-heading">
+          <div className="mb-4 px-1">
+            <h2 id="data-heading" className="font-semibold">
+              {m.data.title}
+            </h2>
+            <p className="mt-0.5 text-[13px] text-muted">{m.data.description}</p>
+          </div>
+          <DataSection />
+        </section>
+      )}
     </div>
   );
 }

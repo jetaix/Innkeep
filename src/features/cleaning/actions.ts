@@ -16,7 +16,7 @@ import { MESSAGES } from "@/i18n/messages";
 import { isoDate, parseForm, text } from "@/lib/form";
 import { findTelegramChats, sendTelegram, type TelegramChat } from "@/lib/telegram";
 import { notifyCleanings, telegramLocale } from "./notify";
-import { getTelegramChat, saveTelegramChat } from "./telegram-chat";
+import { getTelegramChat, rememberMovedChat, saveTelegramChat } from "./telegram-chat";
 
 const day = z.object({ propertyId: z.coerce.number().int().positive(), date: isoDate });
 
@@ -146,6 +146,7 @@ export async function sendTelegramTest(): Promise<TelegramTestState> {
     await sendTelegram(
       MESSAGES[telegramLocale()].cleaning.telegram.test,
       (await getTelegramChat())?.id ?? null,
+      rememberMovedChat,
     );
     await notifyCleanings();
     return { sent: true, error: null };
