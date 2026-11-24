@@ -46,7 +46,7 @@
   "private": true,
   "description": "Open-source, self-hosted channel manager for hosts with one or two rentals",
   "engines": {
-    "node": ">=22"
+    "node": "22.x || 24.x"
   },
   "packageManager": "bun@1.4.4"
 }

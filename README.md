@@ -35,7 +35,7 @@ Not technical? Follow the step-by-step guide instead:
 [docs/INSTALL.md](docs/INSTALL.md) ([en français](docs/INSTALLATION.fr.md)).
 It needs no terminal: you download a folder and double-click a file.
 
-Requires Node.js 22 or later (24 is what the hosted version runs).
+Requires Node.js 22 or 24 (24 is what the hosted version runs).
 
 ```bash
 git clone https://github.com/jetaix/Innkeep
