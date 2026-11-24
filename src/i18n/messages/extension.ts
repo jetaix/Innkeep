@@ -20,6 +20,12 @@ const en = {
     copyAddress: "Copy address",
     copyPath: "Copy path",
     copyToken: "Copy token",
+    /** The download button: "Download the extension (version 0.15.1)". */
+    download: (version: string): string => `Download the extension (version ${version})`,
+    downloadHint: "A ZIP file. Unzip it and keep the folder: the browser loads the extension from it.",
+    /** In the "outdated" notice, before the download button. */
+    update:
+      "To update: download it again, unzip it in place of the old folder, then press the reload arrow on Innkeep Companion.",
     /** "Add a line `EXTENSION_TOKEN=` followed by a long random string to `.env.local`, then restart…" */
     switchOn: {
       title: "Switch it on in Innkeep",
@@ -41,6 +47,10 @@ const en = {
       strong: "Load unpacked",
       after:
         "(top left) and choose the folder below. On a Mac, press Command + Shift + G in the window that opens and paste the path. A card named Innkeep Companion appears.",
+      /** When Innkeep runs on a server: the folder comes from the download. */
+      afterHosted:
+        "(top left) and choose the innkeep-extension folder you get by unzipping the download below. A card named Innkeep Companion appears.",
+      elsewhere: "On another computer, download the extension instead:",
     },
     pin: {
       title: "Keep its icon in view",
@@ -162,6 +172,11 @@ const fr: typeof en = {
     subtitle: "Chrome, Edge, Brave ou Arc, sur un ordinateur. Environ cinq minutes, une seule fois.",
     copyAddress: "Copier l’adresse",
     copyPath: "Copier le chemin",
+    download: (version) => `Télécharger l’extension (version ${version})`,
+    downloadHint:
+      "Un fichier ZIP. Décompressez-le et conservez le dossier : le navigateur charge l’extension depuis celui-ci.",
+    update:
+      "Pour mettre à jour : téléchargez-la de nouveau, décompressez-la à la place de l’ancien dossier, puis appuyez sur la flèche de rechargement d’Innkeep Companion.",
     copyToken: "Copier le jeton",
     switchOn: {
       title: "Activez-la dans Innkeep",
@@ -184,6 +199,9 @@ const fr: typeof en = {
       strong: "Charger l’extension non empaquetée",
       after:
         "(en haut à gauche) et choisissez le dossier ci-dessous. Sur Mac, appuyez sur Commande + Maj + G dans la fenêtre qui s’ouvre et collez le chemin. Une carte nommée Innkeep Companion apparaît.",
+      afterHosted:
+        "(en haut à gauche) et choisissez le dossier innkeep-extension obtenu en décompressant le téléchargement ci-dessous. Une carte nommée Innkeep Companion apparaît.",
+      elsewhere: "Sur un autre ordinateur, téléchargez plutôt l’extension :",
     },
     pin: {
       title: "Gardez son icône visible",
