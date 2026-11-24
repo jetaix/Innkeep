@@ -1,0 +1,16 @@
+/* The few rules that are not a component's own. StyleX adds its extracted CSS to this file at build. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+}
