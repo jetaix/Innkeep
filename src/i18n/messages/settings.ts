@@ -48,7 +48,7 @@ const en = {
       whereSelf: "Add it to your .env file as MCP_TOKEN, then restart the server.",
       claudeCode: "Claude Code: run this in a terminal, with your token in place of YOUR_MCP_TOKEN.",
       desktop:
-        "Claude Desktop: open Settings, Developer, Edit Config, and add this to the file, with your token. Restart Claude Desktop.",
+        "Claude Desktop: open Settings, Developer, Edit Config, and add this to the file, with your token in place of YOUR_MCP_TOKEN. Change nothing else. Node.js must be installed on that computer. Restart Claude Desktop.",
       other: "Another assistant that accepts an MCP server over HTTP: give it this configuration.",
       tryIt: "Then ask it: “What are my next arrivals in Innkeep?”",
     },
@@ -122,7 +122,7 @@ const fr: typeof en = {
       claudeCode:
         "Claude Code : lancez ceci dans un terminal, avec votre jeton à la place de YOUR_MCP_TOKEN.",
       desktop:
-        "Claude Desktop : ouvrez Settings, Developer, Edit Config, et ajoutez ceci au fichier, avec votre jeton. Redémarrez Claude Desktop.",
+        "Claude Desktop : ouvrez Settings, Developer, Edit Config, et ajoutez ceci au fichier, avec votre jeton à la place de YOUR_MCP_TOKEN. Ne changez rien d’autre. Node.js doit être installé sur cet ordinateur. Redémarrez Claude Desktop.",
       other: "Un autre assistant qui accepte un serveur MCP en HTTP : donnez-lui cette configuration.",
       tryIt: "Demandez-lui ensuite : « Quelles sont mes prochaines arrivées dans Innkeep ? »",
     },

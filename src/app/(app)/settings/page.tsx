@@ -83,7 +83,13 @@ async function Settings() {
       text: i.mcp.desktop,
       code: json({
         mcpServers: {
-          innkeep: { command: "npx", args: ["-y", "mcp-remote", mcpUrl, "--header", bearer] },
+          innkeep: {
+            command: "npx",
+            // No space inside the argument: some systems split it there. The value comes from `env`.
+            // biome-ignore lint/suspicious/noTemplateCurlyInString: mcp-remote fills this in, not JavaScript
+            args: ["-y", "mcp-remote", mcpUrl, "--header", "Authorization:${AUTH_HEADER}"],
+            env: { AUTH_HEADER: "Bearer YOUR_MCP_TOKEN" },
+          },
         },
       }),
     },
