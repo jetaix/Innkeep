@@ -29,8 +29,11 @@ async function refresh() {
 async function start(scope) {
   status.textContent = "Starting…";
   const result = await chrome.runtime.sendMessage({ type: "innkeep:tour-start", scope });
-  if (!result?.ok) status.textContent = result?.error ?? "Could not start.";
-  else refresh();
+  if (!result?.ok) {
+    status.textContent = result?.error ?? "Could not start.";
+    // A refused or missing token is fixed in the settings: take the host there.
+    if (result?.reconnect) chrome.runtime.openOptionsPage();
+  } else refresh();
 }
 
 reservations.addEventListener("click", () => start("reservations"));
