@@ -39,7 +39,7 @@ export async function StayList({
         return (
           <li key={stay.id}>
             <Link
-              href={`/calendar?start=${addDays(stay.checkIn, -3)}&r=${stay.id}`}
+              href={`/calendar?view=weeks&start=${addDays(stay.checkIn, -3)}&r=${stay.id}`}
               className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-0.5 px-4 py-2.5 transition-colors hover:bg-subtle sm:grid-cols-[7rem_1fr_12.5rem_5.5rem]"
             >
               <span className="hidden text-xs text-muted sm:block">{when(stay, today, row)}</span>

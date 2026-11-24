@@ -2,6 +2,7 @@ import type {
   Cleaner,
   CleanerAssignment,
   CleaningRecord,
+  CleaningRequest,
   CleaningStatus,
   Property,
   Reservation,
@@ -40,6 +41,8 @@ export type Cleaning = {
   /** Whole hours between check-out and the next check-in; null when no arrival is booked. */
   hours: number | null;
   status: CleaningStatus;
+  /** Whether the cleaner was asked, and whether they said yes. */
+  request: CleaningRequest;
   notes: string;
   /** Who does it: the one picked for this day, else the property's usual cleaner. */
   cleaner: Cleaner | null;
@@ -111,6 +114,7 @@ export function buildSchedule(input: {
             )
           : null,
         status: record?.status ?? "pending",
+        request: record?.request ?? "none",
         notes: record?.notes ?? "",
         cleaner: picked ?? usual ?? null,
         reassigned: picked != null,

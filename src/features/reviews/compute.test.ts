@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Review } from "@/db/schema";
-import { isLow, newestFirst, reviewStats } from "./compute";
+import { isLow, newestFirst, reviewStats, stars } from "./compute";
 
 let nextId = 1;
 const review = (extra: Partial<Review>): Review => ({
@@ -54,5 +54,14 @@ describe("newestFirst", () => {
       review({ reviewedOn: null, author: "d" }),
     ]).map((entry) => entry.author);
     expect(ordered).toEqual(["b", "c", "a", "d"]);
+  });
+});
+
+describe("stars", () => {
+  it("brings every scale to five stars", () => {
+    expect(stars({ rating: 5, scale: 5 })).toBe(5);
+    expect(stars({ rating: 8.4, scale: 10 })).toBe(4);
+    expect(stars({ rating: 1, scale: 10 })).toBe(1);
+    expect(stars({ rating: null, scale: 5 })).toBeNull();
   });
 });

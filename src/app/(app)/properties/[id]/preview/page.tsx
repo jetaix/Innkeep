@@ -19,7 +19,7 @@ import {
   type OtaChannel,
 } from "@/db";
 import { adminPhotos } from "@/features/properties/pages";
-import { readPreview, type Preview } from "@/features/properties/preview";
+import { readPreview, sizedPhoto, type Preview } from "@/features/properties/preview";
 import { publicPageLinks } from "@/features/reservations/platform-links";
 import { INTL_LOCALE } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
@@ -276,14 +276,6 @@ async function ListingCard({
   );
 }
 
-/** Airbnb's image server resizes on request; asking for a sensible width keeps the page light. */
-function sized(url: string, width: number): string {
-  const parsed = new URL(url);
-  if (parsed.hostname.endsWith("muscache.com") && !parsed.search)
-    parsed.searchParams.set("im_w", String(width));
-  return parsed.toString();
-}
-
 /** One large photo and up to four small ones, the way both platforms open a listing. */
 async function Photos({ preview }: { preview: Preview }) {
   const t = (await getI18n()).m.preview;
@@ -298,7 +290,7 @@ async function Photos({ preview }: { preview: Preview }) {
       {/* Photos come from the platforms' own image servers, which next/image is not set up for. */}
       {/* biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers */}
       <img
-        src={sized(url, width)}
+        src={sizedPhoto(url, width)}
         alt={t.photoAlt(index + 1, preview.title)}
         referrerPolicy="no-referrer"
         className="absolute inset-0 size-full object-cover"

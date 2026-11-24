@@ -1,7 +1,7 @@
 /** The Pricing page: nightly prices per platform, what each leaves the host, and suggestions. */
 const en = {
   title: "Pricing",
-  description: "The price of each night on each platform, what each one leaves you, and where they disagree.",
+  description: "Your nightly prices on Airbnb and Booking.com, side by side, and the nights worth adjusting.",
   noProperty: { title: "No properties yet", body: "Add a property to compare its prices." },
   property: "Property",
   plan: "Booking.com rate",
@@ -28,25 +28,36 @@ const en = {
       "Innkeep does not know this listing's id on the platforms yet. Update your reservations first, then come back.",
   },
   tiles: {
-    average: (platform: string) => `${platform}, average free night`,
-    freeNights: (n: number) => `${n} free night${n === 1 ? "" : "s"} with a price`,
-    noPrices: "No price read for a free night",
-    lower: "Nights where Booking.com leaves you less",
-    lowerHint: (higher: number) =>
-      higher ? `and ${higher} where it leaves you more` : "than Airbnb, after fees",
-    shortfall: "Left on the table",
-    shortfallHint: "if those nights sell on Booking.com at today's rate",
+    average: (platform: string) => `Average price on ${platform}`,
+    freeNights: (n: number) => `per night, over ${n} free night${n === 1 ? "" : "s"}`,
+    noPrices: "No price read yet",
+    toAdjust: "Nights to adjust",
+    toAdjustHint: (amount: string): string => `About ${amount} more for you if Booking.com matched Airbnb`,
+    aligned: "Both platforms leave you the same",
   },
   chart: {
     title: "Price per night",
-    subtitle: (days: number) => `Next ${days} days, as guests see it. Shaded nights are taken.`,
-    label: "Nightly price on each platform",
+    subtitle: (months: number): string => `The next ${months} months. Grey nights are already taken.`,
+    label: "Nightly price on each platform. Use the arrow keys to move from night to night.",
+    explore: "Point at a night, or touch it, to see its prices.",
+    noPrice: "no price",
+  },
+  todo: {
+    title: "Prices to adjust",
+    subtitle:
+      "Only the free nights where something is worth changing. You change the prices yourself on each platform.",
+    none: "Nothing to adjust: your prices are consistent on the free nights read so far.",
+    more: (n: number): string => `And ${n} more in the full list below.`,
+    when: "Nights",
+    what: "What to do",
+  },
+  details: {
+    nights: "Every night, one by one",
+    notes: "How these numbers are worked out",
   },
   table: {
-    title: "Night by night",
     night: "Night",
-    keep: "You keep",
-    gap: "Difference",
+    gap: "Booking.com vs Airbnb, after fees",
     suggestion: "Suggestion",
     noPrice: "No price read",
     taken: {
@@ -69,11 +80,13 @@ const en = {
     belowHistory: (earned: string) => `Priced well under the ${earned} a night this month earned before`,
   },
   guest: {
-    title: "What a guest pays",
+    title: "What a guest really pays",
     subtitle:
-      "Your calendars show the nightly price. Guests see a total with each platform's fees, your cleaning fee and any discount. Check a few stays to compare what they are asked on each side.",
-    stay: "Stay",
-    nightly: "Nightly prices",
+      "For a few 3-night stays: the total of your calendar prices, next to the total a guest is asked once platform fees, your cleaning fee and discounts are counted.",
+    stay: "Stay of 3 nights",
+    nightly: "Your Airbnb calendar, 3 nights",
+    /** Under a total: "€61 a night". */
+    perNight: (amount: string): string => `${amount} a night`,
     shown: (platform: string) => `Guest pays on ${platform}`,
     difference: "Booking.com vs Airbnb",
     check: (platform: string) => `Check ${platform}`,
@@ -86,7 +99,6 @@ const en = {
     none: "No free stretch of three priced nights in this period. Read more of your Airbnb calendar first.",
   },
   notes: {
-    title: "How these numbers are worked out",
     fees: (airbnb: string, booking: string, measured: boolean) =>
       `"You keep" removes each platform's cut: ${airbnb} on Airbnb (the usual host fee; yours may differ) and ${booking} on Booking.com (${measured ? "measured on your own bookings" : "the usual commission; send your reservations to measure yours"}).`,
     market:
@@ -102,8 +114,7 @@ const en = {
 
 const fr: typeof en = {
   title: "Tarifs",
-  description:
-    "Le prix de chaque nuit sur chaque plateforme, ce que chacune vous laisse, et là où elles divergent.",
+  description: "Vos prix par nuit sur Airbnb et Booking.com, côte à côte, et les nuits à ajuster.",
   noProperty: { title: "Aucun logement", body: "Ajoutez un logement pour comparer ses tarifs." },
   property: "Logement",
   plan: "Tarif Booking.com",
@@ -130,24 +141,36 @@ const fr: typeof en = {
       "Innkeep ne connaît pas encore l’identifiant de cette annonce sur les plateformes. Mettez d’abord à jour vos réservations, puis revenez.",
   },
   tiles: {
-    average: (platform) => `${platform}, nuit libre moyenne`,
-    freeNights: (n) => `${n} nuit${n > 1 ? "s" : ""} libre${n > 1 ? "s" : ""} avec un prix`,
-    noPrices: "Aucun prix lu pour une nuit libre",
-    lower: "Nuits où Booking.com vous laisse moins",
-    lowerHint: (higher) => (higher ? `et ${higher} où il vous laisse plus` : "qu’Airbnb, frais déduits"),
-    shortfall: "Manque à gagner",
-    shortfallHint: "si ces nuits se vendent sur Booking.com au tarif actuel",
+    average: (platform) => `Prix moyen sur ${platform}`,
+    freeNights: (n) => `par nuit, sur ${n} nuit${n > 1 ? "s" : ""} libre${n > 1 ? "s" : ""}`,
+    noPrices: "Aucun prix lu pour l’instant",
+    toAdjust: "Nuits à ajuster",
+    toAdjustHint: (amount) => `Environ ${amount} de plus pour vous si Booking.com était aligné sur Airbnb`,
+    aligned: "Les deux plateformes vous laissent autant",
   },
   chart: {
     title: "Prix par nuit",
-    subtitle: (days) => `Les ${days} prochains jours, vus par les voyageurs. Les nuits grisées sont prises.`,
-    label: "Prix par nuit sur chaque plateforme",
+    subtitle: (months) => `Les ${months} prochains mois. Les nuits grisées sont déjà prises.`,
+    label: "Prix par nuit sur chaque plateforme. Utilisez les flèches pour passer d’une nuit à l’autre.",
+    explore: "Survolez ou touchez une nuit pour voir ses prix.",
+    noPrice: "pas de prix",
+  },
+  todo: {
+    title: "Prix à ajuster",
+    subtitle:
+      "Seulement les nuits libres où un changement vaut la peine. Vous modifiez les prix vous-même sur chaque plateforme.",
+    none: "Rien à ajuster : vos prix sont cohérents sur les nuits libres lues jusqu’ici.",
+    more: (n) => `Et ${n} de plus dans la liste complète ci-dessous.`,
+    when: "Nuits",
+    what: "Que faire",
+  },
+  details: {
+    nights: "Toutes les nuits, une par une",
+    notes: "Comment ces chiffres sont calculés",
   },
   table: {
-    title: "Nuit par nuit",
     night: "Nuit",
-    keep: "Vous gardez",
-    gap: "Écart",
+    gap: "Booking.com par rapport à Airbnb, frais déduits",
     suggestion: "Suggestion",
     noPrice: "Aucun prix lu",
     taken: {
@@ -169,11 +192,12 @@ const fr: typeof en = {
     belowHistory: (earned) => `Bien en dessous des ${earned} par nuit que ce mois a déjà rapportés`,
   },
   guest: {
-    title: "Ce que paie un voyageur",
+    title: "Ce que paie réellement un voyageur",
     subtitle:
-      "Vos calendriers affichent le prix par nuit. Les voyageurs voient un total avec les frais de chaque plateforme, vos frais de ménage et les éventuelles remises. Vérifiez quelques séjours pour comparer ce qui leur est demandé de chaque côté.",
-    stay: "Séjour",
-    nightly: "Prix par nuit",
+      "Pour quelques séjours de 3 nuits : le total des prix de votre calendrier, à côté du total demandé au voyageur une fois comptés les frais de la plateforme, vos frais de ménage et les remises.",
+    stay: "Séjour de 3 nuits",
+    nightly: "Votre calendrier Airbnb, 3 nuits",
+    perNight: (amount) => `soit ${amount} par nuit`,
     shown: (platform) => `Le voyageur paie sur ${platform}`,
     difference: "Booking.com par rapport à Airbnb",
     check: (platform) => `Vérifier ${platform}`,
@@ -186,7 +210,6 @@ const fr: typeof en = {
     none: "Aucune période libre de trois nuits avec un prix sur cette durée. Lisez d’abord davantage votre calendrier Airbnb.",
   },
   notes: {
-    title: "Comment ces chiffres sont calculés",
     fees: (airbnb, booking, measured) =>
       `« Vous gardez » retire la part de chaque plateforme : ${airbnb} sur Airbnb (frais d’hôte habituels ; les vôtres peuvent différer) et ${booking} sur Booking.com (${measured ? "mesurée sur vos propres réservations" : "commission habituelle ; envoyez vos réservations pour mesurer la vôtre"}).`,
     market:

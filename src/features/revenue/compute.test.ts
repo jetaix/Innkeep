@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseMoney } from "@/lib/money";
-import { addMonths, summariseMonth } from "./compute";
+import { addMonths, summariseMonth, summariseYear } from "./compute";
 
 const rates = [{ id: 1, basePrice: 100 }];
 const stay = (checkIn: string, checkOut: string, extra = {}) => ({
@@ -107,5 +107,26 @@ describe("helpers", () => {
     expect(parseMoney("1,250.5")).toBe(125_050);
     expect(parseMoney("1.250")).toBe(125_000);
     expect(parseMoney("abc")).toBeNull();
+  });
+});
+
+describe("summariseYear", () => {
+  it("adds up the twelve months, splitting a stay across New Year by night", () => {
+    const stays = [
+      stay("2027-03-01", "2027-03-04", { amount: 30_000 }),
+      stay("2027-12-30", "2028-01-03", { amount: 40_000 }),
+    ];
+    const year = summariseYear("2027", stays, [charge({ amount: 1_000 })], rates);
+    expect(year).toMatchObject({
+      month: "2027",
+      gross: 50_000,
+      charges: 12_000,
+      net: 38_000,
+      bookedNights: 5,
+      availableNights: 365,
+      arrivals: 2,
+    });
+    expect(year.chargeLines).toEqual([expect.objectContaining({ id: 1, amount: 12_000 })]);
+    expect(summariseYear("2028", stays, [], rates)).toMatchObject({ gross: 20_000, bookedNights: 2 });
   });
 });

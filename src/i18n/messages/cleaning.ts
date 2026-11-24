@@ -50,6 +50,12 @@ const en = {
     hint: "Ready to paste into Messages or WhatsApp. No guest names, no prices.",
     copy: "Copy the message",
     send: "Open in Messages",
+    status: {
+      label: "Request to the cleaner",
+      none: "Not requested",
+      asked: "Waiting for an answer",
+      confirmed: "Confirmed",
+    },
     greeting: (name: string | null) => (name ? `Hello ${name},` : "Hello,"),
     /** The next guests arrive the same day: the cleaning has a start and an end. */
     /** `place` is named only when there are several places to tell apart. */
@@ -73,6 +79,7 @@ const en = {
     address: (text: string) => `Address: ${text}`,
   },
   manual: {
+    open: "Add a cleaning",
     title: "Add a cleaning by hand",
     hint: "For a deep clean, a check before a long stay, or after your own visit.",
     property: "Property",
@@ -127,7 +134,6 @@ const en = {
       kinds: { group: "Group", person: "Person", channel: "Channel" },
     },
   },
-  credit: "The idea of this schedule comes from RentTools.io, an open-source project under the MIT licence.",
 };
 
 const fr: typeof en = {
@@ -185,6 +191,12 @@ const fr: typeof en = {
     hint: "Prêt à coller dans Messages ou WhatsApp. Sans nom de voyageur ni prix.",
     copy: "Copier le message",
     send: "Ouvrir dans Messages",
+    status: {
+      label: "Demande à la personne de ménage",
+      none: "Pas demandé",
+      asked: "En attente de réponse",
+      confirmed: "Confirmé",
+    },
     greeting: (name) => (name ? `Bonjour ${name},` : "Bonjour,"),
     between: (date, from, until, place) =>
       `Pouvez-vous me confirmer qu’il vous est possible de faire le ménage le ${date}, entre ${from} et ${until}, dans le logement${place ? ` ${place}` : ""} ?`,
@@ -209,6 +221,7 @@ const fr: typeof en = {
     address: (text) => `Adresse : ${text}`,
   },
   manual: {
+    open: "Ajouter un ménage",
     title: "Ajouter un ménage à la main",
     hint: "Pour un grand ménage, une vérification avant un long séjour, ou après votre propre passage.",
     property: "Logement",
@@ -264,7 +277,6 @@ const fr: typeof en = {
       kinds: { group: "Groupe", person: "Personne", channel: "Canal" },
     },
   },
-  credit: "L’idée de ce planning vient de RentTools.io, un projet open source sous licence MIT.",
 };
 
 export const cleaning = { en, fr };

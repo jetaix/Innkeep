@@ -10,7 +10,12 @@ export function SubmitButton({
   children,
   pendingLabel,
   ...style
-}: { children: ReactNode; pendingLabel?: string; className?: string } & ButtonStyle) {
+}: {
+  children: ReactNode;
+  pendingLabel?: string;
+  className?: string;
+  "aria-pressed"?: boolean;
+} & ButtonStyle) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending} aria-busy={pending} {...style}>

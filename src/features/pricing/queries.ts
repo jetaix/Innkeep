@@ -13,7 +13,7 @@ import {
 } from "./compute";
 
 /** How many nights ahead the Pricing page can show; the first is the default. */
-export const PRICING_WINDOWS = [120, 240, 365] as const;
+export const PRICING_WINDOWS = [365, 240, 120] as const;
 
 export async function getPricing(propertyId: number, wantedPlan?: string, days: number = PRICING_WINDOWS[0]) {
   const db = getDb();

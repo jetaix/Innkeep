@@ -102,13 +102,36 @@ async function PricingView({ searchParams }: Pick<PageProps<"/pricing">, "search
           <Card>
             <div className="border-b border-line px-4 py-3">
               <SectionTitle>{t.chart.title}</SectionTitle>
-              <p className="mt-0.5 text-xs text-muted">{t.chart.subtitle(days)}</p>
+              <p className="mt-0.5 text-xs text-muted">{t.chart.subtitle(Math.round(days / 30))}</p>
             </div>
-            <PriceChart nights={pricing.nights} currency={property.currency} />
+            <PriceChart
+              nights={pricing.nights.map(({ date, takenBy, airbnb, booking }) => ({
+                date,
+                takenBy,
+                airbnb,
+                booking,
+              }))}
+              currency={property.currency}
+            />
           </Card>
+          <ToAdjust pricing={pricing} currency={property.currency} />
           <GuestChecks property={property} pricing={pricing} />
-          <NightTable pricing={pricing} currency={property.currency} />
-          <Notes pricing={pricing} />
+          <details className="group">
+            <summary className="cursor-pointer px-1 text-[13px] font-medium underline underline-offset-2">
+              {t.details.nights}
+            </summary>
+            <div className="mt-3">
+              <NightTable pricing={pricing} currency={property.currency} />
+            </div>
+          </details>
+          <details>
+            <summary className="cursor-pointer px-1 text-[13px] font-medium underline underline-offset-2">
+              {t.details.notes}
+            </summary>
+            <div className="mt-3">
+              <Notes pricing={pricing} />
+            </div>
+          </details>
         </>
       ) : (
         <EmptyState title={t.empty.title}>
@@ -217,18 +240,22 @@ async function Tiles({ pricing, currency }: { pricing: Pricing; currency: string
   const t = m.pricing.tiles;
   const { summary } = pricing;
   const money = (amount: number) => fmt.money(amount, currency, { cents: false });
+  const toAdjust = summary.bookingLower + summary.bookingHigher;
   const tiles = [
     ...(["airbnb", "booking"] as const).map((channel) => ({
       label: t.average(CHANNELS[channel].label),
       value: summary[channel].average == null ? "–" : money(summary[channel].average),
       hint: summary[channel].nights ? t.freeNights(summary[channel].nights) : t.noPrices,
     })),
-    { label: t.lower, value: String(summary.bookingLower), hint: t.lowerHint(summary.bookingHigher) },
-    { label: t.shortfall, value: money(summary.shortfall), hint: t.shortfallHint },
+    {
+      label: t.toAdjust,
+      value: String(toAdjust),
+      hint: summary.shortfall > 0 ? t.toAdjustHint(money(summary.shortfall)) : t.aligned,
+    },
   ];
 
   return (
-    <dl className="grid grid-cols-1 overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 xl:grid-cols-4 [&>div]:bg-bg">
+    <dl className="grid grid-cols-1 overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3 [&>div]:bg-bg">
       {tiles.map((tile) => (
         <div key={tile.label} className="m-px px-4 py-3">
           <dt className="text-xs text-muted">{tile.label}</dt>
@@ -303,7 +330,10 @@ async function GuestChecks({ property, pricing }: { property: Property; pricing:
                     <td className="px-4 py-2 whitespace-nowrap">
                       {m.pricing.table.range(fmt.date(check.checkIn), fmt.date(check.checkOut))}
                     </td>
-                    <td className="px-3 py-2 text-right">{money(check.nightly)}</td>
+                    <td className="px-3 py-2 text-right">
+                      <span className="font-medium">{money(check.nightly)}</span>
+                      <span className="block text-xs text-muted">{t.perNight(money(check.nightly / 3))}</span>
+                    </td>
                     {channels.map((channel) => {
                       const quote = check.quotes[channel];
                       return (
@@ -311,6 +341,9 @@ async function GuestChecks({ property, pricing }: { property: Property; pricing:
                           {quote ? (
                             <>
                               <span className="font-medium">{money(quote.total)}</span>
+                              <span className="block text-xs text-muted">
+                                {t.perNight(money(quote.total / 3))}
+                              </span>
                               <span className="block text-xs text-muted">
                                 {quote.original ? `${t.was(money(quote.original))}, ` : ""}
                                 {t.read(fmt.timeAgo(quote.seenAt))}
@@ -367,6 +400,84 @@ async function GuestChecks({ property, pricing }: { property: Property; pricing:
   );
 }
 
+/** A suggestion in words: what to do and, when it helps, why. */
+async function suggestionText(currency: string) {
+  const { m, fmt } = await getI18n();
+  const s = m.pricing.suggestion;
+  const money = (amount: number) => fmt.money(amount, currency, { cents: false });
+  return (suggestion: PriceSuggestion, night: Night): { title: string; why?: string } => {
+    switch (suggestion.kind) {
+      case "align":
+        return suggestion.direction === "raise"
+          ? { title: s.raise(money(suggestion.target)), why: s.raiseWhy(money(night.airbnbNet ?? 0)) }
+          : { title: s.lower(money(suggestion.target)), why: s.lowerWhy };
+      case "lastMinute":
+        return { title: s.lastMinute(fmt.percent(suggestion.percent)) };
+      case "orphan":
+        return { title: s.orphan(suggestion.nights) };
+      case "belowHistory":
+        return { title: s.belowHistory(money(suggestion.earned)) };
+    }
+  };
+}
+
+const TODO_LIMIT = 10;
+
+/** The free nights worth a change, with nights in a row that call for the same thing shown as one line. */
+async function ToAdjust({ pricing, currency }: { pricing: Pricing; currency: string }) {
+  const { m, fmt } = await getI18n();
+  const t = m.pricing.todo;
+  const describe = await suggestionText(currency);
+  const day = (date: string) => fmt.date(date, { weekday: "short", day: "numeric", month: "short" });
+
+  const groups: { first: string; last: string; nights: number; title: string; why?: string }[] = [];
+  pricing.nights.forEach((night, index) => {
+    if (night.takenBy || !night.suggestion) return;
+    const text = describe(night.suggestion, night);
+    const previous = groups.at(-1);
+    if (previous && previous.title === text.title && pricing.nights[index - 1]?.date === previous.last) {
+      previous.last = night.date;
+      previous.nights++;
+    } else groups.push({ first: night.date, last: night.date, nights: 1, ...text });
+  });
+
+  return (
+    <Card>
+      <div className="border-b border-line px-4 py-3">
+        <SectionTitle>{t.title}</SectionTitle>
+        <p className="mt-0.5 max-w-[80ch] text-xs text-muted">{t.subtitle}</p>
+      </div>
+      {groups.length === 0 ? (
+        <p className="px-4 py-4 text-[13px] text-muted">{t.none}</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {groups.slice(0, TODO_LIMIT).map((group) => (
+            <li
+              key={group.first}
+              className="grid grid-cols-1 gap-x-4 gap-y-0.5 px-4 py-2.5 sm:grid-cols-[14rem_1fr]"
+            >
+              <span className="text-[13px] text-muted tabular-nums">
+                {group.nights === 1
+                  ? day(group.first)
+                  : `${m.pricing.table.range(day(group.first), day(group.last))} (${m.common.count.nights(group.nights)})`}
+              </span>
+              <span className="text-[13px]">
+                <span className="font-medium">{group.title}</span>
+                {group.why && <span className="text-muted">, {group.why}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {groups.length > TODO_LIMIT && (
+        <p className="border-t border-line px-4 py-2.5 text-xs text-muted">
+          {t.more(groups.length - TODO_LIMIT)}
+        </p>
+      )}
+    </Card>
+  );
+}
+
 /** Consecutive taken nights held by the same source become one row; free nights stay one each. */
 type Row = { kind: "free"; night: Night } | { kind: "taken"; first: Night; last: Night; nights: number };
 
@@ -390,30 +501,10 @@ async function NightTable({ pricing, currency }: { pricing: Pricing; currency: s
     amount == null ? <span className="text-faint">–</span> : fmt.money(amount, currency, { cents: false });
   const day = (date: string) => fmt.date(date, { weekday: "short", day: "numeric", month: "short" });
 
-  const describe = (suggestion: PriceSuggestion, night: Night): { title: string; why?: string } => {
-    const s = m.pricing.suggestion;
-    switch (suggestion.kind) {
-      case "align":
-        return suggestion.direction === "raise"
-          ? {
-              title: s.raise(fmt.money(suggestion.target, currency, { cents: false })),
-              why: s.raiseWhy(fmt.money(night.airbnbNet ?? 0, currency, { cents: false })),
-            }
-          : { title: s.lower(fmt.money(suggestion.target, currency, { cents: false })), why: s.lowerWhy };
-      case "lastMinute":
-        return { title: s.lastMinute(fmt.percent(suggestion.percent)) };
-      case "orphan":
-        return { title: s.orphan(suggestion.nights) };
-      case "belowHistory":
-        return { title: s.belowHistory(fmt.money(suggestion.earned, currency, { cents: false })) };
-    }
-  };
+  const describe = await suggestionText(currency);
 
   return (
     <Card>
-      <div className="border-b border-line px-4 py-3">
-        <SectionTitle>{t.title}</SectionTitle>
-      </div>
       <div className="relative overflow-x-auto">
         <table className="w-full text-left tabular-nums">
           <thead className="text-xs text-muted">
@@ -429,9 +520,6 @@ async function NightTable({ pricing, currency }: { pricing: Pricing; currency: s
                   </span>
                 </th>
               ))}
-              <th scope="col" className="px-3 py-2 text-right font-medium">
-                {t.keep}
-              </th>
               <th scope="col" className="px-3 py-2 text-right font-medium">
                 {t.gap}
               </th>
@@ -449,7 +537,7 @@ async function NightTable({ pricing, currency }: { pricing: Pricing; currency: s
                       ? day(row.first.date)
                       : t.range(day(row.first.date), day(row.last.date))}
                   </td>
-                  <td colSpan={5} className="px-3 py-2 text-xs">
+                  <td colSpan={4} className="px-3 py-2 text-xs">
                     {t.taken[row.first.takenBy!]}, {m.common.count.nights(row.nights)}
                   </td>
                 </tr>
@@ -492,15 +580,6 @@ async function FreeNight({
       </td>
       <td className="px-3 py-2 text-right">{money(night.airbnb)}</td>
       <td className="px-3 py-2 text-right">{money(night.booking)}</td>
-      <td className="px-3 py-2 text-right text-xs whitespace-nowrap text-muted">
-        {priced ? (
-          <>
-            {money(night.airbnbNet)} / {money(night.bookingNet)}
-          </>
-        ) : (
-          m.pricing.table.noPrice
-        )}
-      </td>
       <td
         className={cn(
           "px-3 py-2 text-right whitespace-nowrap",
@@ -508,7 +587,7 @@ async function FreeNight({
         )}
       >
         {night.gap == null ? (
-          <span className="text-faint">–</span>
+          <span className="text-xs text-faint">{priced ? "–" : m.pricing.table.noPrice}</span>
         ) : (
           <>
             {night.gap > 0 ? "+" : night.gap < 0 ? "−" : ""}
@@ -533,8 +612,7 @@ async function Notes({ pricing }: { pricing: Pricing }) {
   const t = m.pricing.notes;
   return (
     <Card className="p-5">
-      <SectionTitle>{t.title}</SectionTitle>
-      <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed text-muted">
+      <ul className="list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed text-muted">
         <li>
           {t.fees(
             fmt.percent(pricing.fees.airbnb),

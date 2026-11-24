@@ -150,6 +150,37 @@ export function summariseMonth(month: Month, stays: Stay[], charges: Cost[], rat
   };
 }
 
+/**
+ * One year from its twelve months. The result has the shape of a month's
+ * summary, with the year ("2026") where the month would be.
+ */
+export function summariseYear(year: string, stays: Stay[], charges: Cost[], rates: Rate[]): MonthSummary {
+  const months = Array.from({ length: 12 }, (_, i) =>
+    summariseMonth(`${year}-${String(i + 1).padStart(2, "0")}`, stays, charges, rates),
+  );
+  const sum = (pick: (summary: MonthSummary) => number) =>
+    months.reduce((total, summary) => total + pick(summary), 0);
+  const bookedNights = sum((summary) => summary.bookedNights);
+  const availableNights = sum((summary) => summary.availableNights);
+  const lines = new Map<number, MonthSummary["chargeLines"][number]>();
+  for (const line of months.flatMap((summary) => summary.chargeLines)) {
+    const known = lines.get(line.id);
+    lines.set(line.id, known ? { ...known, amount: known.amount + line.amount } : line);
+  }
+  return {
+    month: year,
+    gross: sum((summary) => summary.gross),
+    estimated: sum((summary) => summary.estimated),
+    charges: sum((summary) => summary.charges),
+    net: sum((summary) => summary.net),
+    chargeLines: [...lines.values()],
+    bookedNights,
+    availableNights,
+    occupancy: availableNights > 0 ? bookedNights / availableNights : 0,
+    arrivals: sum((summary) => summary.arrivals),
+  };
+}
+
 /** Share of nights booked in the `days` days starting at `from`, per property. */
 export function occupancyAhead(propertyId: number, stays: Stay[], from: ISODate, days: number): number {
   const to = addDays(from, days);

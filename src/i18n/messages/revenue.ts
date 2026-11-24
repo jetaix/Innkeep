@@ -25,6 +25,18 @@ const en = {
     nights: "Nights",
     occupancy: "Occupancy",
   },
+  view: { label: "View", months: "By month", years: "By year" },
+  years: {
+    title: "Net revenue by year",
+    /** "2026: €12,000 revenue, €3,000 costs, of which €400 is estimated from nightly rates." */
+    summary: (year: string, revenue: string, costs: string, estimated: string | null): string =>
+      `${year}: ${revenue} revenue, ${costs} costs${
+        estimated ? `, of which ${estimated} is estimated from nightly rates` : ""
+      }.`,
+    year: "Year",
+    stays: "Stays",
+    inProgress: "so far and booked",
+  },
   costsIn: (month: string) => `Costs in ${month}`,
   charges: {
     title: "Charges, fees and subscriptions",
@@ -99,6 +111,17 @@ const fr: typeof en = {
     net: "Net",
     nights: "Nuits",
     occupancy: "Taux d’occupation",
+  },
+  view: { label: "Vue", months: "Par mois", years: "Par an" },
+  years: {
+    title: "Revenu net par an",
+    summary: (year, revenue, costs, estimated) =>
+      `${year} : ${revenue} de revenus, ${costs} de coûts${
+        estimated ? `, dont ${estimated} estimés d’après le prix par nuit` : ""
+      }.`,
+    year: "Année",
+    stays: "Séjours",
+    inProgress: "réalisé et réservé à ce jour",
   },
   costsIn: (month) => `Charges de ${month}`,
   charges: {

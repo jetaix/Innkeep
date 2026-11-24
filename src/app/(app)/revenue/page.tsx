@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { ConfirmButton, SubmitButton } from "@/components/ui/actions";
+import { buttonClass } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { Card, EmptyState, PageHeader, SectionTitle } from "@/components/ui/primitives";
 import { Loading } from "@/components/ui/loading";
@@ -9,63 +11,101 @@ import { CHARGE_CATEGORIES, CHARGE_FREQUENCIES, type Charge, type Property } fro
 import { addCharge, deleteCharge } from "@/features/revenue/actions";
 import { formatMonth } from "@/features/revenue/compute";
 import { MonthChart } from "@/features/revenue/month-chart";
-import { getRevenue } from "@/features/revenue/queries";
+import { getRevenue, getRevenueYears } from "@/features/revenue/queries";
 import { INTL_LOCALE } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
+import { cn } from "@/lib/cn";
 import { today } from "@/lib/dates";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).m.revenue.title };
 }
 
-export default async function RevenuePage() {
+export default async function RevenuePage({ searchParams }: PageProps<"/revenue">) {
   const t = (await getI18n()).m.revenue;
   return (
     <>
       <PageHeader title={t.title} description={t.description} />
       <Suspense fallback={<Loading />}>
-        <Revenue />
+        <Revenue searchParams={searchParams} />
       </Suspense>
     </>
   );
 }
 
-async function Revenue() {
+const REVENUE_VIEWS = ["months", "years"] as const;
+
+async function Revenue({ searchParams }: Pick<PageProps<"/revenue">, "searchParams">) {
   await connection();
   const { locale, m, fmt } = await getI18n();
   const t = m.revenue;
-  const { currency, current, summaries, thisMonth, charges, properties } = await getRevenue({
-    monthsBack: 12,
-  });
+  const view = (await searchParams).view === "years" ? "years" : "months";
+  const byYear = view === "years";
+  const { currency, charges, properties, ...data } = byYear
+    ? await getRevenueYears()
+    : await getRevenue({ monthsBack: 12 });
   if (properties.length === 0) {
     return <EmptyState title={t.empty.title}>{t.empty.body}</EmptyState>;
   }
+  const { current, summaries } = data;
+  // The month or year we are in: its figures head the card and its costs are listed.
+  const thisMonth = summaries.find((summary) => summary.month === current) ?? summaries[0];
   const money = (value: number) => fmt.money(value, currency, { cents: false });
-  const monthName = (month: string) => formatMonth(month, "long", INTL_LOCALE[locale]);
+  const monthName = (month: string) => (byYear ? month : formatMonth(month, "long", INTL_LOCALE[locale]));
 
   return (
     <div className="grid grid-cols-1 max-w-6xl items-start gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
       <div className="space-y-6">
         <Card>
-          <div className="border-b border-line px-4 py-3">
-            <SectionTitle>{t.months.title}</SectionTitle>
-            <p className="mt-0.5 text-xs text-muted">
-              {t.months.summary(
-                monthName(current),
-                money(thisMonth.gross),
-                money(thisMonth.charges),
-                thisMonth.estimated > 0 ? money(thisMonth.estimated) : null,
-              )}
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-4 py-3">
+            <div className="min-w-0">
+              <SectionTitle>{byYear ? t.years.title : t.months.title}</SectionTitle>
+              <p className="mt-0.5 text-xs text-muted">
+                {(byYear ? t.years : t.months).summary(
+                  monthName(current),
+                  money(thisMonth.gross),
+                  money(thisMonth.charges),
+                  thisMonth.estimated > 0 ? money(thisMonth.estimated) : null,
+                )}
+              </p>
+            </div>
+            <nav aria-label={t.view.label} className="flex">
+              {REVENUE_VIEWS.map((option, index) => (
+                <Link
+                  key={option}
+                  href={option === "months" ? "/revenue" : `/revenue?view=${option}`}
+                  aria-current={option === view ? "page" : undefined}
+                  className={buttonClass(
+                    { size: "sm" },
+                    cn(
+                      index === 0 ? "rounded-r-none" : "-ml-px rounded-l-none",
+                      option === view && "bg-sunken font-semibold",
+                    ),
+                  )}
+                >
+                  {t.view[option]}
+                </Link>
+              ))}
+            </nav>
           </div>
-          <MonthChart summaries={summaries} current={current} currency={currency} />
+          <MonthChart
+            summaries={summaries}
+            current={current}
+            currency={currency}
+            unit={byYear ? "year" : "month"}
+          />
           <div className="relative overflow-x-auto border-t border-line">
             <table className="w-full text-left tabular-nums">
               <thead className="text-xs text-muted">
                 <tr>
                   <th scope="col" className="px-4 py-2 font-medium">
-                    {t.months.month}
+                    {byYear ? t.years.year : t.months.month}
                   </th>
+                  {byYear && (
+                    <th scope="col" className="px-3 py-2 text-right font-medium">
+                      {t.years.stays}
+                    </th>
+                  )}
                   <th scope="col" className="px-3 py-2 text-right font-medium">
                     {t.months.revenue}
                   </th>
@@ -88,7 +128,11 @@ async function Revenue() {
                   <tr key={summary.month} className={summary.month === current ? "bg-subtle" : undefined}>
                     <th scope="row" className="px-4 py-2 font-medium whitespace-nowrap">
                       {t.months.label(monthName(summary.month))}
+                      {byYear && summary.month === current && (
+                        <span className="block text-xs font-normal text-muted">{t.years.inProgress}</span>
+                      )}
                     </th>
+                    {byYear && <td className="px-3 py-2 text-right text-muted">{summary.arrivals}</td>}
                     <td className="px-3 py-2 text-right">{money(summary.gross)}</td>
                     <td className="px-3 py-2 text-right text-muted">{money(summary.charges)}</td>
                     <td
