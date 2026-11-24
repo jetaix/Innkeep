@@ -31,7 +31,15 @@ export function Modal({
 
   return (
     <>
-      <Button className={className} {...style} onClick={() => dialog.current?.showModal()}>
+      <Button
+        className={className}
+        {...style}
+        onClick={() => {
+          dialog.current?.showModal();
+          // Start in the form, not on the close button.
+          dialog.current?.querySelector<HTMLElement>("input:not([type=hidden]), select, textarea")?.focus();
+        }}
+      >
         {label}
       </Button>
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: the keyboard closes it with Escape or the close button */}
