@@ -3,7 +3,15 @@
 import { and, eq } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { cleanerAssignments, cleaners, cleanings, CLEANING_STATUSES, getDb, properties } from "@/db";
+import {
+  CLEANING_REQUESTS,
+  CLEANING_STATUSES,
+  cleanerAssignments,
+  cleaners,
+  cleanings,
+  getDb,
+  properties,
+} from "@/db";
 import { MESSAGES } from "@/i18n/messages";
 import { isoDate, parseForm, text } from "@/lib/form";
 import { findTelegramChats, sendTelegram, type TelegramChat } from "@/lib/telegram";
@@ -78,6 +86,16 @@ export async function setCleaningStatus(propertyId: number, date: string, status
     status: parsed.data.status,
     doneAt: parsed.data.status === "done" ? Date.now() : null,
   });
+  refresh();
+}
+
+/** Records where the host stands with the cleaner: not asked, waiting for an answer, or agreed. */
+export async function setCleaningRequest(propertyId: number, date: string, request: string) {
+  const parsed = z
+    .object({ ...day.shape, request: z.enum(CLEANING_REQUESTS) })
+    .safeParse({ propertyId, date, request });
+  if (!parsed.success) return;
+  await upsertCleaning(parsed.data.propertyId, parsed.data.date, { request: parsed.data.request });
   refresh();
 }
 

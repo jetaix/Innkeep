@@ -334,6 +334,9 @@ export type CleanerAssignment = typeof cleanerAssignments.$inferSelect;
 
 export const CLEANING_STATUSES = ["pending", "done", "skipped"] as const;
 export type CleaningStatus = (typeof CLEANING_STATUSES)[number];
+/** Where the host stands with the cleaner for one cleaning: not asked, asked and waiting, or agreed. */
+export const CLEANING_REQUESTS = ["none", "asked", "confirmed"] as const;
+export type CleaningRequest = (typeof CLEANING_REQUESTS)[number];
 
 /**
  * What the host recorded about one cleaning day of a property. Cleanings
@@ -357,6 +360,7 @@ export const cleanings = sqliteTable(
     doneAt: integer("done_at"),
     /** When the host was told on Telegram that this cleaning is needed; null if they were not. */
     notifiedAt: integer("notified_at"),
+    request: text("request").$type<CleaningRequest>().notNull().default("none"),
   },
   (t) => [uniqueIndex("cleanings_day").on(t.propertyId, t.date)],
 );

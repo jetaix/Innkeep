@@ -50,7 +50,7 @@ export function buildSuggestions(
   const suggestions: Suggestion[] = [];
   const nameOf = (propertyId: number) => properties.find((p) => p.id === propertyId)?.name ?? t.aProperty;
   const calendarAt = (date: ISODate, id?: number) =>
-    `/calendar?start=${addDays(date, -3)}${id ? `&r=${id}` : ""}`;
+    `/calendar?view=weeks&start=${addDays(date, -3)}${id ? `&r=${id}` : ""}`;
 
   for (const property of properties) {
     const own = stays

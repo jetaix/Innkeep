@@ -40,7 +40,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/calendar">, "searchPa
   const t = m.calendar;
   const params = await searchParams;
   const now = today();
-  const view: View = isView(params.view) ? params.view : "weeks";
+  const view: View = isView(params.view) ? params.view : "month";
   const asked = isISODate(params.start) ? params.start : null;
   // Each view starts where it reads best: a few days back, the first of the month, the first of January.
   const start =
@@ -83,7 +83,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/calendar">, "searchPa
   const failing = feeds.filter((listing) => listing.lastSyncError).length;
 
   const href = (extra: Record<string, string> = {}, from = start, as: View = view) =>
-    `/calendar?${new URLSearchParams({ ...(as === "weeks" ? {} : { view: as }), start: from, ...extra })}`;
+    `/calendar?${new URLSearchParams({ ...(as === "month" ? {} : { view: as }), start: from, ...extra })}`;
   const closeHref = href();
 
   const selected = params.r ? stays.find((stay) => stay.id === Number(params.r)) : undefined;
@@ -151,7 +151,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/calendar">, "searchPa
             <ChevronLeft aria-hidden />
           </Link>
           <Link
-            href={view === "weeks" ? "/calendar" : `/calendar?view=${view}`}
+            href={view === "month" ? "/calendar" : `/calendar?view=${view}`}
             data-shortcut="t"
             title={t.header.withKey(t.header.today, "T")}
             className={buttonClass({}, "-ml-px rounded-none")}

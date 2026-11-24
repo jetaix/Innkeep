@@ -42,6 +42,7 @@ const record = (propertyId: number, date: string, extra: Partial<CleaningRecord>
   manual: false,
   doneAt: null,
   notifiedAt: null,
+  request: "none",
   ...extra,
 });
 

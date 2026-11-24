@@ -16,6 +16,7 @@ const entry = (extra: Partial<Cleaning> = {}): Cleaning => ({
   sameDay: true,
   hours: 6,
   status: "pending",
+  request: "none",
   notes: "",
   cleaner: { id: 1, name: "Sandrine", phone: "", createdAt: 0 },
   reassigned: false,

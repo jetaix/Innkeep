@@ -6,8 +6,9 @@ import { AutoSubmitSelect, PrintButton } from "@/components/ui/auto-submit";
 import { buttonClass } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { Loading } from "@/components/ui/loading";
+import { Modal } from "@/components/ui/modal";
 import { Badge, Card, EmptyState, PageHeader, SectionTitle } from "@/components/ui/primitives";
-import type { Cleaner, Property } from "@/db/schema";
+import { CLEANING_REQUESTS, type Cleaner, type Property } from "@/db/schema";
 import {
   addCleaner,
   addManualCleaning,
@@ -15,6 +16,7 @@ import {
   deleteCleaner,
   removeManualCleaning,
   setCleaningEnabled,
+  setCleaningRequest,
   setCleaningStatus,
   updateCleaning,
 } from "@/features/cleaning/actions";
@@ -85,7 +87,37 @@ async function CleaningView() {
             {nobody > 0 && <Badge tone="warn">{t.summary.unassigned(nobody)}</Badge>}
             {clashes > 0 && <Badge tone="critical">{t.summary.clashes(clashes)}</Badge>}
           </p>
-          <div className="flex flex-wrap items-center gap-2" title={t.share.hint}>
+          <div className="flex flex-wrap items-center gap-2">
+            <Modal
+              label={t.manual.open}
+              title={t.manual.title}
+              description={t.manual.hint}
+              variant="primary"
+              size="sm"
+            >
+              <form action={addManualCleaning} className="space-y-3">
+                {properties.length > 1 ? (
+                  <Field label={t.manual.property} htmlFor="manual-property">
+                    <Select id="manual-property" name="propertyId" defaultValue={properties[0].id}>
+                      {properties.map((property) => (
+                        <option key={property.id} value={property.id}>
+                          {property.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                ) : (
+                  <input type="hidden" name="propertyId" value={properties[0].id} />
+                )}
+                <Field label={t.manual.date} htmlFor="manual-date">
+                  <Input id="manual-date" name="date" type="date" required defaultValue={today} min={today} />
+                </Field>
+                <Field label={t.manual.notes} htmlFor="manual-notes">
+                  <Input id="manual-notes" name="notes" maxLength={500} />
+                </Field>
+                <SubmitButton>{t.manual.submit}</SubmitButton>
+              </form>
+            </Modal>
             <CopyButton value={shareText} label={t.share.copy} />
             <PrintButton className={buttonClass({ size: "sm" })}>{t.share.print}</PrintButton>
           </div>
@@ -123,37 +155,23 @@ async function CleaningView() {
       </div>
 
       <div className="space-y-6 print:hidden">
-        <Card className="p-5">
-          <SectionTitle>{t.manual.title}</SectionTitle>
-          <p className="mt-0.5 mb-3 text-xs text-muted">{t.manual.hint}</p>
-          <form action={addManualCleaning} className="space-y-3">
-            {properties.length > 1 ? (
-              <Field label={t.manual.property} htmlFor="manual-property">
-                <Select id="manual-property" name="propertyId" defaultValue={properties[0].id}>
-                  {properties.map((property) => (
-                    <option key={property.id} value={property.id}>
-                      {property.name}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            ) : (
-              <input type="hidden" name="propertyId" value={properties[0].id} />
-            )}
-            <Field label={t.manual.date} htmlFor="manual-date">
-              <Input id="manual-date" name="date" type="date" required defaultValue={today} min={today} />
-            </Field>
-            <Field label={t.manual.notes} htmlFor="manual-notes">
-              <Input id="manual-notes" name="notes" maxLength={500} />
-            </Field>
-            <SubmitButton>{t.manual.submit}</SubmitButton>
-          </form>
-        </Card>
-
         <Card>
-          <div className="border-b border-line px-5 py-3">
-            <SectionTitle>{t.team.title}</SectionTitle>
-            <p className="mt-0.5 text-xs text-muted">{t.team.hint}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-3">
+            <div className="min-w-0">
+              <SectionTitle>{t.team.title}</SectionTitle>
+              <p className="mt-0.5 text-xs text-muted">{t.team.hint}</p>
+            </div>
+            <Modal label={t.team.add} title={t.team.add} size="sm">
+              <form action={addCleaner} className="space-y-3">
+                <Field label={t.team.name} htmlFor="cleaner-name">
+                  <Input id="cleaner-name" name="name" required maxLength={80} autoComplete="off" />
+                </Field>
+                <Field label={t.team.phone} htmlFor="cleaner-phone">
+                  <Input id="cleaner-phone" name="phone" type="tel" maxLength={40} autoComplete="off" />
+                </Field>
+                <SubmitButton variant="primary">{t.team.add}</SubmitButton>
+              </form>
+            </Modal>
           </div>
           {cleaners.length === 0 ? (
             <p className="px-5 py-4 text-[13px] text-muted">{t.team.none}</p>
@@ -178,20 +196,6 @@ async function CleaningView() {
               ))}
             </ul>
           )}
-          <form
-            action={addCleaner}
-            className="grid grid-cols-1 gap-3 border-t border-line p-5 sm:grid-cols-2"
-          >
-            <Field label={t.team.name} htmlFor="cleaner-name">
-              <Input id="cleaner-name" name="name" required maxLength={80} autoComplete="off" />
-            </Field>
-            <Field label={t.team.phone} htmlFor="cleaner-phone">
-              <Input id="cleaner-phone" name="phone" type="tel" maxLength={40} autoComplete="off" />
-            </Field>
-            <div className="sm:col-span-2">
-              <SubmitButton>{t.team.add}</SubmitButton>
-            </div>
-          </form>
         </Card>
 
         <Card>
@@ -245,11 +249,12 @@ async function CleaningView() {
             })}
           </ul>
         </Card>
-        <p className="px-1 text-xs text-muted">{t.credit}</p>
       </div>
     </div>
   );
 }
+
+const REQUEST_TONE = { none: "neutral", asked: "warn", confirmed: "good" } as const;
 
 async function Row({
   entry,
@@ -285,6 +290,9 @@ async function Row({
             <span className="text-muted">{place.name}</span>
             {entry.status === "done" && <Badge tone="good">{t.done}</Badge>}
             {entry.status === "skipped" && <Badge>{t.skipped}</Badge>}
+            {entry.status === "pending" && (
+              <Badge tone={REQUEST_TONE[entry.request]}>{r.status[entry.request]}</Badge>
+            )}
             {entry.sameDay && entry.status === "pending" && (
               <Badge tone="warn">{cleaningWindow(entry, place, t)}</Badge>
             )}
@@ -370,6 +378,28 @@ async function Row({
           </div>
           <p className="mt-2 text-[13px] leading-relaxed whitespace-pre-line">{request}</p>
           <p className="mt-2 text-xs text-muted">{r.hint}</p>
+          <fieldset className="mt-3 border-t border-line pt-3">
+            <legend className="sr-only">{r.status.label}</legend>
+            <p aria-hidden className="mb-1.5 text-xs font-medium text-muted">
+              {r.status.label}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {CLEANING_REQUESTS.map((option) => (
+                <form
+                  key={option}
+                  action={setCleaningRequest.bind(null, entry.propertyId, entry.date, option)}
+                >
+                  <SubmitButton
+                    size="sm"
+                    variant={option === entry.request ? "primary" : "secondary"}
+                    aria-pressed={option === entry.request}
+                  >
+                    {r.status[option]}
+                  </SubmitButton>
+                </form>
+              ))}
+            </div>
+          </fieldset>
         </div>
       )}
 

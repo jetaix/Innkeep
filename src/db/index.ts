@@ -253,6 +253,10 @@ WHERE channel = 'airbnb'
 ALTER TABLE messages ADD COLUMN external_key TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS messages_external ON messages (conversation_id, external_key);
 `,
+  // 17: whether the cleaner was asked for a cleaning, and whether they agreed
+  `
+ALTER TABLE cleanings ADD COLUMN request TEXT NOT NULL DEFAULT 'none';
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */
