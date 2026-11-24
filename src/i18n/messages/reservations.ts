@@ -26,6 +26,22 @@ const en = {
     profitable: "Profitable",
     loss: "At a loss",
   },
+  view: {
+    label: "View",
+    list: "List",
+    months: "By month",
+  },
+  months: {
+    upcoming: "This month and ahead",
+    past: "Earlier months",
+    /** "67% booked" */
+    booked: (percent: string): string => `${percent} booked`,
+    full: "Fully booked",
+    /** "20 of 30 nights" */
+    nights: (booked: number, available: number): string => `${booked} of ${available} nights`,
+    occupancy: "Share of nights booked",
+    none: "No reservation this month.",
+  },
   groups: {
     now: "Staying now",
     week: "Arriving in the next 7 days",
@@ -79,6 +95,20 @@ const fr: typeof en = {
     net: "Net",
     profitable: "Rentable",
     loss: "À perte",
+  },
+  view: {
+    label: "Vue",
+    list: "Liste",
+    months: "Par mois",
+  },
+  months: {
+    upcoming: "Ce mois-ci et les suivants",
+    past: "Mois précédents",
+    booked: (percent) => `Rempli à ${percent}`,
+    full: "Complet",
+    nights: (booked, available) => `${booked} nuits sur ${available}`,
+    occupancy: "Part des nuits réservées",
+    none: "Aucune réservation ce mois-ci.",
   },
   groups: {
     now: "En cours",
