@@ -41,14 +41,22 @@ export function cleaningLines(entry: Cleaning, place: Property, m: Messages, fmt
 
 /**
  * The message a host sends to ask whether a cleaning is possible: the day in
- * full, the time there is, and the place. Written to be pasted as it is.
+ * full and the time there is. Written to be pasted as it is. The place is
+ * named only when the host has several (`named`): with one, the cleaner knows.
  */
-export function cleaningRequest(entry: Cleaning, place: Property, m: Messages, fmt: Format): string {
+export function cleaningRequest(
+  entry: Cleaning,
+  place: Property,
+  m: Messages,
+  fmt: Format,
+  named = false,
+): string {
   const t = m.cleaning.request;
   const date = fmt.date(entry.date, { weekday: "long", day: "numeric", month: "long" });
+  const name = named ? place.name : null;
   const question = entry.sameDay
-    ? t.between(date, t.time(entry.from), t.time(place.checkInTime), place.name)
-    : t.from(date, t.time(entry.from), place.name);
+    ? t.between(date, t.time(entry.from), t.time(place.checkInTime), name)
+    : t.from(date, t.time(entry.from), name);
   return [
     t.greeting(entry.cleaner?.name ?? null),
     "",
@@ -97,6 +105,8 @@ export function cleaningMessages(input: {
   }
   return {
     summary: blocks.join("\n\n"),
-    requests: needed.map((entry) => cleaningRequest(entry, places.get(entry.propertyId)!, m, fmt)),
+    requests: needed.map((entry) =>
+      cleaningRequest(entry, places.get(entry.propertyId)!, m, fmt, places.size > 1),
+    ),
   };
 }
