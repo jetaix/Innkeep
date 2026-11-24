@@ -1,6 +1,6 @@
 import "server-only";
 import { getDb, listings, nightlyPrices, reviews, type OtaChannel } from "@/db";
-import { getExtensionStatus, getLastUpdate } from "@/features/extension/status";
+import { getExtensionStatus, getLastFullRun, getLastUpdate } from "@/features/extension/status";
 import { aiConfigured } from "@/features/insights/ai";
 import { getAdvice } from "@/features/insights/queries";
 import { getPricing } from "@/features/pricing/queries";
@@ -33,6 +33,12 @@ export type DataSource = {
   error?: string | null;
   /** For guest prices: sample stays checked, out of those proposed. */
   progress?: { done: number; total: number };
+  /**
+   * A full run of the extension has been and gone and this was still never
+   * read: pressing the same button again is unlikely to change that, so it is
+   * said once in the Data section rather than asked for on every page.
+   */
+  tried?: boolean;
   action:
     | { type: "open"; href: string }
     | { type: "sync"; listingId: number }
@@ -47,6 +53,7 @@ export async function getDataSources(now = Date.now()): Promise<DataSource[]> {
   const db = getDb();
   const extension = await getExtensionStatus();
   const extensionReady = extension.state === "ready" || extension.state === "outdated";
+  const lastFullRun = await getLastFullRun();
   const properties = await getProperties();
   const allListings = await db.select().from(listings).all();
   const priceRows = await db.select().from(nightlyPrices).all();
@@ -161,6 +168,7 @@ export async function getDataSources(now = Date.now()): Promise<DataSource[]> {
         state: freshness(pagesAt, "adminPages", now),
         automatic: false,
         progress: pagesSeen.length ? { done: pagesSeen.length, total: pagesSeen.length } : undefined,
+        tried: pagesAt == null && lastFullRun != null && now - lastFullRun > RUN_MS,
         action: !extensionReady
           ? { type: "blocked", reason: "extension" }
           : listing.externalId
@@ -246,10 +254,14 @@ const DAY_MS = 24 * 60 * 60_000;
  * Sources the host can refresh that were never read or are more than a day
  * old, whatever their own limit: the question Innkeep asks when it is opened.
  */
+/** How long a full run can take: until then, a source it has not reached yet is not called unread. */
+const RUN_MS = 10 * 60_000;
+
 export function olderThanADay(sources: DataSource[], now = Date.now()): DataSource[] {
   return sources.filter(
     (source) =>
       !source.automatic &&
+      !source.tried &&
       source.kind !== "advice" &&
       source.action.type !== "blocked" &&
       (source.at == null || now - source.at > DAY_MS),

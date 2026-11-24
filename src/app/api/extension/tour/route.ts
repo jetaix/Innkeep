@@ -1,5 +1,5 @@
 import { consumeRunKey } from "@/features/extension/run";
-import { recordExtension } from "@/features/extension/status";
+import { recordExtension, recordFullRun } from "@/features/extension/status";
 import { tourSteps } from "@/features/extension/tour";
 import { hasBearerToken } from "@/lib/auth";
 
@@ -23,6 +23,7 @@ export async function GET(request: Request) {
   if (key && !keyed)
     return Response.json({ error: "This link has expired. Press the button again." }, { status: 410 });
   const scope = keyed ?? (url.searchParams.get("scope") === "all" ? "all" : "reservations");
+  if (scope === "all") await recordFullRun();
   const origin = process.env.APP_URL?.replace(/\/$/, "") ?? url.origin;
   return Response.json({
     ok: true,
