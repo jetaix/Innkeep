@@ -70,19 +70,30 @@ async function Settings() {
   // On a serverless host a scheduler calls /api/cron; there is no timer to show.
   const hosted = Boolean(process.env.VERCEL);
   const mcpOn = Boolean(process.env.MCP_TOKEN);
-  const mcpConfig = JSON.stringify(
+  const mcpUrl = `${origin}/api/mcp`;
+  const bearer = "Authorization: Bearer YOUR_MCP_TOKEN";
+  const json = (value: unknown) => JSON.stringify(value, null, 2);
+  const mcpSnippets = [
     {
-      mcpServers: {
-        innkeep: {
-          type: "http",
-          url: `${origin}/api/mcp`,
-          headers: { Authorization: "Bearer YOUR_MCP_TOKEN" },
-        },
-      },
+      text: i.mcp.claudeCode,
+      code: `claude mcp add --transport http innkeep ${mcpUrl} --header "${bearer}"`,
     },
-    null,
-    2,
-  );
+    {
+      // Claude Desktop starts servers as local commands: mcp-remote bridges to the HTTP address.
+      text: i.mcp.desktop,
+      code: json({
+        mcpServers: {
+          innkeep: { command: "npx", args: ["-y", "mcp-remote", mcpUrl, "--header", bearer] },
+        },
+      }),
+    },
+    {
+      text: i.mcp.other,
+      code: json({
+        mcpServers: { innkeep: { type: "http", url: mcpUrl, headers: { Authorization: bearer.slice(15) } } },
+      }),
+    },
+  ];
 
   return (
     <div className="grid grid-cols-1 max-w-5xl items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -161,15 +172,27 @@ async function Settings() {
             </Integration>
             <Integration name={i.mcp.name} on={mcpOn} status={state(mcpOn)} variable="MCP_TOKEN">
               {i.mcp.body}
-              <span className="mt-3 block">
-                <span className="mb-1 flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-ink">{i.mcp.config}</span>
-                  <CopyButton value={mcpConfig} />
-                </span>
-                <pre className="relative overflow-x-auto rounded-md border border-line bg-subtle p-3 font-mono text-xs leading-relaxed text-ink">
-                  {mcpConfig}
-                </pre>
-              </span>
+              <span className="mt-3 block text-xs font-medium text-ink">{i.mcp.steps}</span>
+              <ol className="mt-2 list-decimal space-y-3 pl-5 marker:font-medium marker:text-ink">
+                <li>
+                  {mcpOn ? (
+                    i.mcp.tokenSet
+                  ) : (
+                    <>
+                      {i.mcp.token}
+                      <Snippet code="openssl rand -hex 32" />
+                      <span className="mt-2 block">{hosted ? i.mcp.whereHosted : i.mcp.whereSelf}</span>
+                    </>
+                  )}
+                </li>
+                {mcpSnippets.map((snippet) => (
+                  <li key={snippet.text}>
+                    {snippet.text}
+                    <Snippet code={snippet.code} />
+                  </li>
+                ))}
+                <li>{i.mcp.tryIt}</li>
+              </ol>
             </Integration>
           </ul>
           <p className="border-t border-line px-4 py-3 text-xs text-muted">
@@ -238,6 +261,18 @@ function Integration({
       </div>
       <div className="mt-1.5 max-w-[65ch] leading-relaxed text-muted">{children}</div>
     </li>
+  );
+}
+
+/** A command or a piece of configuration to copy as it is. */
+function Snippet({ code }: { code: string }) {
+  return (
+    <span className="mt-1.5 flex items-start gap-2">
+      <pre className="relative min-w-0 flex-1 overflow-x-auto rounded-md border border-line bg-subtle p-2.5 font-mono text-xs leading-relaxed text-ink">
+        {code}
+      </pre>
+      <CopyButton value={code} />
+    </span>
   );
 }
 

@@ -39,7 +39,18 @@ const en = {
     mcp: {
       name: "MCP server",
       body: "Lets an AI assistant read your calendar, revenue and suggestions, and block dates, over the Model Context Protocol.",
-      config: "Client configuration",
+      steps: "How to connect an assistant",
+      /** Step 1, when the token is not set yet. */
+      token: "Create a secret token: a long random text only you know. This command makes one:",
+      tokenSet: "A token is set. It is the value you gave MCP_TOKEN; Innkeep never shows it.",
+      whereHosted:
+        "Add it in Vercel: your project, Settings, Environment Variables, name MCP_TOKEN. Then redeploy.",
+      whereSelf: "Add it to your .env file as MCP_TOKEN, then restart the server.",
+      claudeCode: "Claude Code: run this in a terminal, with your token in place of YOUR_MCP_TOKEN.",
+      desktop:
+        "Claude Desktop: open Settings, Developer, Edit Config, and add this to the file, with your token. Restart Claude Desktop.",
+      other: "Another assistant that accepts an MCP server over HTTP: give it this configuration.",
+      tryIt: "Then ask it: “What are my next arrivals in Innkeep?”",
     },
     /** "Change a variable in your environment or `.env` file and restart the server. The README lists them all." */
     footer: {
@@ -101,7 +112,19 @@ const fr: typeof en = {
     mcp: {
       name: "Serveur MCP",
       body: "Permet à un assistant IA de lire votre calendrier, vos revenus et vos suggestions, et de bloquer des dates, via le Model Context Protocol.",
-      config: "Configuration du client",
+      steps: "Comment connecter un assistant",
+      token:
+        "Créez un jeton secret : un long texte aléatoire que vous seul connaissez. Cette commande en fabrique un :",
+      tokenSet: "Un jeton est défini. C’est la valeur donnée à MCP_TOKEN ; Innkeep ne l’affiche jamais.",
+      whereHosted:
+        "Ajoutez-le dans Vercel : votre projet, Settings, Environment Variables, nom MCP_TOKEN. Puis redéployez.",
+      whereSelf: "Ajoutez-le à votre fichier .env sous le nom MCP_TOKEN, puis redémarrez le serveur.",
+      claudeCode:
+        "Claude Code : lancez ceci dans un terminal, avec votre jeton à la place de YOUR_MCP_TOKEN.",
+      desktop:
+        "Claude Desktop : ouvrez Settings, Developer, Edit Config, et ajoutez ceci au fichier, avec votre jeton. Redémarrez Claude Desktop.",
+      other: "Un autre assistant qui accepte un serveur MCP en HTTP : donnez-lui cette configuration.",
+      tryIt: "Demandez-lui ensuite : « Quelles sont mes prochaines arrivées dans Innkeep ? »",
     },
     footer: {
       beforeFile: "Modifiez une variable dans votre environnement ou dans votre fichier",
