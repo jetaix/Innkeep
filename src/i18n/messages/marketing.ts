@@ -79,7 +79,11 @@ const en = {
     airbnb: "Calendar link, plus your own pages through the extension",
     booking: "Calendar link, plus your own pages through the extension",
     chrome: "Innkeep Companion extension, included",
-    note: "Innkeep is not affiliated with Airbnb, Booking.com or Google. Their names and marks belong to them.",
+    ai: "And with your AI assistant",
+    claude:
+      "Reads your calendar and blocks dates through the MCP server, and writes advice with your own key",
+    chatgpt: "Installs Innkeep with you, from a ready-made request",
+    note: "Innkeep is not affiliated with Airbnb, Booking.com, Google, Anthropic or OpenAI. Their names and marks belong to them.",
   },
   trust: {
     title: "Self-hosted, your bookings stay yours.",
@@ -152,8 +156,8 @@ const en = {
       ] as { tone: "critical" | "warn" | "neutral"; label: string; text: string }[],
     },
     keyboard: {
-      title: "Fast with a keyboard, open to your assistant",
-      body: "Every screen is reachable without a mouse, with a command menu for the rest. A built-in MCP server lets Claude or any other assistant read your calendar and revenue, and block dates when you ask.",
+      title: "Open to your AI assistant",
+      body: "A built-in MCP server lets Claude, or another assistant that accepts one, read your calendar and revenue and block dates when you ask. Claude can also write advice for your listings, and Claude or ChatGPT can install Innkeep with you. Every screen works from the keyboard too.",
       commandMenu: "command menu",
       calendar: "calendar",
       newBooking: "new booking",
@@ -308,7 +312,11 @@ const fr: typeof en = {
     airbnb: "Lien de calendrier, et vos propres pages grâce à l’extension",
     booking: "Lien de calendrier, et vos propres pages grâce à l’extension",
     chrome: "Extension Innkeep Companion, fournie",
-    note: "Innkeep n’a aucun lien avec Airbnb, Booking.com ou Google. Leurs noms et logos leur appartiennent.",
+    ai: "Et avec votre assistant IA",
+    claude:
+      "Lit votre calendrier et bloque des dates grâce au serveur MCP, et rédige des conseils avec votre propre clé",
+    chatgpt: "Installe Innkeep avec vous, à partir d’une demande toute prête",
+    note: "Innkeep n’a aucun lien avec Airbnb, Booking.com, Google, Anthropic ou OpenAI. Leurs noms et logos leur appartiennent.",
   },
   trust: {
     title: "En auto-hébergé, vos réservations restent à vous.",
@@ -384,8 +392,8 @@ const fr: typeof en = {
       ],
     },
     keyboard: {
-      title: "Rapide au clavier, ouvert à votre assistant",
-      body: "Chaque écran est accessible sans souris, et un menu de commandes s’occupe du reste. Un serveur MCP intégré permet à Claude, ou à tout autre assistant, de lire votre calendrier et vos revenus, et de bloquer des dates quand vous le demandez.",
+      title: "Ouvert à votre assistant IA",
+      body: "Un serveur MCP intégré permet à Claude, ou à un autre assistant qui en accepte un, de lire votre calendrier et vos revenus, et de bloquer des dates quand vous le demandez. Claude peut aussi rédiger des conseils pour vos annonces, et Claude ou ChatGPT peuvent installer Innkeep avec vous. Chaque écran fonctionne aussi au clavier.",
       commandMenu: "menu de commandes",
       calendar: "calendrier",
       newBooking: "nouvelle réservation",

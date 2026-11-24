@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoMark } from "@/components/brand/logo";
-import { Badge, Kbd } from "@/components/ui/primitives";
+import { Badge } from "@/components/ui/primitives";
 import { site, siteUrl, takesAccessRequests } from "@/config/site";
 import { AccessForm } from "@/features/marketing/access-form";
 import { CopyRequest } from "@/features/marketing/copy-request";
 import { DemoFilm } from "@/features/marketing/demo-film";
-import { SourceLogo } from "@/features/marketing/source-logos";
+import { SourceLogo, type SourceLogoName } from "@/features/marketing/source-logos";
 import { SiteFooter, SiteHeader, pillClass } from "@/features/marketing/site-chrome";
 import { getI18n } from "@/i18n/server";
 import { cn } from "@/lib/cn";
@@ -89,7 +89,7 @@ export default async function LandingPage() {
             <DemoFilm />
             <div className="mt-10 px-2">
               <h2 className="text-center text-[13px] font-medium text-muted">{t.works.label}</h2>
-              <ul className="mx-auto mt-4 grid max-w-4xl gap-3 sm:grid-cols-3">
+              <ul className="mx-auto mt-4 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3">
                 <WorksWith
                   name="airbnb"
                   label={m.common.sources.airbnb}
@@ -104,6 +104,19 @@ export default async function LandingPage() {
                 />
                 <WorksWith name="chrome" label="Google Chrome" detail={t.works.chrome} tone="text-ink" />
               </ul>
+              <h2 className="mt-8 text-center text-[13px] font-medium text-muted">{t.works.ai}</h2>
+              <ul className="mx-auto mt-4 grid max-w-[40rem] grid-cols-1 gap-3 sm:grid-cols-2">
+                <WorksWith name="claude" label="Claude" detail={t.works.claude} tone="text-ink" />
+                <WorksWith name="chatgpt" label="ChatGPT" detail={t.works.chatgpt} tone="text-ink" />
+              </ul>
+              <p className="mt-4 text-center text-[13px]">
+                <Link
+                  href="/ai"
+                  className="font-medium underline decoration-line-strong underline-offset-4 hover:decoration-ink"
+                >
+                  {f.keyboard.more}
+                </Link>
+              </p>
               <p className="mx-auto mt-5 max-w-[66ch] text-center text-[15px] leading-relaxed text-pretty text-muted">
                 {t.hero.extension}
               </p>
@@ -212,14 +225,11 @@ export default async function LandingPage() {
 
             <Feature title={f.keyboard.title} body={f.keyboard.body} glass="var(--glass-blue)" shape="pill">
               <div className="space-y-4 text-sm">
-                <p className="flex flex-wrap items-center gap-1.5 text-muted">
-                  <Kbd>⌘</Kbd>
-                  <Kbd>K</Kbd> {f.keyboard.commandMenu}
-                  <span className="mx-1 text-faint">/</span>
-                  <Kbd>G</Kbd>
-                  <Kbd>C</Kbd> {f.keyboard.calendar}
-                  <span className="mx-1 text-faint">/</span>
-                  <Kbd>N</Kbd> {f.keyboard.newBooking}
+                <p className="flex flex-wrap items-center gap-x-5 gap-y-2 font-medium">
+                  <span className="flex items-center gap-2">
+                    <SourceLogo name="claude" className="size-5" />
+                    Claude
+                  </span>
                 </p>
                 <p className="border-t border-line pt-4 leading-relaxed">
                   <span className="text-muted">{f.keyboard.you}</span> {f.keyboard.request}
@@ -455,7 +465,7 @@ function WorksWith({
   detail,
   tone,
 }: {
-  name: "airbnb" | "booking" | "chrome";
+  name: SourceLogoName;
   label: string;
   detail: string;
   tone: string;
