@@ -7,7 +7,7 @@ import { MESSAGES } from "@/i18n/messages";
 import { sendTelegram, telegramBot } from "@/lib/telegram";
 import { cleaningNotices } from "./compute";
 import { getCleaning } from "./queries";
-import { getTelegramChat } from "./telegram-chat";
+import { getTelegramChat, rememberMovedChat } from "./telegram-chat";
 import { cleaningMessages } from "./text";
 
 /** Notifications are written outside any request, so their language is a setting, not a cookie. */
@@ -52,7 +52,7 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
     // A first run can find a season of cleanings: a few at a time, so Telegram is not flooded.
     const batch = needed.slice(0, MAX_PER_RUN);
     const { summary, requests } = cleaningMessages({ needed: batch, cancelled, places, m, fmt });
-    await sendTelegram(summary, chat.id);
+    await sendTelegram(summary, chat.id, rememberMovedChat);
     await db.transaction(async (tx) => {
       for (const record of cancelled) {
         await tx
@@ -67,7 +67,7 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
     let told = 0;
     try {
       for (const [index, entry] of batch.entries()) {
-        await sendTelegram(requests[index], chat.id);
+        await sendTelegram(requests[index], chat.id, rememberMovedChat);
         await db
           .insert(cleanings)
           .values({ propertyId: entry.propertyId, date: entry.date, notifiedAt: Date.now() })

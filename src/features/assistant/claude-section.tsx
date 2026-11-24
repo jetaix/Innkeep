@@ -148,7 +148,7 @@ export async function ClaudeSection() {
         <SectionTitle>{t.other.title}</SectionTitle>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">
           {t.other.body}{" "}
-          <Link href="/settings" className="text-ink underline underline-offset-2">
+          <Link href="/settings?tab=assistant" className="text-ink underline underline-offset-2">
             {t.other.link}
           </Link>
           .

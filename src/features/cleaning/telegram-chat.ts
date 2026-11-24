@@ -25,13 +25,39 @@ async function savedChat(): Promise<SavedChat | null> {
   }
 }
 
+/** A chat Telegram gave a new number to: `TELEGRAM_CHAT_ID` cannot be rewritten from here, so the move is kept beside it. */
+const MOVED = "telegram-chat-moved";
+
+async function movedTo(id: string): Promise<string> {
+  const row = await getDb().select().from(appState).where(eq(appState.key, MOVED)).get();
+  if (!row) return id;
+  try {
+    const moved = JSON.parse(row.value) as { from?: unknown; to?: unknown };
+    return moved.from === id && typeof moved.to === "string" && moved.to ? moved.to : id;
+  } catch {
+    return id;
+  }
+}
+
+/** Keeps the number Telegram moved a chat to, so the next message goes straight there. */
+export async function rememberMovedChat(from: string, to: string) {
+  const saved = await savedChat();
+  if (saved?.id === from) await saveTelegramChat({ ...saved, id: to });
+  const value = JSON.stringify({ from, to });
+  await getDb()
+    .insert(appState)
+    .values({ key: MOVED, value })
+    .onConflictDoUpdate({ target: appState.key, set: { value } })
+    .run();
+}
+
 export async function getTelegramChat(): Promise<{
   id: string;
   title: string | null;
   source: "environment" | "saved";
 } | null> {
   if (process.env.TELEGRAM_CHAT_ID) {
-    return { id: process.env.TELEGRAM_CHAT_ID, title: null, source: "environment" };
+    return { id: await movedTo(process.env.TELEGRAM_CHAT_ID), title: null, source: "environment" };
   }
   const saved = await savedChat();
   return saved ? { ...saved, source: "saved" } : null;

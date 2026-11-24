@@ -2,6 +2,15 @@
 const en = {
   title: "Settings",
   description: "Innkeep is configured with environment variables on the server. This page shows what is on.",
+  tabs: {
+    label: "Settings sections",
+    general: "General",
+    connections: "Connections",
+    assistant: "AI assistant (MCP)",
+    data: "Data",
+    /** Heading of the password card, in General. */
+    access: "Access",
+  },
   appearance: {
     title: "Appearance",
     themeHelp: "Remembered in this browser.",
@@ -75,6 +84,14 @@ const fr: typeof en = {
   title: "Réglages",
   description:
     "Innkeep se configure avec des variables d’environnement sur le serveur. Cette page montre ce qui est activé.",
+  tabs: {
+    label: "Sections des réglages",
+    general: "Général",
+    connections: "Connexions",
+    assistant: "Assistant IA (MCP)",
+    data: "Données",
+    access: "Accès",
+  },
   appearance: {
     title: "Apparence",
     themeHelp: "Mémorisé dans ce navigateur.",

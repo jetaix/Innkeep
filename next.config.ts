@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/assistant", destination: "/suggestions#claude", permanent: false },
-      { source: "/data", destination: "/settings#data", permanent: false },
+      { source: "/data", destination: "/settings?tab=data", permanent: false },
     ];
   },
   async headers() {
