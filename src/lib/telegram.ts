@@ -44,9 +44,22 @@ export function requestJson(url: URL, body?: unknown, timeoutMs = 10_000): Promi
         });
       },
     );
+    // How far the request got, so a failure says where it stopped instead of only that it did.
+    let reached = "could not find its address";
+    request.on("socket", (socket) => {
+      socket.on("lookup", (_error, address) => {
+        reached = `could not connect to ${address}`;
+      });
+      socket.on("connect", () => {
+        reached = `connected to ${socket.remoteAddress} but the secure link was not set up`;
+      });
+      socket.on("secureConnect", () => {
+        reached = `connected to ${socket.remoteAddress} and sent the request, but got no reply`;
+      });
+    });
     // From the first byte sent to the last received: connecting counts too.
     const deadline = setTimeout(
-      () => request.destroy(new Error("Telegram did not answer in time")),
+      () => request.destroy(new Error(`Telegram did not answer in time: ${reached}`)),
       timeoutMs,
     );
     request.on("error", (cause) => {
