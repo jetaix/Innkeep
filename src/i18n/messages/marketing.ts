@@ -125,6 +125,14 @@ const en = {
       synced: (ago: string) => `Synced ${ago}`,
       shared: "Shared with both",
     },
+    cleaning: {
+      title: "Every check-out becomes a cleaning",
+      body: "Innkeep plans a cleaning after each stay and shows how long there is before the next guest arrives, and who does it. With Telegram set up, a message tells you each time one has to be arranged, followed by a request worded for your cleaner, ready to forward. No guest names in it.",
+      cleaner: "Marie",
+      message: "Message for the cleaner",
+      request: (place: string, day: string, from: string, until: string) =>
+        `Hello Marie, can you clean ${place} on ${day} between ${from} and ${until}?`,
+    },
     money: {
       title: "Know what a month is really worth",
       body: "Enter cleaning, commission, subscriptions and one-off bills once. Every month then shows revenue, costs and what is left, including bookings that have not been paid out yet.",
@@ -344,6 +352,14 @@ const fr: typeof en = {
       direct: "Réservations directes",
       synced: (ago) => `Synchronisé ${ago}`,
       shared: "Partagées avec les deux",
+    },
+    cleaning: {
+      title: "Chaque départ devient un ménage",
+      body: "Innkeep prévoit un ménage après chaque séjour et indique le temps disponible avant l’arrivée suivante, et qui s’en charge. Avec Telegram configuré, un message vous prévient chaque fois qu’un ménage est à organiser, suivi d’une demande rédigée pour la personne qui fait le ménage, prête à transférer. Sans aucun nom de voyageur.",
+      cleaner: "Marie",
+      message: "Message pour le ménage",
+      request: (place, day, from, until) =>
+        `Bonjour Marie, pouvez-vous faire le ménage au ${place} le ${day} entre ${from} et ${until} ?`,
     },
     money: {
       title: "Sachez ce qu’un mois rapporte vraiment",

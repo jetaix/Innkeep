@@ -137,6 +137,46 @@ export default async function LandingPage() {
               </ul>
             </Feature>
 
+            <Feature title={f.cleaning.title} body={f.cleaning.body} glass="var(--glass-blue)" shape="tile">
+              <ul className="divide-y divide-line text-sm">
+                <li className="pb-4">
+                  <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <span className="font-medium">
+                      {fmt.date("2026-11-12", { weekday: "short", day: "numeric", month: "short" })} · Canal
+                      Loft
+                    </span>
+                    <span className="text-[13px] text-good">
+                      {f.cleaning.cleaner} · {m.cleaning.request.status.confirmed}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-[13px] text-muted">{m.cleaning.row.sameDay("11:00", "16:00", 5)}</p>
+                </li>
+                <li className="py-4">
+                  <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <span className="font-medium">
+                      {fmt.date("2026-11-17", { weekday: "short", day: "numeric", month: "short" })} · Harbour
+                      Studio
+                    </span>
+                    <span className="text-[13px] text-warn">{m.cleaning.row.nobody}</span>
+                  </p>
+                  <p className="mt-1 text-[13px] text-muted">
+                    {m.cleaning.row.from("11:00")} · {m.cleaning.row.days(2)}
+                  </p>
+                </li>
+                <li className="pt-4">
+                  <p className="text-[13px] text-muted">{f.cleaning.message}</p>
+                  <p className="mt-1 leading-relaxed">
+                    {f.cleaning.request(
+                      "Canal Loft",
+                      fmt.date("2026-11-12", { weekday: "long", day: "numeric", month: "long" }),
+                      "11:00",
+                      "16:00",
+                    )}
+                  </p>
+                </li>
+              </ul>
+            </Feature>
+
             <Feature title={f.money.title} body={f.money.body} glass="var(--glass-green)" shape="pill">
               <dl className="grid grid-cols-[1fr_auto] gap-y-2.5 text-sm tabular-nums">
                 <dt className="text-muted">{f.money.revenue(m.common.count.nights(28))}</dt>
@@ -158,7 +198,7 @@ export default async function LandingPage() {
               title={f.suggestions.title}
               body={f.suggestions.body}
               glass="var(--overlap)"
-              shape="tile"
+              shape="arch"
             >
               <ul className="space-y-3.5 text-sm">
                 {f.suggestions.rows.map((row) => (
@@ -170,7 +210,7 @@ export default async function LandingPage() {
               </ul>
             </Feature>
 
-            <Feature title={f.keyboard.title} body={f.keyboard.body} glass="var(--glass-blue)" shape="arch">
+            <Feature title={f.keyboard.title} body={f.keyboard.body} glass="var(--glass-blue)" shape="pill">
               <div className="space-y-4 text-sm">
                 <p className="flex flex-wrap items-center gap-1.5 text-muted">
                   <Kbd>⌘</Kbd>
