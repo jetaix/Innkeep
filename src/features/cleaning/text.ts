@@ -58,3 +58,45 @@ export function cleaningRequest(entry: Cleaning, place: Property, m: Messages, f
     t.thanks,
   ].join("\n");
 }
+
+/**
+ * What Telegram is sent about cleanings: first one summary of what is new and
+ * what fell away, then, for each cleaning to arrange, the request itself as a
+ * message of its own, so the host can forward or copy it to the cleaner
+ * without editing anything.
+ */
+export function cleaningMessages(input: {
+  needed: Cleaning[];
+  cancelled: { propertyId: number; date: string }[];
+  places: Map<number, Property>;
+  m: Messages;
+  fmt: Format;
+}): { summary: string; requests: string[] } {
+  const { needed, cancelled, places, m, fmt } = input;
+  const t = m.cleaning.telegram;
+  const blocks: string[] = [];
+  if (needed.length > 0) {
+    blocks.push(
+      [
+        t.needed(needed.length),
+        ...needed.map((entry) => cleaningLines(entry, places.get(entry.propertyId)!, m, fmt).join("\n")),
+        t.requestsFollow(needed.length),
+      ].join("\n\n"),
+    );
+  }
+  if (cancelled.length > 0) {
+    blocks.push(
+      [
+        t.cancelled(cancelled.length),
+        "",
+        ...cancelled.map((record) =>
+          m.cleaning.share.line(cleaningDay(record.date, fmt), places.get(record.propertyId)?.name ?? ""),
+        ),
+      ].join("\n"),
+    );
+  }
+  return {
+    summary: blocks.join("\n\n"),
+    requests: needed.map((entry) => cleaningRequest(entry, places.get(entry.propertyId)!, m, fmt)),
+  };
+}

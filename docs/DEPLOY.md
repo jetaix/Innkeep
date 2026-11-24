@@ -105,7 +105,9 @@ extension and the MCP server.
 Innkeep sends a message each time a cleaning has to be arranged: when a new
 booking brings a new check-out, or when you add a cleaning by hand. It says
 the day, the place, from when it is free and when the next guest arrives,
-without guest names, so you can forward it to your cleaner as it is. If a stay
+without guest names. Right after it comes the request for each cleaning as a
+message of its own, worded for your cleaner ("can you clean on … between … and
+…?"), so you can forward or copy it as it is. If a stay
 you were told about is cancelled or moved, a second message says that
 cleaning is no longer needed.
 

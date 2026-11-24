@@ -8,7 +8,7 @@ import { sendTelegram, telegramBot } from "@/lib/telegram";
 import { cleaningNotices } from "./compute";
 import { getCleaning } from "./queries";
 import { getTelegramChat } from "./telegram-chat";
-import { cleaningDay, cleaningLines } from "./text";
+import { cleaningMessages } from "./text";
 
 /** Notifications are written outside any request, so their language is a setting, not a cookie. */
 export function telegramLocale(): Locale {
@@ -18,10 +18,15 @@ export function telegramLocale(): Locale {
 
 const scope = globalThis as unknown as { __innkeepNotifying?: boolean };
 
+/** Cleanings announced in one run; the rest follow on the next ones. */
+const MAX_PER_RUN = 8;
+
 /**
  * Tells the host on Telegram about each cleaning to arrange, once: when a new
- * check-out appears, or a cleaning is added by hand. A cleaning they were told
- * about that is no longer needed gets a second message. Nothing is recorded
+ * check-out appears, or a cleaning is added by hand. A summary comes first,
+ * then the request for each cleaning as a message of its own, worded for the
+ * cleaner and ready to forward. A cleaning they were told about that is no
+ * longer needed is named in a later summary. Nothing is recorded
  * as told until Telegram accepted the message, so a failed send is retried on
  * the next run.
  */
@@ -42,40 +47,13 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
     const locale = telegramLocale();
     const m = MESSAGES[locale];
     const fmt = createFormat(locale);
-    const t = m.cleaning.telegram;
     const places = new Map(properties.map((property) => [property.id, property]));
 
-    const blocks: string[] = [];
-    if (needed.length > 0) {
-      blocks.push(
-        [
-          t.needed(needed.length),
-          ...needed.map((entry) => cleaningLines(entry, places.get(entry.propertyId)!, m, fmt).join("\n")),
-        ].join("\n\n"),
-      );
-    }
-    if (cancelled.length > 0) {
-      blocks.push(
-        [
-          t.cancelled(cancelled.length),
-          "",
-          ...cancelled.map((record) =>
-            m.cleaning.share.line(cleaningDay(record.date, fmt), places.get(record.propertyId)?.name ?? ""),
-          ),
-        ].join("\n"),
-      );
-    }
-    await sendTelegram(blocks.join("\n\n"), chat.id);
-
-    const now = Date.now();
+    // A first run can find a season of cleanings: a few at a time, so Telegram is not flooded.
+    const batch = needed.slice(0, MAX_PER_RUN);
+    const { summary, requests } = cleaningMessages({ needed: batch, cancelled, places, m, fmt });
+    await sendTelegram(summary, chat.id);
     await db.transaction(async (tx) => {
-      for (const entry of needed) {
-        await tx
-          .insert(cleanings)
-          .values({ propertyId: entry.propertyId, date: entry.date, notifiedAt: now })
-          .onConflictDoUpdate({ target: [cleanings.propertyId, cleanings.date], set: { notifiedAt: now } })
-          .run();
-      }
       for (const record of cancelled) {
         await tx
           .update(cleanings)
@@ -84,7 +62,27 @@ export async function notifyCleanings(): Promise<{ needed: number; cancelled: nu
           .run();
       }
     });
-    return { needed: needed.length, cancelled: cancelled.length };
+
+    // Then each request on its own, ready to forward. One that Telegram refuses is asked again next run.
+    let told = 0;
+    try {
+      for (const [index, entry] of batch.entries()) {
+        await sendTelegram(requests[index], chat.id);
+        await db
+          .insert(cleanings)
+          .values({ propertyId: entry.propertyId, date: entry.date, notifiedAt: Date.now() })
+          .onConflictDoUpdate({
+            target: [cleanings.propertyId, cleanings.date],
+            set: { notifiedAt: Date.now() },
+          })
+          .run();
+        told++;
+      }
+    } catch (cause) {
+      if (told === 0) throw cause;
+      console.error("[innkeep] Telegram stopped part-way through the cleaning requests", cause);
+    }
+    return { needed: told, cancelled: cancelled.length };
   } finally {
     scope.__innkeepNotifying = false;
   }

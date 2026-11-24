@@ -3,7 +3,7 @@ import type { Property } from "@/db/schema";
 import { createFormat } from "@/i18n/format";
 import { MESSAGES } from "@/i18n/messages";
 import type { Cleaning } from "./compute";
-import { cleaningRequest } from "./text";
+import { cleaningMessages, cleaningRequest } from "./text";
 
 const place = { name: "Bastia", checkInTime: "16:00", checkOutTime: "10:00" } as Property;
 const entry = (extra: Partial<Cleaning> = {}): Cleaning => ({
@@ -53,5 +53,37 @@ describe("cleaningRequest", () => {
     expect(cleaningRequest(entry(), place, MESSAGES.en, createFormat("en"))).toContain(
       "Could you confirm that you can clean Bastia on Saturday 23 January, between 10:00 and 16:00?",
     );
+  });
+});
+
+describe("cleaningMessages", () => {
+  const places = new Map([[1, { ...place, id: 1, address: "" } as Property]]);
+  const fr = { m: MESSAGES.fr, fmt: createFormat("fr") };
+
+  it("sends a summary, then one request for each cleaning to arrange", () => {
+    const { summary, requests } = cleaningMessages({
+      needed: [entry(), entry({ date: "2027-01-31", sameDay: false })],
+      cancelled: [],
+      places,
+      ...fr,
+    });
+    expect(summary).toContain("2 ménages à demander");
+    expect(summary).toContain("un par ménage, prêts à transférer");
+    expect(requests).toHaveLength(2);
+    // The request is the cleaner's message and nothing else.
+    expect(requests[0].startsWith("Bonjour Sandrine,")).toBe(true);
+    expect(requests[1]).toContain("le dimanche 31 janvier, à partir de 10 h");
+  });
+
+  it("only names what fell away when nothing new is to arrange", () => {
+    const { summary, requests } = cleaningMessages({
+      needed: [],
+      cancelled: [{ propertyId: 1, date: "2027-02-03" }],
+      places,
+      ...fr,
+    });
+    expect(summary).toContain("Ménage qui n’est plus nécessaire");
+    expect(summary).not.toContain("transférer");
+    expect(requests).toEqual([]);
   });
 });
