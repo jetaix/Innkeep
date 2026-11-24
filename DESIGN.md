@@ -1,185 +1,184 @@
 ---
-
 name: Innkeep
 description: "Tinted glass on a pale mineral ground: the visual system of Innkeep's public pages."
 colors:
-ground: "#f3f4ef"
-subtle: "#eaece4"
-sunken: "#e1e4da"
-line: "#d9dcd1"
-line-strong: "#bfc4b6"
-ink: "#15171c"
-muted: "#555a61"
-faint: "#868b90"
-panel: "#ffffff"
-glass-coral: "#ff5d73"
-glass-blue: "#3d6df2"
-glass-green: "#10a88f"
-overlap: "#4b2bbd"
-overlap-wash: "#ece6ff"
-block: "#8b8f94"
-ground-dark: "#0d0f13"
-subtle-dark: "#14171c"
-sunken-dark: "#1b1f26"
-line-dark: "#252a32"
-line-strong-dark: "#363c46"
-ink-dark: "#eef0ea"
-muted-dark: "#a3a8ae"
-faint-dark: "#6f757c"
-panel-dark: "#171a20"
-glass-coral-dark: "#ff6f83"
-glass-blue-dark: "#5b84ff"
-glass-green-dark: "#1fc2a6"
-overlap-dark: "#b6a2ff"
-overlap-wash-dark: "#251d44"
-block-dark: "#6f757c"
+  ground: "#f3f4ef"
+  subtle: "#eaece4"
+  sunken: "#e1e4da"
+  line: "#d9dcd1"
+  line-strong: "#bfc4b6"
+  ink: "#15171c"
+  muted: "#555a61"
+  faint: "#868b90"
+  panel: "#ffffff"
+  glass-coral: "#ff5d73"
+  glass-blue: "#3d6df2"
+  glass-green: "#10a88f"
+  overlap: "#4b2bbd"
+  overlap-wash: "#ece6ff"
+  block: "#8b8f94"
+  ground-dark: "#0d0f13"
+  subtle-dark: "#14171c"
+  sunken-dark: "#1b1f26"
+  line-dark: "#252a32"
+  line-strong-dark: "#363c46"
+  ink-dark: "#eef0ea"
+  muted-dark: "#a3a8ae"
+  faint-dark: "#6f757c"
+  panel-dark: "#171a20"
+  glass-coral-dark: "#ff6f83"
+  glass-blue-dark: "#5b84ff"
+  glass-green-dark: "#1fc2a6"
+  overlap-dark: "#b6a2ff"
+  overlap-wash-dark: "#251d44"
+  block-dark: "#6f757c"
 typography:
-display:
-fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "6rem"
-fontWeight: 400
-lineHeight: 1
-letterSpacing: "-0.035em"
-headline:
-fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "3.75rem"
-fontWeight: 400
-lineHeight: 1.04
-letterSpacing: "-0.03em"
-title:
-fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "2.25rem"
-fontWeight: 400
-lineHeight: 1.08
-letterSpacing: "-0.025em"
-title-sm:
-fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "1.5rem"
-fontWeight: 400
-lineHeight: 1.25
-letterSpacing: "-0.02em"
-term:
-fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "1.25rem"
-fontWeight: 400
-lineHeight: 1.4
-letterSpacing: "-0.01em"
-lead:
-fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "1.25rem"
-fontWeight: 400
-lineHeight: 1.625
-body:
-fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "0.9375rem"
-fontWeight: 400
-lineHeight: 1.625
-fontFeature: '"ss01", "cv11"'
-prose:
-fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "1.0625rem"
-fontWeight: 400
-lineHeight: 1.7
-label:
-fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "0.8125rem"
-fontWeight: 500
-lineHeight: 1.4
-micro:
-fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
-fontSize: "0.75rem"
-fontWeight: 500
-lineHeight: 1.33
-mono:
-fontFamily: "Geist Mono, ui-monospace, monospace"
-fontSize: "0.8125rem"
-fontWeight: 400
-lineHeight: 2.15
+  display:
+    fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "6rem"
+    fontWeight: 400
+    lineHeight: 1
+    letterSpacing: "-0.035em"
+  headline:
+    fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "3.75rem"
+    fontWeight: 400
+    lineHeight: 1.04
+    letterSpacing: "-0.03em"
+  title:
+    fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.25rem"
+    fontWeight: 400
+    lineHeight: 1.08
+    letterSpacing: "-0.025em"
+  title-sm:
+    fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 400
+    lineHeight: 1.25
+    letterSpacing: "-0.02em"
+  term:
+    fontFamily: "Funnel Display, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: "-0.01em"
+  lead:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 400
+    lineHeight: 1.625
+  body:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.9375rem"
+    fontWeight: 400
+    lineHeight: 1.625
+    fontFeature: '"ss01", "cv11"'
+  prose:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.0625rem"
+    fontWeight: 400
+    lineHeight: 1.7
+  label:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 500
+    lineHeight: 1.4
+  micro:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 500
+    lineHeight: 1.33
+  mono:
+    fontFamily: "Geist Mono, ui-monospace, monospace"
+    fontSize: "0.8125rem"
+    fontWeight: 400
+    lineHeight: 2.15
 rounded:
-key: "4px"
-slab: "12px"
-card: "16px"
-panel: "28px"
-field: "40px"
-pill: "999px"
-arch: "999px 999px 2rem 2rem"
-tile: "22%"
+  key: "4px"
+  slab: "12px"
+  card: "16px"
+  panel: "28px"
+  field: "40px"
+  pill: "999px"
+  arch: "999px 999px 2rem 2rem"
+  tile: "22%"
 spacing:
-gutter: "20px"
-gutter-wide: "32px"
-card-pad: "20px"
-card-pad-wide: "28px"
-field-pad: "48px"
-feature-gap: "96px"
-feature-gap-wide: "144px"
-section: "144px"
-section-wide: "192px"
-container: "72rem"
-measure: "48rem"
+  gutter: "20px"
+  gutter-wide: "32px"
+  card-pad: "20px"
+  card-pad-wide: "28px"
+  field-pad: "48px"
+  feature-gap: "96px"
+  feature-gap-wide: "144px"
+  section: "144px"
+  section-wide: "192px"
+  container: "72rem"
+  measure: "48rem"
 components:
-button-primary:
-backgroundColor: "{colors.ink}"
-textColor: "{colors.panel}"
-typography: "{typography.label}"
-rounded: "{rounded.pill}"
-height: "36px"
-padding: "0 16px"
-button-primary-hover:
-backgroundColor: "color-mix(in oklab, #15171c 86%, #4b2bbd)"
-button-primary-lg:
-backgroundColor: "{colors.ink}"
-textColor: "{colors.panel}"
-typography: "{typography.body}"
-rounded: "{rounded.pill}"
-height: "48px"
-padding: "0 24px"
-button-secondary:
-backgroundColor: "{colors.panel}"
-textColor: "{colors.ink}"
-typography: "{typography.label}"
-rounded: "{rounded.pill}"
-height: "36px"
-padding: "0 16px"
-button-secondary-lg:
-backgroundColor: "{colors.panel}"
-textColor: "{colors.ink}"
-typography: "{typography.body}"
-rounded: "{rounded.pill}"
-height: "48px"
-padding: "0 24px"
-nav-bar:
-backgroundColor: "color-mix(in oklab, #f3f4ef 72%, transparent)"
-textColor: "{colors.muted}"
-typography: "{typography.label}"
-rounded: "{rounded.pill}"
-height: "56px"
-padding: "0 8px 0 20px"
-panel:
-backgroundColor: "{colors.panel}"
-textColor: "{colors.ink}"
-rounded: "{rounded.panel}"
-panel-card:
-backgroundColor: "{colors.panel}"
-textColor: "{colors.ink}"
-rounded: "{rounded.card}"
-padding: "28px"
-field:
-backgroundColor: "color-mix(in oklab, #10a88f 16%, #f3f4ef)"
-textColor: "{colors.ink}"
-rounded: "{rounded.panel}"
-padding: "48px"
-booking-slab:
-backgroundColor: "color-mix(in oklab, #ff5d73 56%, #ffffff)"
-textColor: "{colors.ink}"
-typography: "{typography.micro}"
-rounded: "{rounded.slab}"
-padding: "0 12px"
-clash-chip:
-backgroundColor: "{colors.overlap-wash}"
-textColor: "{colors.overlap}"
-typography: "{typography.micro}"
-rounded: "{rounded.pill}"
-padding: "4px 10px"
+  button-primary:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.panel}"
+    typography: "{typography.label}"
+    rounded: "{rounded.pill}"
+    height: "36px"
+    padding: "0 16px"
+  button-primary-hover:
+    backgroundColor: "color-mix(in oklab, #15171c 86%, #4b2bbd)"
+  button-primary-lg:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.panel}"
+    typography: "{typography.body}"
+    rounded: "{rounded.pill}"
+    height: "48px"
+    padding: "0 24px"
+  button-secondary:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    typography: "{typography.label}"
+    rounded: "{rounded.pill}"
+    height: "36px"
+    padding: "0 16px"
+  button-secondary-lg:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.pill}"
+    height: "48px"
+    padding: "0 24px"
+  nav-bar:
+    backgroundColor: "color-mix(in oklab, #f3f4ef 72%, transparent)"
+    textColor: "{colors.muted}"
+    typography: "{typography.label}"
+    rounded: "{rounded.pill}"
+    height: "56px"
+    padding: "0 8px 0 20px"
+  panel:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+  panel-card:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.card}"
+    padding: "28px"
+  field:
+    backgroundColor: "color-mix(in oklab, #10a88f 16%, #f3f4ef)"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+    padding: "48px"
+  booking-slab:
+    backgroundColor: "color-mix(in oklab, #ff5d73 56%, #ffffff)"
+    textColor: "{colors.ink}"
+    typography: "{typography.micro}"
+    rounded: "{rounded.slab}"
+    padding: "0 12px"
+  clash-chip:
+    backgroundColor: "{colors.overlap-wash}"
+    textColor: "{colors.overlap}"
+    typography: "{typography.micro}"
+    rounded: "{rounded.pill}"
+    padding: "4px 10px"
 ---
 
 # Design System: Innkeep

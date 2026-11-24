@@ -70,6 +70,9 @@ export async function SiteFooter() {
         <Link href="/ai" className="hover:text-ink">
           {m.ai.nav}
         </Link>
+        <Link href="/design" className="hover:text-ink">
+          {m.design.nav}
+        </Link>
         <Link href="/guides" className="hover:text-ink">
           {m.guides.nav}
         </Link>

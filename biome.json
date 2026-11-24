@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!docs/ALTERNATIVES.md", "!docs/store", "!docs/screenshots", "!bun.lock"]
+    "includes": ["**", "!DESIGN.md", "!docs/ALTERNATIVES.md", "!docs/store", "!docs/screenshots", "!bun.lock"]
   },
   "formatter": {
     "indentStyle": "space",

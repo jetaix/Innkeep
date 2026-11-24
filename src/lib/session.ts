@@ -41,3 +41,19 @@ export const recentFailures = (failures: number[], now: number) =>
 
 export const tooManyAttempts = (failures: number[], now: number) =>
   recentFailures(failures, now).length >= MAX_FAILURES;
+
+/**
+ * A public demo. With `PUBLIC_DEMO=1` next to `APP_PASSWORD`, a visitor who
+ * is not signed in no longer meets the sign-in page: they see the public
+ * pages and a read-only dashboard filled with sample bookings, kept apart
+ * from the host's own data. The host signs in at `/login`, which nothing links to.
+ */
+export const publicDemo = () => process.env.PUBLIC_DEMO === "1" && appPassword() != null;
+
+/**
+ * Which data a request sees, set by `src/proxy.ts` on every request and read
+ * by `src/db`. `real` is the host's own; `demo` is the sample data;
+ * `demo-readonly` is the sample data for a request that tries to change something.
+ */
+export type DataScope = "real" | "demo" | "demo-readonly";
+export const DATA_HEADER = "x-innkeep-data";

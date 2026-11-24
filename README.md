@@ -250,7 +250,8 @@ are usually kept private:
 - **What changed, release by release:** [CHANGELOG.md](CHANGELOG.md).
 - **Why each technical choice was made:** [docs/TECH-BENCHMARK.md](docs/TECH-BENCHMARK.md).
 - **Who it is for and what it promises:** [PRODUCT.md](PRODUCT.md).
-- **How it should look:** [DESIGN.md](DESIGN.md).
+- **How it should look:** [DESIGN.md](DESIGN.md), also published on the
+  [website](https://innkeep-seven.vercel.app/design).
 - **How it compares with paid products, with prices and sources:**
   [docs/ALTERNATIVES.md](docs/ALTERNATIVES.md).
 - **What the extension reads from your accounts:**

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoMark } from "@/components/brand/logo";
 import { Badge } from "@/components/ui/primitives";
-import { site, siteUrl, takesAccessRequests } from "@/config/site";
+import { hasPublicDemo, site, siteUrl, takesAccessRequests } from "@/config/site";
 import { AccessForm } from "@/features/marketing/access-form";
 import { CopyRequest } from "@/features/marketing/copy-request";
 import { DemoFilm } from "@/features/marketing/demo-film";
@@ -71,6 +71,17 @@ export default async function LandingPage() {
                   >
                     {t.hero.selfHosted}
                   </a>
+                  {hasPublicDemo && (
+                    <>
+                      {" · "}
+                      <Link
+                        href="/overview"
+                        className="underline decoration-line-strong underline-offset-4 hover:decoration-ink"
+                      >
+                        {m.demo.landing}
+                      </Link>
+                    </>
+                  )}
                 </p>
               </div>
             ) : (

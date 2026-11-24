@@ -59,6 +59,10 @@ Conventions:
   and return plain values, so they are tested without a database.
 - **Schema changes** append a migration to `MIGRATIONS` in `src/db/index.ts`.
   Never edit one that has shipped.
+- **Who sees which data** is decided in `src/proxy.ts` and enforced in
+  `src/db`: only a signed-in host and the API routes listed in `API_ROUTES`
+  reach the host's database. Add a new API route to that list, and keep its
+  own token check.
 - **Money** is stored in minor units (cents). Use `formatMoney` and `parseMoney`.
 - **Colour means something.** The interface is monochrome; the only colours
   are the three booking sources and good / warning / critical. Use the tokens

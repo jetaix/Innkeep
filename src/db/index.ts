@@ -1,7 +1,9 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import fs from "node:fs";
 import path from "node:path";
 import { createClient, type Client, type Transaction } from "@libsql/client";
 import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
+import { DATA_HEADER, type DataScope } from "@/lib/session";
 import * as schema from "./schema";
 
 /**
@@ -314,48 +316,134 @@ function connect(): Client {
 }
 
 /**
- * The client drizzle talks to. Every call first waits for the migrations, so
- * no query can run against an old schema, whoever asks first. Transactions
- * run one at a time: two calendar syncs finishing together would otherwise
- * fight over SQLite's single writer.
+ * Which data a request sees. An Innkeep protected by a password keeps two
+ * databases apart: the host's own, and a demo with sample bookings that lives
+ * in memory. `src/proxy.ts` decides for each request and says so in a header;
+ * nothing else may set it. Someone who is not signed in therefore never
+ * reaches the host's data, whatever page or action they aim at: with
+ * `PUBLIC_DEMO` they see the demo, without it they only ever see the sign-in page.
+ *
+ * - `real`: the host, signed in, and the machines that call the API with a token.
+ * - `demo`: a visitor looking around.
+ * - `demo-readonly`: a visitor trying to change something. Every write is refused.
  */
-function open(): Db {
-  const client = connect();
+
+const forced = new AsyncLocalStorage<DataScope>();
+const seeding = new AsyncLocalStorage<true>();
+
+/** Runs `work` against the given data, whatever the request says. For filling the demo, and for tests. */
+export const withData = <T>(scope: DataScope, work: () => Promise<T>): Promise<T> => forced.run(scope, work);
+
+/** The data the current request sees. Outside a request (a background sync) it is the host's own. */
+export async function dataScope(): Promise<DataScope> {
+  const set = forced.getStore();
+  if (set) return set;
+  // Without a password there is one household and one set of data.
+  if (!process.env.APP_PASSWORD) return "real";
+  let given: string | null;
+  try {
+    const { headers } = await import("next/headers");
+    given = (await headers()).get(DATA_HEADER);
+  } catch {
+    return "real";
+  }
+  // Inside a request, anything the proxy did not mark as the host's own is the demo.
+  return given === "real" ? "real" : given === "demo" ? "demo" : "demo-readonly";
+}
+
+export const isDemo = async () => (await dataScope()) !== "real";
+
+/** Refused in the demo: a visitor may look, not change. */
+export class DemoReadOnlyError extends Error {
+  constructor() {
+    super("This is a demo: changes are not saved.");
+    this.name = "DemoReadOnlyError";
+  }
+}
+
+const READS = /^\s*(?:select|pragma|explain|with)\b/i;
+const sqlOf = (statement: unknown) =>
+  typeof statement === "string" ? statement : String((statement as { sql?: unknown })?.sql ?? "");
+
+/** Whether a call to the client would only read. Exported for its test. */
+export function onlyReads(method: string, args: unknown[]): boolean {
+  if (method === "execute") return READS.test(sqlOf(args[0]));
+  if (method === "batch")
+    return Array.isArray(args[0]) && args[0].every((statement) => READS.test(sqlOf(statement)));
+  return method === "close" || method === "sync";
+}
+
+/**
+ * One database, ready to be queried. Every call first waits for the
+ * migrations, so no query can run against an old schema, whoever asks first.
+ * Transactions run one at a time: two calendar syncs finishing together would
+ * otherwise fight over SQLite's single writer.
+ */
+function lane(client: Client, single: boolean) {
   const ready: Promise<void> = migrate(client);
   // Reported by the first query that awaits it; this only keeps Node from calling it unhandled.
   ready.catch(() => {});
-  // An in-memory database has one connection, so nothing else may run during a transaction.
-  const single = client.protocol === "file" && process.env.DATABASE_PATH === ":memory:";
   let queue: Promise<void> = Promise.resolve();
 
-  const waiting = new Proxy(client, {
+  return async (method: string, args: unknown[]): Promise<unknown> => {
+    const value: unknown = Reflect.get(client, method, client);
+    const call = (): unknown => (value as (...given: unknown[]) => unknown).apply(client, args);
+    await ready;
+    if (method !== "transaction") {
+      // An in-memory database has one connection, so nothing else may run during a transaction.
+      if (single) await queue;
+      return call();
+    }
+    const before = queue;
+    let release = () => {};
+    queue = new Promise((resolve) => (release = resolve));
+    await before;
+    try {
+      return releasing((await call()) as Transaction, release);
+    } catch (error) {
+      release();
+      throw error;
+    }
+  };
+}
+
+type Lane = ReturnType<typeof lane>;
+let demoLane: Lane | undefined;
+let demoFilled: Promise<void> | undefined;
+
+/** The demo: an in-memory database, filled with the sample data the first time it is asked for. */
+async function demo(): Promise<Lane> {
+  demoLane ??= lane(createClient({ url: ":memory:" }), true);
+  if (!seeding.getStore()) {
+    demoFilled ??= seeding.run(true, () =>
+      forced.run("demo", async () => {
+        const { seedDemo } = await import("./seed");
+        await seedDemo();
+      }),
+    );
+    await demoFilled;
+  }
+  return demoLane;
+}
+
+/** The client drizzle talks to: it sends each call to the host's database or to the demo. */
+function open(): Db {
+  const client = connect();
+  const real = lane(client, client.protocol === "file" && process.env.DATABASE_PATH === ":memory:");
+
+  const routing = new Proxy(client, {
     get(target, property) {
       const value: unknown = Reflect.get(target, property, target);
-      if (typeof value !== "function") return value;
-      const call = (args: unknown[]): unknown => value.apply(target, args);
-      if (property !== "transaction") {
-        return async (...args: unknown[]) => {
-          await ready;
-          if (single) await queue;
-          return call(args);
-        };
-      }
+      if (typeof value !== "function" || typeof property !== "string") return value;
       return async (...args: unknown[]) => {
-        await ready;
-        const before = queue;
-        let release = () => {};
-        queue = new Promise((resolve) => (release = resolve));
-        await before;
-        try {
-          return releasing((await call(args)) as Transaction, release);
-        } catch (error) {
-          release();
-          throw error;
-        }
+        const scope = await dataScope();
+        if (scope === "real") return real(property, args);
+        if (scope === "demo-readonly" && !onlyReads(property, args)) throw new DemoReadOnlyError();
+        return (await demo())(property, args);
       };
     },
   });
-  return drizzle(waiting, { schema });
+  return drizzle(routing, { schema });
 }
 
 /** Lets the next transaction start once this one is committed, rolled back or closed. */

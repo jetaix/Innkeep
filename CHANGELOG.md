@@ -9,6 +9,9 @@ minor version may change how things work.
 
 ### Added
 
+- A public demo (`PUBLIC_DEMO=1`): visitors see a read-only dashboard on
+  sample bookings, and the host signs in at `/login` to see their own.
+
 - A new look for the public pages and a redrawn logo: two overlapping doorways.
 - The landing page takes early-access requests for a hosted version, and
   presents the self-hosted one as the second way to use Innkeep.
@@ -21,6 +24,8 @@ minor version may change how things work.
   for the cleaner.
 - Month and year views in the calendar; a view by month and an overview on the
   Reservations page; a view by year on Revenue; filtering reviews by stars.
+- The design file is public: `/design` shows it with its colours and type,
+  and `/design.md` serves the file itself.
 - An AI page on the website: what an assistant can do through the MCP server,
   how to connect one, and where it stops.
 - A button to download the browser extension as a ZIP from the Extension page.
@@ -39,6 +44,10 @@ minor version may change how things work.
 - Guest messaging. Messages are read and answered on each platform.
 
 ### Fixed
+
+- With a password set, a request from someone not signed in could be aimed at
+  the sign-in page to run a save against the host's data. Such requests now
+  only ever see the sample data.
 
 - The extension refused pages opened from Innkeep, and could loop on
   Booking.com's sign-in page.

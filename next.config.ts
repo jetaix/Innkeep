@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  // The design page and its Markdown twin read this file when they are served.
+  outputFileTracingIncludes: { "/design": ["./DESIGN.md"], "/design.md": ["./DESIGN.md"] },
   // Sent with every page. The referrer policy keeps sending the origin, which
   // the browser extension uses to recognise a tab opened from Innkeep.
   // Pages that became sections of another page: old links and bookmarks still land in the right place.

@@ -17,7 +17,12 @@ export const landingOnly = process.env.LANDING_ONLY === "1";
  * The public website presents the hosted version and takes early-access
  * requests for it. A copy of Innkeep running for a host shows the dashboard instead.
  */
-export const takesAccessRequests = landingOnly;
+export const takesAccessRequests =
+  landingOnly || (process.env.PUBLIC_DEMO === "1" && Boolean(process.env.APP_PASSWORD));
+
+/** True when visitors who are not signed in get a dashboard on sample data (see `publicDemo` in `lib/session`). */
+export const hasPublicDemo =
+  !landingOnly && process.env.PUBLIC_DEMO === "1" && Boolean(process.env.APP_PASSWORD);
 
 /** The public address of this instance. On Vercel the production address is known without configuration. */
 export const siteUrl = (

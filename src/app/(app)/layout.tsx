@@ -7,7 +7,9 @@ import { CommandMenu } from "@/components/shell/command-menu";
 import { SidebarNav } from "@/components/shell/sidebar";
 import { getSuggestions } from "@/features/insights/queries";
 import { ConfirmButton } from "@/components/ui/actions";
+import { isDemo } from "@/db";
 import { hasSampleData } from "@/db/seed";
+import { DemoGuard } from "@/features/demo/demo-guard";
 import { removeSampleDataAction, syncAllAction, syncIfStale } from "@/features/properties/actions";
 import { KeepFresh } from "@/components/shell/keep-fresh";
 import { LanguageSwitch, ThemeSwitch } from "@/components/shell/preferences";
@@ -23,7 +25,11 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const { m } = await getI18n();
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
-      <KeepFresh syncIfStale={syncIfStale} />
+      <Suspense>
+        <HostOnly>
+          <KeepFresh syncIfStale={syncIfStale} />
+        </HostOnly>
+      </Suspense>
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-ink focus:px-3 focus:py-2 focus:text-inverse"
@@ -54,18 +60,56 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <Suspense>
+          <DemoBanner />
+        </Suspense>
+        <Suspense>
           <SampleDataBanner />
         </Suspense>
         <Suspense>
-          <UpdatePrompt />
+          <HostOnly>
+            <UpdatePrompt />
+          </HostOnly>
         </Suspense>
         <main id="main" className="min-w-0 flex-1 px-4 pt-6 pb-20 md:px-8">
           {children}
         </main>
         <Suspense>
-          <ExtensionSetupButton />
+          <HostOnly>
+            <ExtensionSetupButton />
+          </HostOnly>
         </Suspense>
       </div>
+    </div>
+  );
+}
+
+/** Leaves out, in the public demo, what only makes sense for the host: syncing, the extension, updates. */
+async function HostOnly({ children }: { children: React.ReactNode }) {
+  await connection();
+  return (await isDemo()) ? null : children;
+}
+
+/** Tells a visitor of the public demo what they are looking at, and stops their forms politely. */
+async function DemoBanner() {
+  await connection();
+  if (!(await isDemo())) return null;
+  const { m } = await getI18n();
+  return (
+    <div
+      role="status"
+      data-demo
+      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line bg-subtle px-4 py-2 text-[13px] md:px-8"
+    >
+      <p>{m.demo.banner}</p>
+      <p className="flex flex-wrap gap-x-4">
+        <Link href="/#access" className="font-medium underline underline-offset-2">
+          {m.demo.access}
+        </Link>
+        <Link href="/" className="text-muted underline underline-offset-2 hover:text-ink">
+          {m.demo.back}
+        </Link>
+      </p>
+      <DemoGuard />
     </div>
   );
 }
@@ -73,7 +117,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 /** Shown on every page while sample data is loaded, so it is never mistaken for real bookings. */
 async function SampleDataBanner() {
   await connection();
-  if (!(await hasSampleData())) return null;
+  if ((await isDemo()) || !(await hasSampleData())) return null;
   const { m } = await getI18n();
   return (
     <div

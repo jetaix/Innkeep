@@ -96,6 +96,19 @@ accounts. Changing the password signs everyone out. After twenty wrong
 passwords in ten minutes, sign-in is refused until the ten minutes have
 passed.
 
+Someone who is not signed in never reaches your data: their requests are
+answered from a separate set of sample bookings kept in memory, whatever page
+or action they aim at.
+
+### A public demo
+
+Add `PUBLIC_DEMO=1` next to `APP_PASSWORD` to show Innkeep to visitors. They
+then get the public pages and a dashboard on the sample bookings, which they
+can read but not change, instead of the sign-in page. Settings and the
+extension pages stay yours alone. You sign in at `/login`, which nothing
+links to. Do not combine it with `LANDING_ONLY`, which switches the dashboard
+off altogether.
+
 The addresses that machines call keep their own secrets and do not use the
 password: the calendar links you give Airbnb and Booking.com, the browser
 extension and the MCP server.

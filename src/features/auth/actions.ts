@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getI18n } from "@/i18n/server";
 import { eq } from "drizzle-orm";
-import { appState, getDb } from "@/db";
+import { appState, getDb, withData } from "@/db";
 import {
   appPassword,
   passwordMatches,
@@ -18,8 +18,15 @@ import {
 /** Wrong passwords are counted in the database, so the limit holds on a host with many short-lived servers. */
 const FAILURES = "sign-in-failures";
 
+/**
+ * Someone signing in is not signed in yet, so their request only sees the
+ * demo. The count of wrong passwords is the one thing they may read and
+ * write in the host's own data.
+ */
 async function failures(): Promise<number[]> {
-  const row = await getDb().select().from(appState).where(eq(appState.key, FAILURES)).get();
+  const row = await withData("real", () =>
+    getDb().select().from(appState).where(eq(appState.key, FAILURES)).get(),
+  );
   try {
     const parsed: unknown = JSON.parse(row?.value ?? "[]");
     return Array.isArray(parsed) ? parsed.filter((at) => typeof at === "number") : [];
@@ -30,11 +37,13 @@ async function failures(): Promise<number[]> {
 
 async function recordFailure(earlier: number[], now: number) {
   const value = JSON.stringify([...recentFailures(earlier, now), now]);
-  await getDb()
-    .insert(appState)
-    .values({ key: FAILURES, value })
-    .onConflictDoUpdate({ target: appState.key, set: { value } })
-    .run();
+  await withData("real", () =>
+    getDb()
+      .insert(appState)
+      .values({ key: FAILURES, value })
+      .onConflictDoUpdate({ target: appState.key, set: { value } })
+      .run(),
+  );
 }
 
 export type SignInState = { error: string | null };
