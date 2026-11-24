@@ -16,6 +16,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/jetaix/Innkeep/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/jetaix/Innkeep/actions/workflows/ci.yml/badge.svg" /></a>
   <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-15171c?labelColor=f3f4ef" />
   <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-yes-10a88f?labelColor=f3f4ef" />
   <img alt="English and French" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20FR-3d6df2?labelColor=f3f4ef" />
@@ -26,8 +27,15 @@
   <a href="#features">Features</a> ·
   <a href="#what-it-does-not-do">Limits</a> ·
   <a href="docs/ALTERNATIVES.md">Alternatives</a> ·
+  <a href="ROADMAP.md">Roadmap</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
+
+> **Status: early, and built in public.** Innkeep is at version 0.2 with one
+> maintainer, and it still changes every week. Expect rough edges, read [what it does not do](#what-it-does-not-do),
+> and say so when something breaks. A hosted version is being prepared: you can
+> [ask for early access](https://innkeep-seven.vercel.app/#access) on the website.
 
 ![The Innkeep landing page: one calendar for every place you rent](docs/screenshots/landing.png)
 
@@ -214,9 +222,10 @@ Tools: `list_properties`, `list_reservations`, `get_revenue`,
 
 ## Security
 
-There is no login yet. Run Innkeep on a private network or behind a reverse
-proxy that authenticates. See [SECURITY.md](SECURITY.md) for the routes that
-are safe to expose and how to report a vulnerability.
+One password (`APP_PASSWORD`) protects every page; there are no separate
+accounts yet. Set it before Innkeep is reachable from the internet. See
+[SECURITY.md](SECURITY.md) for the routes that are safe to expose and how to
+report a vulnerability.
 
 ## Stack
 
@@ -230,11 +239,36 @@ code is organised.
 bun run check   # format, lint, types, tests, build
 ```
 
-## Roadmap
+## Built in public
 
-- Separate accounts for each person
-- Per-night pricing and minimum stays
-- Partner-API adapters for hosts who have credentials
+Everything about this project is in this repository, including the parts that
+are usually kept private:
+
+- **What is planned, and what is not:** [ROADMAP.md](ROADMAP.md).
+- **What changed, release by release:** [CHANGELOG.md](CHANGELOG.md).
+- **Why each technical choice was made:** [docs/TECH-BENCHMARK.md](docs/TECH-BENCHMARK.md).
+- **Who it is for and what it promises:** [PRODUCT.md](PRODUCT.md).
+- **How it should look:** [DESIGN.md](DESIGN.md).
+- **How it compares with paid products, with prices and sources:**
+  [docs/ALTERNATIVES.md](docs/ALTERNATIVES.md).
+- **What the extension reads from your accounts:**
+  [docs/EXTENSION-PRIVACY.md](docs/EXTENSION-PRIVACY.md).
+
+Much of the code is written with an AI coding assistant and reviewed by the
+maintainer. Commits made that way carry a `Co-Authored-By` line, so you can
+tell which ones.
+
+## Taking part
+
+- **Something is broken or confusing:** [open an issue](https://github.com/jetaix/Innkeep/issues/new/choose).
+  A screenshot and the steps you took are enough.
+- **You host one or two places and something is missing:** open a feature
+  request and describe your week, not the feature. That is what decides the roadmap.
+- **You want to change the code:** read [CONTRIBUTING.md](CONTRIBUTING.md)
+  first; it says how the code is laid out and what will not be merged.
+- **You found a security problem:** do not open an issue; see [SECURITY.md](SECURITY.md).
+
+Everyone taking part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
