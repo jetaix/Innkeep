@@ -1,0 +1,25 @@
+# The iPhone app for TestFlight and the App Store, signed with the certificate
+# and profile kept as secrets on expo.dev (see .ci/sign-ios.sh).
+build:
+  name: Innkeep for iPhone
+  steps:
+    - eas/checkout
+    - run:
+        name: Prepare Exact
+        command: sh .ci/prepare-native.sh ios
+    - eas/install_node_modules
+    - eas/resolve_build_config
+    - run:
+        name: Archive
+        command: |
+          set -eu
+          bun "$EXACT/scripts/exact.mjs" setup --check --platform ios --device
+          export EXACT_BUILD_NUMBER="${ eas.job.version.buildNumber }"
+          . .ci/sign-ios.sh
+          bun exact.mjs ios --device --archive out.ipa --json > artifact.json
+          # Expo looks for the artifact from the repository's root, one folder up: leave a copy there.
+          cp out.ipa ../innkeep.ipa
+    - eas/upload_artifact:
+        inputs:
+          type: application-archive
+          path: innkeep.ipa

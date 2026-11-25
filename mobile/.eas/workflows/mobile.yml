@@ -1,0 +1,50 @@
+# The phone app's CI, on Expo. A change to the app is compiled and tested first;
+# when that passes, both phones' apps are built so a broken build is seen before
+# a release, not during one. Nothing here needs an Apple or Google account.
+name: Mobile
+
+on:
+  push:
+    branches: [main]
+    paths: ["mobile/**"]
+  pull_request:
+    paths: ["mobile/**"]
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel_in_progress: true
+
+jobs:
+  check:
+    name: Compile and test
+    runs_on: linux-medium
+    image: ubuntu-26.04-jdk-17-ndk-r27b-sdk-58
+    steps:
+      - uses: eas/checkout
+      - name: Prepare Exact
+        run: |
+          set -eu
+          # One place names the Exact commit: the build profiles in eas.json.
+          export EXACT_REF=$(bun -e 'console.log(require("./eas.json").build.base.env.EXACT_REF)')
+          sh .ci/prepare-native.sh web
+      - uses: eas/install_node_modules
+      - name: Compile the screens and type-check the data module
+        run: bun exact.mjs contract build app.contract --json --errors-only
+      - name: Run the app's tests
+        run: bun exact.mjs test web
+
+  android:
+    name: Build for Android
+    needs: [check]
+    type: build
+    params:
+      platform: android
+      profile: preview
+
+  ios:
+    name: Build for iPhone
+    needs: [check]
+    type: build
+    params:
+      platform: ios
+      profile: preview

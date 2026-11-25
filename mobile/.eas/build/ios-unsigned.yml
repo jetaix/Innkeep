@@ -1,0 +1,22 @@
+# Proves the iPhone app builds, with no Apple account: an ad-hoc signed archive
+# that a phone will not start. The store build signs one that it will.
+build:
+  name: Innkeep for iPhone (unsigned)
+  steps:
+    - eas/checkout
+    - run:
+        name: Prepare Exact
+        command: sh .ci/prepare-native.sh ios
+    - eas/install_node_modules
+    - run:
+        name: Archive
+        command: |
+          set -eu
+          bun "$EXACT/scripts/exact.mjs" setup --check --platform ios --device
+          bun exact.mjs ios --device --archive out.ipa --unsigned --json > artifact.json
+          # Expo looks for the artifact from the repository's root, one folder up: leave a copy there.
+          cp out.ipa ../innkeep.ipa
+    - eas/upload_artifact:
+        inputs:
+          type: application-archive
+          path: innkeep.ipa

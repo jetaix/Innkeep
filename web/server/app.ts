@@ -23,7 +23,9 @@ export const app = new Hono<Env>()
   .basePath("/api/app")
   .route("/", auth)
   .use("*", async (c, next) => {
-    const verdict = decide(c.req.method, getCookie(c, SESSION_COOKIE));
+    // A browser sends its session as a cookie; the phone app, which keeps none, as a bearer token.
+    const bearer = c.req.header("authorization")?.match(/^Bearer (\S+)$/)?.[1];
+    const verdict = decide(c.req.method, getCookie(c, SESSION_COOKIE) ?? bearer);
     if ("refuse" in verdict) throw new HTTPException(401, { message: "Sign in first." });
     c.set("signedIn", verdict.signedIn);
     await withData(verdict.scope, next);

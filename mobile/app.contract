@@ -1,0 +1,434 @@
+// Innkeep on a phone: what a host checks away from the desk. Today's figures, the
+// stays, and the cleanings to tick off. app.ts asks the host's own Innkeep for them.
+// Colours, type and bars are left to the platform; every word is in strings/<locale>.json.
+use Badge, EmptyState, SummaryCard from "exact:content"
+use ShaderState from "@exact/shader"
+
+routes nav
+  tab today "/"
+  tab stays "/stays"
+    stay "/stays/:id"
+  tab cleaning "/cleaning"
+  tab settings "/settings"
+
+shape Time
+  epochAtZero: number
+  utcOffset: number
+
+shape Reply
+  ok: bool
+  error: string
+
+shape SignIn
+  ok: bool
+  error: string
+  server: string
+
+shape Arrival
+  id: string
+  property: string
+  guest: string
+  checkIn: string
+  checkOut: string
+
+// Each answer names the Innkeep it came from, so one host's rows never show under another's.
+shape Overview
+  server: string
+  properties: number
+  arrivingToday: number
+  occupancy: number
+  urgent: number
+  net: string
+  upcoming: Arrival[]
+
+shape Stay
+  id: string
+  guest: string
+  property: string
+  source: string
+  checkIn: string
+  checkOut: string
+  nights: number
+  guests: number
+  amount: string
+  code: string
+  notes: string
+  now: bool
+  clash: bool
+
+shape Stays
+  server: string
+  items: Stay[]
+
+shape Cleaning
+  key: string
+  propertyId: string
+  property: string
+  date: string
+  from: string
+  sameDay: bool
+  done: bool
+  late: bool
+  cleaner: string
+  guest: string
+
+shape Cleanings
+  server: string
+  items: Cleaning[]
+
+fn errorText(code: string): string = code == "" ? "" : code == "address" ? t("error.address") : code == "unreachable" ? t("error.unreachable") : code == "not-innkeep" ? t("error.not-innkeep") : code == "password-needed" ? t("error.password-needed") : code == "password" ? t("error.password") : code == "too-many" ? t("error.too-many") : code == "outdated" ? t("error.outdated") : code == "demo" ? t("error.demo") : code == "signed-out" ? t("error.signed-out") : t("error.server")
+fn loadText(code: string): string = code == "" ? "" : code == "signed-out" ? t("error.signed-out") : code == "offline" ? t("error.offline") : t("error.load")
+fn guestName(name: string): string = name == "" ? t("stay.guest.unknown") : name
+fn sourceName(source: string): string = source == "airbnb" ? "Airbnb" : source == "booking" ? "Booking.com" : t("stay.source.direct")
+fn span(checkIn: string, checkOut: string): string = `${formatDate(checkIn, 0, "month-day")} – ${formatDate(checkOut, 0, "month-day")}`
+fn tabTitle(name: string): string = name == "today" ? t("tab.today") : name == "stays" ? t("tab.stays") : name == "cleaning" ? t("tab.cleaning") : t("tab.settings")
+fn stayTitle(items: Stay[], id: string): string = match first(items.filter(s => s.id == id)) { case some(s) => guestName(s.guest), case none => t("tab.stays") }
+
+component App
+  // The Innkeep this phone is connected to; empty until the host connects.
+  state server = "" persist
+  state draftAddress = ""
+  state draftPassword = ""
+  state now = 0
+  resource time = exactTime() as shape Time else empty()
+  derive today = formatDate(time.epochAtZero + now, time.utcOffset, "iso")
+  derive lang = t("locale")
+
+  resource overview = loadOverview(server, lang) when server != "" as shape Overview else empty()
+  resource stays = loadStays(server, lang, today) when server != "" and time.epochAtZero > 0 as shape Stays else empty()
+  resource cleaning = loadCleaning(server) when server != "" as shape Cleanings else empty()
+  mutation connected as shape SignIn then afterConnect
+  mutation left as shape Reply then afterLeave
+  mutation cleaned as shape Reply queue refreshes cleaning, overview
+
+  derive connectError = match connected { case some(r) => r.error, case none => "" }
+  derive connectedTo = match connected { case some(r) => r.server, case none => "" }
+  derive overviewError = pending(overview) ? "" : match failure(overview) { case some(f) => loadText(f.code), case none => "" }
+  derive staysError = pending(stays) ? "" : match failure(stays) { case some(f) => loadText(f.code), case none => "" }
+  derive cleaningError = pending(cleaning) ? "" : match failure(cleaning) { case some(f) => loadText(f.code), case none => "" }
+  derive cleanedError = pending(cleaned) ? "" : match cleaned { case some(r) => errorText(r.error), case none => "" }
+  derive staying = stays.items.filter(s => s.now)
+  derive coming = stays.items.filter(s => not s.now)
+  derive toClean = cleaning.items.filter(c => not c.done).length
+
+  // What is on screen ages while the app stays open: read again every five minutes.
+  task poll mount
+    every(300000, pull)
+
+  action pull
+    now = performanceNow()
+    if server != ""
+      refresh overview
+      refresh stays
+      refresh cleaning
+  action pick(name: string)
+    nav = select(nav, name)
+  action follow(url: string)
+    nav = go(nav, url)
+  action editAddress(v: string)
+    draftAddress = v
+  action editPassword(v: string)
+    draftPassword = v
+  action connect
+    if draftAddress.trim() != "" and not pending(connected)
+      haptic("impact-light")
+      send connected = signIn(draftAddress.trim(), draftPassword)
+  // The form stays as typed on a refusal, which says why; only a yes opens the app.
+  action afterConnect
+    if connectError == "" and connectedTo != ""
+      server = connectedTo
+      draftPassword = ""
+      haptic("success")
+    else
+      haptic("error")
+  action leave
+    send left = signOut()
+  action afterLeave
+    server = ""
+    nav = select(nav, "today")
+  action setCleaned(propertyId: string, date: string, done: bool)
+    haptic(done ? "success" : "selection")
+    send cleaned = setCleaned(server, propertyId, date, done)
+
+  view
+    main navigationKey=`${top(nav).id}` navigate=follow testId="app" width="100%" height="100%"
+      display="flex" flex-direction="column"
+      column flex=1 min-height=0 position="relative"
+        for tb in nav.tabs key=tb.name
+          column role="tabpanel" id=`panel-${tb.name}` position="absolute" inset=0
+            for e in tb.stack key=e.id
+              if server == ""
+                // Not connected: the welcome, in the app's place. The mark's two doorways are light
+                // (assets/welcome.wgsl) behind the words; the form sits on glass at the bottom.
+                if e.name == "today"
+                  column navigationKey=`${e.id}` navigationBar="none" -exact-safe-area="none" position="absolute" inset=0
+                    display="flex" flex-direction="column" background-color="welcome.night" color-scheme="dark"
+                    status-bar-style="light-content"
+                    canvas surface=shader(src="assets/welcome.wgsl", energy=(pending(connected) ? 1 : 0), maxFps=30)
+                      position="absolute" inset=0 width="100%" height="100%" aria-hidden=true
+                    scroll flex=1 min-height=0 position="relative" keyboardDismissMode="interactive"
+                      column min-height="100%" box-sizing="border-box" justify-content="flex-end" gap=24
+                        padding="calc(24px + var(--exact-safe-area-inset-top)) 24px calc(24px + var(--exact-safe-area-inset-bottom)) 24px"
+                        column gap=8
+                          // The name is a wordmark: it grows with the reader's text size, up to what one line of a phone holds.
+                          text "Innkeep" role="heading" aria-level=1 font="-exact-large-title" font-weight=700
+                            font-size="min(-exact-large-title, 80px)"
+                            color="welcome.ink" testId="welcome-title"
+                          text t("welcome.tagline") font="-exact-title3" color="welcome.soft"
+                        column backgroundMaterial="glass" border-radius=24 padding=16 gap=12
+                          input value=draftAddress input=editAddress placeholder=t("connect.address.placeholder")
+                            aria-label=t("connect.address") inputmode="url" autocapitalize="none" autocorrect="off"
+                            spellcheck=false autocomplete="url" enterkeyhint="next" testId="address"
+                          input type="password" value=draftPassword input=editPassword submit=connect
+                            placeholder=t("connect.password") aria-label=t("connect.password")
+                            autocomplete="current-password" enterkeyhint="go" testId="password"
+                          button press=connect buttonStyle="filled" testId="connect"
+                            disabled=(draftAddress.trim() == "" or pending(connected))
+                            text (pending(connected) ? t("connect.connecting") : t("connect.action"))
+                          if connectError != "" and not pending(connected)
+                            text errorText(connectError) font="-exact-footnote" color="-exact-system-red"
+                              role="alert" testId="connect-error"
+                          text t("connect.hint") font="-exact-footnote" color="welcome.soft"
+              else
+                column navigationKey=`${e.id}` navigationScroll=`content-${e.id}` position="absolute" inset=0
+                  display="flex" flex-direction="column"
+                  header display="flex" align-items="center" padding="8px 16px"
+                    text (e.name == "stay" ? stayTitle(stays.items, e.params.id) : tabTitle(e.name))
+                      role="heading" aria-level=(e.name == "stay" ? 2 : 1) flex=1
+
+                  if e.name == "today"
+                    if overview.server != server
+                      Waiting(busy=pending(overview), error=overviewError, retry=pull, leave=leave, name="today")
+                    else if overview.properties == 0
+                      EmptyState(symbol="symbol:home", title=t("today.empty.title"), message=t("today.empty.message"))
+                    else
+                      scroll id=`content-${e.id}` refresh=pull refreshing=pending(overview) flex=1 min-height=0
+                        column padding=16 gap=16
+                          if overviewError != ""
+                            Trouble(error=overviewError, retry=pull, name="today")
+                          SummaryCard(label=t("today.occupancy"), value=formatNumber(overview.occupancy, "percent"), detail=t("today.occupancy.detail"), progress=some(overview.occupancy), symbol=some("symbol:calendar"))
+                          column background-color="-exact-secondary-background" border-radius=12 padding="4px 16px"
+                            Figure(label=t("today.arriving"), value=`${overview.arrivingToday}`, name="arriving")
+                            hr
+                            Figure(label=t("today.net"), value=overview.net, name="net")
+                            if overview.urgent > 0
+                              hr
+                              row align-items="center" gap=12 padding="12px 0"
+                                text t("today.urgent") flex=1 min-width=0
+                                Badge(label=`${overview.urgent}`, tint=some("-exact-system-red"))
+                          column gap=8
+                            text t("today.upcoming") role="heading" aria-level=2 font="-exact-headline"
+                            if overview.upcoming.length == 0
+                              text t("today.none") color="-exact-secondary-label" testId="no-arrivals"
+                            column background-color="-exact-secondary-background" border-radius=12 padding="4px 16px"
+                              display=(overview.upcoming.length == 0 ? "none" : "flex")
+                              for u, i in overview.upcoming key=u.id
+                                if i > 0
+                                  hr
+                                column gap=2 padding="10px 0" testId=`arrival-${u.id}`
+                                  text guestName(u.guest)
+                                  text `${u.property} · ${span(u.checkIn, u.checkOut)}`
+                                    font="-exact-subheadline" color="-exact-secondary-label"
+
+                  if e.name == "stays"
+                    if stays.server != server
+                      Waiting(busy=(pending(stays) or time.epochAtZero == 0), error=staysError, retry=pull, leave=leave, name="stays")
+                    else if stays.items.length == 0
+                      EmptyState(symbol="symbol:calendar", title=t("stays.empty.title"), message=t("stays.empty.message"))
+                    else
+                      list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                        refresh=pull refreshing=pending(stays)
+                        if staysError != ""
+                          section
+                            Trouble(error=staysError, retry=pull, name="stays")
+                        if staying.length > 0
+                          section
+                            header
+                              text t("stays.now")
+                            for s in staying key=s.id
+                              StayRow(stay=s)
+                        if coming.length > 0
+                          section
+                            header
+                              text t("stays.next")
+                            for s in coming key=s.id
+                              StayRow(stay=s)
+
+                  if e.name == "stay"
+                    list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                      for s in stays.items.filter(x => x.id == e.params.id) key=s.id
+                        StayDetail(stay=s)
+                      if stays.items.filter(x => x.id == e.params.id).length == 0 and not pending(stays)
+                        section
+                          row
+                            text t("stay.gone") color="-exact-secondary-label" flex=1 min-width=0 testId="stay-gone"
+
+                  if e.name == "cleaning"
+                    if cleaning.server != server
+                      Waiting(busy=pending(cleaning), error=cleaningError, retry=pull, leave=leave, name="cleaning")
+                    else if cleaning.items.length == 0
+                      EmptyState(symbol="symbol:sparkles", title=t("cleaning.empty.title"), message=t("cleaning.empty.message"))
+                    else
+                      list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                        refresh=pull refreshing=pending(cleaning)
+                        if cleaningError != "" or cleanedError != ""
+                          section
+                            Trouble(error=(cleanedError != "" ? cleanedError : cleaningError), retry=pull, name="cleaning")
+                        section
+                          for c in cleaning.items key=c.key
+                            row align-items="center" gap=12 testId=`cleaning-${c.key}`
+                              column flex=1 min-width=0 gap=2 padding-top=4 padding-bottom=4
+                                text c.property
+                                text `${formatDate(c.date, 0, "month-day")} · ${t("cleaning.from", time=c.from)}${c.cleaner == "" ? "" : ` · ${c.cleaner}`}`
+                                  font="-exact-subheadline" color="-exact-secondary-label"
+                              if c.late and not c.done
+                                Badge(label=t("cleaning.late"), tint=some("-exact-system-red"))
+                              else if c.sameDay and not c.done
+                                Badge(label=t("cleaning.sameDay"), tint=some("-exact-system-orange"))
+                              input type="checkbox" checked=c.done change=setCleaned(c.propertyId, c.date)
+                                aria-label=t("cleaning.done", property=c.property, date=formatDate(c.date, 0, "month-day"))
+                                testId=`done-${c.key}`
+
+                  if e.name == "settings"
+                    list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                      section
+                        row
+                          text t("settings.server")
+                          text server color="-exact-secondary-label" testId="server"
+                        link href=server testId="open-web"
+                          text t("settings.open")
+                      section
+                        button commandfor="sign-out" command="show-modal" destructive=true testId="sign-out"
+                          text t("settings.signOut")
+
+      // Hidden until connected, and under a pushed stay, where an iPhone draws its own toolbar.
+      row role="tablist" testId="tabs" display=(server == "" or top(nav).name == "stay" ? "none" : "flex")
+        button role="tab" aria-controls="panel-today" aria-selected=(nav.tab == "today") press=pick("today")
+          testId="tab-today" flex=1
+          image "symbol:home"
+          text t("tab.today")
+        button role="tab" aria-controls="panel-stays" aria-selected=(nav.tab == "stays") press=pick("stays")
+          testId="tab-stays" flex=1
+          image "symbol:calendar"
+          text t("tab.stays")
+        button role="tab" aria-controls="panel-cleaning" aria-selected=(nav.tab == "cleaning") press=pick("cleaning")
+          testId="tab-cleaning" flex=1
+          image "symbol:sparkles"
+          text t("tab.cleaning")
+          if toClean > 0
+            row background-color="-exact-system-red" border-radius=12
+              text `${toClean}` font-variant-numeric="tabular-nums"
+        button role="tab" aria-controls="panel-settings" aria-selected=(nav.tab == "settings") press=pick("settings")
+          testId="tab-settings" flex=1
+          image "symbol:settings"
+          text t("tab.settings")
+
+      dialog id="sign-out" role="alertdialog" aria-label=t("settings.signOut.ask")
+        text t("settings.signOut.detail")
+        button press=leave destructive=true commandfor="sign-out" command="close" testId="sign-out-confirm"
+          text t("settings.signOut")
+        button commandfor="sign-out" command="close" testId="sign-out-cancel"
+          text t("cancel")
+
+// Nothing to show yet: loading, or why not, with the way out.
+component Waiting
+  props
+    busy: bool
+    error: string
+    retry: action
+    leave: action
+    name: string
+  view
+    if error == ""
+      column flex=1 justify-content="center" align-items="center"
+        if busy
+          progress aria-label=t("loading") testId=`${name}-loading`
+    else
+      EmptyState(symbol="symbol:alert", title=t("error.title"), message=error)
+        button press=retry testId=`${name}-retry`
+          text t("retry")
+        if error == t("error.signed-out")
+          button press=leave testId=`${name}-sign-in`
+            text t("connect.action")
+
+// A refresh failed over rows that are still good: say so, in red, above them.
+component Trouble
+  props
+    error: string
+    retry: action
+    name: string
+  view
+    row align-items="center" flex-wrap="wrap" gap=8
+      text error color="-exact-system-red" flex="1 1 12rem" min-width=0 role="alert" testId=`${name}-error`
+      button press=retry testId=`${name}-retry`
+        text t("retry")
+
+component Figure
+  props
+    label: string
+    value: string
+    name: string
+  view
+    row align-items="center" flex-wrap="wrap" gap="4px 12px" padding="12px 0"
+      text label flex="1 1 10rem" min-width=0
+      text value font-variant-numeric="tabular-nums" color="-exact-secondary-label" testId=name
+
+// A stay in the list: who, where and when; the chevron says it opens.
+component StayRow
+  props
+    stay: Stay
+  view
+    link href=path("stay", stay.id) testId=`stay-${stay.id}`
+      column flex=1 min-width=0 gap=2 padding-top=4 padding-bottom=4
+        text guestName(stay.guest)
+        text `${stay.property} · ${span(stay.checkIn, stay.checkOut)}`
+          font="-exact-subheadline" color="-exact-secondary-label"
+      if stay.clash
+        Badge(label=t("stay.clash"), tint=some("-exact-system-red"))
+      image "symbol:forward-chevron"
+
+component StayDetail
+  props
+    stay: Stay
+  view
+    if stay.clash
+      section
+        row
+          text t("stay.clash") color="-exact-system-red" flex=1 min-width=0 testId="detail-clash"
+    section
+      row
+        text t("stay.property")
+        text stay.property testId="detail-property"
+      row
+        text t("stay.source")
+        text sourceName(stay.source) testId="detail-source"
+    section
+      row
+        text t("stay.checkIn")
+        text formatDate(stay.checkIn, 0, "medium") testId="detail-check-in"
+      row
+        text t("stay.checkOut")
+        text formatDate(stay.checkOut, 0, "medium") testId="detail-check-out"
+      row
+        text t("stay.nights")
+        text `${stay.nights}` testId="detail-nights"
+      if stay.guests > 0
+        row
+          text t("stay.guests")
+          text `${stay.guests}`
+    if stay.amount != "" or stay.code != ""
+      section
+        if stay.amount != ""
+          row
+            text t("stay.amount")
+            text stay.amount font-variant-numeric="tabular-nums" testId="detail-amount"
+        if stay.code != ""
+          row
+            text t("stay.code")
+            text stay.code user-select="text"
+    if stay.notes != ""
+      section
+        header
+          text t("stay.notes")
+        row padding-top=10 padding-bottom=10
+          text stay.notes flex=1 min-width=0

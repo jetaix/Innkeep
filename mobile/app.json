@@ -1,0 +1,40 @@
+{
+  "host": {
+    "web": {},
+    "ios": {
+      "minimumOS": "17.0",
+      "deviceFamily": ["iphone"],
+      "localNetworking": true
+    },
+    "android": {}
+  },
+  "deploy": {
+    "store": {
+      "web": "0",
+      "ios": "0",
+      "android": "0"
+    }
+  },
+  "$schema": ".exact/checkout/scripts/app.schema.json",
+  "name": "Innkeep",
+  "short_name": "Innkeep",
+  "id": "io.github.jetaix.innkeep.mobile",
+  "start_url": "/",
+  "display": "standalone",
+  "app": {
+    "id": "io.github.jetaix.innkeep.mobile",
+    "name": "Innkeep"
+  },
+  "strings": {
+    "base": "en"
+  },
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
