@@ -2,15 +2,17 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import { withData } from "../../src/db";
+import { appPassword } from "../../src/lib/session";
 import { auth } from "./auth";
 import type { Env } from "./env";
+import { machine } from "./machine";
 import { read } from "./read";
 import { decide, SESSION_COOKIE } from "./scope";
 import { write } from "./write";
 
 /**
- * The API the client-rendered app talks to. Machine routes (iCal, ingest,
- * MCP, cron) join it in a later phase.
+ * The API the client-rendered app talks to. The routes machines call (iCal,
+ * ingest, MCP, cron) are in `machine.ts` and join it in `server` below.
  *
  * Order matters. Signing in comes first, because it must work without a
  * session. Everything after the middleware reads or writes data, and each of
@@ -46,3 +48,36 @@ app.onError((error, c) => {
   console.error(error);
   return c.json({ error: "Something went wrong." }, 500);
 });
+
+const UNCONFIGURED = "Innkeep is not configured: set APP_PASSWORD, then redeploy.";
+
+/**
+ * Everything the server answers: the app's API and the routes machines call.
+ * This is what gets deployed. The two rules in front of them are the ones the
+ * Next.js proxy applied to every request.
+ *
+ * `app` must have its error handler before it is mounted here, so this stays
+ * below `app.onError`.
+ */
+export const server = new Hono()
+  .use("*", async (c, next) => {
+    const { pathname } = new URL(c.req.url);
+    const api = pathname.startsWith("/api/");
+    const page = pathname === "/extension/start";
+    // Landing-only: a public host keeps no data, so its API answers as if it did not exist.
+    if (process.env.LANDING_ONLY === "1") {
+      // Machines get a plain "not found"; a person following an old link lands on the home page.
+      if (api) return new Response(null, { status: 404 });
+      if (page) return Response.redirect(new URL("/", c.req.url), 307);
+      return next();
+    }
+    // A public host with no password would hand the host's data to anyone who finds the address.
+    // Machine routes are left alone: each has a token of its own.
+    if (process.env.VERCEL && !appPassword()) {
+      if (pathname.startsWith("/api/app/")) return c.json({ error: UNCONFIGURED }, 503);
+      if (page) return new Response(UNCONFIGURED, { status: 503 });
+    }
+    return next();
+  })
+  .route("/", app)
+  .route("/", machine);

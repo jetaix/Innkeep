@@ -4,24 +4,27 @@ FROM node:22-slim AS build
 WORKDIR /app
 RUN npm install --global bun@1.4.4
 COPY package.json bun.lock ./
+COPY web/package.json web/bun.lock ./web/
 # No install scripts: the database driver ships its compiled binary, so nothing has to be built here.
-RUN bun install --frozen-lockfile --ignore-scripts
+RUN bun install --frozen-lockfile --ignore-scripts && cd web && bun install --frozen-lockfile --ignore-scripts
 COPY . .
-# Build with everything, then keep only what the running app needs.
-RUN bun run build && rm -rf node_modules && bun install --frozen-lockfile --ignore-scripts --production
+# The server is built into one file; of everything installed, only the database driver is needed to run it.
+RUN cd web && bun run build \
+  && cd .. && rm -rf node_modules web/node_modules \
+  && version=$(node -p "require('./package.json').dependencies['@libsql/client']") \
+  && mkdir run && cd run && npm init -y >/dev/null \
+  && npm install --omit=dev --no-audit --no-fund "@libsql/client@$version"
 
 FROM node:22-slim
 WORKDIR /app
 ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
     DATABASE_PATH=/data/innkeep.db \
     PORT=3000
-COPY --from=build /app/package.json /app/next.config.ts ./
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/.next ./.next
-COPY --from=build /app/public ./public
+COPY --from=build /app/run/node_modules ./node_modules
+COPY --from=build /app/web/dist ./web/dist
+COPY --from=build /app/web/dist-server ./web/dist-server
 RUN mkdir /data && chown node:node /data
 USER node
 VOLUME /data
 EXPOSE 3000
-CMD ["node_modules/.bin/next", "start", "-H", "0.0.0.0"]
+CMD ["node", "web/dist-server/serve.js"]

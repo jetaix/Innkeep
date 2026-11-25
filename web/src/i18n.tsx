@@ -30,6 +30,7 @@ const AREAS = {
   reviews: () => import("@/i18n/messages/reviews").then((file) => file.reviews),
   properties: () => import("@/i18n/messages/properties").then((file) => file.properties),
   preview: () => import("@/i18n/messages/preview").then((file) => file.preview),
+  setup: () => import("@/i18n/messages/setup").then((file) => file.setup),
   settings: () => import("@/i18n/messages/settings").then((file) => file.settings),
   data: () => import("@/i18n/messages/data").then((file) => file.data),
   extension: () => import("@/i18n/messages/extension").then((file) => file.extension),

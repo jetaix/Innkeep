@@ -6,3 +6,7 @@
 delete process.env.TURSO_DATABASE_URL;
 delete process.env.TURSO_AUTH_TOKEN;
 process.env.DATABASE_PATH = ":memory:";
+
+// A shell that exports the Telegram bot (as a deploy setup does) must not let a test send a real message.
+delete process.env.TELEGRAM_BOT_TOKEN;
+delete process.env.TELEGRAM_CHAT_ID;

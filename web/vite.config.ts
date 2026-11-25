@@ -30,5 +30,9 @@ export default defineConfig({
   },
   define: { __RENDERER__: JSON.stringify(renderer), __SITE__: JSON.stringify(siteEnv) },
   build: { manifest: true, target: "es2023" },
-  server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },
+  // The address the docs and the browser extension expect. The server answers the API and the one page-level redirect.
+  server: {
+    port: Number(process.env.PORT ?? 3000),
+    proxy: { "/api": "http://localhost:3001", "/extension/start": "http://localhost:3001" },
+  },
 });

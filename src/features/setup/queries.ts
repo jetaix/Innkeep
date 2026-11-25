@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, gt } from "drizzle-orm";
-import { getDb, listings, properties, reservations } from "@/db";
+import { getDb, listings, OTA_CHANNELS, properties, reservations } from "@/db";
+import { getExtensionStatus, getLastUpdate } from "@/features/extension/status";
 import { today } from "@/lib/dates";
 
 /** The property being set up, with the calendar links saved so far. */
@@ -26,4 +27,13 @@ export async function getSetupSummary(id: number) {
     )
     .all();
   return { stays: stays.length, named: stays.filter((stay) => stay.guestName).length };
+}
+
+/** Asked every few seconds by a waiting step: has the extension connected, and when did it last read reservations? */
+export async function getSetupProgress() {
+  const [{ state }, ...read] = await Promise.all([
+    getExtensionStatus(),
+    ...OTA_CHANNELS.map((channel) => getLastUpdate(channel)),
+  ]);
+  return { extension: state === "ready", readAt: Math.max(0, ...read.map((last) => last?.at ?? 0)) };
 }

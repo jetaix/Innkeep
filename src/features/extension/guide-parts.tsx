@@ -6,10 +6,12 @@ import { CopyButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
 import { getI18n } from "@/i18n/server";
 import manifest from "../../../extension/manifest.json";
+import { isHosted, storeUrl } from "./install";
+
+export { isHosted, storeUrl };
 
 /** The pieces of the extension's setup guide, shared by its own page and by the "Add a property" guide. */
 
-/** On a server there is no folder on the host's computer to point at: the extension is downloaded. */
 /** The address the host's browser reaches this Innkeep at: what the extension must be given. */
 export async function innkeepOrigin() {
   const requestHeaders = await headers();
@@ -18,8 +20,6 @@ export async function innkeepOrigin() {
     `${requestHeaders.get("x-forwarded-proto") ?? "http"}://${requestHeaders.get("host")}`
   );
 }
-
-export const isHosted = () => Boolean(process.env.VERCEL);
 
 export function Copyable({ value, label, secret }: { value: string; label: string; secret?: boolean }) {
   return (
@@ -60,15 +60,6 @@ export async function Credentials({ origin, token }: { origin: string; token: st
       )}
     </>
   );
-}
-
-/**
- * Where the extension is on the Chrome Web Store, once it has been published
- * there and `EXTENSION_STORE_URL` says so. Any other address is ignored.
- */
-export function storeUrl(): string | null {
-  const url = process.env.EXTENSION_STORE_URL?.trim();
-  return url && /^https:\/\/chromewebstore\.google\.com\/detail\/[\w./-]+$/.test(url) ? url : null;
 }
 
 /** The steps that put the extension in Chrome and connect it, as items of a numbered list. */

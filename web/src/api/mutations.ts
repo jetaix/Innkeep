@@ -77,6 +77,12 @@ export const saveListing = mutationOptions({
     ),
   ...stale(["properties"], ["stays"], ["feeds"], ["freshness"], ...FIGURES),
 });
+/** The "Add a property" guide: saves the calendar links filled in, and says whether one could not be read. */
+export const connectCalendars = mutationOptions({
+  mutationFn: (sent: { property: number; links: Record<"airbnb" | "booking", string> }) =>
+    unwrap(rpc.setup[":id"].calendars.$put({ param: id(sent.property), json: sent.links })),
+  ...stale(["setup"], ["properties"], ["stays"], ["feeds"], ["freshness"], ...FIGURES),
+});
 export const syncListing = mutationOptions({
   mutationFn: (listing: number) => unwrap(rpc.listings[":id"].sync.$post({ param: id(listing) })),
   ...stale(["properties"], ["stays"], ["feeds"], ["freshness"], ...FIGURES),

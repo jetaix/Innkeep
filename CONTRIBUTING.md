@@ -29,6 +29,19 @@ request ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
 ## How the code is organised
 
+Innkeep is the app in `web/`: pages in `web/src/routes`, their parts in
+`web/src/features/<name>`, the design system in `web/src/ui` and
+`web/src/tokens.stylex.ts`, and the server in `web/server` (`app.ts` for the
+dashboard's API, `machine.ts` for the calendar feeds, the extension, MCP and
+the scheduler, `serve.ts` for a machine of your own, `vercel.ts` for Vercel).
+`bun run dev` starts it at http://localhost:3000.
+
+The logic it runs is shared code under `src/`: `features/<name>/queries.ts`,
+`compute.ts` and `rules.ts`, `channels/`, `db/`, `i18n/` and `lib/`. The
+Next.js app under `src/app`, with the components and server actions only it
+uses, is the previous version: it still builds in CI (`bun run dev:next`,
+`bun run build:next`) and is being removed. The layout below describes `src/`.
+
 ```
 src/
   app/                 Routes only: pages compose features, API routes stay thin

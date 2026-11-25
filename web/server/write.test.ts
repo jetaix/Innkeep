@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { cleaners, getDb, properties, reservations, withData } from "../../src/db";
+import { cleaners, getDb, listings, properties, reservations, withData } from "../../src/db";
 import { sessionValue } from "../../src/lib/session";
 import { app } from "./app";
 
@@ -12,7 +12,7 @@ const send = (method: string, path: string, body?: unknown, cookie?: string) =>
     body: JSON.stringify(body ?? {}),
   });
 const host = (method: string, path: string, body?: unknown) => send(method, path, body, session);
-const count = async (table: typeof properties | typeof reservations | typeof cleaners) =>
+const count = async (table: typeof properties | typeof reservations | typeof cleaners | typeof listings) =>
   (await getDb().select().from(table).all()).length;
 
 describe("the write API", () => {
@@ -46,6 +46,24 @@ describe("the write API", () => {
     expect(edited.status).toBe(200);
     const row = (await getDb().select().from(properties).all())[0];
     expect(row).toMatchObject({ name: "Flat by the port", maxGuests: 4, currency: "EUR" });
+  });
+
+  it("saves the calendar links of the setup guide, and says when one cannot be read", async () => {
+    // Nothing filled in: nothing saved, nothing to read.
+    const none = await host("PUT", `/setup/${flat}/calendars`, { airbnb: "", booking: "  " });
+    expect(await none.json()).toEqual({ unreadable: false });
+    expect(await count(listings)).toBe(0);
+
+    // A link that is not a calendar is kept, with what went wrong reading it.
+    const wrong = await host("PUT", `/setup/${flat}/calendars`, { airbnb: "not a link" });
+    expect(await wrong.json()).toEqual({ unreadable: true });
+    const saved = await getDb().select().from(listings).all();
+    expect(saved).toHaveLength(1);
+    expect(saved[0]).toMatchObject({ propertyId: flat, channel: "airbnb", icalUrl: "not a link" });
+    expect(saved[0]?.lastSyncError).toBeTruthy();
+
+    expect((await host("PUT", "/setup/abc/calendars", {})).status).toBe(400);
+    expect((await host("PUT", `/setup/${flat}/calendars`, { airbnb: 3 })).status).toBe(400);
   });
 
   it("lets the host add a stay, and refuses dates that end before they start", async () => {
@@ -131,6 +149,7 @@ describe("the write API", () => {
     ["POST", "/advice"],
     ["POST", "/claude"],
     ["DELETE", "/claude"],
+    ["PUT", "/setup/1/calendars"],
   ])("keeps the host's own accounts from a visitor: %s %s", async (method, path) => {
     expect((await send(method, path, {})).status).toBe(403);
   });

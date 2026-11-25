@@ -1,5 +1,7 @@
 .data
 dist
 dist-ssr
+dist-server
+public/innkeep-extension.zip
 node_modules
 src/routeTree.gen.ts

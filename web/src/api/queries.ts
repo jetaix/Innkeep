@@ -116,3 +116,17 @@ export const settingsQuery = queryOptions({
   queryKey: ["settings"],
   queryFn: () => unwrap(rpc.settings.$get()),
 });
+
+/** Host only: the property the "Add a property" guide is setting up, and what Innkeep knows of it so far. */
+export const setupQuery = (id: number) =>
+  queryOptions({
+    queryKey: ["setup", id],
+    queryFn: () => unwrap(rpc.setup[":id"].$get({ param: { id: String(id) } })),
+  });
+
+/** Host only: whether the extension has connected, and when it last read reservations. Never cached. */
+export const setupProgressQuery = queryOptions({
+  queryKey: ["setup", "progress"],
+  queryFn: () => unwrap(rpc.setup.progress.$get()),
+  staleTime: 0,
+});
