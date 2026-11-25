@@ -34,6 +34,11 @@ const AREAS = {
   data: () => import("@/i18n/messages/data").then((file) => file.data),
   extension: () => import("@/i18n/messages/extension").then((file) => file.extension),
   auth: () => import("@/i18n/messages/auth").then((file) => file.auth),
+  marketing: () => import("@/i18n/messages/marketing").then((file) => file.marketing),
+  alternatives: () => import("@/i18n/messages/alternatives").then((file) => file.alternatives),
+  guides: () => import("@/i18n/messages/guides").then((file) => file.guides),
+  ai: () => import("@/i18n/messages/ai").then((file) => file.ai),
+  design: () => import("@/i18n/messages/design").then((file) => file.design),
 } satisfies { [A in keyof Messages]?: () => Promise<Record<Locale, Messages[A]>> };
 
 /** An area that is downloaded when first needed. */
@@ -60,10 +65,28 @@ export function loadMessages(...areas: Area[]): Promise<unknown> {
   return Promise.all(areas.map(load));
 }
 
+/**
+ * The words of areas that have finished loading, for code outside a
+ * component: a route's `head`, which runs after its loader has waited for
+ * `loadMessages`.
+ */
+export function readMessages<A extends Area>(...areas: A[]): Pick<Messages, A> {
+  const locale = currentLocale();
+  const m: Record<string, unknown> = {};
+  for (const area of areas) {
+    const both = ready.get(area);
+    if (!both) throw new Error(`The "${area}" texts are not loaded: wait for loadMessages("${area}") first`);
+    m[area] = both[locale];
+  }
+  return m as Pick<Messages, A>;
+}
+
 const listeners = new Set<() => void>();
 
 /** The language in use right now, for code outside a component (a route's loader). */
 export function currentLocale(): Locale {
+  // The static pages are written in the default language; the browser then switches if it must.
+  if (typeof document === "undefined") return DEFAULT_LOCALE;
   const chosen = document.cookie.match(new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]+)`))?.[1];
   if (isLocale(chosen)) return chosen;
   for (const tag of navigator.languages) {
@@ -120,4 +143,4 @@ export function useI18n<A extends Area = never>(
 }
 
 // The page's own language, for assistive technology and hyphenation.
-document.documentElement.lang = currentLocale();
+if (typeof document !== "undefined") document.documentElement.lang = currentLocale();

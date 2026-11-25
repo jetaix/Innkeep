@@ -69,6 +69,7 @@ const SWATCHES = Object.keys(swatch) as (keyof typeof swatch)[];
 function Kit() {
   return (
     <div {...stylex.props(styles.page)}>
+      <title>Innkeep</title>
       <div {...stylex.props(styles.half)}>
         <Pieces tone="ink" />
       </div>

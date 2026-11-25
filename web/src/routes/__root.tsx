@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import { useTheme } from "../theme";
 import { dark, darkShadow, light, lightShadow } from "../themes";
 import { color, font, text } from "../tokens.stylex";
@@ -31,6 +31,11 @@ function Page() {
         styles.page,
       )}
     >
+      {/*
+       * The title and the other head tags of the page on screen, kept current as it changes.
+       * In the browser only: the static pages get the same tags written into their head.
+       */}
+      {typeof document !== "undefined" && <HeadContent />}
       <Outlet />
     </div>
   );

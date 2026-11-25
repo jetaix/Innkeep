@@ -64,6 +64,7 @@ function LoginPage() {
         : signIn.error.message;
   return (
     <>
+      <title>{`${t.title} · Innkeep`}</title>
       <h1 {...stylex.props(styles.title)}>Innkeep</h1>
       <p {...stylex.props(styles.intro)}>{t.intro}</p>
       <Card>

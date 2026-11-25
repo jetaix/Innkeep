@@ -3,13 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Innkeep</title>
+    <meta name="application-name" content="Innkeep" />
+    <!-- Added to a phone's home screen, it opens like an app, under its own name. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Innkeep" />
+    <!-- A dashboard full of dates and amounts: none of them is a phone number to dial. -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f4ef" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f0f11" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <!-- The host's choice of light or dark, applied before anything is drawn. The key is THEME_KEY in src/i18n/config.ts. -->
+    <link rel="apple-touch-icon" href="/apple-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!--
+      Before anything is drawn: the host's choice of light or dark and their
+      language, so neither flashes. The keys are THEME_KEY and LOCALE_COOKIE
+      in src/i18n/config.ts.
+    -->
     <script>
       try {
+        const page = document.documentElement;
         const theme = localStorage.getItem("innkeep-theme");
-        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+        if (theme === "light" || theme === "dark") page.dataset.theme = theme;
+        const chosen = document.cookie.match(/(?:^|; )innkeep-locale=(en|fr)/);
+        page.lang = chosen ? chosen[1] : (navigator.language || "").slice(0, 2) === "fr" ? "fr" : "en";
       } catch {
         // Storage refused (private window): follow the system.
       }

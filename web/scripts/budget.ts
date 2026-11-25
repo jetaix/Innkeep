@@ -59,9 +59,14 @@ const rows: { name: string; size: number; limit: number }[] = [
   { name: "first-view CSS", size: cssSize, limit: BUDGET.css },
 ];
 const lazy = Object.keys(manifest).filter((name) => manifest[name]?.isDynamicEntry);
-// A page of the dashboard never loads alone: the frame around it comes first.
-const frame = lazy.find((name) => name.startsWith("src/routes/_app.tsx"));
-const frameChunks = frame ? [...closure(frame)].filter((name) => !shell.has(name)) : [];
+// A page never loads alone: the frame around it (the dashboard's, or the public pages') comes first.
+const frames = ["_app", "_site"].map((name) => {
+  const key = lazy.find((candidate) => candidate.startsWith(`src/routes/${name}.tsx`));
+  return {
+    inside: `src/routes/${name}/`,
+    chunks: key ? [...closure(key)].filter((chunk) => !shell.has(chunk)) : [],
+  };
+});
 
 for (const key of lazy) {
   const own = [...closure(key)].filter((name) => !shell.has(name));
@@ -72,8 +77,8 @@ for (const key of lazy) {
     continue;
   }
   rows.push({ name: `route ${key}`, size, limit: BUDGET.route });
-  const inFrame = key.startsWith("src/routes/_app/");
-  const first = inFrame ? sizeOf(new Set([...frameChunks, ...own])) : size;
+  const frame = frames.find((candidate) => key.startsWith(candidate.inside));
+  const first = frame ? sizeOf(new Set([...frame.chunks, ...own])) : size;
   rows.push({ name: `cold entry ${key}`, size: shellSize + first, limit: BUDGET.coldEntry });
 }
 

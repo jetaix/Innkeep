@@ -1,6 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation } from "@tanstack/react-query";
-import { CHARGE_CATEGORIES, CHARGE_FREQUENCIES, type Charge, type Property } from "@/db/schema";
+import type { Charge, Property } from "@/db/schema";
+import { CHARGE_CATEGORIES, CHARGE_FREQUENCIES } from "../../lists";
 import { today } from "@/lib/dates";
 import { addCharge, deleteCharge } from "../../api/mutations";
 import { useI18n } from "../../i18n";

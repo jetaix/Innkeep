@@ -4,6 +4,7 @@ import { redact } from "@tanstack/redact/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { siteEnv } from "./site-env.ts";
 
 /**
  * Redact is the default browser renderer. `RENDERER=react-dom` builds the
@@ -27,7 +28,7 @@ export default defineConfig({
       "@": new URL("../src", import.meta.url).pathname,
     },
   },
-  define: { __RENDERER__: JSON.stringify(renderer) },
+  define: { __RENDERER__: JSON.stringify(renderer), __SITE__: JSON.stringify(siteEnv) },
   build: { manifest: true, target: "es2023" },
   server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },
 });

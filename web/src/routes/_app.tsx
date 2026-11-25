@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { NAV } from "@/config/navigation";
 import { clearSampleData } from "../api/mutations";
 import { navQuery, sessionQuery } from "../api/queries";
@@ -130,11 +130,9 @@ function AppFrame() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const page = NAV.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
   const title = page ? `${m.common.nav[page.id]} · Innkeep` : "Innkeep";
-  useEffect(() => {
-    document.title = title;
-  }, [title]);
   return (
     <div {...stylex.props(styles.frame)}>
+      <title>{title}</title>
       {session.signedIn && <KeepFresh />}
       <a href="#main" {...stylex.props(styles.skip)}>
         {m.common.nav.skipToContent}
