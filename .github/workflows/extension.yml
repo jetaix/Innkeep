@@ -1,0 +1,48 @@
+name: Extension download
+
+# Keeps one download of the browser extension on GitHub, so nobody has to fetch
+# the whole repository for one folder:
+# https://github.com/jetaix/Innkeep/releases/download/extension/innkeep-extension.zip
+# The archive is the one the app itself offers (scripts/zip-extension.mjs): a
+# single `innkeep-extension` folder to choose in "Load unpacked". It is rebuilt
+# each time the extension changes on main, and replaces the previous one.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "extension/**"
+      - "scripts/zip-extension.mjs"
+      - ".github/workflows/extension.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: extension-download
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Package and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Package the extension
+        run: node scripts/zip-extension.mjs
+      - name: Publish it under the "extension" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p 'require("./extension/manifest.json").version')
+          notes="The Innkeep browser extension, version $version, as a folder to load in Chrome. Unzip it, then follow extension/README.md. Rebuilt from main each time the extension changes."
+          if gh release view extension >/dev/null 2>&1; then
+            gh release edit extension --title "Browser extension $version" --notes "$notes"
+          else
+            gh release create extension --title "Browser extension $version" --notes "$notes" --target "$GITHUB_SHA"
+          fi
+          gh release upload extension public/innkeep-extension.zip --clobber
