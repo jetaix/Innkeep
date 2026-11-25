@@ -1,0 +1,74 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 Innkeep contributors",
+    "categories": ["BUSINESS", "PRODUCTIVITY"],
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false,
+      "kidsAgeBand": null,
+      "ageRatingOverride": "NONE",
+      "koreaAgeRatingOverride": "NONE"
+    },
+    "release": {
+      "automaticRelease": false,
+      "phasedRelease": true
+    },
+    "info": {
+      "en-US": {
+        "title": "Innkeep",
+        "subtitle": "Bookings and cleanings, to go",
+        "description": "Innkeep for iPhone is the pocket companion to Innkeep, the free, open-source channel manager you run yourself. It shows what a host needs away from the desk, and nothing else.\n\nTODAY, AT A GLANCE\n• Who arrives today, and the next arrivals after that\n• How many of the next 30 nights are booked\n• What this month pays after costs\n• How many things need fixing\n\nEVERY STAY\n• Guests staying now and those coming up, across your places\n• Dates, nights, number of guests, payout and confirmation code\n• A clear warning when two bookings overlap\n\nCLEANINGS, TICKED OFF\n• A cleaning for each departure, with the time the place is free from\n• Same-day turnovers and late cleanings stand out\n• Mark a cleaning done from the doorstep\n\nYOURS, AND PRIVATE\n• Connects only to your own Innkeep, at the address you type\n• No account with us, no tracking, no analytics, no ads\n• Your password is exchanged once for a session kept in the iPhone keychain\n• English and French\n\nInnkeep for iPhone needs an Innkeep server: your own, or a public demo. Innkeep is free software under the MIT licence; set-up instructions are on GitHub.\n\nInnkeep is an independent project. It is not affiliated with, endorsed by or a partner of Airbnb or Booking.com; it works from the calendar links those platforms give every host.",
+        "keywords": [
+          "host",
+          "rental",
+          "vacation rental",
+          "channel manager",
+          "cleaning",
+          "calendar",
+          "bookings",
+          "self-hosted",
+          "short-term"
+        ],
+        "releaseNotes": "The first version: today's figures, your stays, and cleanings to tick off.",
+        "promoText": "Who arrives today, what the month pays, which cleaning is next: your own Innkeep, in your pocket.",
+        "marketingUrl": "https://github.com/jetaix/Innkeep",
+        "supportUrl": "https://github.com/jetaix/Innkeep/issues",
+        "privacyPolicyUrl": "https://github.com/jetaix/Innkeep/blob/main/mobile/docs/PRIVACY.md"
+      },
+      "fr-FR": {
+        "title": "Innkeep",
+        "subtitle": "Séjours et ménages, en poche",
+        "description": "Innkeep pour iPhone est le compagnon de poche d’Innkeep, le channel manager libre et gratuit que vous hébergez vous-même. Il montre ce dont un hôte a besoin loin de son bureau, et rien d’autre.\n\nAUJOURD’HUI, D’UN COUP D’ŒIL\n• Qui arrive aujourd’hui, et les arrivées suivantes\n• La part des 30 prochaines nuits déjà réservée\n• Ce que rapporte le mois après frais\n• Le nombre de points à corriger\n\nCHAQUE SÉJOUR\n• Les voyageurs présents et ceux à venir, pour tous vos logements\n• Dates, nuits, nombre de voyageurs, versement et code de confirmation\n• Une alerte claire quand deux réservations se chevauchent\n\nLES MÉNAGES, COCHÉS\n• Un ménage à chaque départ, avec l’heure à partir de laquelle le logement est libre\n• Les enchaînements le même jour et les ménages en retard ressortent\n• Marquez un ménage comme fait depuis le pas de la porte\n\nÀ VOUS, ET PRIVÉ\n• Se connecte uniquement à votre propre Innkeep, à l’adresse que vous saisissez\n• Aucun compte chez nous, aucun suivi, aucune mesure d’audience, aucune publicité\n• Votre mot de passe est échangé une fois contre une session gardée dans le trousseau de l’iPhone\n• En français et en anglais\n\nInnkeep pour iPhone a besoin d’un serveur Innkeep : le vôtre, ou une démo publique. Innkeep est un logiciel libre sous licence MIT ; les instructions d’installation sont sur GitHub.\n\nInnkeep est un projet indépendant. Il n’est ni affilié à Airbnb ou Booking.com, ni approuvé par eux, ni leur partenaire ; il fonctionne à partir des liens de calendrier que ces plateformes donnent à chaque hôte.",
+        "keywords": [
+          "hôte",
+          "location",
+          "saisonnière",
+          "gîte",
+          "ménage",
+          "calendrier",
+          "réservations",
+          "channel manager",
+          "auto-hébergé"
+        ],
+        "releaseNotes": "La première version : les chiffres du jour, vos séjours et les ménages à cocher.",
+        "promoText": "Qui arrive aujourd’hui, ce que rapporte le mois, quel ménage vient ensuite : votre Innkeep, dans la poche.",
+        "marketingUrl": "https://github.com/jetaix/Innkeep",
+        "supportUrl": "https://github.com/jetaix/Innkeep/issues",
+        "privacyPolicyUrl": "https://github.com/jetaix/Innkeep/blob/main/mobile/docs/PRIVACY.md#français"
+      }
+    }
+  }
+}

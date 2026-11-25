@@ -69,4 +69,20 @@ describe("who sees which data", () => {
     expect(right.headers.get("set-cookie")).toContain(`innkeep-session=${sessionValue(PASSWORD)}`);
     expect(right.headers.get("set-cookie")).toContain("HttpOnly");
   }, 10_000);
+
+  it("signs the phone app in with a token it sends back as a bearer", async () => {
+    process.env.PUBLIC_DEMO = "";
+    const wrong = await send("/session/native", { password: "a guess" });
+    expect(wrong.status).toBe(401);
+
+    const right = await send("/session/native", { password: PASSWORD });
+    expect(right.headers.get("set-cookie")).toBeNull();
+    const { token } = await right.json();
+    expect(token).toBe(sessionValue(PASSWORD));
+
+    const asked = (authorization: string) => app.request("/api/app/overview", { headers: { authorization } });
+    expect((await asked(`Bearer ${token}`)).status).toBe(200);
+    expect((await asked("Bearer not-a-session")).status).toBe(401);
+    process.env.PUBLIC_DEMO = "1";
+  }, 10_000);
 });

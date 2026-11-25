@@ -1,0 +1,53 @@
+{
+  "cli": {
+    "version": ">= 27.11.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "bun": "1.4.2",
+      "withoutCredentials": true,
+      "env": {
+        "EXACT_REF": "6bc548e675e553502b496364cd171c475c1cdf68",
+        "EXACT_VERSION": "0.1.0",
+        "EXACT_NON_EXEMPT_ENCRYPTION": "false"
+      },
+      "ios": {
+        "image": "macos-tahoe-26.6-xcode-27.2"
+      },
+      "android": {
+        "image": "ubuntu-26.04-jdk-17-ndk-r27b-sdk-58"
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "environment": "preview",
+      "ios": {
+        "config": "ios-unsigned.yml"
+      },
+      "android": {
+        "config": "android-apk.yml",
+        "distribution": "internal"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "environment": "production",
+      "distribution": "store",
+      "autoIncrement": true,
+      "ios": {
+        "config": "ios-store.yml"
+      },
+      "android": {
+        "config": "android-store.yml"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "metadataPath": "store.config.json"
+      }
+    }
+  }
+}

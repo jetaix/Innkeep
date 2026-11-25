@@ -1,0 +1,15 @@
+{
+  "name": "mobile",
+  "private": true,
+  "scripts": {
+    "build": "bun exact.mjs web-build --out dist",
+    "start": "bun exact.mjs serve dist"
+  },
+  "dependencies": {
+    "@exact/shader": "file:.exact/checkout/packages/shader"
+  },
+  "devDependencies": {
+    "eas-cli": "27.11.0",
+    "expo-modules-autolinking": "^58.1.0"
+  }
+}

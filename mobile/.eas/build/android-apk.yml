@@ -1,0 +1,28 @@
+# An Android app to install by hand and try: signed with Android's debug key,
+# so Play will not take it. The store build makes the bundle Play takes.
+build:
+  name: Innkeep for Android (APK)
+  steps:
+    - eas/checkout
+    - run:
+        name: Prepare Exact
+        shell: /bin/sh
+        command: |
+          set -eu
+          sh .ci/prepare-native.sh android
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            'platforms;android-37.2' 'build-tools;37.0.0' 'ndk;27.1.12297006'
+    - eas/install_node_modules
+    - run:
+        name: Build
+        command: |
+          set -eu
+          bun "$EXACT/scripts/exact.mjs" setup --check --platform android
+          EXACT_UPDATE_TRUST=production bun exact.mjs android --release --no-install --json > artifact.json
+          # Expo looks for the artifact from the repository's root, one folder up: leave a copy there.
+          cp target/android/app/outputs/apk/release/app-release.apk ../innkeep.apk
+    - eas/upload_artifact:
+        inputs:
+          type: application-archive
+          path: innkeep.apk

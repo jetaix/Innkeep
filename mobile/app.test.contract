@@ -1,0 +1,108 @@
+// Every test starts on an unconnected phone. The Innkeep at https://inn.test is these
+// canned answers; the day is 2026-01-01, the default.
+answer fetch "https://inn.test/api/app/session" method GET with 200 {"signedIn": false, "demo": false, "passwordSet": true}
+answer fetch "https://inn.test/api/app/session/native" method POST with 200 {"ok": true, "token": "s3ss10n"}
+answer fetch "https://inn.test/api/app/overview" with 200 {"properties": 2, "currency": "EUR", "arrivingToday": 1, "occupancy": 0.5, "urgent": 2, "months": [{"month": "2026-01", "net": 123400}, {"month": "2026-02", "net": 0}], "upcoming": [{"id": 7, "property": "Loft", "guest": "Ada Lovelace", "checkIn": "2026-01-03", "checkOut": "2026-01-06"}, {"id": 8, "property": "Cabin", "guest": null, "checkIn": "2026-01-10", "checkOut": "2026-01-12"}]}
+answer fetch "https://inn.test/api/app/properties" with 200 {"properties": [{"id": 1, "name": "Loft", "currency": "EUR"}, {"id": 2, "name": "Cabin", "currency": "EUR"}], "listings": []}
+answer fetch "https://inn.test/api/app/stays" with 200 {"stays": [{"id": 5, "propertyId": 1, "source": "booking", "kind": "reservation", "guestName": "Grace Hopper", "checkIn": "2025-12-30", "checkOut": "2026-01-02", "amount": 45000, "guests": 2, "externalCode": "", "notes": ""}, {"id": 6, "propertyId": 1, "source": "direct", "kind": "block", "guestName": "", "checkIn": "2026-01-02", "checkOut": "2026-01-03"}, {"id": 7, "propertyId": 1, "source": "airbnb", "kind": "reservation", "guestName": "Ada Lovelace", "checkIn": "2026-01-03", "checkOut": "2026-01-06", "amount": 61250, "guests": 3, "externalCode": "HMABC123", "notes": "Late arrival"}, {"id": 8, "propertyId": 2, "source": "direct", "kind": "reservation", "guestName": "", "checkIn": "2026-01-10", "checkOut": "2026-01-12", "amount": null, "guests": null, "externalCode": null, "notes": ""}], "conflicts": [7], "links": []}
+answer fetch "https://inn.test/api/app/cleaning" with 200 {"today": "2026-01-01", "properties": [{"id": 1, "name": "Loft"}, {"id": 2, "name": "Cabin"}], "cleaners": [], "assignments": [], "schedule": [{"propertyId": 1, "date": "2025-12-30", "status": "done", "from": "11:00", "sameDay": false, "cleaner": null, "after": null}, {"propertyId": 1, "date": "2026-01-02", "status": "pending", "from": "11:00", "sameDay": true, "cleaner": {"id": 1, "name": "Marie"}, "after": {"guestName": "Grace Hopper"}}, {"propertyId": 2, "date": "2026-01-12", "status": "pending", "from": "10:00", "sameDay": false, "cleaner": null, "after": null}, {"propertyId": 2, "date": "2026-01-20", "status": "skipped", "from": "10:00", "sameDay": false, "cleaner": null, "after": null}]}
+answer fetch "https://inn.test/api/app/cleanings/" method PUT with 200 {"ok": true}
+
+test "a wrong password is refused in words, the right one opens today"
+  answer fetch "https://inn.test/api/app/session/native" method POST with 401 {"error": "That is not the password. Check it and try again."}
+  expect disabled "connect"
+  type "address" "inn.test"
+  tap "connect"
+  clock data
+  expect text "connect-error" == "This Innkeep asks for a password."
+  type "password" "a guess"
+  tap "connect"
+  clock data
+  expect text "connect-error" == "That is not the password. Check it and try again."
+  expect state server == ""
+  answer fetch "https://inn.test/api/app/session/native" method POST with 200 {"ok": true, "token": "s3ss10n"}
+  type "password" "the right one"
+  type "password" key "Enter"
+  clock data
+  expect state server == "https://inn.test"
+  expect text "arriving" == "1"
+  expect text "net" == "€1,234"
+  expect tree has "arrival-7"
+  reload
+  expect tree missing "connect"
+  expect text "arriving" == "1"
+
+test "a public demo opens without a password, to look"
+  answer fetch "https://inn.test/api/app/session" method GET with 200 {"signedIn": false, "demo": true, "passwordSet": true}
+  type "address" "inn.test"
+  tap "connect"
+  clock data
+  expect state server == "https://inn.test"
+  expect text "arriving" == "1"
+
+test "an address with nothing behind it says so"
+  fail fetch "https://nowhere.test"
+  type "address" "nowhere.test"
+  tap "connect"
+  clock data
+  expect text "connect-error" == "Can't reach that address. Check it and your connection, then try again."
+  type "address" "not an address"
+  tap "connect"
+  clock data
+  expect text "connect-error" == "That is not an address. Type it as you would in a browser."
+
+test "stays list who is there and who comes, and a row opens its stay"
+  type "address" "https://inn.test"
+  type "password" "the right one"
+  tap "connect"
+  clock data
+  tap "tab-stays"
+  clock data
+  expect tree has "stay-5"
+  expect tree has "stay-7"
+  expect tree has "stay-8"
+  expect tree missing "stay-6"
+  expect state stays.items.0 .now == true
+  expect state stays.items.1 .now == false
+  tap "stay-7"
+  clock settle
+  expect text "detail-property" == "Loft"
+  expect text "detail-source" == "Airbnb"
+  expect text "detail-nights" == "3"
+  expect text "detail-amount" == "€612.50"
+  expect tree has "detail-clash"
+
+test "a cleaning is ticked off on the Innkeep"
+  type "address" "inn.test"
+  type "password" "the right one"
+  tap "connect"
+  clock data
+  tap "tab-cleaning"
+  clock data
+  expect tree has "cleaning-1-2026-01-02"
+  expect tree has "cleaning-2-2026-01-12"
+  expect tree missing "cleaning-1-2025-12-30"
+  expect tree missing "cleaning-2-2026-01-20"
+  tap "done-1-2026-01-02"
+  clock data
+  expect tree missing "cleaning-error"
+
+test "a refused change is said, and disconnecting returns to the form"
+  answer fetch "https://inn.test/api/app/cleanings/" method PUT with 403 {"error": "This is a demo: changes are not saved."}
+  type "address" "inn.test"
+  type "password" "the right one"
+  tap "connect"
+  clock data
+  tap "tab-cleaning"
+  clock data
+  tap "done-2-2026-01-12"
+  clock data
+  expect text "cleaning-error" == "This is a demo: changes are not saved."
+  tap "tab-settings"
+  expect text "server" == "https://inn.test"
+  tap "sign-out"
+  clock settle
+  tap "sign-out-confirm"
+  clock data
+  expect state server == ""
+  expect tree has "connect"

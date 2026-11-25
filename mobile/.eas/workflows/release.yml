@@ -1,0 +1,33 @@
+# A release, started by hand: `bunx eas workflow:run release.yml`. Builds the
+# signed apps for the stores. It needs the signing secrets in the project's
+# production environment on expo.dev; mobile/README.md lists them.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        description: Which app to build
+        options:
+          - all
+          - android
+          - ios
+        default: all
+
+jobs:
+  android:
+    name: Android bundle for Google Play
+    if: ${{ inputs.platform != 'ios' }}
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  ios:
+    name: iPhone archive for the App Store
+    if: ${{ inputs.platform != 'android' }}
+    type: build
+    params:
+      platform: ios
+      profile: production
