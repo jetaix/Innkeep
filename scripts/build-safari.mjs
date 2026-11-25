@@ -27,7 +27,7 @@ const build = spawnSync(
     "-project",
     project,
     "-scheme",
-    "Innkeep Companion",
+    "Innkeep Companion (macOS)",
     "-configuration",
     "Release",
     "-derivedDataPath",

@@ -100,7 +100,7 @@ export default async function LandingPage() {
             <DemoFilm />
             <div className="mt-10 px-2">
               <h2 className="text-center text-[13px] font-medium text-muted">{t.works.label}</h2>
-              <ul className="mx-auto mt-4 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3">
+              <ul className="mx-auto mt-4 grid max-w-[40rem] grid-cols-1 gap-3 sm:grid-cols-2">
                 <WorksWith
                   name="airbnb"
                   label={m.common.sources.airbnb}
@@ -114,6 +114,7 @@ export default async function LandingPage() {
                   tone="text-blue"
                 />
                 <WorksWith name="chrome" label="Google Chrome" detail={t.works.chrome} tone="text-ink" />
+                <WorksWith name="safari" label="Safari" detail={t.works.safari} tone="text-ink" />
               </ul>
               <h2 className="mt-8 text-center text-[13px] font-medium text-muted">{t.works.ai}</h2>
               <ul className="mx-auto mt-4 grid max-w-[40rem] grid-cols-1 gap-3 sm:grid-cols-2">

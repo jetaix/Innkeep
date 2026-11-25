@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Innkeep Companion</title>
     <style>
       :root {
@@ -49,6 +50,13 @@
         button.primary {
           background: #ededf0;
           color: #0f0f11;
+        }
+      }
+      /* Safari on a phone shows the popup as a sheet as wide as the screen. */
+      @media (pointer: coarse) {
+        body {
+          width: auto;
+          font-size: 15px;
         }
       }
       /* The rule above would otherwise show a button marked hidden. */

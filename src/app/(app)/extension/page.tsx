@@ -162,6 +162,29 @@ async function Guide() {
         </ol>
       </Card>
 
+      {!hosted && (
+        <Card className="p-5">
+          <SectionTitle>{t.safari.title}</SectionTitle>
+          <p className="mt-1 text-[13px] leading-relaxed text-muted">{t.safari.intro}</p>
+          <ol className="mt-2 list-decimal space-y-2 pl-5 text-[13px] leading-relaxed text-muted">
+            <li>
+              {t.safari.build}
+              <Copyable value="bun run build:safari" label={t.safari.copyCommand} />
+            </li>
+            <li>{t.safari.allow}</li>
+            <li>
+              {t.safari.open}
+              <Copyable
+                value={path.join(process.cwd(), "safari/build/Build/Products/Release/Innkeep Companion.app")}
+                label={s.copyPath}
+              />
+            </li>
+            <li>{t.safari.sites}</li>
+            <li>{t.safari.connect}</li>
+          </ol>
+        </Card>
+      )}
+
       <Card className="p-5">
         <SectionTitle>{t.after.title}</SectionTitle>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13px] leading-relaxed text-muted">

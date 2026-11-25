@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  Innkeep Companion
+//  macOS (App)
 //
 //  Created by Jonathan Etaix on 25/11/2026.
 //

@@ -22,7 +22,7 @@ const en = {
     github: "Get Innkeep on GitHub",
     dashboard: "Open the dashboard",
     extension:
-      "Works with a Chrome extension, included. Calendar links only carry dates; the extension reads the rest (guests, payouts, prices, reviews) from your own Airbnb and Booking.com pages.",
+      "Works with an extension for Chrome and Safari, included. Calendar links only carry dates; the extension reads the rest (guests, payouts, prices, reviews) from your own Airbnb and Booking.com pages.",
   },
   access: {
     label: "Your email address",
@@ -79,11 +79,12 @@ const en = {
     airbnb: "Calendar link, plus your own pages through the extension",
     booking: "Calendar link, plus your own pages through the extension",
     chrome: "Innkeep Companion extension, included",
+    safari: "The same extension on a Mac, built with Xcode",
     ai: "And with your AI assistant",
     claude:
       "Reads your calendar and blocks dates through the MCP server, and writes advice with your own key",
     chatgpt: "Installs Innkeep with you, from a ready-made request",
-    note: "Innkeep is not affiliated with Airbnb, Booking.com, Google, Anthropic or OpenAI. Their names and marks belong to them.",
+    note: "Innkeep is not affiliated with Airbnb, Booking.com, Google, Apple, Anthropic or OpenAI. Their names and marks belong to them.",
   },
   trust: {
     title: "Self-hosted, your bookings stay yours.",
@@ -254,7 +255,7 @@ const fr: typeof en = {
     github: "Obtenir Innkeep sur GitHub",
     dashboard: "Ouvrir le tableau de bord",
     extension:
-      "Fonctionne avec une extension Chrome, fournie. Les liens de calendrier ne contiennent que des dates ; l’extension lit le reste (voyageurs, versements, prix, avis) sur vos propres pages Airbnb et Booking.com.",
+      "Fonctionne avec une extension pour Chrome et Safari, fournie. Les liens de calendrier ne contiennent que des dates ; l’extension lit le reste (voyageurs, versements, prix, avis) sur vos propres pages Airbnb et Booking.com.",
   },
   access: {
     label: "Votre adresse e-mail",
@@ -312,11 +313,12 @@ const fr: typeof en = {
     airbnb: "Lien de calendrier, et vos propres pages grâce à l’extension",
     booking: "Lien de calendrier, et vos propres pages grâce à l’extension",
     chrome: "Extension Innkeep Companion, fournie",
+    safari: "La même extension sur Mac, à construire avec Xcode",
     ai: "Et avec votre assistant IA",
     claude:
       "Lit votre calendrier et bloque des dates grâce au serveur MCP, et rédige des conseils avec votre propre clé",
     chatgpt: "Installe Innkeep avec vous, à partir d’une demande toute prête",
-    note: "Innkeep n’a aucun lien avec Airbnb, Booking.com, Google, Anthropic ou OpenAI. Leurs noms et logos leur appartiennent.",
+    note: "Innkeep n’a aucun lien avec Airbnb, Booking.com, Google, Apple, Anthropic ou OpenAI. Leurs noms et logos leur appartiennent.",
   },
   trust: {
     title: "En auto-hébergé, vos réservations restent à vous.",

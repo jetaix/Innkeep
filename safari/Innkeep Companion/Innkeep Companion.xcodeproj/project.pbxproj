@@ -7,47 +7,88 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B8960BC630B6D2F600444EA8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8960BC530B6D2F600444EA8 /* AppDelegate.swift */; };
-		B8960BCA30B6D2F600444EA8 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = B8960BC830B6D2F600444EA8 /* Main.html */; };
-		B8960BCC30B6D2F600444EA8 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B8960BCB30B6D2F600444EA8 /* Icon.png */; };
-		B8960BCE30B6D2F600444EA8 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = B8960BCD30B6D2F600444EA8 /* Style.css */; };
-		B8960BD030B6D2F600444EA8 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BCF30B6D2F600444EA8 /* Script.js */; };
-		B8960BD230B6D2F600444EA8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8960BD130B6D2F600444EA8 /* ViewController.swift */; };
-		B8960BD530B6D2F600444EA8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8960BD330B6D2F600444EA8 /* Main.storyboard */; };
-		B8960BD730B6D2F600444EA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8960BD630B6D2F600444EA8 /* Assets.xcassets */; };
-		B8960BDE30B6D2F700444EA8 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8960BDD30B6D2F700444EA8 /* Innkeep Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		B8960BE330B6D2F700444EA8 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8960BE230B6D2F700444EA8 /* SafariWebExtensionHandler.swift */; };
-		B8960BFC30B6D2F700444EA8 /* booking.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BEF30B6D2F700444EA8 /* booking.js */; };
-		B8960BFD30B6D2F700444EA8 /* ui.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF030B6D2F700444EA8 /* ui.js */; };
-		B8960BFE30B6D2F700444EA8 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF130B6D2F700444EA8 /* popup.js */; };
-		B8960BFF30B6D2F700444EA8 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF230B6D2F700444EA8 /* background.js */; };
-		B8960C0030B6D2F700444EA8 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF330B6D2F700444EA8 /* popup.html */; };
-		B8960C0130B6D2F700444EA8 /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF430B6D2F700444EA8 /* options.js */; };
-		B8960C0330B6D2F700444EA8 /* parse.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF730B6D2F700444EA8 /* parse.js */; };
-		B8960C0430B6D2F700444EA8 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF830B6D2F700444EA8 /* icons */; };
-		B8960C0530B6D2F700444EA8 /* airbnb.js in Resources */ = {isa = PBXBuildFile; fileRef = B8960BF930B6D2F700444EA8 /* airbnb.js */; };
-		B8960C0630B6D2F700444EA8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = B8960BFA30B6D2F700444EA8 /* manifest.json */; };
-		B8960C0730B6D2F700444EA8 /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = B8960BFB30B6D2F700444EA8 /* options.html */; };
+		B8948F9730B6D62600A784C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948F9630B6D62600A784C9 /* AppDelegate.swift */; };
+		B8948F9930B6D62600A784C9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948F9830B6D62600A784C9 /* SceneDelegate.swift */; };
+		B8948F9C30B6D62600A784C9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8948F9A30B6D62600A784C9 /* LaunchScreen.storyboard */; };
+		B8948F9F30B6D62600A784C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8948F9D30B6D62600A784C9 /* Main.storyboard */; };
+		B8948FA830B6D62600A784C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948FA730B6D62600A784C9 /* AppDelegate.swift */; };
+		B8948FAB30B6D62600A784C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8948FA930B6D62600A784C9 /* Main.storyboard */; };
+		B8948FB230B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B8948FBC30B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B8948FC130B6D62600A784C9 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8630B6D62500A784C9 /* Main.html */; };
+		B8948FC230B6D62600A784C9 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8630B6D62500A784C9 /* Main.html */; };
+		B8948FC330B6D62600A784C9 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8830B6D62500A784C9 /* Icon.png */; };
+		B8948FC430B6D62600A784C9 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8830B6D62500A784C9 /* Icon.png */; };
+		B8948FC530B6D62600A784C9 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8930B6D62500A784C9 /* Style.css */; };
+		B8948FC630B6D62600A784C9 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8930B6D62500A784C9 /* Style.css */; };
+		B8948FC730B6D62600A784C9 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8A30B6D62500A784C9 /* Script.js */; };
+		B8948FC830B6D62600A784C9 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8A30B6D62500A784C9 /* Script.js */; };
+		B8948FC930B6D62600A784C9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948F8B30B6D62500A784C9 /* ViewController.swift */; };
+		B8948FCA30B6D62600A784C9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948F8B30B6D62500A784C9 /* ViewController.swift */; };
+		B8948FCB30B6D62600A784C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8C30B6D62600A784C9 /* Assets.xcassets */; };
+		B8948FCC30B6D62600A784C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8C30B6D62600A784C9 /* Assets.xcassets */; };
+		B8948FCD30B6D62600A784C9 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948F8E30B6D62600A784C9 /* SafariWebExtensionHandler.swift */; };
+		B8948FCE30B6D62600A784C9 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948F8E30B6D62600A784C9 /* SafariWebExtensionHandler.swift */; };
+		B8948FED30B6D62600A784C9 /* booking.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE030B6D62600A784C9 /* booking.js */; };
+		B8948FEE30B6D62600A784C9 /* ui.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE130B6D62600A784C9 /* ui.js */; };
+		B8948FEF30B6D62600A784C9 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE230B6D62600A784C9 /* popup.js */; };
+		B8948FF030B6D62600A784C9 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE330B6D62600A784C9 /* background.js */; };
+		B8948FF130B6D62600A784C9 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE430B6D62600A784C9 /* popup.html */; };
+		B8948FF230B6D62600A784C9 /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE530B6D62600A784C9 /* options.js */; };
+		B8948FF430B6D62600A784C9 /* parse.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE830B6D62600A784C9 /* parse.js */; };
+		B8948FF530B6D62600A784C9 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE930B6D62600A784C9 /* icons */; };
+		B8948FF630B6D62600A784C9 /* airbnb.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FEA30B6D62600A784C9 /* airbnb.js */; };
+		B8948FF730B6D62600A784C9 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = B8948FEB30B6D62600A784C9 /* manifest.json */; };
+		B8948FF830B6D62600A784C9 /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948FEC30B6D62600A784C9 /* options.html */; };
+		B8948FF930B6D62600A784C9 /* booking.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE030B6D62600A784C9 /* booking.js */; };
+		B8948FFA30B6D62600A784C9 /* ui.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE130B6D62600A784C9 /* ui.js */; };
+		B8948FFB30B6D62600A784C9 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE230B6D62600A784C9 /* popup.js */; };
+		B8948FFC30B6D62600A784C9 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE330B6D62600A784C9 /* background.js */; };
+		B8948FFD30B6D62600A784C9 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE430B6D62600A784C9 /* popup.html */; };
+		B8948FFE30B6D62600A784C9 /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE530B6D62600A784C9 /* options.js */; };
+		B894900030B6D62600A784C9 /* parse.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE830B6D62600A784C9 /* parse.js */; };
+		B894900130B6D62600A784C9 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = B8948FE930B6D62600A784C9 /* icons */; };
+		B894900230B6D62600A784C9 /* airbnb.js in Resources */ = {isa = PBXBuildFile; fileRef = B8948FEA30B6D62600A784C9 /* airbnb.js */; };
+		B894900330B6D62600A784C9 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = B8948FEB30B6D62600A784C9 /* manifest.json */; };
+		B894900430B6D62600A784C9 /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948FEC30B6D62600A784C9 /* options.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		B8960BDF30B6D2F700444EA8 /* PBXContainerItemProxy */ = {
+		B8948FB330B6D62600A784C9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = B8960BBA30B6D2F600444EA8 /* Project object */;
+			containerPortal = B8948F8030B6D62500A784C9 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = B8960BDC30B6D2F700444EA8;
-			remoteInfo = "Innkeep Companion Extension";
+			remoteGlobalIDString = B8948FB030B6D62600A784C9;
+			remoteInfo = "Innkeep Companion Extension (iOS)";
+		};
+		B8948FBD30B6D62600A784C9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B8948F8030B6D62500A784C9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B8948FBA30B6D62600A784C9;
+			remoteInfo = "Innkeep Companion Extension (macOS)";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		B8960BEA30B6D2F700444EA8 /* Embed Foundation Extensions */ = {
+		B8948FD430B6D62600A784C9 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				B8960BDE30B6D2F700444EA8 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */,
+				B8948FB230B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FDB30B6D62600A784C9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B8948FBC30B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -55,41 +96,63 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		B8960BC230B6D2F600444EA8 /* Innkeep Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B8960BC530B6D2F600444EA8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		B8960BC930B6D2F600444EA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
-		B8960BCB30B6D2F600444EA8 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
-		B8960BCD30B6D2F600444EA8 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
-		B8960BCF30B6D2F600444EA8 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
-		B8960BD130B6D2F600444EA8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		B8960BD430B6D2F600444EA8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		B8960BD630B6D2F600444EA8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B8960BD830B6D2F600444EA8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B8960BDD30B6D2F700444EA8 /* Innkeep Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B8960BE230B6D2F700444EA8 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		B8960BE430B6D2F700444EA8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B8960BEF30B6D2F700444EA8 /* booking.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = booking.js; path = ../../../extension/booking.js; sourceTree = "<group>"; };
-		B8960BF030B6D2F700444EA8 /* ui.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = ui.js; path = ../../../extension/ui.js; sourceTree = "<group>"; };
-		B8960BF130B6D2F700444EA8 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = ../../../extension/popup.js; sourceTree = "<group>"; };
-		B8960BF230B6D2F700444EA8 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = ../../../extension/background.js; sourceTree = "<group>"; };
-		B8960BF330B6D2F700444EA8 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../extension/popup.html; sourceTree = "<group>"; };
-		B8960BF430B6D2F700444EA8 /* options.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = options.js; path = ../../../extension/options.js; sourceTree = "<group>"; };
-		B8960BF730B6D2F700444EA8 /* parse.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = parse.js; path = ../../../extension/parse.js; sourceTree = "<group>"; };
-		B8960BF830B6D2F700444EA8 /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../../extension/icons; sourceTree = "<group>"; };
-		B8960BF930B6D2F700444EA8 /* airbnb.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = airbnb.js; path = ../../../extension/airbnb.js; sourceTree = "<group>"; };
-		B8960BFA30B6D2F700444EA8 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../extension/manifest.json; sourceTree = "<group>"; };
-		B8960BFB30B6D2F700444EA8 /* options.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = options.html; path = ../../../extension/options.html; sourceTree = "<group>"; };
+		B8948F8730B6D62500A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		B8948F8830B6D62500A784C9 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		B8948F8930B6D62500A784C9 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		B8948F8A30B6D62500A784C9 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		B8948F8B30B6D62500A784C9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		B8948F8C30B6D62600A784C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B8948F8E30B6D62600A784C9 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		B8948F9330B6D62600A784C9 /* Innkeep Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948F9630B6D62600A784C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B8948F9830B6D62600A784C9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		B8948F9B30B6D62600A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B8948F9E30B6D62600A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B8948FA030B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B8948FA530B6D62600A784C9 /* Innkeep Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948FA730B6D62600A784C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B8948FAA30B6D62600A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B8948FAC30B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948FB630B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948FC030B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B8948FE030B6D62600A784C9 /* booking.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = booking.js; path = ../../../extension/booking.js; sourceTree = "<group>"; };
+		B8948FE130B6D62600A784C9 /* ui.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = ui.js; path = ../../../extension/ui.js; sourceTree = "<group>"; };
+		B8948FE230B6D62600A784C9 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = ../../../extension/popup.js; sourceTree = "<group>"; };
+		B8948FE330B6D62600A784C9 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = ../../../extension/background.js; sourceTree = "<group>"; };
+		B8948FE430B6D62600A784C9 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../extension/popup.html; sourceTree = "<group>"; };
+		B8948FE530B6D62600A784C9 /* options.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = options.js; path = ../../../extension/options.js; sourceTree = "<group>"; };
+		B8948FE830B6D62600A784C9 /* parse.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = parse.js; path = ../../../extension/parse.js; sourceTree = "<group>"; };
+		B8948FE930B6D62600A784C9 /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../../extension/icons; sourceTree = "<group>"; };
+		B8948FEA30B6D62600A784C9 /* airbnb.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = airbnb.js; path = ../../../extension/airbnb.js; sourceTree = "<group>"; };
+		B8948FEB30B6D62600A784C9 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../extension/manifest.json; sourceTree = "<group>"; };
+		B8948FEC30B6D62600A784C9 /* options.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = options.html; path = ../../../extension/options.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B8960BBF30B6D2F600444EA8 /* Frameworks */ = {
+		B8948F9030B6D62600A784C9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B8960BDA30B6D2F700444EA8 /* Frameworks */ = {
+		B8948FA230B6D62600A784C9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FAE30B6D62600A784C9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FB830B6D62600A784C9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -99,233 +162,392 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B8960BB930B6D2F600444EA8 = {
+		B8948F7F30B6D62500A784C9 = {
 			isa = PBXGroup;
 			children = (
-				B8960BC430B6D2F600444EA8 /* Innkeep Companion */,
-				B8960BE130B6D2F700444EA8 /* Innkeep Companion Extension */,
-				B8960BC330B6D2F600444EA8 /* Products */,
+				B8948F8430B6D62500A784C9 /* Shared (App) */,
+				B8948F8D30B6D62600A784C9 /* Shared (Extension) */,
+				B8948F9530B6D62600A784C9 /* iOS (App) */,
+				B8948FA630B6D62600A784C9 /* macOS (App) */,
+				B8948FB530B6D62600A784C9 /* iOS (Extension) */,
+				B8948FBF30B6D62600A784C9 /* macOS (Extension) */,
+				B8948F9430B6D62600A784C9 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		B8960BC330B6D2F600444EA8 /* Products */ = {
+		B8948F8430B6D62500A784C9 /* Shared (App) */ = {
 			isa = PBXGroup;
 			children = (
-				B8960BC230B6D2F600444EA8 /* Innkeep Companion.app */,
-				B8960BDD30B6D2F700444EA8 /* Innkeep Companion Extension.appex */,
+				B8948F8B30B6D62500A784C9 /* ViewController.swift */,
+				B8948F8C30B6D62600A784C9 /* Assets.xcassets */,
+				B8948F8530B6D62500A784C9 /* Resources */,
 			);
-			name = Products;
+			path = "Shared (App)";
 			sourceTree = "<group>";
 		};
-		B8960BC430B6D2F600444EA8 /* Innkeep Companion */ = {
+		B8948F8530B6D62500A784C9 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				B8960BC530B6D2F600444EA8 /* AppDelegate.swift */,
-				B8960BD130B6D2F600444EA8 /* ViewController.swift */,
-				B8960BD330B6D2F600444EA8 /* Main.storyboard */,
-				B8960BD630B6D2F600444EA8 /* Assets.xcassets */,
-				B8960BD830B6D2F600444EA8 /* Info.plist */,
-				B8960BC730B6D2F600444EA8 /* Resources */,
-			);
-			path = "Innkeep Companion";
-			sourceTree = "<group>";
-		};
-		B8960BC730B6D2F600444EA8 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				B8960BC830B6D2F600444EA8 /* Main.html */,
-				B8960BCB30B6D2F600444EA8 /* Icon.png */,
-				B8960BCD30B6D2F600444EA8 /* Style.css */,
-				B8960BCF30B6D2F600444EA8 /* Script.js */,
+				B8948F8630B6D62500A784C9 /* Main.html */,
+				B8948F8830B6D62500A784C9 /* Icon.png */,
+				B8948F8930B6D62500A784C9 /* Style.css */,
+				B8948F8A30B6D62500A784C9 /* Script.js */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		B8960BE130B6D2F700444EA8 /* Innkeep Companion Extension */ = {
+		B8948F8D30B6D62600A784C9 /* Shared (Extension) */ = {
 			isa = PBXGroup;
 			children = (
-				B8960BEE30B6D2F700444EA8 /* Resources */,
-				B8960BE230B6D2F700444EA8 /* SafariWebExtensionHandler.swift */,
-				B8960BE430B6D2F700444EA8 /* Info.plist */,
+				B8948FDF30B6D62600A784C9 /* Resources */,
+				B8948F8E30B6D62600A784C9 /* SafariWebExtensionHandler.swift */,
 			);
-			path = "Innkeep Companion Extension";
+			path = "Shared (Extension)";
 			sourceTree = "<group>";
 		};
-		B8960BEE30B6D2F700444EA8 /* Resources */ = {
+		B8948F9430B6D62600A784C9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B8960BEF30B6D2F700444EA8 /* booking.js */,
-				B8960BF030B6D2F700444EA8 /* ui.js */,
-				B8960BF130B6D2F700444EA8 /* popup.js */,
-				B8960BF230B6D2F700444EA8 /* background.js */,
-				B8960BF330B6D2F700444EA8 /* popup.html */,
-				B8960BF430B6D2F700444EA8 /* options.js */,
-				B8960BF730B6D2F700444EA8 /* parse.js */,
-				B8960BF830B6D2F700444EA8 /* icons */,
-				B8960BF930B6D2F700444EA8 /* airbnb.js */,
-				B8960BFA30B6D2F700444EA8 /* manifest.json */,
-				B8960BFB30B6D2F700444EA8 /* options.html */,
+				B8948F9330B6D62600A784C9 /* Innkeep Companion.app */,
+				B8948FA530B6D62600A784C9 /* Innkeep Companion.app */,
+				B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */,
+				B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B8948F9530B6D62600A784C9 /* iOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				B8948F9630B6D62600A784C9 /* AppDelegate.swift */,
+				B8948F9830B6D62600A784C9 /* SceneDelegate.swift */,
+				B8948F9A30B6D62600A784C9 /* LaunchScreen.storyboard */,
+				B8948F9D30B6D62600A784C9 /* Main.storyboard */,
+				B8948FA030B6D62600A784C9 /* Info.plist */,
+			);
+			path = "iOS (App)";
+			sourceTree = "<group>";
+		};
+		B8948FA630B6D62600A784C9 /* macOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				B8948FA730B6D62600A784C9 /* AppDelegate.swift */,
+				B8948FA930B6D62600A784C9 /* Main.storyboard */,
+				B8948FAC30B6D62600A784C9 /* Info.plist */,
+			);
+			path = "macOS (App)";
+			sourceTree = "<group>";
+		};
+		B8948FB530B6D62600A784C9 /* iOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				B8948FB630B6D62600A784C9 /* Info.plist */,
+			);
+			path = "iOS (Extension)";
+			sourceTree = "<group>";
+		};
+		B8948FBF30B6D62600A784C9 /* macOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				B8948FC030B6D62600A784C9 /* Info.plist */,
+			);
+			path = "macOS (Extension)";
+			sourceTree = "<group>";
+		};
+		B8948FDF30B6D62600A784C9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B8948FE030B6D62600A784C9 /* booking.js */,
+				B8948FE130B6D62600A784C9 /* ui.js */,
+				B8948FE230B6D62600A784C9 /* popup.js */,
+				B8948FE330B6D62600A784C9 /* background.js */,
+				B8948FE430B6D62600A784C9 /* popup.html */,
+				B8948FE530B6D62600A784C9 /* options.js */,
+				B8948FE830B6D62600A784C9 /* parse.js */,
+				B8948FE930B6D62600A784C9 /* icons */,
+				B8948FEA30B6D62600A784C9 /* airbnb.js */,
+				B8948FEB30B6D62600A784C9 /* manifest.json */,
+				B8948FEC30B6D62600A784C9 /* options.html */,
 			);
 			name = Resources;
-			path = "Innkeep Companion Extension";
+			path = "Shared (Extension)";
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B8960BC130B6D2F600444EA8 /* Innkeep Companion */ = {
+		B8948F9230B6D62600A784C9 /* Innkeep Companion (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B8960BEB30B6D2F700444EA8 /* Build configuration list for PBXNativeTarget "Innkeep Companion" */;
+			buildConfigurationList = B8948FD530B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (iOS)" */;
 			buildPhases = (
-				B8960BBE30B6D2F600444EA8 /* Sources */,
-				B8960BBF30B6D2F600444EA8 /* Frameworks */,
-				B8960BC030B6D2F600444EA8 /* Resources */,
-				B8960BEA30B6D2F700444EA8 /* Embed Foundation Extensions */,
+				B8948F8F30B6D62600A784C9 /* Sources */,
+				B8948F9030B6D62600A784C9 /* Frameworks */,
+				B8948F9130B6D62600A784C9 /* Resources */,
+				B8948FD430B6D62600A784C9 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				B8960BE030B6D2F700444EA8 /* PBXTargetDependency */,
+				B8948FB430B6D62600A784C9 /* PBXTargetDependency */,
 			);
-			name = "Innkeep Companion";
+			name = "Innkeep Companion (iOS)";
 			packageProductDependencies = (
 			);
-			productName = "Innkeep Companion";
-			productReference = B8960BC230B6D2F600444EA8 /* Innkeep Companion.app */;
+			productName = "Innkeep Companion (iOS)";
+			productReference = B8948F9330B6D62600A784C9 /* Innkeep Companion.app */;
 			productType = "com.apple.product-type.application";
 		};
-		B8960BDC30B6D2F700444EA8 /* Innkeep Companion Extension */ = {
+		B8948FA430B6D62600A784C9 /* Innkeep Companion (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B8960BE730B6D2F700444EA8 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension" */;
+			buildConfigurationList = B8948FDC30B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (macOS)" */;
 			buildPhases = (
-				B8960BD930B6D2F700444EA8 /* Sources */,
-				B8960BDA30B6D2F700444EA8 /* Frameworks */,
-				B8960BDB30B6D2F700444EA8 /* Resources */,
+				B8948FA130B6D62600A784C9 /* Sources */,
+				B8948FA230B6D62600A784C9 /* Frameworks */,
+				B8948FA330B6D62600A784C9 /* Resources */,
+				B8948FDB30B6D62600A784C9 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B8948FBE30B6D62600A784C9 /* PBXTargetDependency */,
+			);
+			name = "Innkeep Companion (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "Innkeep Companion (macOS)";
+			productReference = B8948FA530B6D62600A784C9 /* Innkeep Companion.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B8948FB030B6D62600A784C9 /* Innkeep Companion Extension (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B8948FD130B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (iOS)" */;
+			buildPhases = (
+				B8948FAD30B6D62600A784C9 /* Sources */,
+				B8948FAE30B6D62600A784C9 /* Frameworks */,
+				B8948FAF30B6D62600A784C9 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "Innkeep Companion Extension";
+			name = "Innkeep Companion Extension (iOS)";
 			packageProductDependencies = (
 			);
-			productName = "Innkeep Companion Extension";
-			productReference = B8960BDD30B6D2F700444EA8 /* Innkeep Companion Extension.appex */;
+			productName = "Innkeep Companion Extension (iOS)";
+			productReference = B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		B8948FBA30B6D62600A784C9 /* Innkeep Companion Extension (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B8948FD830B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (macOS)" */;
+			buildPhases = (
+				B8948FB730B6D62600A784C9 /* Sources */,
+				B8948FB830B6D62600A784C9 /* Frameworks */,
+				B8948FB930B6D62600A784C9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Innkeep Companion Extension (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "Innkeep Companion Extension (macOS)";
+			productReference = B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B8960BBA30B6D2F600444EA8 /* Project object */ = {
+		B8948F8030B6D62500A784C9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
-					B8960BC130B6D2F600444EA8 = {
+					B8948F9230B6D62600A784C9 = {
 						CreatedOnToolsVersion = 26.6;
 					};
-					B8960BDC30B6D2F700444EA8 = {
+					B8948FA430B6D62600A784C9 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					B8948FB030B6D62600A784C9 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					B8948FBA30B6D62600A784C9 = {
 						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
-			buildConfigurationList = B8960BBD30B6D2F600444EA8 /* Build configuration list for PBXProject "Innkeep Companion" */;
+			buildConfigurationList = B8948F8330B6D62500A784C9 /* Build configuration list for PBXProject "Innkeep Companion" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = B8960BB930B6D2F600444EA8;
+			mainGroup = B8948F7F30B6D62500A784C9;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = B8960BC330B6D2F600444EA8 /* Products */;
+			productRefGroup = B8948F9430B6D62600A784C9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B8960BC130B6D2F600444EA8 /* Innkeep Companion */,
-				B8960BDC30B6D2F700444EA8 /* Innkeep Companion Extension */,
+				B8948F9230B6D62600A784C9 /* Innkeep Companion (iOS) */,
+				B8948FA430B6D62600A784C9 /* Innkeep Companion (macOS) */,
+				B8948FB030B6D62600A784C9 /* Innkeep Companion Extension (iOS) */,
+				B8948FBA30B6D62600A784C9 /* Innkeep Companion Extension (macOS) */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B8960BC030B6D2F600444EA8 /* Resources */ = {
+		B8948F9130B6D62600A784C9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B8960BCC30B6D2F600444EA8 /* Icon.png in Resources */,
-				B8960BD530B6D2F600444EA8 /* Main.storyboard in Resources */,
-				B8960BD030B6D2F600444EA8 /* Script.js in Resources */,
-				B8960BCA30B6D2F600444EA8 /* Main.html in Resources */,
-				B8960BD730B6D2F600444EA8 /* Assets.xcassets in Resources */,
-				B8960BCE30B6D2F600444EA8 /* Style.css in Resources */,
+				B8948FC330B6D62600A784C9 /* Icon.png in Resources */,
+				B8948F9C30B6D62600A784C9 /* LaunchScreen.storyboard in Resources */,
+				B8948FC130B6D62600A784C9 /* Main.html in Resources */,
+				B8948FC730B6D62600A784C9 /* Script.js in Resources */,
+				B8948FCB30B6D62600A784C9 /* Assets.xcassets in Resources */,
+				B8948F9F30B6D62600A784C9 /* Main.storyboard in Resources */,
+				B8948FC530B6D62600A784C9 /* Style.css in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B8960BDB30B6D2F700444EA8 /* Resources */ = {
+		B8948FA330B6D62600A784C9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B8960C0530B6D2F700444EA8 /* airbnb.js in Resources */,
-				B8960BFF30B6D2F700444EA8 /* background.js in Resources */,
-				B8960C0130B6D2F700444EA8 /* options.js in Resources */,
-				B8960C0030B6D2F700444EA8 /* popup.html in Resources */,
-				B8960C0430B6D2F700444EA8 /* icons in Resources */,
-				B8960C0630B6D2F700444EA8 /* manifest.json in Resources */,
-				B8960BFD30B6D2F700444EA8 /* ui.js in Resources */,
-				B8960BFE30B6D2F700444EA8 /* popup.js in Resources */,
-				B8960C0330B6D2F700444EA8 /* parse.js in Resources */,
-				B8960BFC30B6D2F700444EA8 /* booking.js in Resources */,
-				B8960C0730B6D2F700444EA8 /* options.html in Resources */,
+				B8948FC430B6D62600A784C9 /* Icon.png in Resources */,
+				B8948FC630B6D62600A784C9 /* Style.css in Resources */,
+				B8948FAB30B6D62600A784C9 /* Main.storyboard in Resources */,
+				B8948FC830B6D62600A784C9 /* Script.js in Resources */,
+				B8948FCC30B6D62600A784C9 /* Assets.xcassets in Resources */,
+				B8948FC230B6D62600A784C9 /* Main.html in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FAF30B6D62600A784C9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B894900230B6D62600A784C9 /* airbnb.js in Resources */,
+				B8948FFC30B6D62600A784C9 /* background.js in Resources */,
+				B8948FFE30B6D62600A784C9 /* options.js in Resources */,
+				B8948FFD30B6D62600A784C9 /* popup.html in Resources */,
+				B894900130B6D62600A784C9 /* icons in Resources */,
+				B894900330B6D62600A784C9 /* manifest.json in Resources */,
+				B8948FFA30B6D62600A784C9 /* ui.js in Resources */,
+				B8948FFB30B6D62600A784C9 /* popup.js in Resources */,
+				B894900030B6D62600A784C9 /* parse.js in Resources */,
+				B8948FF930B6D62600A784C9 /* booking.js in Resources */,
+				B894900430B6D62600A784C9 /* options.html in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FB930B6D62600A784C9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B8948FF630B6D62600A784C9 /* airbnb.js in Resources */,
+				B8948FF030B6D62600A784C9 /* background.js in Resources */,
+				B8948FF230B6D62600A784C9 /* options.js in Resources */,
+				B8948FF130B6D62600A784C9 /* popup.html in Resources */,
+				B8948FF530B6D62600A784C9 /* icons in Resources */,
+				B8948FF730B6D62600A784C9 /* manifest.json in Resources */,
+				B8948FEE30B6D62600A784C9 /* ui.js in Resources */,
+				B8948FEF30B6D62600A784C9 /* popup.js in Resources */,
+				B8948FF430B6D62600A784C9 /* parse.js in Resources */,
+				B8948FED30B6D62600A784C9 /* booking.js in Resources */,
+				B8948FF830B6D62600A784C9 /* options.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B8960BBE30B6D2F600444EA8 /* Sources */ = {
+		B8948F8F30B6D62600A784C9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B8960BD230B6D2F600444EA8 /* ViewController.swift in Sources */,
-				B8960BC630B6D2F600444EA8 /* AppDelegate.swift in Sources */,
+				B8948FC930B6D62600A784C9 /* ViewController.swift in Sources */,
+				B8948F9730B6D62600A784C9 /* AppDelegate.swift in Sources */,
+				B8948F9930B6D62600A784C9 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B8960BD930B6D2F700444EA8 /* Sources */ = {
+		B8948FA130B6D62600A784C9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B8960BE330B6D2F700444EA8 /* SafariWebExtensionHandler.swift in Sources */,
+				B8948FCA30B6D62600A784C9 /* ViewController.swift in Sources */,
+				B8948FA830B6D62600A784C9 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FAD30B6D62600A784C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B8948FCD30B6D62600A784C9 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8948FB730B6D62600A784C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B8948FCE30B6D62600A784C9 /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		B8960BE030B6D2F700444EA8 /* PBXTargetDependency */ = {
+		B8948FB430B6D62600A784C9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = B8960BDC30B6D2F700444EA8 /* Innkeep Companion Extension */;
-			targetProxy = B8960BDF30B6D2F700444EA8 /* PBXContainerItemProxy */;
+			target = B8948FB030B6D62600A784C9 /* Innkeep Companion Extension (iOS) */;
+			targetProxy = B8948FB330B6D62600A784C9 /* PBXContainerItemProxy */;
+		};
+		B8948FBE30B6D62600A784C9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B8948FBA30B6D62600A784C9 /* Innkeep Companion Extension (macOS) */;
+			targetProxy = B8948FBD30B6D62600A784C9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		B8960BC830B6D2F600444EA8 /* Main.html */ = {
+		B8948F8630B6D62500A784C9 /* Main.html */ = {
 			isa = PBXVariantGroup;
 			children = (
-				B8960BC930B6D2F600444EA8 /* Base */,
+				B8948F8730B6D62500A784C9 /* Base */,
 			);
 			name = Main.html;
 			sourceTree = "<group>";
 		};
-		B8960BD330B6D2F600444EA8 /* Main.storyboard */ = {
+		B8948F9A30B6D62600A784C9 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				B8960BD430B6D2F600444EA8 /* Base */,
+				B8948F9B30B6D62600A784C9 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		B8948F9D30B6D62600A784C9 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B8948F9E30B6D62600A784C9 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		B8948FA930B6D62600A784C9 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B8948FAA30B6D62600A784C9 /* Base */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -333,7 +555,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		B8960BE530B6D2F700444EA8 /* Debug */ = {
+		B8948FCF30B6D62600A784C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -386,17 +608,15 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		B8960BE630B6D2F700444EA8 /* Release */ = {
+		B8948FD030B6D62600A784C9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -443,103 +663,98 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
 		};
-		B8960BE830B6D2F700444EA8 /* Debug */ = {
+		B8948FD230B6D62600A784C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Innkeep Companion Extension/Info.plist";
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Innkeep Companion Extension";
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		B8960BE930B6D2F700444EA8 /* Release */ = {
+		B8948FD330B6D62600A784C9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Innkeep Companion Extension/Info.plist";
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Innkeep Companion Extension";
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		B8960BEC30B6D2F700444EA8 /* Debug */ = {
+		B8948FD630B6D62600A784C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Innkeep Companion/Info.plist";
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
@@ -549,8 +764,161 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Innkeep Companion";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B8948FD730B6D62600A784C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
+				PRODUCT_NAME = "Innkeep Companion";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B8948FD930B6D62600A784C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
+				PRODUCT_NAME = "Innkeep Companion Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B8948FDA30B6D62600A784C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
+				PRODUCT_NAME = "Innkeep Companion Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B8948FDD30B6D62600A784C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
+				PRODUCT_NAME = "Innkeep Companion";
 				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -560,28 +928,27 @@
 			};
 			name = Debug;
 		};
-		B8960BED30B6D2F700444EA8 /* Release */ = {
+		B8948FDE30B6D62600A784C9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Innkeep Companion/Info.plist";
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -590,8 +957,9 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Innkeep Companion";
 				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -604,34 +972,52 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B8960BBD30B6D2F600444EA8 /* Build configuration list for PBXProject "Innkeep Companion" */ = {
+		B8948F8330B6D62500A784C9 /* Build configuration list for PBXProject "Innkeep Companion" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B8960BE530B6D2F700444EA8 /* Debug */,
-				B8960BE630B6D2F700444EA8 /* Release */,
+				B8948FCF30B6D62600A784C9 /* Debug */,
+				B8948FD030B6D62600A784C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B8960BE730B6D2F700444EA8 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension" */ = {
+		B8948FD130B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B8960BE830B6D2F700444EA8 /* Debug */,
-				B8960BE930B6D2F700444EA8 /* Release */,
+				B8948FD230B6D62600A784C9 /* Debug */,
+				B8948FD330B6D62600A784C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B8960BEB30B6D2F700444EA8 /* Build configuration list for PBXNativeTarget "Innkeep Companion" */ = {
+		B8948FD530B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B8960BEC30B6D2F700444EA8 /* Debug */,
-				B8960BED30B6D2F700444EA8 /* Release */,
+				B8948FD630B6D62600A784C9 /* Debug */,
+				B8948FD730B6D62600A784C9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B8948FD830B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8948FD930B6D62600A784C9 /* Debug */,
+				B8948FDA30B6D62600A784C9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B8948FDC30B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8948FDD30B6D62600A784C9 /* Debug */,
+				B8948FDE30B6D62600A784C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B8960BBA30B6D2F600444EA8 /* Project object */;
+	rootObject = B8948F8030B6D62500A784C9 /* Project object */;
 }

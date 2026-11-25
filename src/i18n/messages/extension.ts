@@ -72,6 +72,20 @@ const en = {
       manual: "Or open one page at a time:",
     },
   },
+  /** A second, shorter guide under the first, shown when Innkeep runs from its folder on this computer. */
+  safari: {
+    title: "Safari on a Mac",
+    intro:
+      "Safari takes an extension only inside an app, which you build from Innkeep's folder. It needs Xcode, Apple's free developer tool.",
+    copyCommand: "Copy command",
+    build: "In Terminal, from Innkeep's folder, run:",
+    allow:
+      "In Safari, open Settings, then Advanced, and tick “Show features for web developers”. Then open Settings, Developer, and tick “Allow unsigned extensions”. Safari asks for your password, and asks again each time it restarts.",
+    open: "Open the app you just built, once. Then turn on Innkeep Companion in Safari's Settings, under Extensions.",
+    sites:
+      "On Airbnb and on Booking.com, click the Innkeep Companion icon in the toolbar and choose “Always Allow on This Website”. Until then Safari keeps the extension away from those pages.",
+    connect: "Continue with “Connect it to this Innkeep” above.",
+  },
   after: {
     title: "Later on",
     items: [
@@ -222,6 +236,19 @@ const fr: typeof en = {
       body: "Connectez-vous à Airbnb et à Booking.com dans ce même navigateur. Appuyez ensuite sur le bouton : un onglet parcourt vos propres pages tout seul, affiche un bouton Stop sur chacune, puis revient ici. Les deux mêmes boutons se trouvent dans l’icône Innkeep Companion.",
       manual: "Ou ouvrez une page à la fois :",
     },
+  },
+  safari: {
+    title: "Safari sur un Mac",
+    intro:
+      "Safari n’accepte une extension que dans une application, à construire depuis le dossier d’Innkeep. Il faut Xcode, l’outil de développement gratuit d’Apple.",
+    copyCommand: "Copier la commande",
+    build: "Dans le Terminal, depuis le dossier d’Innkeep, lancez :",
+    allow:
+      "Dans Safari, ouvrez Réglages, puis Avancées, et cochez « Afficher les fonctionnalités pour les développeurs web ». Ouvrez ensuite Réglages, Développeurs, et cochez « Autoriser les extensions non signées ». Safari demande votre mot de passe, et le redemande à chaque redémarrage.",
+    open: "Ouvrez une fois l’application que vous venez de construire. Activez ensuite Innkeep Companion dans les Réglages de Safari, sous Extensions.",
+    sites:
+      "Sur Airbnb et sur Booking.com, cliquez sur l’icône Innkeep Companion dans la barre d’outils et choisissez « Toujours autoriser sur ce site web ». D’ici là, Safari tient l’extension à l’écart de ces pages.",
+    connect: "Poursuivez avec « Reliez-la à cet Innkeep » ci-dessus.",
   },
   after: {
     title: "Par la suite",

@@ -1,6 +1,6 @@
 //
 //  SafariWebExtensionHandler.swift
-//  Innkeep Companion Extension
+//  Shared (Extension)
 //
 //  Created by Jonathan Etaix on 25/11/2026.
 //

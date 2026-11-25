@@ -4,6 +4,8 @@ import { deleteCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { appState, getDb, withData } from "../../src/db";
+import { requestAccess } from "../../src/features/marketing/mutations";
+import { LOCALES } from "../../src/i18n/config";
 import {
   appPassword,
   passwordMatches,
@@ -65,6 +67,12 @@ export const auth = new Hono<Env>()
       maxAge: 60 * 60 * 24 * SESSION_DAYS,
     });
     return c.json({ ok: true as const });
+  })
+  // Early access to the hosted version: open to anyone, touches no data, sends one message.
+  .post("/access", async (c) => {
+    const sent = (await c.req.json().catch(() => null)) as Record<string, unknown> | null;
+    const locale = z.enum(LOCALES).catch("en").parse(sent?.locale);
+    return c.json(await requestAccess({ email: sent?.email, company: sent?.company ?? undefined }, locale));
   })
   .delete("/session", (c) => {
     deleteCookie(c, SESSION_COOKIE, { path: "/" });

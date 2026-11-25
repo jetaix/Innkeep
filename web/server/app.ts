@@ -6,6 +6,7 @@ import { auth } from "./auth";
 import type { Env } from "./env";
 import { read } from "./read";
 import { decide, SESSION_COOKIE } from "./scope";
+import { write } from "./write";
 
 /**
  * The API the client-rendered app talks to. Machine routes (iCal, ingest,
@@ -25,13 +26,18 @@ export const app = new Hono<Env>()
     c.set("signedIn", verdict.signedIn);
     await withData(verdict.scope, next);
   })
-  .route("/", read);
+  .route("/", read)
+  .route("/", write);
 
 /** The API's routes and their types, for the client. */
 export type AppType = typeof app;
 
 app.onError((error, c) => {
   if (error instanceof HTTPException) return c.json({ error: error.message }, error.status);
+  // What was sent does not fit: the change's own check, or a route's.
+  if (error.name === "InvalidInput" || error.name === "ZodError") {
+    return c.json({ error: error.name === "InvalidInput" ? error.message : "Check what was sent." }, 400);
+  }
   // drizzle wraps what the database layer throws.
   const cause = (error as { cause?: { name?: string } }).cause;
   if (error.name === "DemoReadOnlyError" || cause?.name === "DemoReadOnlyError") {
