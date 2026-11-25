@@ -186,6 +186,9 @@ guests see it, and reviews. Its toolbar button offers **Update reservations**
 See [extension/README.md](extension/README.md) for setup and for the risk you
 take by using it: the platforms' terms restrict automated data collection.
 
+[Download the extension folder](https://github.com/jetaix/Innkeep/releases/download/extension/innkeep-extension.zip) on its own, as a ZIP to unzip and load
+in Chrome, without the rest of the repository.
+
 ### Claude (AI advice)
 
 Open **Suggestions** in the sidebar and go to its Claude section, create an API key in the Anthropic Console,

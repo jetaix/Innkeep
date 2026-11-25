@@ -74,7 +74,8 @@ and token ready to copy. The same steps:
    needed because the extension is loaded from a folder, not from the Chrome
    Web Store.
 3. **Load it.** Click **Load unpacked** and choose this `extension/` folder. A
-   card named Innkeep appears.
+   card named Innkeep appears. Without the repository on your computer,
+   [download the folder](https://github.com/jetaix/Innkeep/releases/download/extension/innkeep-extension.zip), unzip it and choose `innkeep-extension`.
 4. **Pin it.** Click the puzzle-piece icon next to the address bar and pin
    Innkeep, so its icon stays in the toolbar.
 5. **Connect it.** Click the icon, then **Settings** at the bottom of the
