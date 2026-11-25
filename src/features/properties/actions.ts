@@ -2,19 +2,8 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
-import { applied, fields, InvalidInput } from "@/lib/form";
+import { applied, fields } from "@/lib/form";
 import * as change from "./mutations";
-
-export async function createProperty(form: FormData) {
-  let id: number;
-  try {
-    id = await change.createProperty(fields(form));
-  } catch (error) {
-    if (error instanceof InvalidInput) return;
-    throw error;
-  }
-  redirect(`/properties/${id}`);
-}
 
 export async function updateProperty(id: number, form: FormData) {
   if (await applied(() => change.updateProperty(id, fields(form)))) refresh();

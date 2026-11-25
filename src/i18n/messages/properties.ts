@@ -35,12 +35,8 @@ const en = {
   },
   create: {
     open: "Add a property",
-    title: "New property",
-    hint: "Start with a name. You fill in the details and connect the calendars on the next page.",
     label: "Name",
     placeholder: "A name only you see, e.g. Canal Loft",
-    submit: "Add property",
-    pending: "Adding…",
   },
   property: {
     title: "Property",
@@ -166,12 +162,8 @@ const fr: typeof en = {
   },
   create: {
     open: "Ajouter un logement",
-    title: "Nouveau logement",
-    hint: "Commencez par un nom. Vous complétez les détails et connectez les calendriers sur la page suivante.",
     label: "Nom",
     placeholder: "Un nom que vous seul voyez, par ex. Loft du canal",
-    submit: "Ajouter le logement",
-    pending: "Ajout…",
   },
   property: {
     title: "Logement",

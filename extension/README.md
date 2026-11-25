@@ -1,4 +1,4 @@
-# Innkeep Companion
+# Innkeep browser extension
 
 A small browser extension that fills in what calendar links leave out. It
 shows a "Send to Innkeep" button on three pages of your own host accounts:
@@ -74,9 +74,9 @@ and token ready to copy. The same steps:
    needed because the extension is loaded from a folder, not from the Chrome
    Web Store.
 3. **Load it.** Click **Load unpacked** and choose this `extension/` folder. A
-   card named Innkeep Companion appears.
+   card named Innkeep appears.
 4. **Pin it.** Click the puzzle-piece icon next to the address bar and pin
-   Innkeep Companion, so its icon stays in the toolbar.
+   Innkeep, so its icon stays in the toolbar.
 5. **Connect it.** Click the icon, then **Settings** at the bottom of the
    popup. Enter your Innkeep address (for example `http://localhost:3000`)
    and the token, then **Save and test**. Chrome asks permission to reach that
@@ -98,12 +98,12 @@ Safari takes an extension only inside an app, so `safari/` holds a small Xcode
 project that wraps this folder. It needs a Mac with Xcode.
 
 1. **Build it.** Run `bun run build:safari`. It writes
-   `safari/build/Build/Products/Release/Innkeep Companion.app`.
+   `safari/build/Build/Products/Release/Innkeep.app`.
 2. **Allow it.** In Safari, open Settings → Advanced and tick **Show features
    for web developers**. Then Settings → Developer → **Allow unsigned
    extensions**. Safari asks for your password, and forgets this choice each
    time it quits: the app is signed for this Mac only, not by Apple.
-3. **Open the app once**, then turn on Innkeep Companion in Safari's Settings
+3. **Open the app once**, then turn on Innkeep in Safari's Settings
    → Extensions.
 4. **Let it read the sites.** Safari asks per site: on Airbnb and Booking.com,
    click the extension's icon and choose **Always Allow on This Website**.
@@ -112,6 +112,25 @@ project that wraps this folder. It needs a Mac with Xcode.
    **Save and test**.
 
 After changing a file in this folder, build again and reopen Safari.
+
+### Safari on an iPhone or iPad
+
+The same Xcode project has an iPhone and iPad app. There is no script for it:
+open `safari/Innkeep/Innkeep.xcodeproj` in Xcode, choose
+the scheme **Innkeep (iOS)**, pick your device or a simulator, set
+your own team under Signing, and press Run.
+
+1. **Turn it on.** In the Settings app, open Apps → Safari → Extensions and
+   switch on Innkeep.
+2. **Let it read the sites.** On Airbnb and Booking.com, open the page menu in
+   Safari's address bar, choose the extension and allow it on that website.
+3. **Connect it.** Same menu → Innkeep → **Settings**, then the
+   address, the token and **Save and test**. On a real device the address must
+   be one the phone can reach: `localhost` there is the phone itself.
+
+Checked in the iOS Simulator: the extension connects to Innkeep and reads the
+Airbnb reservations page. Booking.com and the two runs of the popup have not
+been tried on a phone.
 
 ### One click from Innkeep
 
@@ -128,7 +147,7 @@ Innkeep.
 
 ### The toolbar popup
 
-Click the Innkeep Companion icon. It has two buttons, which Innkeep also
+Click the Innkeep icon. It has two buttons, which Innkeep also
 offers on its Data page and when you open it with data more than a day old:
 
 - **Update reservations** opens your Airbnb and Booking.com reservations
@@ -153,6 +172,27 @@ Innkeep instead if you prefer to stay closer to ordinary browsing.
 Extranet pages are kept only when they describe the property. Pages about
 money, invoices, bank details, the account, its users, guests or messages are
 never read, whatever they are called.
+
+### Notifications
+
+In the extension's **Settings**, tick **Notify me about new, changed and
+cancelled reservations** and allow it when the browser asks. A first
+notification confirms it works.
+
+While the browser is open, the extension asks your Innkeep (and nothing else)
+every five minutes what happened to your reservations, and shows a
+notification for each new stay, change of dates or cancellation. A click opens
+the Reservations page. Innkeep words them in the browser's language, English
+or French.
+
+- Innkeep learns of a change when it imports your calendar links (every 15
+  minutes by default), so a notification can come up to twenty minutes late,
+  and without the guest's name until a reservations page has been read.
+- Booking.com's calendar does not tell a booking from dates you closed, so
+  those notifications say "Dates now closed on Booking.com".
+- Innkeep must be running and reachable. Nothing is shown while the browser is
+  closed, and what happened meanwhile is shown when it opens again.
+- Not in Safari, which does not offer notifications to extensions.
 
 ### Nightly prices
 
@@ -224,16 +264,15 @@ it would be counted twice.
 - All-numeric dates. Airbnb writes the month as a word in the languages
   tested (French on the live page; English, German and Spanish in unit tests).
 - Firefox.
-- Safari on iPhone and iPad.
 
 ## Files
 
-| File                         | Role                                                           |
-| ---------------------------- | -------------------------------------------------------------- |
-| `manifest.json`              | Permissions: storage, plus the one Innkeep address you approve |
-| `parse.js`                   | Pure text parsing, unit tested in `parse.test.ts`              |
-| `airbnb.js`, `booking.js`    | Say which page elements to read                                |
-| `ui.js`                      | The "Send to Innkeep" control and automatic sending            |
-| `background.js`              | The only code that uses the network, and only to reach Innkeep |
-| `options.html`, `options.js` | Connection settings                                            |
-| `../safari/`                 | The Xcode project that wraps this folder for Safari on a Mac   |
+| File                         | Role                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `manifest.json`              | Permissions: storage, the one Innkeep address you approve, and notifications if you ask for them |
+| `parse.js`                   | Pure text parsing, unit tested in `parse.test.ts`                                                |
+| `airbnb.js`, `booking.js`    | Say which page elements to read                                                                  |
+| `ui.js`                      | The "Send to Innkeep" control and automatic sending                                              |
+| `background.js`              | The only code that uses the network, and only to reach Innkeep                                   |
+| `options.html`, `options.js` | Connection settings                                                                              |
+| `../safari/`                 | The Xcode project that wraps this folder for Safari on a Mac                                     |

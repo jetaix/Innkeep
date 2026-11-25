@@ -6,7 +6,7 @@ import { reservationLinks } from "./platform-links";
 
 /**
  * One-click refresh of guest names, payouts and past stays. Each button opens the host's
- * own reservations page on the platform in a new tab; the Innkeep Companion
+ * own reservations page on the platform in a new tab; the Innkeep
  * extension reads it, sends the details here and closes the tab again.
  *
  * Deliberately a plain link, not `noreferrer`: the extension recognises a tab

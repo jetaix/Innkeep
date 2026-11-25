@@ -11,8 +11,7 @@ const en = {
   outdated: {
     before: (version: string | null, required: string) =>
       `Your extension is ${version ? `version ${version}` : "an older version"}; Innkeep now needs ${required} to store statuses, booking dates and cancelled stays. Open`,
-    after:
-      ", press the reload arrow on Innkeep Companion, then open your reservations pages again (last step below).",
+    after: ", press the reload arrow on Innkeep, then open your reservations pages again (last step below).",
   },
   setup: {
     title: "Set it up",
@@ -25,7 +24,7 @@ const en = {
     downloadHint: "A ZIP file. Unzip it and keep the folder: the browser loads the extension from it.",
     /** In the "outdated" notice, before the download button. */
     update:
-      "To update: download it again, unzip it in place of the old folder, then press the reload arrow on Innkeep Companion.",
+      "To update: download it again, unzip it in place of the old folder, then press the reload arrow on Innkeep.",
     /** "Add a line `EXTENSION_TOKEN=` followed by a long random string to `.env.local`, then restart…" */
     switchOn: {
       title: "Switch it on in Innkeep",
@@ -46,19 +45,25 @@ const en = {
       before: "Click",
       strong: "Load unpacked",
       after:
-        "(top left) and choose the folder below. On a Mac, press Command + Shift + G in the window that opens and paste the path. A card named Innkeep Companion appears.",
+        "(top left) and choose the folder below. On a Mac, press Command + Shift + G in the window that opens and paste the path. A card named Innkeep appears.",
       /** When Innkeep runs on a server: the folder comes from the download. */
       afterHosted:
-        "(top left) and choose the innkeep-extension folder you get by unzipping the download below. A card named Innkeep Companion appears.",
+        "(top left) and choose the innkeep-extension folder you get by unzipping the download below. A card named Innkeep appears.",
       elsewhere: "On another computer, download the extension instead:",
+    },
+    /** In place of the two steps above, once the extension is on the Chrome Web Store. */
+    store: {
+      title: "Install the extension",
+      body: "Press the button: the Chrome Web Store opens in a new tab. Click “Add to Chrome”, then “Add extension”. This works in Chrome, Edge, Brave and Arc.",
+      button: "Install from the Chrome Web Store",
     },
     pin: {
       title: "Keep its icon in view",
-      body: "Click the puzzle-piece icon to the right of the address bar, then the pin next to Innkeep Companion. Its icon now stays in the toolbar.",
+      body: "Click the puzzle-piece icon to the right of the address bar, then the pin next to Innkeep. Its icon now stays in the toolbar.",
     },
     connect: {
       title: "Connect it to this Innkeep",
-      before: "Click the Innkeep Companion icon, then",
+      before: "Click the Innkeep icon, then",
       settings: "Settings",
       middle: "at the bottom of the small window. Paste the address and the token below, then click",
       strong: "Save and test",
@@ -68,31 +73,129 @@ const en = {
     },
     read: {
       title: "Read your data",
-      body: "Sign in to Airbnb and to Booking.com in this same browser. Then press the button: one tab goes through your own pages by itself, shows a Stop button on each, and comes back here. The same two buttons are in the Innkeep Companion icon.",
+      body: "Sign in to Airbnb and to Booking.com in this same browser. Then press the button: one tab goes through your own pages by itself, shows a Stop button on each, and comes back here. The same two buttons are in the Innkeep icon.",
       manual: "Or open one page at a time:",
     },
   },
-  /** A second, shorter guide under the first, shown when Innkeep runs from its folder on this computer. */
+  /** The guide for Safari on a Mac, shown when Innkeep runs from its folder on this computer. */
   safari: {
     title: "Safari on a Mac",
-    intro:
-      "Safari takes an extension only inside an app, which you build from Innkeep's folder. It needs Xcode, Apple's free developer tool.",
+    subtitle: "About twenty minutes, most of it waiting for a download. Once.",
     copyCommand: "Copy command",
-    build: "In Terminal, from Innkeep's folder, run:",
-    allow:
-      "In Safari, open Settings, then Advanced, and tick “Show features for web developers”. Then open Settings, Developer, and tick “Allow unsigned extensions”. Safari asks for your password, and asks again each time it restarts.",
-    open: "Open the app you just built, once. Then turn on Innkeep Companion in Safari's Settings, under Extensions.",
-    sites:
-      "On Airbnb and on Booking.com, click the Innkeep Companion icon in the toolbar and choose “Always Allow on This Website”. Until then Safari keeps the extension away from those pages.",
-    connect: "Continue with “Connect it to this Innkeep” above.",
+    xcode: {
+      title: "Install Xcode",
+      body: "Xcode is Apple's free tool for making apps. Safari only accepts an extension that comes inside an app, and Xcode makes that app. Open the App Store, search for Xcode and click Get. It is a large download. Then open Xcode once, accept what it asks and wait until it has finished installing. You can close it afterwards.",
+    },
+    build: {
+      title: "Make the app",
+      body: "Open Terminal: press Command + Space, type Terminal and press Return. Paste the line below and press Return. After about a minute it ends with a line that names Innkeep.app. Nothing else on your Mac is changed.",
+    },
+    allow: {
+      title: "Let Safari accept it",
+      body: "In Safari, click Safari in the menu bar at the top of the screen, then Settings. Open the Advanced tab and tick “Show features for web developers”. A new Developer tab appears: open it and tick “Allow unsigned extensions”. Safari asks for the password of your Mac. Safari forgets this choice each time it quits, so tick the box again after you restart Safari.",
+    },
+    open: {
+      title: "Open the app once",
+      body: "In Finder, press Command + Shift + G, paste the path below and press Return. Double-click Innkeep. A small window opens: you can close it. Opening the app once is what shows the extension to Safari.",
+    },
+    enable: {
+      title: "Turn it on",
+      body: "Back in Safari's Settings, open the Extensions tab and tick Innkeep in the list on the left. Its icon appears next to the address bar.",
+    },
+    sites: {
+      title: "Allow it on Airbnb and Booking.com",
+      body: "Open airbnb.com and sign in. Click the Innkeep icon next to the address bar and choose “Always Allow on This Website”. Do the same on admin.booking.com. Until then Safari keeps the extension away from those pages and nothing is read.",
+    },
+    /** Ends the "Connect it to this Innkeep" step, in place of the sentence about Chrome. */
+    connectAfter:
+      ". Safari asks whether the extension may reach that address: allow it. You should read “Connected”.",
+    later: "After updating Innkeep, do “Make the app” again, then quit Safari and open it again.",
+  },
+  /** The guide for Safari on an iPhone or iPad. */
+  ios: {
+    title: "Safari on an iPhone or iPad",
+    subtitle: "Needs a Mac with Xcode and the cable of the phone. About half an hour, once.",
+    limits:
+      "Tried so far on a phone: connecting to Innkeep and reading your Airbnb reservations page. Booking.com and “Refresh everything” have not been tried there yet.",
+    need: {
+      title: "Get what you need",
+      body: "A Mac with Xcode (see “Install Xcode” in the guide for Safari on a Mac), your iPhone or iPad with its cable, and your Apple account. With a free Apple account the app stops working after seven days: press the ▶ button of step 5 again to renew it.",
+    },
+    project: {
+      title: "Open the project in Xcode",
+      body: "In Finder, press Command + Shift + G, paste the path below and press Return. Double-click the file named Innkeep.xcodeproj. Xcode opens.",
+    },
+    sign: {
+      title: "Sign it with your Apple account",
+      body: "In the left column of Xcode, click the blue Innkeep line at the very top. In the middle, under Targets, click “Innkeep (iOS)”, then the tab “Signing & Capabilities”. In the Team menu choose “Add an Account…”, sign in, then choose your name. Do the same for the target “Innkeep Extension (iOS)”.",
+      taken:
+        "If Xcode says the identifier is not available, type a few letters of your own at the end of “Bundle Identifier” on the first target, and the same letters just before “.Extension” on the second.",
+    },
+    phone: {
+      title: "Prepare the phone",
+      body: "Plug the phone into the Mac and tap Trust on the phone. Then, on the phone, open Settings, Privacy & Security, Developer Mode, switch it on and restart when asked. This lets the phone run an app that does not come from the App Store.",
+    },
+    run: {
+      title: "Put the app on the phone",
+      body: "At the top of the Xcode window, click the name that starts with Innkeep and choose “Innkeep (iOS)”, then click the device next to it and choose your phone. Press the ▶ button. The first time takes a few minutes. If the phone says the developer is not trusted, open Settings, General, VPN & Device Management, tap your Apple account, then Trust, and press ▶ again. The Innkeep app opens on the phone; you can close it.",
+    },
+    enable: {
+      title: "Turn it on in Safari",
+      body: "On the phone, open Settings, Apps, Safari, Extensions, tap Innkeep and switch on “Allow Extension”. On older versions of iOS, Safari is directly in Settings.",
+    },
+    sites: {
+      title: "Allow it on Airbnb and Booking.com",
+      body: "In Safari on the phone, open airbnb.com and sign in. Tap the icon at the left end of the address bar, then Innkeep, and choose “Always Allow”, then “Always Allow on This Website”. Do the same on admin.booking.com.",
+    },
+    connect: {
+      title: "Connect it to this Innkeep",
+      body: "Open this page on the phone, so that you can copy the address and the token there. Then tap the icon at the left end of the address bar, Innkeep, and Settings. Paste the address and the token, tap “Save and test” and allow when Safari asks. You should read “Connected”.",
+      local:
+        "This Innkeep runs on this computer only: its address starts with localhost, which on a phone means the phone itself. The extension on a phone needs an Innkeep that has an address on the internet.",
+    },
+    read: {
+      title: "Read your reservations",
+      body: "Still in Safari on the phone, open your reservations page on Airbnb. A small Innkeep box appears at the bottom of the page and sends what the page shows; if it shows a “Send to Innkeep” button, tap it. Then open Innkeep: the reservations are there.",
+    },
+  },
+  /** How to use the extension once it is set up, in any browser. */
+  use: {
+    title: "Use it day to day",
+    subtitle: "The extension only works when you ask. Nothing runs while the browser is closed.",
+    steps: [
+      {
+        title: "Stay signed in to Airbnb and Booking.com",
+        body: "Use the browser where you added the extension, and sign in to both sites as you always do. The extension never sees your passwords.",
+      },
+      {
+        title: "Press “Refresh everything”",
+        body: "The button is on this page, on the Data page of Innkeep and in the Innkeep icon of the browser. It takes a few minutes. “Reservations only” takes under a minute.",
+      },
+      {
+        title: "Let the tab work",
+        body: "One tab goes through your own pages by itself. A band at the top says which page it is on and has a Stop button. You can use other tabs meanwhile, but keep that one open. A page that asks you to sign in is skipped.",
+      },
+      {
+        title: "Look at the result",
+        body: "The tab comes back to the Data page of Innkeep, which says what was read and when. Guest names, payouts and prices are now up to date everywhere in Innkeep.",
+      },
+      {
+        title: "Do it again when Innkeep asks",
+        body: "After a day, Innkeep shows “Your data is more than a day old” with the same button. You can also open a single Airbnb or Booking.com page yourself: the Innkeep box at the bottom of that page sends what it shows.",
+      },
+      {
+        title: "Turn on notifications",
+        body: "In Chrome, Edge, Brave or Arc: click the Innkeep icon, then Settings, and tick “Notify me about new, changed and cancelled reservations”. The browser asks once: allow it. While the browser is open, the extension asks Innkeep every five minutes and shows a notification for each change. Innkeep learns of a change from your calendar links, so it can come up to twenty minutes after the booking, and without the guest's name. Safari does not offer notifications to extensions.",
+      },
+    ],
   },
   after: {
     title: "Later on",
     items: [
-      "After updating Innkeep: open the extensions page again and press the round arrow on the Innkeep Companion card, then refresh any Airbnb or Booking.com tab that was already open.",
-      "Chrome may show “Disable developer mode extensions” when it starts. Close that message; choosing to disable would switch Innkeep Companion off.",
+      "After updating Innkeep: open the extensions page again and press the round arrow on the Innkeep card, then refresh any Airbnb or Booking.com tab that was already open.",
+      "Chrome may show “Disable developer mode extensions” when it starts. Close that message; choosing to disable would switch Innkeep off.",
       "If the corner button of Innkeep says “Update the browser extension”, do the first point above.",
-      "To remove it: on the extensions page, click Remove on the Innkeep Companion card. Nothing stays behind.",
+      "To remove it: on the extensions page, click Remove on the Innkeep card. Nothing stays behind.",
     ],
   },
   reads: {
@@ -159,8 +262,8 @@ const en = {
     stuck: {
       title: "Still on this page after ten seconds?",
       reload: (version: string) =>
-        `The extension is missing or older than ${version}. Open chrome://extensions and press the reload arrow on Innkeep Companion, then press the button again.`,
-      popup: "Or click the Innkeep Companion icon in the browser's toolbar and choose a button there.",
+        `The extension is missing or older than ${version}. Open chrome://extensions and press the reload arrow on Innkeep, then press the button again.`,
+      popup: "Or click the Innkeep icon in the browser's toolbar and choose a button there.",
       guide: "Extension setup",
       data: "Back to Data",
     },
@@ -179,7 +282,7 @@ const fr: typeof en = {
     before: (version, required) =>
       `Votre extension est ${version ? `en version ${version}` : "dans une ancienne version"} ; Innkeep a désormais besoin de la version ${required} pour enregistrer les statuts, les dates de réservation et les séjours annulés. Ouvrez`,
     after:
-      ", cliquez sur la flèche de rechargement d’Innkeep Companion, puis ouvrez à nouveau vos pages de réservations (dernière étape ci-dessous).",
+      ", cliquez sur la flèche de rechargement d’Innkeep, puis ouvrez à nouveau vos pages de réservations (dernière étape ci-dessous).",
   },
   setup: {
     title: "Installation",
@@ -190,7 +293,7 @@ const fr: typeof en = {
     downloadHint:
       "Un fichier ZIP. Décompressez-le et conservez le dossier : le navigateur charge l’extension depuis celui-ci.",
     update:
-      "Pour mettre à jour : téléchargez-la de nouveau, décompressez-la à la place de l’ancien dossier, puis appuyez sur la flèche de rechargement d’Innkeep Companion.",
+      "Pour mettre à jour : téléchargez-la de nouveau, décompressez-la à la place de l’ancien dossier, puis appuyez sur la flèche de rechargement d’Innkeep.",
     copyToken: "Copier le jeton",
     switchOn: {
       title: "Activez-la dans Innkeep",
@@ -212,18 +315,23 @@ const fr: typeof en = {
       before: "Cliquez sur",
       strong: "Charger l’extension non empaquetée",
       after:
-        "(en haut à gauche) et choisissez le dossier ci-dessous. Sur Mac, appuyez sur Commande + Maj + G dans la fenêtre qui s’ouvre et collez le chemin. Une carte nommée Innkeep Companion apparaît.",
+        "(en haut à gauche) et choisissez le dossier ci-dessous. Sur Mac, appuyez sur Commande + Maj + G dans la fenêtre qui s’ouvre et collez le chemin. Une carte nommée Innkeep apparaît.",
       afterHosted:
-        "(en haut à gauche) et choisissez le dossier innkeep-extension obtenu en décompressant le téléchargement ci-dessous. Une carte nommée Innkeep Companion apparaît.",
+        "(en haut à gauche) et choisissez le dossier innkeep-extension obtenu en décompressant le téléchargement ci-dessous. Une carte nommée Innkeep apparaît.",
       elsewhere: "Sur un autre ordinateur, téléchargez plutôt l’extension :",
+    },
+    store: {
+      title: "Installez l’extension",
+      body: "Appuyez sur le bouton : le Chrome Web Store s’ouvre dans un nouvel onglet. Cliquez sur « Ajouter à Chrome », puis sur « Ajouter l’extension ». Cela fonctionne dans Chrome, Edge, Brave et Arc.",
+      button: "Installer depuis le Chrome Web Store",
     },
     pin: {
       title: "Gardez son icône visible",
-      body: "Cliquez sur l’icône en forme de pièce de puzzle, à droite de la barre d’adresse, puis sur l’épingle à côté d’Innkeep Companion. Son icône reste alors dans la barre d’outils.",
+      body: "Cliquez sur l’icône en forme de pièce de puzzle, à droite de la barre d’adresse, puis sur l’épingle à côté d’Innkeep. Son icône reste alors dans la barre d’outils.",
     },
     connect: {
       title: "Reliez-la à cet Innkeep",
-      before: "Cliquez sur l’icône Innkeep Companion, puis sur",
+      before: "Cliquez sur l’icône Innkeep, puis sur",
       settings: "Settings",
       middle: "en bas de la petite fenêtre. Collez l’adresse et le jeton ci-dessous, puis cliquez sur",
       strong: "Save and test",
@@ -233,30 +341,127 @@ const fr: typeof en = {
     },
     read: {
       title: "Lisez vos données",
-      body: "Connectez-vous à Airbnb et à Booking.com dans ce même navigateur. Appuyez ensuite sur le bouton : un onglet parcourt vos propres pages tout seul, affiche un bouton Stop sur chacune, puis revient ici. Les deux mêmes boutons se trouvent dans l’icône Innkeep Companion.",
+      body: "Connectez-vous à Airbnb et à Booking.com dans ce même navigateur. Appuyez ensuite sur le bouton : un onglet parcourt vos propres pages tout seul, affiche un bouton Stop sur chacune, puis revient ici. Les deux mêmes boutons se trouvent dans l’icône Innkeep.",
       manual: "Ou ouvrez une page à la fois :",
     },
   },
   safari: {
     title: "Safari sur un Mac",
-    intro:
-      "Safari n’accepte une extension que dans une application, à construire depuis le dossier d’Innkeep. Il faut Xcode, l’outil de développement gratuit d’Apple.",
+    subtitle: "Environ vingt minutes, surtout le temps d’un téléchargement. Une seule fois.",
     copyCommand: "Copier la commande",
-    build: "Dans le Terminal, depuis le dossier d’Innkeep, lancez :",
-    allow:
-      "Dans Safari, ouvrez Réglages, puis Avancées, et cochez « Afficher les fonctionnalités pour les développeurs web ». Ouvrez ensuite Réglages, Développeurs, et cochez « Autoriser les extensions non signées ». Safari demande votre mot de passe, et le redemande à chaque redémarrage.",
-    open: "Ouvrez une fois l’application que vous venez de construire. Activez ensuite Innkeep Companion dans les Réglages de Safari, sous Extensions.",
-    sites:
-      "Sur Airbnb et sur Booking.com, cliquez sur l’icône Innkeep Companion dans la barre d’outils et choisissez « Toujours autoriser sur ce site web ». D’ici là, Safari tient l’extension à l’écart de ces pages.",
-    connect: "Poursuivez avec « Reliez-la à cet Innkeep » ci-dessus.",
+    xcode: {
+      title: "Installez Xcode",
+      body: "Xcode est l’outil gratuit d’Apple pour créer des applications. Safari n’accepte une extension que dans une application, et c’est Xcode qui la fabrique. Ouvrez l’App Store, cherchez Xcode et cliquez sur Obtenir. Le téléchargement est volumineux. Ouvrez ensuite Xcode une fois, acceptez ce qu’il demande et attendez la fin de l’installation. Vous pouvez le fermer ensuite.",
+    },
+    build: {
+      title: "Fabriquez l’application",
+      body: "Ouvrez le Terminal : appuyez sur Commande + Espace, tapez Terminal et appuyez sur Entrée. Collez la ligne ci-dessous et appuyez sur Entrée. Au bout d’une minute environ, la dernière ligne nomme Innkeep.app. Rien d’autre n’est modifié sur votre Mac.",
+    },
+    allow: {
+      title: "Autorisez-la dans Safari",
+      body: "Dans Safari, cliquez sur Safari dans la barre des menus en haut de l’écran, puis sur Réglages. Ouvrez l’onglet Avancées et cochez « Afficher les fonctionnalités pour les développeurs web ». Un onglet Développeurs apparaît : ouvrez-le et cochez « Autoriser les extensions non signées ». Safari demande le mot de passe de votre Mac. Safari oublie ce choix chaque fois qu’il se ferme : cochez de nouveau la case après l’avoir relancé.",
+    },
+    open: {
+      title: "Ouvrez l’application une fois",
+      body: "Dans le Finder, appuyez sur Commande + Maj + G, collez le chemin ci-dessous et appuyez sur Entrée. Double-cliquez sur Innkeep. Une petite fenêtre s’ouvre : vous pouvez la fermer. C’est cette ouverture qui fait connaître l’extension à Safari.",
+    },
+    enable: {
+      title: "Activez-la",
+      body: "De retour dans les Réglages de Safari, ouvrez l’onglet Extensions et cochez Innkeep dans la liste de gauche. Son icône apparaît à côté de la barre d’adresse.",
+    },
+    sites: {
+      title: "Autorisez-la sur Airbnb et Booking.com",
+      body: "Ouvrez airbnb.com et connectez-vous. Cliquez sur l’icône Innkeep à côté de la barre d’adresse et choisissez « Toujours autoriser sur ce site web ». Faites de même sur admin.booking.com. D’ici là, Safari tient l’extension à l’écart de ces pages et rien n’est lu.",
+    },
+    connectAfter:
+      ". Safari demande si l’extension peut accéder à cette adresse : acceptez. Vous devez lire « Connected ».",
+    later:
+      "Après une mise à jour d’Innkeep, refaites « Fabriquez l’application », puis quittez Safari et rouvrez-le.",
+  },
+  ios: {
+    title: "Safari sur un iPhone ou un iPad",
+    subtitle: "Il faut un Mac avec Xcode et le câble du téléphone. Environ une demi-heure, une seule fois.",
+    limits:
+      "Essayé jusqu’ici sur un téléphone : la connexion à Innkeep et la lecture de votre page de réservations Airbnb. Booking.com et « Tout mettre à jour » n’y ont pas encore été essayés.",
+    need: {
+      title: "Réunissez ce qu’il faut",
+      body: "Un Mac avec Xcode (voir « Installez Xcode » dans le guide Safari sur un Mac), votre iPhone ou iPad avec son câble, et votre compte Apple. Avec un compte Apple gratuit, l’application cesse de fonctionner au bout de sept jours : appuyez de nouveau sur le bouton ▶ de l’étape 5 pour la renouveler.",
+    },
+    project: {
+      title: "Ouvrez le projet dans Xcode",
+      body: "Dans le Finder, appuyez sur Commande + Maj + G, collez le chemin ci-dessous et appuyez sur Entrée. Double-cliquez sur le fichier Innkeep.xcodeproj. Xcode s’ouvre.",
+    },
+    sign: {
+      title: "Signez-la avec votre compte Apple",
+      body: "Dans la colonne de gauche de Xcode, cliquez sur la ligne bleue Innkeep tout en haut. Au milieu, sous Targets, cliquez sur « Innkeep (iOS) », puis sur l’onglet « Signing & Capabilities ». Dans le menu Team, choisissez « Add an Account… », connectez-vous, puis choisissez votre nom. Faites de même pour la cible « Innkeep Extension (iOS) ».",
+      taken:
+        "Si Xcode indique que l’identifiant n’est pas disponible, ajoutez quelques lettres de votre choix à la fin de « Bundle Identifier » sur la première cible, et les mêmes lettres juste avant « .Extension » sur la seconde.",
+    },
+    phone: {
+      title: "Préparez le téléphone",
+      body: "Branchez le téléphone au Mac et touchez Se fier sur le téléphone. Puis, sur le téléphone, ouvrez Réglages, Confidentialité et sécurité, Mode développeur, activez-le et redémarrez quand il le demande. Le téléphone peut alors lancer une application qui ne vient pas de l’App Store.",
+    },
+    run: {
+      title: "Installez l’application sur le téléphone",
+      body: "En haut de la fenêtre de Xcode, cliquez sur le nom qui commence par Innkeep et choisissez « Innkeep (iOS) », puis cliquez sur l’appareil à côté et choisissez votre téléphone. Appuyez sur le bouton ▶. La première fois prend quelques minutes. Si le téléphone indique que le développeur n’est pas approuvé, ouvrez Réglages, Général, VPN et gestion de l’appareil, touchez votre compte Apple, puis Faire confiance, et appuyez de nouveau sur ▶. L’application Innkeep s’ouvre sur le téléphone ; vous pouvez la fermer.",
+    },
+    enable: {
+      title: "Activez-la dans Safari",
+      body: "Sur le téléphone, ouvrez Réglages, Apps, Safari, Extensions, touchez Innkeep et activez « Autoriser l’extension ». Sur les versions plus anciennes d’iOS, Safari se trouve directement dans Réglages.",
+    },
+    sites: {
+      title: "Autorisez-la sur Airbnb et Booking.com",
+      body: "Dans Safari sur le téléphone, ouvrez airbnb.com et connectez-vous. Touchez l’icône à gauche de la barre d’adresse, puis Innkeep, et choisissez « Toujours autoriser », puis « Toujours autoriser sur ce site web ». Faites de même sur admin.booking.com.",
+    },
+    connect: {
+      title: "Reliez-la à cet Innkeep",
+      body: "Ouvrez cette page sur le téléphone, pour y copier l’adresse et le jeton. Touchez ensuite l’icône à gauche de la barre d’adresse, Innkeep, puis Settings. Collez l’adresse et le jeton, touchez « Save and test » et acceptez quand Safari le demande. Vous devez lire « Connected ».",
+      local:
+        "Cet Innkeep ne fonctionne que sur cet ordinateur : son adresse commence par localhost, ce qui, sur un téléphone, désigne le téléphone lui-même. L’extension sur téléphone a besoin d’un Innkeep qui a une adresse sur Internet.",
+    },
+    read: {
+      title: "Lisez vos réservations",
+      body: "Toujours dans Safari sur le téléphone, ouvrez votre page de réservations sur Airbnb. Un petit cadre Innkeep apparaît en bas de la page et envoie ce qu’elle affiche ; s’il montre un bouton « Send to Innkeep », touchez-le. Ouvrez ensuite Innkeep : les réservations y sont.",
+    },
+  },
+  use: {
+    title: "L’utiliser au quotidien",
+    subtitle:
+      "L’extension ne travaille que lorsque vous le demandez. Rien ne tourne quand le navigateur est fermé.",
+    steps: [
+      {
+        title: "Restez connecté à Airbnb et à Booking.com",
+        body: "Utilisez le navigateur où vous avez ajouté l’extension, et connectez-vous aux deux sites comme d’habitude. L’extension ne voit jamais vos mots de passe.",
+      },
+      {
+        title: "Appuyez sur « Tout mettre à jour »",
+        body: "Le bouton se trouve sur cette page, sur la page Données d’Innkeep et dans l’icône Innkeep du navigateur. Comptez quelques minutes. « Réservations seulement » prend moins d’une minute.",
+      },
+      {
+        title: "Laissez l’onglet travailler",
+        body: "Un onglet parcourt vos propres pages tout seul. Un bandeau en haut indique la page en cours et propose un bouton Stop. Vous pouvez utiliser d’autres onglets pendant ce temps, mais gardez celui-ci ouvert. Une page qui demande de vous connecter est ignorée.",
+      },
+      {
+        title: "Regardez le résultat",
+        body: "L’onglet revient sur la page Données d’Innkeep, qui indique ce qui a été lu et quand. Les noms des voyageurs, les versements et les prix sont alors à jour partout dans Innkeep.",
+      },
+      {
+        title: "Recommencez quand Innkeep le demande",
+        body: "Au bout d’un jour, Innkeep affiche « Vos données ont plus d’un jour » avec le même bouton. Vous pouvez aussi ouvrir vous-même une seule page Airbnb ou Booking.com : le cadre Innkeep en bas de cette page envoie ce qu’elle affiche.",
+      },
+      {
+        title: "Activez les notifications",
+        body: "Dans Chrome, Edge, Brave ou Arc : cliquez sur l’icône Innkeep, puis sur Settings, et cochez « Notify me about new, changed and cancelled reservations ». Le navigateur pose la question une fois : acceptez. Tant que le navigateur est ouvert, l’extension interroge Innkeep toutes les cinq minutes et affiche une notification pour chaque changement. Innkeep apprend un changement par vos liens de calendrier : la notification peut donc arriver jusqu’à vingt minutes après la réservation, et sans le nom du voyageur. Safari ne propose pas de notifications aux extensions.",
+      },
+    ],
   },
   after: {
     title: "Par la suite",
     items: [
-      "Après une mise à jour d’Innkeep : rouvrez la page des extensions et appuyez sur la flèche ronde de la carte Innkeep Companion, puis actualisez les onglets Airbnb ou Booking.com déjà ouverts.",
-      "Chrome peut afficher « Désactiver les extensions en mode développeur » au démarrage. Fermez ce message ; choisir de désactiver éteindrait Innkeep Companion.",
+      "Après une mise à jour d’Innkeep : rouvrez la page des extensions et appuyez sur la flèche ronde de la carte Innkeep, puis actualisez les onglets Airbnb ou Booking.com déjà ouverts.",
+      "Chrome peut afficher « Désactiver les extensions en mode développeur » au démarrage. Fermez ce message ; choisir de désactiver éteindrait Innkeep.",
       "Si le bouton en bas à droite d’Innkeep indique « Mettre à jour l’extension de navigateur », suivez le premier point ci-dessus.",
-      "Pour la retirer : sur la page des extensions, cliquez sur Supprimer sur la carte Innkeep Companion. Rien ne reste derrière.",
+      "Pour la retirer : sur la page des extensions, cliquez sur Supprimer sur la carte Innkeep. Rien ne reste derrière.",
     ],
   },
   reads: {
@@ -319,9 +524,8 @@ const fr: typeof en = {
     stuck: {
       title: "Toujours sur cette page après dix secondes ?",
       reload: (version) =>
-        `L’extension est absente ou antérieure à la version ${version}. Ouvrez chrome://extensions, appuyez sur la flèche de rechargement d’Innkeep Companion, puis appuyez de nouveau sur le bouton.`,
-      popup:
-        "Ou cliquez sur l’icône Innkeep Companion dans la barre d’outils du navigateur et choisissez un bouton.",
+        `L’extension est absente ou antérieure à la version ${version}. Ouvrez chrome://extensions, appuyez sur la flèche de rechargement d’Innkeep, puis appuyez de nouveau sur le bouton.`,
+      popup: "Ou cliquez sur l’icône Innkeep dans la barre d’outils du navigateur et choisissez un bouton.",
       guide: "Installer l’extension",
       data: "Retour aux Données",
     },

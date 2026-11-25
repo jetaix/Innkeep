@@ -107,8 +107,8 @@ bouton **Copier** pour tout ce qu’il faut coller. En résumé :
 2. Cliquez sur **Charger l’extension non empaquetée** et choisissez le
    dossier `extension` qui se trouve dans `Innkeep-main`.
 3. Cliquez sur l’icône en forme de pièce de puzzle, à côté de la barre
-   d’adresse, et épinglez Innkeep Companion pour garder son icône visible.
-4. Cliquez sur l’icône Innkeep Companion, ouvrez **Settings**, collez
+   d’adresse, et épinglez Innkeep pour garder son icône visible.
+4. Cliquez sur l’icône Innkeep, ouvrez **Settings**, collez
    l’adresse et le jeton qu’Innkeep vous affiche, puis cliquez sur
    **Save and test**.
 
@@ -153,8 +153,8 @@ Tout ce qu’Innkeep sait se trouve dans le dossier `data`, à l’intérieur de
    fichiers masqués ; sur Windows, cochez **Éléments masqués** dans le menu
    Affichage.)
 4. Démarrez Innkeep depuis le nouveau dossier.
-5. Dans la page des extensions de Chrome, supprimez l’ancienne Innkeep
-   Companion et chargez le dossier `extension` de la nouvelle version.
+5. Dans la page des extensions de Chrome, supprimez l’ancienne extension
+   Innkeep et chargez le dossier `extension` de la nouvelle version.
 
 ## En cas de problème
 
@@ -165,7 +165,7 @@ Tout ce qu’Innkeep sait se trouve dans le dossier `data`, à l’intérieur de
 | Le navigateur affiche « Ce site est inaccessible »              | La fenêtre de texte a été fermée. Relancez Innkeep.                                                        |
 | « That step failed » dans la fenêtre de texte                   | Copiez le texte de la fenêtre et envoyez-le à la personne qui vous a partagé Innkeep.                      |
 | La mise à jour ignore une plateforme                            | Vous n’y êtes pas connecté. Connectez-vous à Airbnb ou à Booking.com dans le même navigateur et réessayez. |
-| Le bouton de l’extension dans Innkeep indique « Mettre à jour » | Dans la page des extensions de Chrome, appuyez sur la flèche ronde d’Innkeep Companion.                    |
+| Le bouton de l’extension dans Innkeep indique « Mettre à jour » | Dans la page des extensions de Chrome, appuyez sur la flèche ronde d’Innkeep.                              |
 
 Les messages de la fenêtre de texte et de l’extension sont en anglais ;
 Innkeep lui-même est en français.

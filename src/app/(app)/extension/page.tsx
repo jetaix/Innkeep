@@ -1,18 +1,24 @@
-import { Download as DownloadIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
 import path from "node:path";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
-import { headers } from "next/headers";
 import { connection } from "next/server";
-import { CopyButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
 import { Badge, Card, Notice, PageHeader, SectionTitle } from "@/components/ui/primitives";
 import { Loading } from "@/components/ui/loading";
+import {
+  ChromeSteps,
+  Copyable,
+  Credentials,
+  Download,
+  innkeepOrigin,
+  isHosted,
+  Step,
+} from "@/features/extension/guide-parts";
 import { getExtensionStatus, REQUIRED_EXTENSION } from "@/features/extension/status";
 import { DetailsRefresh } from "@/features/reservations/details-refresh";
 import { getI18n } from "@/i18n/server";
-import manifest from "../../../../extension/manifest.json";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getI18n()).m.extension.title };
@@ -30,29 +36,32 @@ export default async function ExtensionPage() {
   );
 }
 
-function Copyable({ value, label, secret }: { value: string; label: string; secret?: boolean }) {
+/** A guide for another browser, closed until the host asks for it. */
+function FoldedGuide({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
   return (
-    <span className="mt-2 flex items-center gap-2">
-      <code className="min-w-0 flex-1 truncate rounded-md bg-sunken px-2 py-1.5 font-mono text-xs">
-        {secret ? "•".repeat(24) : value}
-      </code>
-      <CopyButton value={value} label={label} />
-    </span>
-  );
-}
-
-function Step({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <li className="flex gap-3 px-5 py-4 [counter-increment:step]">
-      <span
-        aria-hidden
-        className="flex size-5 shrink-0 items-center justify-center rounded-full bg-sunken text-[11px] font-semibold tabular-nums before:content-[counter(step)]"
-      />
-      <div className="min-w-0 flex-1">
-        <h3 className="font-medium">{title}</h3>
-        <div className="mt-1 text-[13px] leading-relaxed text-muted">{children}</div>
-      </div>
-    </li>
+    <Card>
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-[inherit] px-5 py-3 [&::-webkit-details-marker]:hidden">
+          <div>
+            <SectionTitle>{title}</SectionTitle>
+            <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
+          </div>
+          <ChevronDown
+            aria-hidden
+            className="size-4 shrink-0 text-muted transition-transform group-open:rotate-180"
+          />
+        </summary>
+        <ol className="divide-y divide-line border-t border-line [counter-reset:step]">{children}</ol>
+      </details>
+    </Card>
   );
 }
 
@@ -63,13 +72,8 @@ async function Guide() {
   const s = t.setup;
   const status = await getExtensionStatus();
   const token = process.env.EXTENSION_TOKEN;
-  const requestHeaders = await headers();
-  const origin =
-    process.env.APP_URL?.replace(/\/$/, "") ??
-    `${requestHeaders.get("x-forwarded-proto") ?? "http"}://${requestHeaders.get("host")}`;
-  const folder = path.join(process.cwd(), "extension");
-  // On a server there is no folder on the host's computer to point at: the extension is downloaded.
-  const hosted = Boolean(process.env.VERCEL);
+  const origin = await innkeepOrigin();
+  const hosted = isHosted();
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -100,37 +104,7 @@ async function Guide() {
           <p className="mt-0.5 text-xs text-muted">{s.subtitle}</p>
         </div>
         <ol className="divide-y divide-line [counter-reset:step]">
-          {!token && (
-            <Step title={s.switchOn.title}>
-              {s.switchOn.before} <code className="font-mono text-xs text-ink">EXTENSION_TOKEN=</code>{" "}
-              {s.switchOn.middle} <code className="font-mono text-xs text-ink">.env.local</code>
-              {s.switchOn.after}
-            </Step>
-          )}
-          <Step title={s.openPage.title}>
-            {s.openPage.before} <strong className="font-medium text-ink">{s.openPage.strong}</strong>{" "}
-            {s.openPage.after}
-            <Copyable value="chrome://extensions" label={s.copyAddress} />
-          </Step>
-          <Step title={s.load.title}>
-            {s.load.before} <strong className="font-medium text-ink">{s.load.strong}</strong>{" "}
-            {hosted ? s.load.afterHosted : s.load.after}
-            {!hosted && <Copyable value={folder} label={s.copyPath} />}
-            {!hosted && <span className="mt-3 block text-xs">{s.load.elsewhere}</span>}
-            <Download />
-          </Step>
-          <Step title={s.pin.title}>{s.pin.body}</Step>
-          <Step title={s.connect.title}>
-            {s.connect.before} <strong className="font-medium text-ink">{s.connect.settings}</strong>{" "}
-            {s.connect.middle} <strong className="font-medium text-ink">{s.connect.strong}</strong>
-            {s.connect.after}
-            <Copyable value={origin} label={s.copyAddress} />
-            {token ? (
-              <Copyable value={token} label={s.copyToken} secret />
-            ) : (
-              <span className="mt-2 block text-xs">{s.connect.tokenMissing}</span>
-            )}
-          </Step>
+          <ChromeSteps origin={origin} token={token} />
           <Step title={s.read.title}>
             {s.read.body}
             <span className="mt-3 flex flex-wrap gap-2">
@@ -163,27 +137,78 @@ async function Guide() {
       </Card>
 
       {!hosted && (
-        <Card className="p-5">
-          <SectionTitle>{t.safari.title}</SectionTitle>
-          <p className="mt-1 text-[13px] leading-relaxed text-muted">{t.safari.intro}</p>
-          <ol className="mt-2 list-decimal space-y-2 pl-5 text-[13px] leading-relaxed text-muted">
-            <li>
-              {t.safari.build}
-              <Copyable value="bun run build:safari" label={t.safari.copyCommand} />
-            </li>
-            <li>{t.safari.allow}</li>
-            <li>
-              {t.safari.open}
-              <Copyable
-                value={path.join(process.cwd(), "safari/build/Build/Products/Release/Innkeep Companion.app")}
-                label={s.copyPath}
-              />
-            </li>
-            <li>{t.safari.sites}</li>
-            <li>{t.safari.connect}</li>
-          </ol>
-        </Card>
+        <FoldedGuide title={t.safari.title} subtitle={t.safari.subtitle}>
+          <Step title={t.safari.xcode.title}>{t.safari.xcode.body}</Step>
+          <Step title={t.safari.build.title}>
+            {t.safari.build.body}
+            <Copyable value={`cd "${process.cwd()}" && npm run build:safari`} label={t.safari.copyCommand} />
+          </Step>
+          <Step title={t.safari.allow.title}>{t.safari.allow.body}</Step>
+          <Step title={t.safari.open.title}>
+            {t.safari.open.body}
+            <Copyable
+              value={path.join(process.cwd(), "safari/build/Build/Products/Release")}
+              label={s.copyPath}
+            />
+          </Step>
+          <Step title={t.safari.enable.title}>{t.safari.enable.body}</Step>
+          <Step title={t.safari.sites.title}>{t.safari.sites.body}</Step>
+          <Step title={s.connect.title}>
+            {s.connect.before} <strong className="font-medium text-ink">{s.connect.settings}</strong>{" "}
+            {s.connect.middle} <strong className="font-medium text-ink">{s.connect.strong}</strong>
+            {t.safari.connectAfter}
+            <Credentials origin={origin} token={token} />
+          </Step>
+          <Step title={s.read.title}>
+            {s.read.body}
+            <span className="mt-3 block text-xs">{t.safari.later}</span>
+          </Step>
+        </FoldedGuide>
       )}
+
+      {!hosted && (
+        <FoldedGuide title={t.ios.title} subtitle={t.ios.subtitle}>
+          <Step title={t.ios.need.title}>
+            {t.ios.need.body}
+            <span className="mt-3 block text-xs">{t.ios.limits}</span>
+          </Step>
+          <Step title={t.ios.project.title}>
+            {t.ios.project.body}
+            <Copyable value={path.join(process.cwd(), "safari/Innkeep")} label={s.copyPath} />
+          </Step>
+          <Step title={t.ios.sign.title}>
+            {t.ios.sign.body}
+            <span className="mt-3 block text-xs">{t.ios.sign.taken}</span>
+          </Step>
+          <Step title={t.ios.phone.title}>{t.ios.phone.body}</Step>
+          <Step title={t.ios.run.title}>{t.ios.run.body}</Step>
+          <Step title={t.ios.enable.title}>{t.ios.enable.body}</Step>
+          <Step title={t.ios.sites.title}>{t.ios.sites.body}</Step>
+          <Step title={t.ios.connect.title}>
+            {t.ios.connect.body}
+            {/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(origin) ? (
+              <span className="mt-3 block text-ink">{t.ios.connect.local}</span>
+            ) : (
+              <Credentials origin={origin} token={token} />
+            )}
+          </Step>
+          <Step title={t.ios.read.title}>{t.ios.read.body}</Step>
+        </FoldedGuide>
+      )}
+
+      <Card>
+        <div className="border-b border-line px-5 py-3">
+          <SectionTitle>{t.use.title}</SectionTitle>
+          <p className="mt-0.5 text-xs text-muted">{t.use.subtitle}</p>
+        </div>
+        <ol className="divide-y divide-line [counter-reset:step]">
+          {t.use.steps.map((step) => (
+            <Step key={step.title} title={step.title}>
+              {step.body}
+            </Step>
+          ))}
+        </ol>
+      </Card>
 
       <Card className="p-5">
         <SectionTitle>{t.after.title}</SectionTitle>
@@ -204,23 +229,5 @@ async function Guide() {
         <p className="mt-3 text-xs leading-relaxed text-muted">{t.reads.terms}</p>
       </Card>
     </div>
-  );
-}
-
-/** The extension as a ZIP, written to `public/` by `scripts/zip-extension.mjs` before each build. */
-async function Download() {
-  const s = (await getI18n()).m.extension.setup;
-  return (
-    <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-      <a
-        href="/innkeep-extension.zip"
-        download={`innkeep-extension-${manifest.version}.zip`}
-        className={buttonClass({ size: "sm", variant: "primary" })}
-      >
-        <DownloadIcon aria-hidden />
-        {s.download(manifest.version)}
-      </a>
-      <span className="text-xs text-muted">{s.downloadHint}</span>
-    </span>
   );
 }

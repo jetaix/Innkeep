@@ -76,6 +76,22 @@ export async function saveListing(propertyId: number, channel: unknown, input: u
   return row.id;
 }
 
+/** Saves only the calendar link of a listing, keeping whatever else was already set on it. */
+export async function saveCalendarLink(propertyId: number, channel: unknown, icalUrl: string) {
+  const parsedChannel = parse(z.enum(OTA_CHANNELS), channel);
+  const existing = await getDb()
+    .select()
+    .from(listings)
+    .where(and(eq(listings.propertyId, propertyId), eq(listings.channel, parsedChannel)))
+    .get();
+  return saveListing(propertyId, parsedChannel, {
+    listingUrl: existing?.listingUrl ?? "",
+    titleOverride: existing?.titleOverride ?? "",
+    descriptionOverride: existing?.descriptionOverride ?? "",
+    icalUrl,
+  });
+}
+
 export async function syncOne(listingId: number) {
   await syncListing(listingId);
 }

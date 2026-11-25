@@ -97,9 +97,9 @@ button for everything you need to paste. In short:
 1. In Chrome, open the extensions page and switch on **Developer mode**.
 2. Click **Load unpacked** and choose the `extension` folder inside
    `Innkeep-main`.
-3. Click the puzzle-piece icon next to the address bar and pin Innkeep
-   Companion, so its icon stays visible.
-4. Click the Innkeep Companion icon, open **Settings**, paste the address and
+3. Click the puzzle-piece icon next to the address bar and pin Innkeep,
+   so its icon stays visible.
+4. Click the Innkeep icon, open **Settings**, paste the address and
    the token that Innkeep shows you, and click **Save and test**.
 
 Then sign in to Airbnb and Booking.com in the same browser, come back to
@@ -137,7 +137,7 @@ Everything Innkeep knows is in the `data` folder inside `Innkeep-main`.
    Mac press Command + Shift + . in the Finder to show hidden files; on Windows
    tick **Hidden items** in the View menu.)
 4. Start Innkeep from the new folder.
-5. In Chrome's extensions page, remove the old Innkeep Companion and load the
+5. In Chrome's extensions page, remove the old Innkeep and load the
    `extension` folder of the new version.
 
 ## If something goes wrong
@@ -149,7 +149,7 @@ Everything Innkeep knows is in the `data` folder inside `Innkeep-main`.
 | The browser shows "This site can't be reached"          | The text window was closed. Start Innkeep again.                                                 |
 | "That step failed" in the text window                   | Copy the text of the window and send it to the person who shared Innkeep with you.               |
 | The Refresh run skips a platform                        | You are not signed in there. Sign in to Airbnb or Booking.com in the same browser and try again. |
-| The extension button in Innkeep says "Update"           | In Chrome's extensions page, press the round arrow on Innkeep Companion.                         |
+| The extension button in Innkeep says "Update"           | In Chrome's extensions page, press the round arrow on Innkeep.                                   |
 
 ## What to know before you rely on it
 

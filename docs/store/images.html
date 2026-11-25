@@ -1,0 +1,376 @@
+<!doctype html>
+<!--
+  The Chrome Web Store images, in the look of Innkeep's home page: glass
+  arches on the dark page, the colour mark, the display typeface.
+  `node scripts/store-images.mjs` opens this page three times in Chrome
+  (?v=shot, ?v=small, ?v=marquee) and saves what it shows.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600&family=Geist:wght@400;500;600&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0c10;
+        --panel: #171a20;
+        --ink: #ededf0;
+        --muted: #9b9ba4;
+        --line: #2a2d35;
+        --coral: #ff6f83;
+        --blue: #5b84ff;
+        --green: #1fc2a6;
+        --overlap: #b6a2ff;
+        --hi: rgb(255 255 255 / 0.14);
+        --tint: #0d0f13;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Geist, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .glass {
+        position: absolute;
+        z-index: -1;
+        border-radius: 999px 999px 2rem 2rem;
+        background:
+          radial-gradient(120% 80% at 20% 0%, var(--hi), transparent 55%),
+          linear-gradient(170deg, color-mix(in oklab, var(--g) 58%, var(--tint)) 0%, var(--g) 78%);
+        opacity: 0.82;
+        box-shadow:
+          inset 0 2px 0 var(--hi),
+          inset 0 0 0 1.5px color-mix(in oklab, var(--hi) 55%, transparent),
+          inset 0 -32px 48px -32px rgb(0 0 0 / 0.22),
+          0 56px 90px -44px color-mix(in oklab, var(--g) 75%, transparent);
+      }
+      h1 {
+        font-family: "Funnel Display", Geist, sans-serif;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.035em;
+      }
+      .name {
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        font-weight: 600;
+      }
+      .name svg {
+        width: 1.9em;
+        height: 1.9em;
+        filter: drop-shadow(0 12px 18px color-mix(in oklab, var(--overlap) 35%, transparent));
+      }
+      .lead {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      /* 1280 × 800: the screenshot */
+      .shot .glass.a {
+        --g: var(--green);
+        left: -90px;
+        top: 470px;
+        width: 250px;
+        height: 520px;
+        rotate: -12deg;
+      }
+      .shot .glass.b {
+        --g: var(--blue);
+        right: 250px;
+        top: -230px;
+        width: 260px;
+        height: 400px;
+        rotate: 18deg;
+      }
+      .shot .glass.c {
+        --g: var(--coral);
+        right: -120px;
+        top: 330px;
+        width: 320px;
+        height: 620px;
+        rotate: 8deg;
+      }
+      .shot .copy {
+        position: absolute;
+        left: 96px;
+        top: 150px;
+        width: 600px;
+      }
+      .shot .name {
+        font-size: 19px;
+      }
+      .shot h1 {
+        margin-top: 30px;
+        font-size: 66px;
+      }
+      .shot .lead {
+        margin-top: 22px;
+        font-size: 20px;
+        max-width: 30em;
+      }
+      .shot ul {
+        margin-top: 34px;
+        padding: 0;
+        list-style: none;
+        font-size: 17px;
+        border-top: 1px solid var(--line);
+      }
+      .shot li {
+        padding: 13px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .popup {
+        position: absolute;
+        right: 110px;
+        top: 200px;
+        width: 340px;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #18181b;
+        overflow: hidden;
+        box-shadow:
+          0 40px 80px -30px rgb(0 0 0 / 0.8),
+          0 0 0 1px rgb(255 255 255 / 0.08);
+        font-size: 13px;
+      }
+      .popup header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 16px;
+        background: #f1f1ee;
+        color: #6b6b73;
+      }
+      .popup header svg {
+        width: 18px;
+        height: 18px;
+      }
+      .popup .body {
+        padding: 16px;
+      }
+      .popup h2 {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .popup .action {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #d4d4d0;
+        line-height: 1.45;
+        color: #55555c;
+      }
+      .popup .action b {
+        display: block;
+        color: #18181b;
+        font-weight: 600;
+      }
+      .popup .action.primary {
+        background: #18181b;
+        border-color: #18181b;
+        color: #c9c9cf;
+      }
+      .popup .action.primary b {
+        color: #ffffff;
+      }
+      .toast {
+        position: absolute;
+        right: 110px;
+        top: 96px;
+        width: 340px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: var(--panel);
+        box-shadow:
+          0 30px 60px -30px rgb(0 0 0 / 0.8),
+          0 0 0 1px rgb(255 255 255 / 0.08);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .toast svg {
+        flex: none;
+        width: 34px;
+        height: 34px;
+      }
+      .toast b {
+        display: block;
+        font-weight: 600;
+      }
+      .toast span {
+        color: var(--muted);
+      }
+
+      /* 440 × 280 and 1400 × 560: the promotional images */
+      .promo .copy {
+        position: absolute;
+        left: 9%;
+        top: 50%;
+        translate: 0 -50%;
+      }
+      .small .name {
+        font-size: 13px;
+      }
+      .small h1 {
+        margin-top: 14px;
+        font-size: 31px;
+        max-width: 8.5em;
+      }
+      .small .lead {
+        display: none;
+      }
+      .small .glass.a {
+        --g: var(--blue);
+        right: 70px;
+        top: -70px;
+        width: 86px;
+        height: 150px;
+        rotate: 18deg;
+      }
+      .small .glass.b {
+        --g: var(--coral);
+        right: -34px;
+        top: 70px;
+        width: 120px;
+        height: 250px;
+        rotate: 8deg;
+      }
+      .small .glass.c {
+        --g: var(--green);
+        left: -46px;
+        top: 214px;
+        width: 90px;
+        height: 150px;
+        rotate: -12deg;
+      }
+      .marquee .name {
+        font-size: 24px;
+      }
+      .marquee h1 {
+        margin-top: 30px;
+        font-size: 84px;
+        max-width: 9.5em;
+      }
+      .marquee .lead {
+        margin-top: 24px;
+        font-size: 26px;
+        max-width: 26em;
+      }
+      .marquee .glass.a {
+        --g: var(--blue);
+        right: 330px;
+        top: -190px;
+        width: 240px;
+        height: 380px;
+        rotate: 18deg;
+      }
+      .marquee .glass.b {
+        --g: var(--coral);
+        right: -70px;
+        top: 150px;
+        width: 300px;
+        height: 560px;
+        rotate: 8deg;
+      }
+      .marquee .glass.c {
+        --g: var(--green);
+        left: -120px;
+        top: 420px;
+        width: 220px;
+        height: 380px;
+        rotate: -12deg;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute">
+      <symbol id="mark" viewBox="0 0 24 24">
+        <clipPath id="meet">
+          <path d="M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z" />
+        </clipPath>
+        <path fill="#ff6f83" d="M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z" />
+        <path fill="#5b84ff" d="M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z" />
+        <path
+          fill="#b6a2ff"
+          clip-path="url(#meet)"
+          d="M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z"
+        />
+      </symbol>
+    </svg>
+
+    <div class="stage shot" data-v="shot" hidden>
+      <span class="glass a"></span><span class="glass b"></span><span class="glass c"></span>
+      <div class="copy">
+        <p class="name"><svg><use href="#mark" /></svg>Innkeep</p>
+        <h1>Your own pages, sent to your own Innkeep.</h1>
+        <p class="lead">
+          Reads reservations, prices, listing details and reviews from your Airbnb and Booking.com host pages.
+        </p>
+        <ul>
+          <li>Sends to one address: the Innkeep you host yourself</li>
+          <li>Reads a page only when you open it or start a run</li>
+          <li>No passwords, no cookies, no data sent to anyone else</li>
+        </ul>
+      </div>
+      <div class="toast">
+        <svg><use href="#mark" /></svg>
+        <p><b>New reservation on Airbnb</b><span>13 Dec to 20 Dec · Pine Cabin</span></p>
+      </div>
+      <div class="popup">
+        <header><svg><use href="#mark" /></svg>Toolbar button</header>
+        <div class="body">
+          <h2>Innkeep</h2>
+          <p class="action primary">
+            <b>Update reservations</b>Opens your two reservations pages, reads them, and returns to Innkeep.
+          </p>
+          <p class="action">
+            <b>Read everything</b>Also goes through your calendars, listing editor, extranet pages, public listing
+            and reviews. A few minutes; keep the tab open.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage promo" data-v="small marquee" hidden>
+      <span class="glass a"></span><span class="glass b"></span><span class="glass c"></span>
+      <div class="copy">
+        <p class="name"><svg><use href="#mark" /></svg>Innkeep</p>
+        <h1>Your own pages, sent to your own Innkeep.</h1>
+        <p class="lead">For hosts on Airbnb and Booking.com who run Innkeep themselves.</p>
+      </div>
+    </div>
+
+    <script>
+      const v = new URLSearchParams(location.search).get("v") ?? "shot";
+      for (const stage of document.querySelectorAll(".stage")) {
+        if (!stage.dataset.v.split(" ").includes(v)) continue;
+        stage.hidden = false;
+        stage.classList.add(v);
+      }
+    </script>
+  </body>
+</html>

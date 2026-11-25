@@ -139,3 +139,39 @@ describe("Booking.com feeds", () => {
     expect((await stays()).map((stay) => stay.kind)).toEqual(["reservation", "block"]);
   });
 });
+
+describe("syncListing: what the host is told", () => {
+  it("notes a new stay, its change of dates and its cancellation, once each", async () => {
+    const db = getDb();
+    const { reservationEvents } = await import("@/db");
+    const property = await db
+      .insert(properties)
+      .values({ name: "Told", icalToken: "told", createdAt: 0 })
+      .returning({ id: properties.id })
+      .get();
+    const listing = await db
+      .insert(listings)
+      .values({ propertyId: property.id, channel: "airbnb", icalUrl: "https://example.test/told.ics" })
+      .returning({ id: listings.id })
+      .get();
+    const kinds = async () =>
+      (await db.select().from(reservationEvents).orderBy(reservationEvents.id).all())
+        .filter((row) => row.at > 0)
+        .map((row) => row.kind);
+    const start = (await kinds()).length;
+
+    serve(feed([event("told-1", "20990110", "20990114"), event("old-1", "20200110", "20200114")]));
+    await syncListing(listing.id);
+    await syncListing(listing.id);
+    expect((await kinds()).slice(start)).toEqual(["new"]);
+
+    serve(feed([event("told-1", "20990110", "20990115")]));
+    await syncListing(listing.id);
+    expect((await kinds()).slice(start)).toEqual(["new", "changed"]);
+
+    serve(feed([]));
+    await syncListing(listing.id);
+    await syncListing(listing.id);
+    expect((await kinds()).slice(start)).toEqual(["new", "changed", "cancelled"]);
+  });
+});

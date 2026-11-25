@@ -99,6 +99,21 @@ export const reservations = sqliteTable(
 );
 
 /**
+ * What happened to a stay that the host should hear about: it appeared, was
+ * cancelled, or moved. The browser extension reads these to show notifications.
+ */
+export const reservationEvents = sqliteTable("reservation_events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  reservationId: integer("reservation_id")
+    .notNull()
+    .references(() => reservations.id, { onDelete: "cascade" }),
+  kind: text("kind").$type<"new" | "cancelled" | "changed">().notNull(),
+  /** For "changed": the dates the stay had before, as "check-in/check-out". */
+  detail: text("detail").notNull().default(""),
+  at: integer("at").notNull(),
+});
+
+/**
  * Guest conversations and their messages. Innkeep no longer reads or shows
  * guest messages; the two tables stay so that what an earlier version stored
  * is not lost.

@@ -9,7 +9,7 @@ const en = {
     how: "Each button opens your own page on the platform; the extension reads it and Innkeep updates when you come back.",
     popup: {
       title: "Or let the extension do the rounds",
-      body: "Use the two buttons below, or the same two in the Innkeep Companion icon of your browser's toolbar:",
+      body: "Use the two buttons below, or the same two in the Innkeep icon of your browser's toolbar:",
       reservations: {
         name: "Update reservations",
         text: "opens your two reservations pages, reads them and comes back. Under a minute.",
@@ -91,7 +91,7 @@ const fr: typeof en = {
     how: "Chaque bouton ouvre votre propre page sur la plateforme ; l’extension la lit et Innkeep se met à jour à votre retour.",
     popup: {
       title: "Ou laissez l’extension faire la tournée",
-      body: "Utilisez les deux boutons ci-dessous, ou les mêmes dans l’icône Innkeep Companion de la barre d’outils du navigateur :",
+      body: "Utilisez les deux boutons ci-dessous, ou les mêmes dans l’icône Innkeep de la barre d’outils du navigateur :",
       reservations: {
         name: "Update reservations",
         text: "ouvre vos deux pages de réservations, les lit et revient. Moins d’une minute.",

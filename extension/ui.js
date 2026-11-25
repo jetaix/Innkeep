@@ -42,7 +42,7 @@
     }
   }
 
-  const RELOAD = "Innkeep Companion was updated. Reload this page to use it here.";
+  const RELOAD = "The Innkeep extension was updated. Reload this page to use it here.";
 
   const ready = (async () => {
     const [saved, status] = await Promise.all([stored("baseUrl"), ask({ type: "innkeep:tour-status" })]);

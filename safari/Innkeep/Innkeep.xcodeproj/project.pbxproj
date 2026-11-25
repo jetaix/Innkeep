@@ -13,8 +13,8 @@
 		B8948F9F30B6D62600A784C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8948F9D30B6D62600A784C9 /* Main.storyboard */; };
 		B8948FA830B6D62600A784C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8948FA730B6D62600A784C9 /* AppDelegate.swift */; };
 		B8948FAB30B6D62600A784C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8948FA930B6D62600A784C9 /* Main.storyboard */; };
-		B8948FB230B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		B8948FBC30B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B8948FB230B6D62600A784C9 /* Innkeep Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8948FB130B6D62600A784C9 /* Innkeep Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B8948FBC30B6D62600A784C9 /* Innkeep Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B8948FBB30B6D62600A784C9 /* Innkeep Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B8948FC130B6D62600A784C9 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8630B6D62500A784C9 /* Main.html */; };
 		B8948FC230B6D62600A784C9 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8630B6D62500A784C9 /* Main.html */; };
 		B8948FC330B6D62600A784C9 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B8948F8830B6D62500A784C9 /* Icon.png */; };
@@ -59,14 +59,14 @@
 			containerPortal = B8948F8030B6D62500A784C9 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B8948FB030B6D62600A784C9;
-			remoteInfo = "Innkeep Companion Extension (iOS)";
+			remoteInfo = "Innkeep Extension (iOS)";
 		};
 		B8948FBD30B6D62600A784C9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B8948F8030B6D62500A784C9 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B8948FBA30B6D62600A784C9;
-			remoteInfo = "Innkeep Companion Extension (macOS)";
+			remoteInfo = "Innkeep Extension (macOS)";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -77,7 +77,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				B8948FB230B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */,
+				B8948FB230B6D62600A784C9 /* Innkeep Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -88,7 +88,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				B8948FBC30B6D62600A784C9 /* Innkeep Companion Extension.appex in Embed Foundation Extensions */,
+				B8948FBC30B6D62600A784C9 /* Innkeep Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,19 +103,19 @@
 		B8948F8B30B6D62500A784C9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		B8948F8C30B6D62600A784C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B8948F8E30B6D62600A784C9 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		B8948F9330B6D62600A784C9 /* Innkeep Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948F9330B6D62600A784C9 /* Innkeep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8948F9630B6D62600A784C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B8948F9830B6D62600A784C9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B8948F9B30B6D62600A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B8948F9E30B6D62600A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B8948FA030B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B8948FA530B6D62600A784C9 /* Innkeep Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948FA530B6D62600A784C9 /* Innkeep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Innkeep.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8948FA730B6D62600A784C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B8948FAA30B6D62600A784C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B8948FAC30B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948FB130B6D62600A784C9 /* Innkeep Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8948FB630B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8948FBB30B6D62600A784C9 /* Innkeep Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Innkeep Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8948FC030B6D62600A784C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B8948FE030B6D62600A784C9 /* booking.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = booking.js; path = ../../../extension/booking.js; sourceTree = "<group>"; };
 		B8948FE130B6D62600A784C9 /* ui.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = ui.js; path = ../../../extension/ui.js; sourceTree = "<group>"; };
@@ -208,10 +208,10 @@
 		B8948F9430B6D62600A784C9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B8948F9330B6D62600A784C9 /* Innkeep Companion.app */,
-				B8948FA530B6D62600A784C9 /* Innkeep Companion.app */,
-				B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */,
-				B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */,
+				B8948F9330B6D62600A784C9 /* Innkeep.app */,
+				B8948FA530B6D62600A784C9 /* Innkeep.app */,
+				B8948FB130B6D62600A784C9 /* Innkeep Extension.appex */,
+				B8948FBB30B6D62600A784C9 /* Innkeep Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -276,9 +276,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B8948F9230B6D62600A784C9 /* Innkeep Companion (iOS) */ = {
+		B8948F9230B6D62600A784C9 /* Innkeep (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B8948FD530B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (iOS)" */;
+			buildConfigurationList = B8948FD530B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep (iOS)" */;
 			buildPhases = (
 				B8948F8F30B6D62600A784C9 /* Sources */,
 				B8948F9030B6D62600A784C9 /* Frameworks */,
@@ -290,16 +290,16 @@
 			dependencies = (
 				B8948FB430B6D62600A784C9 /* PBXTargetDependency */,
 			);
-			name = "Innkeep Companion (iOS)";
+			name = "Innkeep (iOS)";
 			packageProductDependencies = (
 			);
-			productName = "Innkeep Companion (iOS)";
-			productReference = B8948F9330B6D62600A784C9 /* Innkeep Companion.app */;
+			productName = "Innkeep (iOS)";
+			productReference = B8948F9330B6D62600A784C9 /* Innkeep.app */;
 			productType = "com.apple.product-type.application";
 		};
-		B8948FA430B6D62600A784C9 /* Innkeep Companion (macOS) */ = {
+		B8948FA430B6D62600A784C9 /* Innkeep (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B8948FDC30B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (macOS)" */;
+			buildConfigurationList = B8948FDC30B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep (macOS)" */;
 			buildPhases = (
 				B8948FA130B6D62600A784C9 /* Sources */,
 				B8948FA230B6D62600A784C9 /* Frameworks */,
@@ -311,16 +311,16 @@
 			dependencies = (
 				B8948FBE30B6D62600A784C9 /* PBXTargetDependency */,
 			);
-			name = "Innkeep Companion (macOS)";
+			name = "Innkeep (macOS)";
 			packageProductDependencies = (
 			);
-			productName = "Innkeep Companion (macOS)";
-			productReference = B8948FA530B6D62600A784C9 /* Innkeep Companion.app */;
+			productName = "Innkeep (macOS)";
+			productReference = B8948FA530B6D62600A784C9 /* Innkeep.app */;
 			productType = "com.apple.product-type.application";
 		};
-		B8948FB030B6D62600A784C9 /* Innkeep Companion Extension (iOS) */ = {
+		B8948FB030B6D62600A784C9 /* Innkeep Extension (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B8948FD130B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (iOS)" */;
+			buildConfigurationList = B8948FD130B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Extension (iOS)" */;
 			buildPhases = (
 				B8948FAD30B6D62600A784C9 /* Sources */,
 				B8948FAE30B6D62600A784C9 /* Frameworks */,
@@ -330,16 +330,16 @@
 			);
 			dependencies = (
 			);
-			name = "Innkeep Companion Extension (iOS)";
+			name = "Innkeep Extension (iOS)";
 			packageProductDependencies = (
 			);
-			productName = "Innkeep Companion Extension (iOS)";
-			productReference = B8948FB130B6D62600A784C9 /* Innkeep Companion Extension.appex */;
+			productName = "Innkeep Extension (iOS)";
+			productReference = B8948FB130B6D62600A784C9 /* Innkeep Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		B8948FBA30B6D62600A784C9 /* Innkeep Companion Extension (macOS) */ = {
+		B8948FBA30B6D62600A784C9 /* Innkeep Extension (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B8948FD830B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (macOS)" */;
+			buildConfigurationList = B8948FD830B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Extension (macOS)" */;
 			buildPhases = (
 				B8948FB730B6D62600A784C9 /* Sources */,
 				B8948FB830B6D62600A784C9 /* Frameworks */,
@@ -349,11 +349,11 @@
 			);
 			dependencies = (
 			);
-			name = "Innkeep Companion Extension (macOS)";
+			name = "Innkeep Extension (macOS)";
 			packageProductDependencies = (
 			);
-			productName = "Innkeep Companion Extension (macOS)";
-			productReference = B8948FBB30B6D62600A784C9 /* Innkeep Companion Extension.appex */;
+			productName = "Innkeep Extension (macOS)";
+			productReference = B8948FBB30B6D62600A784C9 /* Innkeep Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -380,7 +380,7 @@
 					};
 				};
 			};
-			buildConfigurationList = B8948F8330B6D62500A784C9 /* Build configuration list for PBXProject "Innkeep Companion" */;
+			buildConfigurationList = B8948F8330B6D62500A784C9 /* Build configuration list for PBXProject "Innkeep" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -394,10 +394,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B8948F9230B6D62600A784C9 /* Innkeep Companion (iOS) */,
-				B8948FA430B6D62600A784C9 /* Innkeep Companion (macOS) */,
-				B8948FB030B6D62600A784C9 /* Innkeep Companion Extension (iOS) */,
-				B8948FBA30B6D62600A784C9 /* Innkeep Companion Extension (macOS) */,
+				B8948F9230B6D62600A784C9 /* Innkeep (iOS) */,
+				B8948FA430B6D62600A784C9 /* Innkeep (macOS) */,
+				B8948FB030B6D62600A784C9 /* Innkeep Extension (iOS) */,
+				B8948FBA30B6D62600A784C9 /* Innkeep Extension (macOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -509,12 +509,12 @@
 /* Begin PBXTargetDependency section */
 		B8948FB430B6D62600A784C9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = B8948FB030B6D62600A784C9 /* Innkeep Companion Extension (iOS) */;
+			target = B8948FB030B6D62600A784C9 /* Innkeep Extension (iOS) */;
 			targetProxy = B8948FB330B6D62600A784C9 /* PBXContainerItemProxy */;
 		};
 		B8948FBE30B6D62600A784C9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = B8948FBA30B6D62600A784C9 /* Innkeep Companion Extension (macOS) */;
+			target = B8948FBA30B6D62600A784C9 /* Innkeep Extension (macOS) */;
 			targetProxy = B8948FBD30B6D62600A784C9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -676,7 +676,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -689,8 +689,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
-				PRODUCT_NAME = "Innkeep Companion Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep.Extension;
+				PRODUCT_NAME = "Innkeep Extension";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -709,7 +709,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -722,8 +722,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
-				PRODUCT_NAME = "Innkeep Companion Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep.Extension;
+				PRODUCT_NAME = "Innkeep Extension";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -745,7 +745,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -763,8 +763,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
-				PRODUCT_NAME = "Innkeep Companion";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep;
+				PRODUCT_NAME = "Innkeep";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -785,7 +785,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -803,8 +803,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
-				PRODUCT_NAME = "Innkeep Companion";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep;
+				PRODUCT_NAME = "Innkeep";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -827,7 +827,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -840,8 +840,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
-				PRODUCT_NAME = "Innkeep Companion Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep.Extension;
+				PRODUCT_NAME = "Innkeep Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -862,7 +862,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -875,8 +875,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion.Extension;
-				PRODUCT_NAME = "Innkeep Companion Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep.Extension;
+				PRODUCT_NAME = "Innkeep Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -900,7 +900,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -915,8 +915,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
-				PRODUCT_NAME = "Innkeep Companion";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep;
+				PRODUCT_NAME = "Innkeep";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -941,7 +941,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep Companion";
+				INFOPLIST_KEY_CFBundleDisplayName = "Innkeep";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -956,8 +956,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.InnkeepCompanion;
-				PRODUCT_NAME = "Innkeep Companion";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jetaix.Innkeep;
+				PRODUCT_NAME = "Innkeep";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -972,7 +972,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B8948F8330B6D62500A784C9 /* Build configuration list for PBXProject "Innkeep Companion" */ = {
+		B8948F8330B6D62500A784C9 /* Build configuration list for PBXProject "Innkeep" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B8948FCF30B6D62600A784C9 /* Debug */,
@@ -981,7 +981,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B8948FD130B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (iOS)" */ = {
+		B8948FD130B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Extension (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B8948FD230B6D62600A784C9 /* Debug */,
@@ -990,7 +990,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B8948FD530B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (iOS)" */ = {
+		B8948FD530B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B8948FD630B6D62600A784C9 /* Debug */,
@@ -999,7 +999,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B8948FD830B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion Extension (macOS)" */ = {
+		B8948FD830B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Extension (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B8948FD930B6D62600A784C9 /* Debug */,
@@ -1008,7 +1008,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B8948FDC30B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep Companion (macOS)" */ = {
+		B8948FDC30B6D62600A784C9 /* Build configuration list for PBXNativeTarget "Innkeep (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B8948FDD30B6D62600A784C9 /* Debug */,

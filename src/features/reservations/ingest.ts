@@ -2,6 +2,7 @@ import "server-only";
 import { and, eq, like, or } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, listings, OTA_CHANNELS, properties, reservations, type Reservation } from "@/db";
+import { recordReservationEvent } from "@/features/notifications/record";
 import { today } from "@/lib/dates";
 
 /**
@@ -164,6 +165,7 @@ export async function ingestReservations(input: IngestInput): Promise<IngestResu
           .get();
         const propertyId = known?.propertyId ?? propertyFor(row.listingName);
         if (known) {
+          await recordReservationEvent(tx, known, known, { ...known, status: "cancelled" }, now);
           await tx
             .update(reservations)
             .set({ ...withStored(details, known), status: "cancelled" })

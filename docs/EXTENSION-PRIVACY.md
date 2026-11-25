@@ -1,8 +1,8 @@
-# Innkeep Companion: privacy policy
+# Innkeep browser extension: privacy policy
 
-_Last updated: 19 November 2026_
+_Last updated: 25 November 2026_
 
-Innkeep Companion is a browser extension for hosts who use
+The Innkeep extension is a browser extension for hosts who use
 [Innkeep](https://github.com/jetaix/Innkeep), a free, open-source dashboard
 they run on their own computer or server. This page says what the extension
 reads, where it sends it, and what it never does.
@@ -52,9 +52,19 @@ What happens to it there is under your control and outside this extension.
 
 ## What it keeps in your browser
 
-Three settings, in Chrome's local extension storage on your device: your
-Innkeep address, the access token of your Innkeep, and whether to send
-automatically. Removing the extension deletes them.
+Its settings, in Chrome's local extension storage on your device: your
+Innkeep address, the access token of your Innkeep, whether to send
+automatically, whether to notify you, and the number of the last event it
+notified you about. Removing the extension deletes them.
+
+## Notifications
+
+Off unless you tick "Notify me about new, changed and cancelled reservations"
+in the settings; Chrome then asks your permission. While it is on, the
+extension asks **your own Innkeep** every five minutes what happened to your
+reservations and shows a notification for each new stay, change of dates or
+cancellation. It contacts no other address for this, and it does not open or
+read Airbnb or Booking.com to do it.
 
 ## What it does to pages
 
@@ -69,6 +79,7 @@ shows a Stop button on each.
 - Turn off automatic sending in the settings, so nothing is sent without a
   click.
 - Stop a run at any time with its Stop button.
+- Untick the notifications box in the settings to stop the regular check.
 - Remove the extension at any time from `chrome://extensions`. Data already
   in your Innkeep stays there until you delete it in Innkeep.
 

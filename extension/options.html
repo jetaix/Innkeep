@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Innkeep Companion</title>
+    <title>Innkeep</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -78,7 +78,7 @@
     </style>
   </head>
   <body>
-    <h1>Innkeep Companion</h1>
+    <h1>Innkeep</h1>
     <p>Connect the extension to your own Innkeep. Nothing is sent anywhere else.</p>
     <form id="form">
       <label for="baseUrl">Innkeep address</label>
@@ -89,6 +89,11 @@
         <input id="autoSend" type="checkbox" style="width: auto; height: auto" />
         Send automatically when I open a reservations page
       </label>
+      <label style="display: flex; gap: 0.5rem; align-items: center; font-weight: 400; font-size: 14px">
+        <input id="notify" type="checkbox" style="width: auto; height: auto" />
+        Notify me about new, changed and cancelled reservations
+      </label>
+      <p id="notifyResult" role="status" style="margin: 0; font-size: 13px"></p>
       <button type="submit">Save and test</button>
     </form>
     <p id="result" role="status"></p>

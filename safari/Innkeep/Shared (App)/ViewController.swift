@@ -16,7 +16,7 @@ import SafariServices
 typealias PlatformViewController = NSViewController
 #endif
 
-let extensionBundleIdentifier = "io.github.jetaix.InnkeepCompanion.Extension"
+let extensionBundleIdentifier = "io.github.jetaix.Innkeep.Extension"
 
 class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMessageHandler {
 

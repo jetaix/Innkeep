@@ -21,6 +21,8 @@ import { guides } from "./guides";
 import { ai } from "./ai";
 import { demo } from "./demo";
 import { design } from "./design";
+import { setup } from "./setup";
+import { notifications } from "./notifications";
 
 /**
  * One file per area of the app, each holding English and French side by side
@@ -49,6 +51,8 @@ const AREAS = {
   ai,
   demo,
   design,
+  setup,
+  notifications,
 };
 
 type Area = keyof typeof AREAS;

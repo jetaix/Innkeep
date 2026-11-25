@@ -5,14 +5,10 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { CHANNELS } from "@/channels";
 import { publishState } from "@/channels/content";
-import { SubmitButton } from "@/components/ui/actions";
 import { buttonClass } from "@/components/ui/button";
-import { Field, Input } from "@/components/ui/form";
 import { Loading } from "@/components/ui/loading";
-import { Modal } from "@/components/ui/modal";
 import { Badge, Card, EmptyState, PageHeader, SourceDot } from "@/components/ui/primitives";
 import { getDb, listings, OTA_CHANNELS } from "@/db";
-import { createProperty } from "@/features/properties/actions";
 import { readPreview, sizedPhoto } from "@/features/properties/preview";
 import { getProperties, getStays } from "@/features/reservations/queries";
 import { monthOf, summariseMonth } from "@/features/revenue/compute";
@@ -30,16 +26,9 @@ export default async function PropertiesPage() {
   return (
     <>
       <PageHeader title={t.title} description={t.description}>
-        <Modal label={t.create.open} title={t.create.title} description={t.create.hint} variant="primary">
-          <form action={createProperty} className="space-y-3">
-            <Field label={t.create.label} htmlFor="name">
-              <Input id="name" name="name" required placeholder={t.create.placeholder} autoComplete="off" />
-            </Field>
-            <SubmitButton variant="primary" pendingLabel={t.create.pending}>
-              {t.create.submit}
-            </SubmitButton>
-          </form>
-        </Modal>
+        <Link href="/properties/new" className={buttonClass({ variant: "primary" })}>
+          {t.create.open}
+        </Link>
       </PageHeader>
       <Suspense fallback={<Loading />}>
         <PropertyList />

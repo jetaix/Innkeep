@@ -45,7 +45,7 @@ It states its limits openly and points to alternatives when they fit better.
 
 ## Operating Context
 
-- Two parts, both required: the app, and the Innkeep Companion Chrome extension.
+- Two parts, both required: the app, and the Innkeep Chrome extension.
 - Runs locally at `http://localhost:3000`; started with `start.command` (Mac),
   `start.bat` (Windows) or `npm run app`. Requires Node.js 22 or later.
 - A landing-only mode (`LANDING_ONLY=1`) publishes just the landing and
