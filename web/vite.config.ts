@@ -20,7 +20,13 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     ...(renderer === "redact" ? [redact({ environments: ["client"] })] : []),
   ],
-  resolve: { alias: { "~": new URL("./src", import.meta.url).pathname } },
+  resolve: {
+    alias: {
+      "~": new URL("./src", import.meta.url).pathname,
+      // What the two apps share until cutover: texts, formats, the menu, pure logic.
+      "@": new URL("../src", import.meta.url).pathname,
+    },
+  },
   define: { __RENDERER__: JSON.stringify(renderer) },
   build: { manifest: true, target: "es2023" },
   server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },

@@ -6,8 +6,9 @@ import { brotliCompressSync } from "node:zlib";
  * Fails the build when the first view grows past its budget. Sizes are
  * Brotli, read from the files Vite wrote, and each file is counted once.
  *
- * - cold entry: the shell plus one route's own code, the JavaScript a first
- *   visit to that route downloads before anything shows;
+ * - cold entry: the shell, the dashboard's frame where the route sits inside
+ *   it, and the route's own code: the JavaScript a first visit to that route
+ *   downloads before anything shows (its text is listed apart);
  * - route: what that route adds on top of the shell;
  * - CSS: every stylesheet of the first view.
  */
@@ -57,11 +58,23 @@ const rows: { name: string; size: number; limit: number }[] = [
   { name: "shell (every route)", size: shellSize, limit: BUDGET.coldEntry },
   { name: "first-view CSS", size: cssSize, limit: BUDGET.css },
 ];
-for (const key of Object.keys(manifest).filter((name) => manifest[name]?.isDynamicEntry)) {
+const lazy = Object.keys(manifest).filter((name) => manifest[name]?.isDynamicEntry);
+// A page of the dashboard never loads alone: the frame around it comes first.
+const frame = lazy.find((name) => name.startsWith("src/routes/_app.tsx"));
+const frameChunks = frame ? [...closure(frame)].filter((name) => !shell.has(name)) : [];
+
+for (const key of lazy) {
   const own = [...closure(key)].filter((name) => !shell.has(name));
-  const route = sizeOf(own);
-  rows.push({ name: `route ${key}`, size: route, limit: BUDGET.route });
-  rows.push({ name: `cold entry ${key}`, size: shellSize + route, limit: BUDGET.coldEntry });
+  const size = sizeOf(own);
+  // The text of one area of the interface, downloaded beside the page that uses it.
+  if (key.includes("/i18n/messages/")) {
+    rows.push({ name: `text ${key.slice(key.lastIndexOf("/") + 1)}`, size, limit: BUDGET.route });
+    continue;
+  }
+  rows.push({ name: `route ${key}`, size, limit: BUDGET.route });
+  const inFrame = key.startsWith("src/routes/_app/");
+  const first = inFrame ? sizeOf(new Set([...frameChunks, ...own])) : size;
+  rows.push({ name: `cold entry ${key}`, size: shellSize + first, limit: BUDGET.coldEntry });
 }
 
 let failed = false;

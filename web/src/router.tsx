@@ -1,9 +1,17 @@
-import { QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
+import { ApiError } from "./api/client";
 import { routeTree } from "./routeTree.gen";
+import { refused } from "./shell/refused";
 
 export const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: false } },
+  mutationCache: new MutationCache({
+    // The server refuses a change from a visitor of the demo: say so, once, for every form.
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 403) refused();
+    },
+  }),
 });
 
 export const router = createRouter({

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, guestQuotes, listings, OTA_CHANNELS, properties, reviews } from "../../src/db";
+import { hasSampleData } from "../../src/db/seed";
 import { getKeyStatus } from "../../src/features/assistant/key";
 import { getCleaning } from "../../src/features/cleaning/queries";
 import { getTelegramChat } from "../../src/features/cleaning/telegram-chat";
@@ -102,7 +103,12 @@ export const read = new Hono<Env>()
   .get("/nav", async (c) => {
     const locale = query(z.object({ locale: z.enum(LOCALES).default("en") }), c.req.query()).locale;
     const urgent = (await getSuggestions(locale)).active.filter((item) => item.severity === "urgent").length;
-    return c.json({ urgent, toRefresh: countToRefresh(await getDataSources()) });
+    return c.json({
+      urgent,
+      toRefresh: countToRefresh(await getDataSources()),
+      // Sample data is on screen: the page says so on every screen.
+      sample: await hasSampleData(),
+    });
   })
 
   .get("/properties", async (c) => {
