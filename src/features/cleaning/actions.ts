@@ -1,6 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { hostOnly } from "@/db";
 import { applied, fields, InvalidInput } from "@/lib/form";
 import * as change from "./mutations";
 
@@ -51,16 +52,19 @@ export async function removeManualCleaning(propertyId: number, date: string) {
 
 /** Checks the Telegram settings with a real message, then sends whatever is waiting. */
 export async function sendTelegramTest(): Promise<change.TelegramTestState> {
+  await hostOnly();
   return change.sendTelegramTest();
 }
 
 /** Asks Telegram which chats the bot was recently written to in. */
 export async function findTelegramChatsAction(): Promise<change.TelegramChatsState> {
+  await hostOnly();
   return change.listTelegramChats();
 }
 
 /** Keeps the chat the host picked, and proves it works with a first message. */
 export async function chooseTelegramChat(form: FormData) {
+  await hostOnly();
   try {
     if (await change.chooseTelegramChat(fields(form))) refresh();
   } catch (error) {

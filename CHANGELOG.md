@@ -45,6 +45,10 @@ minor version may change how things work.
 
 ### Fixed
 
+- In the public demo, a visitor could trigger the host's Telegram test
+  message, list the chats of the host's bot, or start a paid request for
+  advice. Those actions are now for the host only.
+
 - With a password set, a request from someone not signed in could be aimed at
   the sign-in page to run a save against the host's data. Such requests now
   only ever see the sample data.

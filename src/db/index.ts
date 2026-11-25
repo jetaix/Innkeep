@@ -353,6 +353,15 @@ export async function dataScope(): Promise<DataScope> {
 
 export const isDemo = async () => (await dataScope()) !== "real";
 
+/**
+ * For the few actions that reach outside the database with the host's own
+ * accounts (a Telegram message, a paid request to Anthropic). The database
+ * refuses a visitor's writes by itself; it cannot refuse these.
+ */
+export async function hostOnly(): Promise<void> {
+  if (await isDemo()) throw new DemoReadOnlyError();
+}
+
 /** Refused in the demo: a visitor may look, not change. */
 export class DemoReadOnlyError extends Error {
   constructor() {
