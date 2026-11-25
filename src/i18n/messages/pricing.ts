@@ -42,6 +42,31 @@ const en = {
     explore: "Point at a night, or touch it, to see its prices.",
     noPrice: "no price",
   },
+  /** The difference between the two platforms, said in words above the chart. */
+  gap: {
+    /** Follows the average difference, written large: "€18 more on Booking.com than on Airbnb, …". */
+    more: (dearer: string, other: string, nights: number): string =>
+      `more on ${dearer} than on ${other}, on average over the ${nights} free night${nights === 1 ? "" : "s"} that show${nights === 1 ? "s" : ""} both prices.`,
+    same: (nights: number): string =>
+      `of difference between the two platforms, on average over the ${nights} free night${nights === 1 ? "" : "s"} that show${nights === 1 ? "s" : ""} both prices.`,
+    /** "Airbnb is notably cheaper on 23 nights, Booking.com on 4; 14 are within 5% of each other." */
+    split: (
+      first: string,
+      firstNights: number,
+      second: string,
+      secondNights: number,
+      close: number,
+      margin: string,
+    ): string =>
+      `${first} is notably cheaper on ${firstNights} night${firstNights === 1 ? "" : "s"}, ${second} on ${secondNights}; ${close} ${close === 1 ? "is" : "are"} within ${margin} of each other.`,
+    widest: (amount: string, date: string, dearer: string): string =>
+      `The widest gap is ${amount}, on ${date}, where ${dearer} is the dearer one.`,
+    none: "No free night shows a price on both platforms yet, so there is no gap to measure.",
+    /** Legend of the chart. */
+    band: "Shaded: the difference between the two",
+    /** Beside the lower of two prices in a table. */
+    lower: "lower",
+  },
   todo: {
     title: "Prices to adjust",
     subtitle:
@@ -154,6 +179,19 @@ const fr: typeof en = {
     label: "Prix par nuit sur chaque plateforme. Utilisez les flèches pour passer d’une nuit à l’autre.",
     explore: "Survolez ou touchez une nuit pour voir ses prix.",
     noPrice: "pas de prix",
+  },
+  gap: {
+    more: (dearer, other, nights) =>
+      `de plus sur ${dearer} que sur ${other}, en moyenne sur ${nights === 1 ? "la nuit libre qui affiche" : `les ${nights} nuits libres qui affichent`} les deux prix.`,
+    same: (nights) =>
+      `d’écart entre les deux plateformes, en moyenne sur ${nights === 1 ? "la nuit libre qui affiche" : `les ${nights} nuits libres qui affichent`} les deux prix.`,
+    split: (first, firstNights, second, secondNights, close, margin) =>
+      `${first} est nettement moins cher sur ${firstNights} nuit${firstNights > 1 ? "s" : ""}, ${second} sur ${secondNights} ; ${close} ${close > 1 ? "sont" : "est"} à moins de ${margin} d’écart.`,
+    widest: (amount, date, dearer) =>
+      `L’écart le plus large est de ${amount}, le ${date}, où ${dearer} est le plus cher.`,
+    none: "Aucune nuit libre n’affiche encore un prix sur les deux plateformes : il n’y a pas d’écart à mesurer.",
+    band: "Zone teintée : l’écart entre les deux",
+    lower: "moins cher",
   },
   todo: {
     title: "Prix à ajuster",

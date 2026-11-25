@@ -12,20 +12,23 @@ import {
   Wallet,
 } from "lucide-react";
 
+/** Key of the label in `messages/common.ts` (`nav.<id>`). */
+export type NavId =
+  | "overview"
+  | "calendar"
+  | "reservations"
+  | "cleaning"
+  | "reviews"
+  | "revenue"
+  | "pricing"
+  | "suggestions"
+  | "properties"
+  | "settings";
+
 export type NavItem = {
-  href: string;
-  /** Key of the label in `messages/common.ts` (`nav.<id>`). */
-  id:
-    | "overview"
-    | "calendar"
-    | "reservations"
-    | "cleaning"
-    | "reviews"
-    | "revenue"
-    | "pricing"
-    | "suggestions"
-    | "properties"
-    | "settings";
+  /** Every page of the menu lives at the address of its own name. */
+  href: `/${NavId}`;
+  id: NavId;
   icon: LucideIcon;
   /** Second key of the "g then …" shortcut. */
   key: string;

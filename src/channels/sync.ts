@@ -1,5 +1,6 @@
 import { and, eq, gt, isNotNull, ne, sql } from "drizzle-orm";
 import { getDb, listings, properties, reservations, type OtaChannel } from "@/db";
+import { recordReservationEvent } from "@/features/notifications/record";
 import { addDays, today } from "@/lib/dates";
 import { parseICal, type CalendarEvent } from "@/lib/ical";
 import { CHANNELS, sourceLabel } from "./index";
@@ -69,9 +70,23 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
   let cancelled = 0;
 
   await db.transaction(async (tx) => {
+    // How each stay stood before this import, to tell the host what changed.
+    const stored = await tx
+      .select()
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.propertyId, listing.propertyId),
+          eq(reservations.source, listing.channel),
+          isNotNull(reservations.externalUid),
+        ),
+      )
+      .all();
+    const before = new Map(stored.map((row) => [row.externalUid, row]));
+
     for (const event of relevant) {
       const { kind, channelInfo } = adapter.classifyEvent(event);
-      await tx
+      const saved = await tx
         .insert(reservations)
         .values({
           propertyId: listing.propertyId,
@@ -94,7 +109,9 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
             status: "confirmed",
           },
         })
-        .run();
+        .returning()
+        .get();
+      await recordReservationEvent(tx, saved, before.get(event.uid) ?? null, saved, now);
     }
 
     const upcoming = await tx
@@ -113,6 +130,8 @@ export async function syncListing(listingId: number): Promise<SyncResult> {
     for (const row of upcoming) {
       if (seen.has(row.uid!)) continue;
       await tx.update(reservations).set({ status: "cancelled" }).where(eq(reservations.id, row.id)).run();
+      const was = before.get(row.uid);
+      if (was) await recordReservationEvent(tx, was, was, { ...was, status: "cancelled" }, now);
       cancelled++;
     }
 

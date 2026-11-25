@@ -218,7 +218,9 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     case "innkeep:tour-status": {
       // A page script asking is a page that loaded: the step reached the site it was meant for.
       const step = tour && tabId === tour.tabId ? tour.steps[tour.index] : null;
-      if (step && sender.url && hostOf(sender.url) === hostOf(step.url)) step.arrived = true;
+      // Safari may leave `sender.url` out; the tab's address says the same thing.
+      const from = sender.url ?? sender.tab?.url;
+      if (step && from && hostOf(from) === hostOf(step.url)) step.arrived = true;
       respond(tourStatus(tabId));
       return false;
     }
@@ -244,7 +246,80 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       return false;
     }
 
+    case "innkeep:notify-setup":
+      // Only the extension's own settings page may switch notifications.
+      if (sender.tab && !sender.url?.startsWith(chrome.runtime.getURL(""))) return false;
+      setUpNotifications(message.test === true).then(respond);
+      return true;
+
     default:
       return false;
   }
 });
+
+/**
+ * Notifications, when the host ticked the box in the settings. The extension
+ * asks its Innkeep, and nothing else, what happened to the reservations since
+ * the last time, every few minutes while the browser is open. Innkeep words
+ * the notifications; a click on one opens the Reservations page.
+ */
+const NOTIFY_ALARM = "innkeep:events";
+const NOTIFY_EVERY_MINUTES = 5;
+const language = () => chrome.i18n.getUILanguage().slice(0, 2);
+
+let listening = false;
+/** `alarms` and `notifications` only exist once the host allowed them, which can be after start-up. */
+function listenForNotifications() {
+  if (listening || !chrome.alarms || !chrome.notifications) return;
+  listening = true;
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === NOTIFY_ALARM) void checkEvents();
+  });
+  chrome.notifications.onClicked.addListener(async (id) => {
+    if (!id.startsWith("innkeep:")) return;
+    chrome.notifications.clear(id);
+    const { baseUrl } = await chrome.storage.local.get("baseUrl");
+    if (baseUrl) chrome.tabs.create({ url: `${baseUrl}/reservations` });
+  });
+}
+
+function show(id, title, message) {
+  chrome.notifications.create(`innkeep:${id}`, {
+    type: "basic",
+    iconUrl: chrome.runtime.getURL("icons/icon-128.png"),
+    title,
+    message,
+  });
+}
+
+/** Starts or stops the regular check, to match the setting. */
+async function setUpNotifications(test = false) {
+  const { notify } = await chrome.storage.local.get("notify");
+  if (!chrome.alarms || !chrome.notifications) return { ok: false };
+  if (!notify) {
+    await chrome.alarms.clear(NOTIFY_ALARM);
+    return { ok: true };
+  }
+  listenForNotifications();
+  // Start from now: nobody wants a notification for each stay already in Innkeep.
+  const start = await callInnkeep("GET", `/api/extension/events?lang=${language()}`);
+  if (start.ok) {
+    await chrome.storage.local.set({ eventCursor: start.last });
+    if (test && start.test) show("test", start.test.title, start.test.body);
+  }
+  await chrome.alarms.create(NOTIFY_ALARM, { periodInMinutes: NOTIFY_EVERY_MINUTES });
+  return start.ok ? { ok: true } : { ok: false, error: start.error };
+}
+
+async function checkEvents() {
+  const { notify, eventCursor } = await chrome.storage.local.get(["notify", "eventCursor"]);
+  if (!notify || !chrome.notifications) return;
+  if (typeof eventCursor !== "number") return void setUpNotifications();
+  const news = await callInnkeep("GET", `/api/extension/events?after=${eventCursor}&lang=${language()}`);
+  if (!news.ok || !Array.isArray(news.notifications)) return;
+  for (const item of news.notifications) show(item.id, String(item.title), String(item.body));
+  if (typeof news.last === "number") await chrome.storage.local.set({ eventCursor: news.last });
+}
+
+// The browser wakes this script for an alarm, so the listeners must be in place as soon as it loads.
+listenForNotifications();

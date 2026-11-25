@@ -8,6 +8,8 @@
 # packaged browser extension
 /dist
 /public/innkeep-extension.zip
+/safari/build
+xcuserdata/
 next-env.d.ts
 *.tsbuildinfo
 

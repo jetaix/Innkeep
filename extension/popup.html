@@ -2,96 +2,398 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Innkeep Companion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Innkeep</title>
     <style>
+      /* The fonts ship with the extension; a build without them falls back to the system's. */
+      @font-face {
+        font-family: "Geist";
+        src: url("fonts/geist.woff2") format("woff2");
+        font-weight: 100 900;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Funnel Display";
+        src: url("fonts/funnel-display.woff2") format("woff2");
+        font-weight: 300 800;
+        font-display: swap;
+      }
+      /* The public pages' colours: a mineral ground, and one glass colour per platform. */
       :root {
         color-scheme: light dark;
-      }
-      body {
-        width: 300px;
-        margin: 0;
-        padding: 14px;
-        font:
-          13px/1.45 system-ui,
-          sans-serif;
-      }
-      h1 {
-        margin: 0 0 10px;
-        font-size: 14px;
-      }
-      button {
-        display: block;
-        width: 100%;
-        margin-top: 8px;
-        padding: 9px 12px;
-        border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-        border-radius: 8px;
-        background: transparent;
-        color: inherit;
-        font: inherit;
-        text-align: left;
-        cursor: pointer;
-      }
-      button strong {
-        display: block;
-        font-weight: 600;
-      }
-      button span {
-        opacity: 0.7;
-        font-size: 12px;
-      }
-      button.primary {
-        border-color: transparent;
-        background: #18181b;
-        color: #fff;
+        --ground: #f3f4ef;
+        --sunken: #e1e4da;
+        --line: #d9dcd1;
+        --line-strong: #bfc4b6;
+        --ink: #15171c;
+        --muted: #555a61;
+        --panel: #ffffff;
+        --on-ink: #ffffff;
+        --coral: #ff5d73;
+        --blue: #3d6df2;
+        --overlap: #4b2bbd;
+        --overlap-wash: #ece6ff;
+        --hi: rgb(255 255 255 / 0.55);
+        --float:
+          0 1px 0 rgb(255 255 255 / 0.9) inset, 0 22px 40px -26px rgb(21 23 28 / 0.3),
+          0 8px 18px -14px rgb(21 23 28 / 0.2), 0 0 0 1px rgb(21 23 28 / 0.05);
+        --lift: 0 1px 2px rgb(21 23 28 / 0.08), 0 0 0 1px var(--line);
       }
       @media (prefers-color-scheme: dark) {
-        button.primary {
-          background: #ededf0;
-          color: #0f0f11;
+        :root {
+          --ground: #0d0f13;
+          --sunken: #1b1f26;
+          --line: #252a32;
+          --line-strong: #363c46;
+          --ink: #eef0ea;
+          --muted: #a3a8ae;
+          --panel: #171a20;
+          --on-ink: #0d0f13;
+          --coral: #ff6f83;
+          --blue: #5b84ff;
+          --overlap: #b6a2ff;
+          --overlap-wash: #251d44;
+          --hi: rgb(255 255 255 / 0.14);
+          --float:
+            0 1px 0 rgb(255 255 255 / 0.06) inset, 0 22px 40px -26px rgb(0 0 0 / 0.8),
+            0 0 0 1px rgb(255 255 255 / 0.07);
+          --lift: 0 0 0 1px var(--line-strong);
         }
       }
-      /* The rule above would otherwise show a button marked hidden. */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        width: 328px;
+        margin: 0;
+        padding: 14px;
+        background: var(--ground);
+        color: var(--ink);
+        font:
+          13px/1.45 "Geist",
+          ui-sans-serif,
+          system-ui,
+          sans-serif;
+        font-feature-settings: "ss01", "cv11";
+        -webkit-font-smoothing: antialiased;
+      }
+      ::selection {
+        background: color-mix(in oklab, var(--overlap) 22%, transparent);
+      }
+      :focus-visible {
+        outline: 2px solid var(--overlap);
+        outline-offset: 2px;
+      }
       [hidden] {
         display: none !important;
       }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2px 12px 4px;
+      }
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 0;
+        font:
+          500 18px/1 "Funnel Display",
+          "Geist",
+          ui-sans-serif,
+          system-ui,
+          sans-serif;
+        letter-spacing: -0.025em;
+      }
+      h1 svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      /* One white panel: what is read, then the two runs. */
+      main {
+        padding: 12px;
+        border-radius: 16px;
+        background: var(--panel);
+        box-shadow: var(--float);
+      }
+
+      /* The two platforms, each a slab of its own glass. They never overlap here: violet is a clash. */
+      .sources {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .slab {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 46px;
+        padding: 6px 12px;
+        overflow: hidden;
+        border-radius: 12px;
+        background: color-mix(in oklab, var(--glass) 56%, var(--panel));
+        box-shadow:
+          0 1px 0 var(--hi) inset,
+          0 10px 16px -12px color-mix(in oklab, var(--glass) 70%, transparent);
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 1.33;
+      }
+      /* Grain, as on every piece of glass. */
+      .slab::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+        mix-blend-mode: soft-light;
+        opacity: 0.35;
+        pointer-events: none;
+      }
+      .slab.airbnb {
+        --glass: var(--coral);
+      }
+      .slab.booking {
+        --glass: var(--blue);
+      }
+      .slab small {
+        font-weight: 400;
+        font-size: 11px;
+      }
+      /* A platform that turned the run away is drawn like a blocked period: grey and hatched. */
+      .slab.away {
+        background:
+          repeating-linear-gradient(
+            135deg,
+            transparent 0 5px,
+            color-mix(in oklab, var(--ink) 9%, transparent) 5px 6px
+          ),
+          var(--sunken);
+        box-shadow: 0 0 0 1px var(--line) inset;
+      }
+      .slab.away::after {
+        display: none;
+      }
+
+      /* Where a run is: one segment that fills, page by page. */
+      .track {
+        height: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--sunken);
+      }
+      .track div {
+        width: 0;
+        height: 100%;
+        border-radius: 999px;
+        background: var(--ink);
+        transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      #status {
+        min-height: 1.45em;
+        margin: 10px 2px 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      #status:empty {
+        display: none;
+      }
+      #when {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .runs {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+      button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        height: 40px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--panel);
+        box-shadow: var(--lift);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          background-color 200ms,
+          box-shadow 200ms,
+          transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      button:hover:not(:disabled) {
+        box-shadow:
+          0 1px 2px rgb(21 23 28 / 0.08),
+          0 0 0 1px var(--line-strong);
+      }
+      button:active:not(:disabled) {
+        transform: scale(0.97);
+      }
       button:disabled {
-        opacity: 0.5;
+        opacity: 0.45;
         cursor: default;
       }
-      #status {
-        min-height: 1.4em;
-        margin: 10px 0 0;
+      button.primary {
+        background: var(--ink);
+        box-shadow: none;
+        color: var(--on-ink);
+      }
+      button.primary:hover:not(:disabled) {
+        background: color-mix(in oklab, var(--ink) 86%, var(--overlap));
+        box-shadow: none;
+      }
+      button svg {
+        width: 14px;
+        height: 14px;
+      }
+      .about {
+        margin: 6px 6px 0;
+        color: var(--muted);
         font-size: 12px;
       }
+      .about + button {
+        margin-top: 12px;
+      }
+      #stop {
+        margin-top: 12px;
+      }
+
       #settings {
-        display: inline;
         width: auto;
-        margin: 8px 0 0;
-        padding: 0;
-        border: 0;
-        text-decoration: underline;
-        opacity: 0.7;
+        height: 28px;
+        padding: 0 10px 0 8px;
+        gap: 5px;
+        background: transparent;
+        box-shadow: none;
+        color: var(--muted);
         font-size: 12px;
+      }
+      #settings:hover {
+        background: var(--sunken);
+        box-shadow: none;
+        color: var(--ink);
+      }
+
+      /* Safari on a phone shows the popup as a sheet as wide as the screen. */
+      @media (pointer: coarse) {
+        body {
+          width: auto;
+          font-size: 15px;
+        }
+        button {
+          height: 48px;
+        }
+        #settings {
+          height: 44px;
+          font-size: 14px;
+        }
+        .about,
+        #status {
+          font-size: 13px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition-duration: 0.01ms !important;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Innkeep Companion</h1>
-    <button id="reservations" class="primary" type="button">
-      <strong>Update reservations</strong>
-      <span>Opens your two reservations pages, reads them, and returns to Innkeep.</span>
-    </button>
-    <button id="everything" type="button">
-      <strong>Read everything</strong>
-      <span>
-        Also goes through your calendars, listing editor, extranet pages, public listing and reviews. A few
-        minutes; keep the tab open.
-      </span>
-    </button>
-    <button id="stop" type="button" hidden><strong>Stop the run</strong></button>
-    <p id="status" role="status"></p>
-    <button id="settings" type="button">Settings</button>
+    <header>
+      <h1>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="var(--coral)"
+            d="M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z"
+          />
+          <path
+            fill="var(--blue)"
+            d="M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z"
+          />
+          <clipPath id="mark">
+            <path d="M4 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 12 21Z" />
+          </clipPath>
+          <path
+            fill="var(--overlap)"
+            clip-path="url(#mark)"
+            d="M12 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11A1.5 1.5 0 0 1 20 21Z"
+          />
+        </svg>
+        Innkeep
+      </h1>
+      <button id="settings" type="button">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+          <circle cx="16" cy="7" r="2" />
+          <circle cx="8" cy="17" r="2" />
+        </svg>
+        Settings
+      </button>
+    </header>
+    <main>
+      <ul class="sources" aria-label="Pages it reads">
+        <li id="airbnb" class="slab airbnb">Airbnb</li>
+        <li id="booking" class="slab booking">
+          Booking.com
+          <small id="bookingAway" hidden>Sign in needed</small>
+        </li>
+      </ul>
+      <div
+        id="progress"
+        class="track"
+        role="progressbar"
+        aria-label="Run"
+        aria-valuemin="0"
+        aria-valuenow="0"
+        hidden
+      >
+        <div></div>
+      </div>
+      <p id="status" role="status"></p>
+      <div class="runs">
+        <button id="reservations" class="primary" type="button" aria-describedby="reservationsAbout">
+          Update reservations
+        </button>
+        <p id="reservationsAbout" class="about">
+          Opens your two reservations pages, reads them, and returns to Innkeep.
+        </p>
+        <button id="everything" type="button" aria-describedby="everythingAbout">Read everything</button>
+        <p id="everythingAbout" class="about">
+          Also goes through your calendars, listing editor, extranet pages, public listing and reviews. A few
+          minutes; keep the tab open.
+        </p>
+        <button id="stop" type="button" hidden>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="2.5" />
+          </svg>
+          Stop the run
+        </button>
+      </div>
+    </main>
     <script src="popup.js"></script>
   </body>
 </html>

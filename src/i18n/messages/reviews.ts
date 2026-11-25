@@ -23,6 +23,11 @@ const en = {
     unanswered: (n: number) => `${n} without a reply`,
     low: (n: number) => `${n} lower rating${n === 1 ? "" : "s"}`,
     none: "None read yet",
+    /** Beside the large figure: every rating brought to a scale of five. */
+    outOf: (scale: number) => `out of ${scale}`,
+    overall: (count: number) =>
+      `Average of ${count} rated review${count === 1 ? "" : "s"}, both platforms brought to a scale of 5`,
+    overallNone: "No rating read yet",
   },
   filters: {
     label: "Show",
@@ -75,6 +80,10 @@ const fr: typeof en = {
     unanswered: (n) => `${n} sans réponse`,
     low: (n) => `${n} note${n > 1 ? "s" : ""} plus basse${n > 1 ? "s" : ""}`,
     none: "Aucun avis lu",
+    outOf: (scale) => `sur ${scale}`,
+    overall: (count) =>
+      `Moyenne de ${count} avis noté${count > 1 ? "s" : ""}, les deux plateformes ramenées sur 5`,
+    overallNone: "Aucune note lue pour l’instant",
   },
   filters: {
     label: "Afficher",

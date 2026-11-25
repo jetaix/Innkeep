@@ -16,6 +16,8 @@ const en = {
     noArrival: "No arrival booked",
     /** "35% booked this month" */
     occupancy: (percent: string): string => `${percent} booked this month`,
+    /** One part of the month's bar: "Airbnb: 4 nights" */
+    nightsFrom: (source: string, nights: string): string => `${source}: ${nights}`,
     photoAlt: (name: string): string => `Photo of ${name}`,
     noPhoto: "No photo yet. Read the public page with the extension to show one.",
     view: "View the listing",
@@ -35,12 +37,8 @@ const en = {
   },
   create: {
     open: "Add a property",
-    title: "New property",
-    hint: "Start with a name. You fill in the details and connect the calendars on the next page.",
     label: "Name",
     placeholder: "A name only you see, e.g. Canal Loft",
-    submit: "Add property",
-    pending: "Adding…",
   },
   property: {
     title: "Property",
@@ -148,6 +146,7 @@ const fr: typeof en = {
     stayingNow: "Des voyageurs sont sur place",
     noArrival: "Aucune arrivée réservée",
     occupancy: (percent) => `Rempli à ${percent} ce mois-ci`,
+    nightsFrom: (source, nights) => `${source} : ${nights}`,
     photoAlt: (name) => `Photo de ${name}`,
     noPhoto: "Pas encore de photo. Lisez la page publique avec l’extension pour en afficher une.",
     view: "Voir l’annonce",
@@ -166,12 +165,8 @@ const fr: typeof en = {
   },
   create: {
     open: "Ajouter un logement",
-    title: "Nouveau logement",
-    hint: "Commencez par un nom. Vous complétez les détails et connectez les calendriers sur la page suivante.",
     label: "Nom",
     placeholder: "Un nom que vous seul voyez, par ex. Loft du canal",
-    submit: "Ajouter le logement",
-    pending: "Ajout…",
   },
   property: {
     title: "Logement",

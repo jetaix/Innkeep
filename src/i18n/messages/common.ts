@@ -41,6 +41,11 @@ const en = {
     newTab: "(opens a new tab)",
   },
   loading: "Loading…",
+  notFound: {
+    title: "This page does not exist",
+    body: "The address may be mistyped, or the page may have been moved.",
+    home: "Go to the home page",
+  },
   preferences: {
     theme: "Theme",
     system: "System",
@@ -101,6 +106,11 @@ const fr: typeof en = {
     newTab: "(ouvre un nouvel onglet)",
   },
   loading: "Chargement…",
+  notFound: {
+    title: "Cette page n’existe pas",
+    body: "L’adresse est peut-être mal saisie, ou la page a été déplacée.",
+    home: "Aller à l’accueil",
+  },
   preferences: {
     theme: "Thème",
     system: "Système",

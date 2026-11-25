@@ -8,13 +8,15 @@
     "start": "next start",
     "app": "node scripts/start.mjs",
     "package:extension": "node scripts/package-extension.mjs",
+    "build:safari": "node scripts/build-safari.mjs",
     "lint": "biome lint .",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit && bun scripts/check-awaits.ts",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "check": "biome check . && bun run typecheck && bun run test && bun run build",
-    "prepare": "node scripts/hooks.mjs"
+    "prepare": "node scripts/hooks.mjs",
+    "web:check": "cd web && bun install --frozen-lockfile && bun run build && bun run check"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",

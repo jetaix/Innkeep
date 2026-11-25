@@ -259,6 +259,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS messages_external ON messages (conversation_id
   `
 ALTER TABLE cleanings ADD COLUMN request TEXT NOT NULL DEFAULT 'none';
 `,
+  // 18: what happened to a stay (new, cancelled, dates changed), for the browser's notifications
+  `
+CREATE TABLE IF NOT EXISTS reservation_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reservation_id INTEGER NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL,
+  detail TEXT NOT NULL DEFAULT '',
+  at INTEGER NOT NULL
+);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

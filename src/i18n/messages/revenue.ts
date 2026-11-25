@@ -18,6 +18,16 @@ const en = {
     /** Read aloud for one bar of the chart. */
     bar: (month: string, net: string, revenue: string, costs: string) =>
       `${month}: net ${net}, from ${revenue} revenue and ${costs} costs`,
+    /** Follows the net figure, written large: "€1,871 is what November 2026 leaves: …". */
+    leaves: (period: string, revenue: string, costs: string, estimated: string | null): string =>
+      `is what ${period} leaves: ${revenue} of revenue minus ${costs} of costs${
+        estimated ? `. ${estimated} of that revenue is estimated from nightly rates` : ""
+      }.`,
+    /** Legend of the chart. */
+    upcoming: "Not over yet",
+    loss: "Costs revenue did not cover",
+    /** Under the name of the month we are in. */
+    now: "this month",
     month: "Month",
     revenue: "Revenue",
     costs: "Costs",
@@ -105,6 +115,13 @@ const fr: typeof en = {
     label: capitalise,
     bar: (month, net, revenue, costs) =>
       `${capitalise(month)} : ${net} net, pour ${revenue} de revenus et ${costs} de charges`,
+    leaves: (period, revenue, costs, estimated) =>
+      `c’est ce que laisse ${period} : ${revenue} de revenus moins ${costs} de charges${
+        estimated ? `. ${estimated} de ces revenus sont estimés d’après les tarifs par nuit` : ""
+      }.`,
+    upcoming: "Pas encore terminé",
+    loss: "Charges que les revenus n’ont pas couvertes",
+    now: "ce mois-ci",
     month: "Mois",
     revenue: "Revenus",
     costs: "Charges",

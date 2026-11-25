@@ -167,7 +167,7 @@ async function Welcome() {
         title={t.title}
         action={
           <>
-            <Link href="/properties" className={buttonClass({ variant: "primary" })}>
+            <Link href="/properties/new" className={buttonClass({ variant: "primary" })}>
               {t.addProperty}
             </Link>
             <form action={loadDemoData}>

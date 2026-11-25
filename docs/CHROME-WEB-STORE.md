@@ -1,4 +1,4 @@
-# Publishing Innkeep Companion on the Chrome Web Store (unlisted)
+# Publishing the Innkeep extension on the Chrome Web Store (unlisted)
 
 Unlisted means anyone with the link can install it and gets automatic
 updates, but it does not appear in the store's search. It goes through the
@@ -10,7 +10,7 @@ Everything to paste is below. Build the file to upload with:
 bun run package:extension
 ```
 
-It writes `dist/innkeep-companion-<version>.zip`.
+It writes `dist/innkeep-extension-<version>.zip`.
 
 ## Before you start
 
@@ -22,7 +22,15 @@ It writes `dist/innkeep-companion-<version>.zip`.
    <https://chrome.google.com/webstore/devconsole>. Google asks for a small
    one-time registration fee and for 2-step verification on the account. In
    the EU you also state whether you publish as a trader.
-3. **One screenshot**, 1280 × 800: [`docs/store/screenshot-1.png`](store/screenshot-1.png).
+3. **The images**, all in [`docs/store/`](store/):
+   - Store icon, 128 × 128: `extension/icons/icon-128.png`.
+   - Screenshot, 1280 × 800: `screenshot-1.png`.
+   - Small promotional image, 440 × 280: `promo-small.png`.
+   - Extra-large promotional banner, 1400 × 560 (optional): `promo-marquee.png`.
+
+   The screenshot and the two promotional images are drawn from
+   `docs/store/images.html` by `node scripts/store-images.mjs` (needs Google
+   Chrome).
 
 ## Steps
 
@@ -37,7 +45,7 @@ It writes `dist/innkeep-companion-<version>.zip`.
 
 ## Store listing
 
-**Name** (from the manifest): Innkeep Companion
+**Name** (from the manifest): Innkeep
 
 **Summary** (from the manifest, 132 characters at most):
 
@@ -50,7 +58,7 @@ It writes `dist/innkeep-companion-<version>.zip`.
 **Description:**
 
 ```text
-Innkeep Companion is the browser side of Innkeep, a free, open-source dashboard for hosts with one or two places. You run Innkeep yourself, on your own computer or server. This extension is of no use without it.
+This extension is the browser side of Innkeep, a free, open-source dashboard for hosts with one or two places. You run Innkeep yourself, on your own computer or server. This extension is of no use without it.
 
 Calendar links between platforms only carry dates. This extension reads the rest from pages of your own host accounts and sends it to your own Innkeep:
 
@@ -68,11 +76,14 @@ HOW IT WORKS
 WHAT IT DOES NOT DO
 • It does not read passwords, cookies, payment details, guest phone numbers, messages, door codes or wifi details.
 • It does not click, type or submit anything on Airbnb or Booking.com, and does not call their APIs.
-• It does not run in the background or on a schedule.
+• It does not read Airbnb or Booking.com in the background or on a schedule.
+
+NOTIFICATIONS (OPTIONAL)
+If you tick "Notify me" in its settings, the extension asks your own Innkeep every five minutes what happened to your reservations, and shows a notification for a new stay, a change of dates or a cancellation. It asks nothing of Airbnb or Booking.com for this.
 
 SETUP
 1. Install and start Innkeep: https://github.com/jetaix/Innkeep
-2. Click the Innkeep Companion icon, open Settings, and paste the address and token that Innkeep shows on its "Browser extension" page.
+2. Click the Innkeep icon, open Settings, and paste the address and token that Innkeep shows on its "Browser extension" page.
 3. Sign in to Airbnb and Booking.com, then press "Refresh everything" in Innkeep.
 
 Reservations and reviews contain your guests' personal data, and the platforms' terms restrict automated data collection. Using this extension on your account is your decision.
@@ -94,8 +105,10 @@ Innkeep is not affiliated with Airbnb or Booking.com. Source code: https://githu
 
 | Permission                                                 | Justification                                                                                                                                                                                                                                                                                                                                               |
 | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `storage`                                                  | Keeps three settings on the device: the address of the user's Innkeep, its access token, and whether to send automatically.                                                                                                                                                                                                                                 |
+| `storage`                                                  | Keeps the settings on the device: the address of the user's Innkeep, its access token, whether to send automatically, whether to notify, and the number of the last event notified.                                                                                                                                                                         |
 | Host permission (optional, `http://*/*` and `https://*/*`) | Innkeep is self-hosted, so every user has a different address (often `http://localhost:3000`). The extension requests access at run time to the single address the user enters in its settings, and uses it only to send data to that Innkeep. It never requests any other site. A fixed list of hosts is impossible because the address is the user's own. |
+| `notifications` (optional)                                 | Requested only when the user ticks "Notify me about new, changed and cancelled reservations" in the settings. Shows a notification when the user's own Innkeep reports a new stay, a change of dates or a cancellation.                                                                                                                                     |
+| `alarms` (optional)                                        | Requested together with `notifications`. Wakes the extension every five minutes to ask the user's own Innkeep for those events. No other site is contacted.                                                                                                                                                                                                 |
 | Content scripts on `airbnb.*` and `booking.com`            | Read the reservations, prices, listing details and reviews shown on the user's own host pages and public listing, and show the "Send to Innkeep" control. Nothing is modified or submitted on those pages.                                                                                                                                                  |
 
 **Remote code:** No, I am not using remote code. (All code is in the package.)
@@ -132,14 +145,24 @@ To test:
 3. Click the extension icon > Settings, paste the address and token, click "Save and test". Chrome asks permission for http://localhost:3000. The page shows "Connected".
 4. Reading data needs an Airbnb or Booking.com host account. On a host reservations page the extension shows a "Send to Innkeep" control and posts the visible rows to http://localhost:3000/api/ingest/reservations.
 
+5. Optional: in Settings, tick "Notify me about new, changed and cancelled reservations". Chrome asks for the notifications permission and a first notification confirms it. From then on the extension asks http://localhost:3000/api/extension/events every five minutes.
+
 The only network requests the extension makes go to the address saved in step 3 (see background.js, the only file that calls fetch). The optional host permission is requested for that single origin (see options.js).
 ```
 
 ## After approval
 
-- Share the store link with your users in place of the "Load unpacked"
-  steps. They still open **Settings** in the extension to paste their Innkeep
-  address and token.
+- Set the store link in Innkeep's settings file (`.env.local`, or the
+  environment variables of your server), then restart Innkeep:
+
+  ```bash
+  EXTENSION_STORE_URL=https://chromewebstore.google.com/detail/<your item id>
+  ```
+
+  The "Browser extension" page and the "Add a property" guide then show an
+  **Install from the Chrome Web Store** button in place of the "Load
+  unpacked" steps. Hosts still open **Settings** in the extension to paste
+  their Innkeep address and token.
 - To publish an update: raise `version` in `extension/manifest.json`, run
   `bun run package:extension`, upload the new zip under **Package**, and
   submit. Installed copies update by themselves within a day or so.

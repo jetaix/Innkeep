@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Builds the file to upload to the Chrome Web Store:
- * `dist/innkeep-companion-<version>.zip`, holding the extension's files and
+ * `dist/innkeep-extension-<version>.zip`, holding the extension's files and
  * nothing else (no README, no tests). Run with `bun run package:extension`.
  */
 import { spawnSync } from "node:child_process";
@@ -13,7 +13,7 @@ const source = "extension";
 const LEFT_OUT = [/\.md$/, /\.test\.ts$/, /^\.DS_Store$/];
 
 const manifest = JSON.parse(readFileSync(path.join(source, "manifest.json"), "utf8"));
-const target = path.resolve("dist", `innkeep-companion-${manifest.version}.zip`);
+const target = path.resolve("dist", `innkeep-extension-${manifest.version}.zip`);
 
 const files = readdirSync(source, { recursive: true, withFileTypes: true })
   .filter((entry) => entry.isFile() && !LEFT_OUT.some((pattern) => pattern.test(entry.name)))

@@ -1,0 +1,72 @@
+/*
+ * The few rules that are not a component's own. Everything else is StyleX,
+ * which adds its extracted CSS to this file at build.
+ */
+@import "@fontsource-variable/geist/wght.css";
+@import "@fontsource-variable/geist-mono/wght.css";
+@import "@fontsource-variable/funnel-display/wght.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/*
+ * The ground under the app, right before any code has run: `data-theme` is
+ * set by the script in `index.html`. The two colours are `bg` in
+ * `tokens.stylex.ts`.
+ */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  color-scheme: light dark;
+  background: #f3f4ef;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  background: #0d0f13;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    color-scheme: dark;
+    background: #0d0f13;
+  }
+}
+
+body {
+  margin: 0;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* One focus style everywhere, visible on every surface. `--focus` is set by the page and by the public pages. */
+:focus-visible {
+  outline: 2px solid var(--focus, CanvasText);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--focus, CanvasText) 20%, transparent);
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -35,7 +35,7 @@
 > **Status: early, and built in public.** Innkeep is at version 0.2 with one
 > maintainer, and it still changes every week. Expect rough edges, read [what it does not do](#what-it-does-not-do),
 > and say so when something breaks. A hosted version is being prepared: you can
-> [ask for early access](https://innkeep-seven.vercel.app/#access) on the website.
+> [ask for early access](https://innkeep.club/#access) on the website.
 
 ![The Innkeep landing page: one calendar for every place you rent](docs/screenshots/landing.png)
 
@@ -177,7 +177,7 @@ The Settings page shows what is switched on.
 
 ### Browser extension
 
-Calendar links carry dates only. The **Innkeep Companion** extension in
+Calendar links carry dates only. The **Innkeep** extension in
 [`extension/`](extension/) reads the rest from your own Airbnb and Booking.com
 pages: reservations with guest names and payouts, past and cancelled stays,
 nightly prices, your listing's details and photos, the public listing as
@@ -219,7 +219,7 @@ snippet for your address):
 
 Tools: `list_properties`, `list_reservations`, `get_revenue`,
 `list_suggestions`, `block_dates`. The website's
-[AI page](https://innkeep-seven.vercel.app/ai) shows what each one does, with an
+[AI page](https://innkeep.club/ai) shows what each one does, with an
 example conversation and its limits.
 
 ## Security
@@ -251,7 +251,7 @@ are usually kept private:
 - **Why each technical choice was made:** [docs/TECH-BENCHMARK.md](docs/TECH-BENCHMARK.md).
 - **Who it is for and what it promises:** [PRODUCT.md](PRODUCT.md).
 - **How it should look:** [DESIGN.md](DESIGN.md), also published on the
-  [website](https://innkeep-seven.vercel.app/design).
+  [website](https://innkeep.club/design).
 - **How it compares with paid products, with prices and sources:**
   [docs/ALTERNATIVES.md](docs/ALTERNATIVES.md).
 - **What the extension reads from your accounts:**

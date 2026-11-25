@@ -45,7 +45,7 @@ src/
   components/shell/    Sidebar, command menu and keyboard layer
   db/                  Schema, migrations, sample data
   i18n/                Languages: messages/<area>.ts (English and French side by side), formats
-extension/             Innkeep Companion browser extension (plain JS, no build step)
+extension/             Innkeep browser extension (plain JS, no build step)
   lib/                 Dates, money, iCal, small helpers
 ```
 

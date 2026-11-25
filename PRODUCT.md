@@ -45,7 +45,7 @@ It states its limits openly and points to alternatives when they fit better.
 
 ## Operating Context
 
-- Two parts, both required: the app, and the Innkeep Companion Chrome extension.
+- Two parts, both required: the app, and the Innkeep Chrome extension.
 - Runs locally at `http://localhost:3000`; started with `start.command` (Mac),
   `start.bat` (Windows) or `npm run app`. Requires Node.js 22 or later.
 - A landing-only mode (`LANDING_ONLY=1`) publishes just the landing and
@@ -68,8 +68,8 @@ It states its limits openly and points to alternatives when they fit better.
 - Every user-visible string exists in English and French.
 - In the dashboard, colour is reserved for the three booking sources and the
   good / warning / critical states.
-- Undecided: whether the dashboard adopts the new public brand or keeps its
-  current monochrome look.
+- The dashboard in `web/` and the Chrome extension use the public brand (see
+  DESIGN.md); a double booking is violet, errors are red.
 - Undecided: the price of the hosted version, when it opens, and how it will
   handle login and the data it stores. Nothing on the pages may promise these.
 - Early-access requests are taken only on the public website (`LANDING_ONLY=1`)

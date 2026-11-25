@@ -53,7 +53,7 @@ function withData(request: NextRequest, scope: DataScope) {
  * A new API route must be added here, or it will be handed the demo.
  */
 const API_ROUTES =
-  /^\/api\/(?:cron|mcp|extension\/tour|ingest\/(?:listing|page|preview|prices|quote|reservations|reviews)|ical\/[^/]+\/[^/]+)$/;
+  /^\/api\/(?:cron|mcp|extension\/(?:tour|events)|ingest\/(?:listing|page|preview|prices|quote|reservations|reviews)|ical\/[^/]+\/[^/]+)$/;
 
 const machineScope = (request: NextRequest): DataScope =>
   API_ROUTES.test(request.nextUrl.pathname) ? "real" : visitorScope(request);
@@ -63,7 +63,7 @@ const visitorScope = (request: NextRequest): DataScope =>
   request.method === "GET" || request.method === "HEAD" ? "demo" : "demo-readonly";
 
 // Pages that would show how this Innkeep is set up; the demo has nothing to show there.
-const HOST_ONLY = /^\/(?:settings|extension)(?:\/|$)/;
+const HOST_ONLY = /^\/(?:settings|extension|properties\/new)(?:\/|$)/;
 
 /**
  * With `PUBLIC_DEMO` a visitor is not asked for the password: they get the

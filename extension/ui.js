@@ -42,7 +42,59 @@
     }
   }
 
-  const RELOAD = "Innkeep Companion was updated. Reload this page to use it here.";
+  const RELOAD = "The Innkeep extension was updated. Reload this page to use it here.";
+
+  /**
+   * How Innkeep looks on someone else's page: the white panel and ink pills of
+   * its own pages, always light, in the system's font (a page script cannot
+   * load the extension's). Colours are written out because the host page owns
+   * the custom properties.
+   */
+  const INK = "#15171c";
+  const FONT = "ui-sans-serif,system-ui,sans-serif";
+  const FLOAT =
+    "0 1px 0 rgba(255,255,255,.9) inset,0 22px 40px -22px rgba(21,23,28,.34)," +
+    "0 8px 18px -12px rgba(21,23,28,.2),0 0 0 1px rgba(21,23,28,.06)";
+  /** The ring around the box says how the last send went: plain, saved, or refused. */
+  const RING = { neutral: "rgba(21,23,28,.06)", good: "#18794e", error: "#c62a2f" };
+
+  /** The mark: two doorways, coral and blue, violet where they overlap. */
+  function mark() {
+    const NS = "http://www.w3.org/2000/svg";
+    const arch = (x) =>
+      `M${x + 1.5} 21a1.5 1.5 0 0 1-1.5-1.5V8.5a5.5 5.5 0 0 1 11 0v11a1.5 1.5 0 0 1-1.5 1.5Z`;
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.style.cssText = "flex:none;width:18px;height:18px";
+    const path = (x, fill) => {
+      const shape = document.createElementNS(NS, "path");
+      shape.setAttribute("d", arch(x));
+      shape.setAttribute("fill", fill);
+      return shape;
+    };
+    // The overlap is the right doorway again, cut to the shape of the left one.
+    const clip = document.createElementNS(NS, "clipPath");
+    clip.id = "innkeep-mark";
+    clip.append(path(2.5, "#000"));
+    const overlap = path(10.5, "#4b2bbd");
+    overlap.setAttribute("clip-path", "url(#innkeep-mark)");
+    svg.append(path(2.5, "#ff5d73"), path(10.5, "#3d6df2"), clip, overlap);
+    return svg;
+  }
+
+  /** One focus ring and one pressed state for Innkeep's own buttons, whatever the page does to buttons. */
+  function ownStyles() {
+    if (document.getElementById("innkeep-ui")) return;
+    const style = document.createElement("style");
+    style.id = "innkeep-ui";
+    style.textContent =
+      "[data-innkeep] button{transition:transform .2s cubic-bezier(.16,1,.3,1),background-color .2s}" +
+      "[data-innkeep] button:focus-visible{outline:2px solid #4b2bbd;outline-offset:2px}" +
+      "[data-innkeep] button:active{transform:scale(.97)}" +
+      "@media (prefers-reduced-motion:reduce){[data-innkeep] button{transition:none}}";
+    document.head.append(style);
+  }
 
   const ready = (async () => {
     const [saved, status] = await Promise.all([stored("baseUrl"), ask({ type: "innkeep:tour-status" })]);
@@ -56,26 +108,28 @@
 
   /** A small banner at the top while a run is going, with the way to stop it. */
   function showTour() {
+    ownStyles();
     const banner = document.createElement("div");
     banner.setAttribute("role", "status");
+    banner.dataset.innkeep = "";
     banner.style.cssText =
       "position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:2147483001;display:flex;" +
-      "align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:999px;background:#18181b;color:#fff;" +
-      "font:13px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px -8px rgba(0,0,0,.4)";
+      "align-items:center;gap:10px;width:max-content;max-width:calc(100vw - 24px);padding:6px 6px 6px 12px;border-radius:999px;" +
+      `background:#fff;color:${INK};font:500 13px/1.4 ${FONT};box-shadow:${FLOAT}`;
     const text = document.createElement("span");
     text.textContent = `Innkeep is reading your pages: ${tour.index + 1} of ${tour.total}`;
     const stop = document.createElement("button");
     stop.type = "button";
     stop.textContent = "Stop";
     stop.style.cssText =
-      "height:26px;padding:0 10px;border:0;border-radius:999px;background:#fff;color:#18181b;" +
-      "font:500 12px system-ui,sans-serif;cursor:pointer";
+      `flex:none;width:auto;height:28px;margin:0;padding:0 12px;border:0;white-space:nowrap;border-radius:999px;background:${INK};color:#fff;` +
+      `font:500 12px ${FONT};cursor:pointer`;
     stop.addEventListener("click", () => {
       // Works even on a page that outlived the extension: the banner goes either way.
       void ask({ type: "innkeep:tour-stop" });
       banner.remove();
     });
-    banner.append(text, stop);
+    banner.append(mark(), text, stop);
     document.body.append(banner);
   }
 
@@ -102,7 +156,7 @@
       const setStatus = (text, tone = "neutral") => {
         if (!pill) return;
         pill.querySelector("[data-status]").textContent = text;
-        pill.style.borderColor = tone === "error" ? "#c62a2f" : tone === "good" ? "#18794e" : "#d4d4d0";
+        pill.style.boxShadow = FLOAT.replace(RING.neutral, RING[tone] ?? RING.neutral);
       };
 
       /** The box's one button: send the page, or, when Innkeep refused the token, open the settings. */
@@ -164,13 +218,15 @@
         }
         if (pill?.isConnected) return;
 
+        ownStyles();
         pill = document.createElement("div");
         pill.setAttribute("role", "region");
         pill.setAttribute("aria-label", "Innkeep");
+        pill.dataset.innkeep = "";
         pill.style.cssText =
           "position:fixed;right:16px;bottom:16px;z-index:2147483000;display:flex;align-items:center;gap:10px;" +
-          "max-width:380px;padding:8px 8px 8px 12px;border:1px solid #d4d4d0;border-radius:10px;background:#fff;" +
-          "color:#18181b;font:13px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px -8px rgba(0,0,0,.25)";
+          "max-width:min(380px,calc(100vw - 32px));padding:8px 8px 8px 12px;border-radius:16px;background:#fff;" +
+          `color:${INK};font:13px/1.4 ${FONT};box-shadow:${FLOAT};transition:box-shadow .2s`;
 
         const status = document.createElement("span");
         status.dataset.status = "";
@@ -181,8 +237,8 @@
         button.type = "button";
         button.textContent = page.button;
         button.style.cssText =
-          "flex:none;height:28px;padding:0 10px;border:0;border-radius:6px;background:#18181b;color:#fff;" +
-          "font:500 12px system-ui,sans-serif;cursor:pointer";
+          `flex:none;width:auto;height:32px;margin:0;padding:0 14px;border:0;white-space:nowrap;border-radius:999px;background:${INK};color:#fff;` +
+          `font:500 12px ${FONT};cursor:pointer`;
         button.addEventListener("click", () => {
           if (action !== "reconnect") return void send();
           // The settings open in a tab; once saved there, this button sends again.
@@ -191,7 +247,7 @@
           setStatus("Paste the token from Innkeep in the settings tab, save, then send again.");
         });
 
-        pill.append(status, button);
+        pill.append(mark(), status, button);
         document.body.append(pill);
       }
 

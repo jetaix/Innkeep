@@ -33,7 +33,7 @@ const en = {
     },
     extension: {
       name: "Browser extension",
-      body: "Lets the Innkeep Companion extension add guest names, payouts, past stays and listing details from your own Airbnb and Booking.com pages.",
+      body: "Lets the Innkeep extension add guest names, payouts, past stays and listing details from your own Airbnb and Booking.com pages.",
       link: "How to install it",
     },
     telegram: {
@@ -114,7 +114,7 @@ const fr: typeof en = {
     },
     extension: {
       name: "Extension de navigateur",
-      body: "Permet à l’extension Innkeep Companion d’ajouter les noms des voyageurs, les versements, les séjours passés et les détails des annonces à partir de vos propres pages Airbnb et Booking.com.",
+      body: "Permet à l’extension Innkeep d’ajouter les noms des voyageurs, les versements, les séjours passés et les détails des annonces à partir de vos propres pages Airbnb et Booking.com.",
       link: "Comment l’installer",
     },
     telegram: {

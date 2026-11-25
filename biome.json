@@ -6,7 +6,15 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!DESIGN.md", "!docs/ALTERNATIVES.md", "!docs/store", "!docs/screenshots", "!bun.lock"]
+    "includes": [
+      "**",
+      "!DESIGN.md",
+      "!docs/ALTERNATIVES.md",
+      "!docs/store",
+      "!docs/screenshots",
+      "!bun.lock",
+      "!safari"
+    ]
   },
   "formatter": {
     "indentStyle": "space",

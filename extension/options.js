@@ -3,11 +3,41 @@ const baseUrl = document.getElementById("baseUrl");
 const token = document.getElementById("token");
 const autoSend = document.getElementById("autoSend");
 const result = document.getElementById("result");
+const notify = document.getElementById("notify");
+const notifyResult = document.getElementById("notifyResult");
 
-chrome.storage.local.get(["baseUrl", "token", "autoSend"]).then((saved) => {
+chrome.storage.local.get(["baseUrl", "token", "autoSend", "notify"]).then((saved) => {
   autoSend.checked = saved.autoSend ?? true;
+  notify.checked = saved.notify === true;
   baseUrl.value = saved.baseUrl ?? "";
   token.value = saved.token ?? "";
+});
+
+/**
+ * Notifications are asked for here, on the click, because the browser only
+ * shows its permission question in answer to one. Saved at once, without
+ * "Save and test".
+ */
+notify.addEventListener("change", async () => {
+  notifyResult.textContent = "";
+  if (!notify.checked) {
+    await chrome.storage.local.set({ notify: false });
+    await chrome.runtime.sendMessage({ type: "innkeep:notify-setup" });
+    return;
+  }
+  const granted = await chrome.permissions
+    .request({ permissions: ["notifications", "alarms"] })
+    .catch(() => false);
+  if (!granted) {
+    notify.checked = false;
+    notifyResult.textContent = "This browser did not allow notifications for the extension.";
+    return;
+  }
+  await chrome.storage.local.set({ notify: true });
+  const response = await chrome.runtime.sendMessage({ type: "innkeep:notify-setup", test: true });
+  notifyResult.textContent = response?.ok
+    ? "Notifications are on. While the browser is open, the extension asks your Innkeep every five minutes."
+    : (response?.error ?? "Could not reach Innkeep. Connect the extension first, then tick this box again.");
 });
 
 form.addEventListener("submit", async (event) => {
@@ -20,8 +50,12 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  // Ask for access to this one address only.
-  const granted = await chrome.permissions.request({ origins: [`${origin}/*`] });
+  // Ask for access to this one address only. The port is left out: Safari
+  // refuses a pattern that has one, and Chrome ignores it.
+  const { protocol, hostname } = new URL(origin);
+  const granted = await chrome.permissions
+    .request({ origins: [`${protocol}//${hostname}/*`] })
+    .catch(() => false);
   if (!granted) {
     result.textContent = "Permission to reach that address was declined.";
     return;
