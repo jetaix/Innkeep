@@ -82,11 +82,8 @@ routes.push(
     : { src: "^/(?!.*\\.[a-z0-9]+$).*", dest: "/_shell.html" },
 );
 
-const { crons } = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
-fs.writeFileSync(
-  path.join(out, "config.json"),
-  JSON.stringify({ version: 3, routes, ...(landingOnly ? {} : { crons }) }, null, 2),
-);
+// The scheduler's entry stays in `vercel.json`, which Vercel reads beside this output: saying it twice is refused.
+fs.writeFileSync(path.join(out, "config.json"), JSON.stringify({ version: 3, routes }, null, 2));
 console.log(
   `Wrote .vercel/output: ${prerendered.length + 1} static pages${landingOnly ? "" : ", 1 function"}.`,
 );
