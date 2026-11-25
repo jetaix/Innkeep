@@ -2,6 +2,7 @@ import { MutationCache, QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { ApiError } from "./api/client";
 import { routeTree } from "./routeTree.gen";
+import { PageError } from "./shell/page-error";
 import { refused } from "./shell/refused";
 
 export const queryClient = new QueryClient({
@@ -22,6 +23,8 @@ export const router = createRouter({
   defaultPreloadDelay: 50,
   // The query cache decides what is fresh, not the router.
   defaultPreloadStaleTime: 0,
+  // A page that fails is replaced by a message inside the frame; the rest of the app keeps working.
+  defaultErrorComponent: PageError,
 });
 
 declare module "@tanstack/react-router" {

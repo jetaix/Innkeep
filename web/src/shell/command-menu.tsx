@@ -220,7 +220,7 @@ export function CommandMenu({ canSync }: { canSync: boolean }) {
       label: c.addBooking,
       keywords: ["new", "block", "booking", "reservation", "ajouter", "bloquer", "réservation"],
       icon: CalendarPlus,
-      run: () => void navigate({ to: "/calendar", search: { new: true } }),
+      run: () => void navigate({ to: "/calendar", search: { new: "1" } }),
     },
     ...(canSync
       ? [

@@ -1,14 +1,25 @@
-import { eq } from "drizzle-orm";
+import { and, count, eq, gte, lte } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb, guestQuotes, listings, OTA_CHANNELS, properties, reviews } from "../../src/db";
+import { CHANNELS } from "../../src/channels";
+import { effectiveContent, publishState } from "../../src/channels/content";
+import {
+  getDb,
+  guestQuotes,
+  listings,
+  nightlyPrices,
+  OTA_CHANNELS,
+  properties,
+  reservations,
+  reviews,
+} from "../../src/db";
 import { hasSampleData } from "../../src/db/seed";
 import { getKeyStatus } from "../../src/features/assistant/key";
 import { getCleaning } from "../../src/features/cleaning/queries";
 import { getTelegramChat } from "../../src/features/cleaning/telegram-chat";
 import { getExtensionStatus, REQUIRED_EXTENSION } from "../../src/features/extension/status";
 import { countToRefresh, getDataSources } from "../../src/features/freshness/sources";
-import { aiConfigured } from "../../src/features/insights/ai";
+import { AI_MODEL, aiConfigured } from "../../src/features/insights/ai";
 import { getAdvice, getSuggestions } from "../../src/features/insights/queries";
 import { getPricing, PRICING_WINDOWS } from "../../src/features/pricing/queries";
 import { parseChannelDetails } from "../../src/features/properties/ingest";
@@ -16,6 +27,7 @@ import { adminPhotos, getPages } from "../../src/features/properties/pages";
 import { readPreview } from "../../src/features/properties/preview";
 import {
   calendarLinks,
+  guestViewLinks,
   publicPageLinks,
   reservationLinks,
   reviewPageLinks,
@@ -25,6 +37,7 @@ import { occupancyAhead } from "../../src/features/revenue/compute";
 import { getCharges, getRevenue, getRevenueYears } from "../../src/features/revenue/queries";
 import { LOCALES } from "../../src/i18n/config";
 import { addDays, today } from "../../src/lib/dates";
+import { isPrivateAddress } from "../../src/lib/net";
 import { appPassword, publicDemo } from "../../src/lib/session";
 import { telegramBot } from "../../src/lib/telegram";
 import { badRequest, type Env, hostOnly, notFound } from "./env";
@@ -113,15 +126,28 @@ export const read = new Hono<Env>()
 
   .get("/properties", async (c) => {
     const all = await getDb().select().from(listings).all();
+    const places = await getProperties();
     return c.json({
-      properties: await getProperties(),
-      listings: all.map((listing) => ({ ...listing, preview: readPreview(listing) })),
+      properties: places,
+      listings: all.map((listing) => {
+        const place = places.find((candidate) => candidate.id === listing.propertyId);
+        return {
+          ...listing,
+          preview: readPreview(listing),
+          // Whether the details last published on the platform are still the ones kept here.
+          state: place ? publishState(place, listing) : ("never" as const),
+        };
+      }),
     });
   })
 
   .get("/properties/:id", async (c) => {
     const property = await propertyOr404(idOf(c.req.param("id")));
     const own = await getDb().select().from(listings).where(eq(listings.propertyId, property.id)).all();
+    // Where the platforms fetch this property's calendars from.
+    const origin =
+      process.env.APP_URL?.replace(/\/$/, "") ??
+      `${c.req.header("x-forwarded-proto") ?? "http"}://${c.req.header("host")}`;
     return c.json({
       property,
       listings: await Promise.all(
@@ -129,8 +155,19 @@ export const read = new Hono<Env>()
           ...listing,
           details: parseChannelDetails(listing.channelDetails),
           pages: await getPages(listing.id),
+          state: publishState(property, listing),
+          // The title and description this platform should show: the master copy plus its overrides.
+          content: effectiveContent(property, listing),
         })),
       ),
+      // Which platforms take listing details through an API.
+      pushesContent: Object.fromEntries(
+        OTA_CHANNELS.map((channel) => [channel, CHANNELS[channel].capabilities.content] as const),
+      ),
+      origin,
+      // Innkeep runs on an address the platforms cannot open (this computer, a home network).
+      unreachable: isPrivateAddress(origin),
+      extensionOn: Boolean(process.env.EXTENSION_TOKEN),
     });
   })
 
@@ -149,6 +186,7 @@ export const read = new Hono<Env>()
       quotes: await getDb().select().from(guestQuotes).where(eq(guestQuotes.propertyId, property.id)).all(),
       adminPhotos: photos,
       publicLinks: await publicPageLinks(property.id),
+      extensionOn: Boolean(process.env.EXTENSION_TOKEN),
     });
   })
 
@@ -156,7 +194,12 @@ export const read = new Hono<Env>()
   .get("/stays", async (c) => {
     const range = query(z.object({ from: isoDate.optional(), to: isoDate.optional() }), c.req.query());
     const stays = await getStays(range.from ?? addDays(today(), -1), range.to);
-    return c.json({ stays, conflicts: [...findConflicts(stays)], links: await reservationLinks() });
+    return c.json({
+      stays,
+      conflicts: [...findConflicts(stays)],
+      // Where the extension can read each platform's reservations; empty when it is not set up.
+      links: process.env.EXTENSION_TOKEN ? await reservationLinks() : [],
+    });
   })
 
   // How the calendar links are doing: when they were last read and how many fail.
@@ -192,15 +235,32 @@ export const read = new Hono<Env>()
         days: z.coerce
           .number()
           .refine((days) => (PRICING_WINDOWS as readonly number[]).includes(days))
-          .default(PRICING_WINDOWS[0]),
+          .default(PRICING_WINDOWS[0])
+          // A period that is not offered shows the default one, as a missing one does.
+          .catch(PRICING_WINDOWS[0]),
       }),
       c.req.query(),
     );
-    await propertyOr404(asked.property);
+    const property = await propertyOr404(asked.property);
+    const pricing = await getPricing(asked.property, asked.plan, asked.days);
+    const extensionOn = Boolean(process.env.EXTENSION_TOKEN);
+    const noLinks: Awaited<ReturnType<typeof guestViewLinks>> = {};
     return c.json({
-      pricing: await getPricing(asked.property, asked.plan, asked.days),
+      pricing,
+      /** The periods the page offers; the first is the default. */
+      windows: PRICING_WINDOWS,
       calendarLinks: await calendarLinks(asked.property),
-      extensionOn: Boolean(process.env.EXTENSION_TOKEN),
+      /** The public listing for each sample stay, in the order of `pricing.guestChecks`. */
+      guestLinks: await Promise.all(
+        pricing.guestChecks.map((check) =>
+          extensionOn
+            ? guestViewLinks(property.id, check.checkIn, check.checkOut, property.maxGuests)
+            : noLinks,
+        ),
+      ),
+      /** Whether a run of the extension can be started from here: see `ExtensionStatus`. */
+      extension: (await getExtensionStatus()).state,
+      extensionOn,
     });
   })
 
@@ -210,17 +270,59 @@ export const read = new Hono<Env>()
     const links = Object.fromEntries(
       await Promise.all(places.map(async (place) => [place.id, await reviewPageLinks(place.id)] as const)),
     );
-    return c.json({ reviews: all, links });
+    // The state alone: a visitor of the demo may know whether reviews can be read, not the details.
+    return c.json({ reviews: all, links, extension: (await getExtensionStatus()).state });
   })
 
   .get("/suggestions", async (c) => {
     const locale = query(z.object({ locale: z.enum(LOCALES).default("en") }), c.req.query()).locale;
     return c.json(await getSuggestions(locale));
   })
-  .get("/advice", async (c) => c.json({ advice: await getAdvice(), configured: await aiConfigured() }))
+  .get("/advice", async (c) => {
+    // How much real data the model would get today, so thin advice is no surprise.
+    const db = getDb();
+    const now = today();
+    const realStays = await db
+      .select({ total: count() })
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.kind, "reservation"),
+          eq(reservations.status, "confirmed"),
+          lte(reservations.checkOut, now),
+          gte(reservations.amount, 1),
+        ),
+      )
+      .get();
+    const freePrices = await db
+      .select({ total: count() })
+      .from(nightlyPrices)
+      .where(gte(nightlyPrices.date, now))
+      .get();
+    return c.json({
+      advice: await getAdvice(),
+      configured: await aiConfigured(),
+      // Where Claude's key comes from (never the key itself) and which model answers.
+      claude: {
+        // The end of the host's key is the host's own business: a visitor of the demo sees none.
+        key: c.get("signedIn") ? await getKeyStatus() : ({ source: null } as const),
+        model: AI_MODEL,
+        realStays: realStays?.total ?? 0,
+        freePrices: freePrices?.total ?? 0,
+      },
+    });
+  })
 
   // How fresh each piece of data read from the platforms is.
-  .get("/freshness", async (c) => c.json({ sources: await getDataSources() }))
+  .get("/freshness", async (c) => {
+    const sources = await getDataSources();
+    return c.json({
+      sources,
+      toRefresh: countToRefresh(sources),
+      // Whether the extension can be asked to read: decides what the "refresh" buttons offer.
+      extension: (await getExtensionStatus()).state,
+    });
+  })
 
   // Below: how this Innkeep is set up. The demo has nothing to show there.
   .get("/extension", async (c) => {
@@ -234,6 +336,14 @@ export const read = new Hono<Env>()
       mcpTokenSet: Boolean(process.env.MCP_TOKEN),
       extensionTokenSet: Boolean(process.env.EXTENSION_TOKEN),
       telegram: { bot: telegramBot(), chat: await getTelegramChat() },
-      claude: { configured: await aiConfigured(), key: await getKeyStatus() },
+      claude: { configured: await aiConfigured(), key: await getKeyStatus(), model: AI_MODEL },
+      // On a serverless host a scheduler calls /api/cron; there is no timer to show.
+      sync: {
+        hosted: Boolean(process.env.VERCEL),
+        scheduled: Boolean(process.env.CRON_SECRET),
+        interval: Number(process.env.SYNC_INTERVAL_MINUTES ?? 15),
+      },
+      // The public address when one is configured; otherwise the page uses the one it was opened at.
+      appUrl: process.env.APP_URL?.replace(/\/$/, "") ?? null,
     });
   });

@@ -1,7 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { Suspense, useEffect } from "react";
+import { NAV } from "@/config/navigation";
 import { clearSampleData } from "../api/mutations";
 import { navQuery, sessionQuery } from "../api/queries";
 import { Logo } from "../brand/logo";
@@ -125,6 +126,13 @@ const styles = stylex.create({
 function AppFrame() {
   const { m } = useI18n();
   const { data: session } = useSuspenseQuery(sessionQuery);
+  // The tab is named after the page of the menu that is open.
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const page = NAV.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+  const title = page ? `${m.common.nav[page.id]} · Innkeep` : "Innkeep";
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
   return (
     <div {...stylex.props(styles.frame)}>
       {session.signedIn && <KeepFresh />}
