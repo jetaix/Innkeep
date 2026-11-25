@@ -16,6 +16,8 @@ const en = {
     noArrival: "No arrival booked",
     /** "35% booked this month" */
     occupancy: (percent: string): string => `${percent} booked this month`,
+    /** One part of the month's bar: "Airbnb: 4 nights" */
+    nightsFrom: (source: string, nights: string): string => `${source}: ${nights}`,
     photoAlt: (name: string): string => `Photo of ${name}`,
     noPhoto: "No photo yet. Read the public page with the extension to show one.",
     view: "View the listing",
@@ -144,6 +146,7 @@ const fr: typeof en = {
     stayingNow: "Des voyageurs sont sur place",
     noArrival: "Aucune arrivée réservée",
     occupancy: (percent) => `Rempli à ${percent} ce mois-ci`,
+    nightsFrom: (source, nights) => `${source} : ${nights}`,
     photoAlt: (name) => `Photo de ${name}`,
     noPhoto: "Pas encore de photo. Lisez la page publique avec l’extension pour en afficher une.",
     view: "Voir l’annonce",

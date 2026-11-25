@@ -26,7 +26,7 @@ const DESK = "@media (min-width: 64rem)";
 
 const styles = stylex.create({
   page: { display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "72rem" },
-  crumb: { margin: 0, fontSize: text.sm },
+  crumb: { margin: 0, fontSize: text.base },
   back: {
     color: color.muted,
     textDecoration: { default: "none", ":hover": "underline" },
@@ -38,7 +38,7 @@ const styles = stylex.create({
     alignItems: "start",
     gap: "1.5rem",
   },
-  note: { maxWidth: "80ch", margin: 0, color: color.muted, fontSize: text.sm, lineHeight: 1.625 },
+  note: { maxWidth: "70ch", margin: 0, color: color.muted, fontSize: text.base, lineHeight: 1.625 },
 });
 
 function PreviewPage() {

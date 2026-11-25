@@ -7,23 +7,39 @@ import { color, font, radius, text } from "../../tokens.stylex";
 import { CopyButton, SubmitButton } from "../../ui/actions";
 import { Field, Input, Textarea } from "../../ui/form";
 import { Badge, Card, Hidden, Notice, SectionTitle, SourceDot } from "../../ui/primitives";
+import { washStyle } from "../../ui/slab";
 import type { PropertyAnswer, PropertyListing } from "./shared";
 
 const WIDE = "@media (min-width: 40rem)";
 const DESK = "@media (min-width: 48rem)";
 
 const styles = stylex.create({
-  card: { padding: "1.25rem" },
+  card: { padding: "1.25rem", overflow: "hidden" },
+  // The platform's own colour, as a pale sheet across the top of its card and nowhere else.
   head: {
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.5rem",
+    margin: "-1.25rem -1.25rem 0",
+    padding: "0.875rem 1.25rem",
+    borderRadius: `${radius.lg} ${radius.lg} 0 0`,
   },
   heading: { display: "flex", alignItems: "center", gap: "0.5rem" },
+  headSide: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    columnGap: "0.75rem",
+    rowGap: "0.25rem",
+  },
+  onWash: { backgroundColor: color.panel },
+  // The same words as on the list, where they follow the platform's name: here they stand alone.
+  status: { display: "inline-block", "::first-letter": { textTransform: "uppercase" } },
   quiet: {
-    color: { default: color.muted, ":hover": color.ink },
+    color: { default: color.ink, ":hover": color.ink },
+    textDecorationColor: { default: color.lineStrong, ":hover": color.ink },
     fontSize: text.sm,
     textDecoration: "underline",
     textUnderlineOffset: 2,
@@ -42,7 +58,7 @@ const styles = stylex.create({
   critical: { color: color.critical },
   local: {
     padding: "0.625rem 0.75rem",
-    borderRadius: radius.md,
+    borderRadius: radius.slab,
     backgroundColor: color.warnBg,
     color: color.warn,
     fontSize: text.base,
@@ -97,7 +113,7 @@ const styles = stylex.create({
   pair: { display: "contents" },
   term: { color: color.muted },
   value: { margin: 0, whiteSpace: "pre-line" },
-  readAt: { margin: "0.5rem 0 0", color: color.faint, fontSize: text.sm },
+  readAt: { margin: "0.5rem 0 0", color: color.muted, fontSize: text.sm },
   pages: {
     display: "flex",
     flexDirection: "column",
@@ -106,7 +122,7 @@ const styles = stylex.create({
     padding: 0,
     listStyle: "none",
   },
-  page: { borderWidth: 1, borderStyle: "solid", borderColor: color.line, borderRadius: radius.md },
+  page: { borderWidth: 1, borderStyle: "solid", borderColor: color.line, borderRadius: radius.slab },
   summary: {
     display: "flex",
     flexWrap: "wrap",
@@ -196,17 +212,33 @@ export function ChannelCard({
   return (
     <Card xstyle={styles.card}>
       <section aria-labelledby={id("heading")}>
-        <div {...stylex.props(styles.head)}>
+        <div {...stylex.props(washStyle(channel), styles.head)}>
           <SectionTitle id={id("heading")} xstyle={styles.heading}>
             <SourceDot source={channel} />
             {label}
           </SectionTitle>
-          {listing?.listingUrl && (
-            <a href={listing.listingUrl} target="_blank" rel="noreferrer" {...stylex.props(styles.quiet)}>
-              {t.openListing}
-              <Hidden> {m.common.actions.newTab}</Hidden>
-            </a>
-          )}
+          <div {...stylex.props(styles.headSide)}>
+            {listing?.listingUrl && (
+              <a href={listing.listingUrl} target="_blank" rel="noreferrer" {...stylex.props(styles.quiet)}>
+                {t.openListing}
+                <Hidden> {m.common.actions.newTab}</Hidden>
+              </a>
+            )}
+            {/* Whether the calendar link works, said as a state. */}
+            {!listing?.icalUrl ? (
+              <Badge xstyle={styles.onWash}>
+                <span {...stylex.props(styles.status)}>{m.properties.list.status.notConnected}</span>
+              </Badge>
+            ) : listing.lastSyncError ? (
+              <Badge tone="critical">
+                <span {...stylex.props(styles.status)}>{m.properties.list.status.notSyncing}</span>
+              </Badge>
+            ) : (
+              <Badge tone="good" xstyle={styles.onWash}>
+                <span {...stylex.props(styles.status)}>{m.properties.list.status.connected}</span>
+              </Badge>
+            )}
+          </div>
         </div>
 
         <form

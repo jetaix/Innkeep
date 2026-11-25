@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
 import type { OtaChannel } from "@/db/schema";
 import { OTA_CHANNELS } from "../../lists";
 import { isLow, newestFirst, reviewStats, STARS, stars } from "@/features/reviews/compute";
@@ -10,9 +10,10 @@ import { propertiesQuery, reviewsQuery } from "../../api/queries";
 import { ReviewCard } from "../../features/reviews/review-card";
 import { SyncCta } from "../../features/extension/sync-cta";
 import { loadMessages, useI18n } from "../../i18n";
-import { color, radius, text } from "../../tokens.stylex";
+import { color, radius, shadow, text } from "../../tokens.stylex";
 import { buttonStyle } from "../../ui/button";
 import { Card, EmptyState, Hidden, PageHeader, SourceDot } from "../../ui/primitives";
+import { figureStyle, slabStyle } from "../../ui/slab";
 
 const SHOW = ["all", "unanswered", "low"] as const;
 type Show = (typeof SHOW)[number];
@@ -42,36 +43,60 @@ const WIDE = "@media (min-width: 40rem)";
 
 const styles = stylex.create({
   page: { display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "56rem" },
-  top: { display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1rem" },
-  places: { display: "flex", flexDirection: "column", gap: "0.5rem" },
+  // The rating as one figure, and beside it how each platform's guests scored the place.
+  score: {
+    display: "grid",
+    gridTemplateColumns: { default: "minmax(0, 1fr)", [WIDE]: "minmax(0, 15rem) minmax(0, 1fr)" },
+    columnGap: "2.5rem",
+    rowGap: "1.25rem",
+    alignItems: "center",
+    padding: { default: "1.25rem 1rem", [WIDE]: "1.5rem" },
+  },
+  overall: { margin: 0, display: "flex", alignItems: "baseline", gap: "0.5rem" },
+  figure: { fontSize: { default: "3.5rem", [WIDE]: "4.5rem" } },
+  noFigure: { margin: 0, fontSize: "1.5rem", lineHeight: 1.2, letterSpacing: "-0.02em", textWrap: "balance" },
+  outOf: { color: color.muted, fontSize: text.md },
+  overallNote: { margin: "0.375rem 0 0", color: color.muted, fontSize: text.sm, lineHeight: 1.5 },
+  places: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    padding: "0.875rem 1rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.line,
+  },
   read: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" },
   small: { color: color.muted, fontSize: text.sm },
-  setUp: { color: color.ink, fontSize: text.sm, textDecorationLine: "underline", textUnderlineOffset: 2 },
-  // The hairlines between the cells are the grid's own background showing through its gaps.
-  stats: {
+  setUp: {
+    color: color.ink,
+    fontSize: text.sm,
+    textDecorationLine: "underline",
+    textDecorationColor: color.lineStrong,
+    textUnderlineOffset: 3,
+  },
+  stats: { display: "flex", flexDirection: "column", gap: "1.125rem", margin: 0 },
+  stat: {
     display: "grid",
-    gridTemplateColumns: { default: "1fr", [WIDE]: "1fr 1fr" },
-    gap: 1,
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    alignItems: "baseline",
+    columnGap: "1rem",
+    rowGap: "0.375rem",
+  },
+  platform: { display: "flex", alignItems: "center", gap: "0.375rem", fontSize: text.base, fontWeight: 500 },
+  average: { margin: 0, fontSize: text.base, fontWeight: 500, fontVariantNumeric: "tabular-nums" },
+  // A bar of the platform's own glass: its length is the average on that platform's scale.
+  bar: {
+    gridColumn: "1 / -1",
     margin: 0,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
-    backgroundColor: color.line,
+    height: "0.875rem",
+    borderRadius: radius.full,
+    backgroundColor: color.sunken,
   },
-  stat: { padding: "0.75rem 1rem", backgroundColor: color.bg },
-  platform: { display: "flex", alignItems: "center", gap: "0.375rem", color: color.muted, fontSize: text.sm },
-  average: {
-    margin: "0.25rem 0 0",
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    letterSpacing: "-0.025em",
-    fontVariantNumeric: "tabular-nums",
-  },
-  detail: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
-  faint: { color: color.faint },
-  cta: { margin: "0.5rem 0 0" },
+  fill: { display: "block", height: "100%", minWidth: "0.875rem", borderRadius: radius.full },
+  width: (share: number) => ({ width: `${share * 100}%` }),
+  detail: { gridColumn: "1 / -1", margin: 0, color: color.muted, fontSize: text.sm, lineHeight: 1.5 },
+  cta: { gridColumn: "1 / -1", margin: "0.25rem 0 0" },
   filters: { display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: "1.5rem", rowGap: "0.5rem" },
   count: {
     margin: 0,
@@ -97,19 +122,23 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     height: "1.75rem",
-    paddingInline: "0.625rem",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
+    gap: "0.25rem",
+    paddingInline: "0.75rem",
+    borderRadius: radius.full,
+    backgroundColor: { default: "transparent", ":hover": color.sunken },
     color: { default: color.muted, ":hover": color.ink },
+    fontVariantNumeric: "tabular-nums",
     fontSize: text.sm,
     fontWeight: 500,
     textDecoration: "none",
-    transitionProperty: "color, background-color, border-color",
+    transitionProperty: "color, background-color, box-shadow",
     transitionDuration: "150ms",
   },
-  chosen: { borderColor: color.lineStrong, backgroundColor: color.sunken, color: color.ink },
+  chosen: {
+    backgroundColor: { default: color.panel, ":hover": color.panel },
+    color: color.ink,
+    boxShadow: shadow.card,
+  },
 });
 
 function ReviewsPage() {
@@ -154,10 +183,81 @@ function Reviews() {
     value.toLocaleString(INTL_LOCALE[locale], { maximumFractionDigits: 2, minimumFractionDigits: 1 });
   const canRead = extension === "ready" || extension === "outdated";
   const names = new Map(properties.map((property) => [property.id, property.name]));
+  // Every rating on a scale of five, so the two platforms can share one figure.
+  const rated = all.flatMap((review) =>
+    review.rating == null || review.scale <= 0 ? [] : [(review.rating / review.scale) * 5],
+  );
+  const overall = rated.length ? rated.reduce((sum, rating) => sum + rating, 0) / rated.length : null;
 
   return (
     <div {...stylex.props(styles.page)}>
-      <Card xstyle={styles.top}>
+      <Card>
+        <div {...stylex.props(styles.score)}>
+          <div>
+            {overall == null ? (
+              <p {...stylex.props(figureStyle, styles.noFigure)}>{t.stats.overallNone}</p>
+            ) : (
+              <>
+                <p {...stylex.props(styles.overall)}>
+                  <span {...stylex.props(figureStyle, styles.figure)}>{number(overall)}</span>
+                  <span {...stylex.props(styles.outOf)}>{t.stats.outOf(5)}</span>
+                </p>
+                <p {...stylex.props(styles.overallNote)}>{t.stats.overall(rated.length)}</p>
+              </>
+            )}
+          </div>
+          <dl {...stylex.props(styles.stats)}>
+            {OTA_CHANNELS.map((channel) => {
+              const stats = reviewStats(all, channel);
+              const lastSeen = Math.max(
+                0,
+                ...all.filter((review) => review.source === channel).map((review) => review.seenAt),
+              );
+              return (
+                <div key={channel} {...stylex.props(styles.stat)}>
+                  <dt {...stylex.props(styles.platform)}>
+                    <SourceDot source={channel} />
+                    {m.common.sources[channel]}
+                  </dt>
+                  <dd {...stylex.props(styles.average)}>
+                    {stats.average == null ? "–" : t.stats.average(number(stats.average), stats.scale)}
+                  </dd>
+                  <dd aria-hidden {...stylex.props(styles.bar)}>
+                    {stats.average != null && (
+                      <span
+                        {...stylex.props(
+                          slabStyle(channel),
+                          styles.fill,
+                          styles.width(Math.min(1, stats.average / stats.scale)),
+                        )}
+                      />
+                    )}
+                  </dd>
+                  <dd {...stylex.props(styles.detail)}>
+                    {stats.count === 0
+                      ? t.stats.none
+                      : [
+                          t.stats.reviews(stats.count),
+                          stats.unanswered ? t.stats.unanswered(stats.unanswered) : null,
+                          stats.low ? t.stats.low(stats.low) : null,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                    {". "}
+                    {lastSeen
+                      ? t.read.readAt(m.common.sources[channel], fmt.timeAgo(lastSeen))
+                      : t.read.never(m.common.sources[channel])}
+                  </dd>
+                  {!lastSeen && (
+                    <dd {...stylex.props(styles.cta)}>
+                      <SyncCta state={extension} variant="secondary" />
+                    </dd>
+                  )}
+                </div>
+              );
+            })}
+          </dl>
+        </div>
         <div {...stylex.props(styles.places)}>
           {properties.map((property) => {
             const links = pageLinks[property.id] ?? {};
@@ -200,47 +300,6 @@ function Reviews() {
             );
           })}
         </div>
-        <dl {...stylex.props(styles.stats)}>
-          {OTA_CHANNELS.map((channel) => {
-            const stats = reviewStats(all, channel);
-            const lastSeen = Math.max(
-              0,
-              ...all.filter((review) => review.source === channel).map((review) => review.seenAt),
-            );
-            return (
-              <div key={channel} {...stylex.props(styles.stat)}>
-                <dt {...stylex.props(styles.platform)}>
-                  <SourceDot source={channel} />
-                  {m.common.sources[channel]}
-                </dt>
-                <dd {...stylex.props(styles.average)}>
-                  {stats.average == null ? "–" : t.stats.average(number(stats.average), stats.scale)}
-                </dd>
-                <dd {...stylex.props(styles.detail)}>
-                  {stats.count === 0
-                    ? t.stats.none
-                    : [
-                        t.stats.reviews(stats.count),
-                        stats.unanswered ? t.stats.unanswered(stats.unanswered) : null,
-                        stats.low ? t.stats.low(stats.low) : null,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
-                </dd>
-                <dd {...stylex.props(styles.detail, styles.faint)}>
-                  {lastSeen
-                    ? t.read.readAt(m.common.sources[channel], fmt.timeAgo(lastSeen))
-                    : t.read.never(m.common.sources[channel])}
-                </dd>
-                {!lastSeen && (
-                  <dd {...stylex.props(styles.cta)}>
-                    <SyncCta state={extension} />
-                  </dd>
-                )}
-              </div>
-            );
-          })}
-        </dl>
       </Card>
 
       {all.length === 0 ? (
@@ -272,7 +331,8 @@ function Reviews() {
               options={[
                 { label: t.filters.anyStars, search: to({ stars: null }), current: star == null },
                 ...STARS.map((value) => ({
-                  label: `${value} ★`,
+                  label: String(value),
+                  star: true,
                   title: t.filters.starsLabel(value),
                   search: to({ stars: value }),
                   current: value === star,
@@ -310,7 +370,7 @@ function Choice({
   options,
 }: {
   label: string;
-  options: { label: string; title?: string; search: ReviewsSearch; current: boolean }[];
+  options: { label: string; star?: boolean; title?: string; search: ReviewsSearch; current: boolean }[];
 }) {
   return (
     <nav aria-label={label} {...stylex.props(styles.choice)}>
@@ -326,6 +386,7 @@ function Choice({
           {...stylex.props(styles.option, option.current && styles.chosen)}
         >
           {option.label}
+          {option.star && <Star aria-hidden size={12} fill="currentColor" strokeWidth={0} />}
         </Link>
       ))}
     </nav>

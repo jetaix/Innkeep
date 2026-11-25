@@ -10,12 +10,14 @@ import { useI18n } from "../../i18n";
 import { color, text } from "../../tokens.stylex";
 import { SubmitButton } from "../../ui/actions";
 import { buttonStyle } from "../../ui/button";
-import { Badge, Card, Hidden, SectionTitle, SourceDot } from "../../ui/primitives";
+import { Badge, Hidden, SourceDot } from "../../ui/primitives";
 import { SyncCta } from "../extension/sync-cta";
 
 const styles = stylex.create({
-  section: { display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "64rem" },
-  summary: { padding: "1rem" },
+  section: { display: "flex", flexDirection: "column", gap: "2.5rem" },
+  summary: { maxWidth: "44rem" },
+  group: { minWidth: 0 },
+  groupTitle: { margin: "0 0 0.5rem", fontSize: text.md, fontWeight: 600, letterSpacing: "-0.01em" },
   line: {
     display: "flex",
     flexWrap: "wrap",
@@ -26,8 +28,8 @@ const styles = stylex.create({
   },
   how: { margin: "0.375rem 0 0", color: color.muted, fontSize: text.base, lineHeight: 1.625 },
   popup: {
-    marginTop: "0.75rem",
-    paddingTop: "0.75rem",
+    marginTop: "1rem",
+    paddingTop: "1rem",
     borderTopWidth: 1,
     borderTopStyle: "solid",
     borderTopColor: color.line,
@@ -48,14 +50,17 @@ const styles = stylex.create({
   name: { color: color.ink, fontWeight: 500 },
   buttons: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", marginTop: "0.75rem" },
   small: { margin: "0.375rem 0 0", color: color.muted, fontSize: text.sm },
-  head: {
-    padding: "0.75rem 1rem",
+  scroll: {
+    position: "relative",
+    overflowX: "auto",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.lineStrong,
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: color.line,
   },
-  scroll: { position: "relative", overflowX: "auto" },
-  table: { width: "100%", borderCollapse: "collapse", textAlign: "start" },
+  table: { width: "100%", minWidth: "40rem", borderCollapse: "collapse", textAlign: "start" },
   th: {
     padding: "0.5rem 0.75rem",
     color: color.muted,
@@ -72,13 +77,13 @@ const styles = stylex.create({
     textAlign: "start",
     verticalAlign: "top",
   },
-  first: { paddingInlineStart: "1rem" },
-  last: { paddingInlineEnd: "1rem", textAlign: "end" },
+  first: { paddingInlineStart: 0 },
+  last: { paddingInlineEnd: 0, textAlign: "end" },
   nowrap: { whiteSpace: "nowrap" },
   when: { color: color.muted, fontVariantNumeric: "tabular-nums" },
   strong: { fontWeight: 500 },
   feeds: { display: "block", color: color.muted, fontSize: text.sm },
-  automatic: { display: "block", marginTop: "0.125rem", color: color.faint, fontSize: text.sm },
+  automatic: { display: "block", marginTop: "0.125rem", color: color.muted, fontSize: text.sm },
   progress: { display: "block", marginTop: "0.125rem", color: color.muted, fontSize: text.sm },
   from: { display: "inline-flex", alignItems: "center", gap: "0.375rem" },
   error: {
@@ -105,9 +110,9 @@ const styles = stylex.create({
     lineHeight: 1.625,
     textAlign: "start",
   },
-  link: { color: color.ink, textUnderlineOffset: 2 },
+  link: { color: color.ink, textDecorationColor: color.lineStrong, textUnderlineOffset: 4 },
   below: { display: "block", marginTop: "0.375rem" },
-  limits: { padding: "1.25rem" },
+  limits: { maxWidth: "44rem" },
   rows: {
     display: "flex",
     flexDirection: "column",
@@ -144,7 +149,7 @@ export function DataSection() {
 
   return (
     <div {...stylex.props(styles.section)}>
-      <Card xstyle={styles.summary}>
+      <div {...stylex.props(styles.summary)}>
         <p {...stylex.props(styles.line)}>
           <Badge tone={toRefresh ? "warn" : "good"}>
             {toRefresh ? t.summary.toRefresh(toRefresh) : t.summary.allFresh}
@@ -184,13 +189,11 @@ export function DataSection() {
           </div>
           <p {...stylex.props(styles.small)}>{t.summary.popup.signIn}</p>
         </div>
-      </Card>
+      </div>
 
       {groups.map((group) => (
-        <Card key={group.key}>
-          <div {...stylex.props(styles.head)}>
-            <SectionTitle>{group.title}</SectionTitle>
-          </div>
+        <div key={group.key} {...stylex.props(styles.group)}>
+          <h3 {...stylex.props(styles.groupTitle)}>{group.title}</h3>
           <div {...stylex.props(styles.scroll)}>
             <table {...stylex.props(styles.table)}>
               <thead>
@@ -219,18 +222,18 @@ export function DataSection() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       ))}
 
-      <Card xstyle={styles.limits}>
-        <SectionTitle>{t.limits.title}</SectionTitle>
+      <div {...stylex.props(styles.limits)}>
+        <h3 {...stylex.props(styles.groupTitle)}>{t.limits.title}</h3>
         <ul {...stylex.props(styles.rows)}>
           {t.limits.rows.map((row) => (
             <li key={row}>{row}</li>
           ))}
         </ul>
         <p {...stylex.props(styles.why)}>{t.limits.why}</p>
-      </Card>
+      </div>
     </div>
   );
 }

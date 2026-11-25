@@ -2,7 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type FormEvent, lazy, Suspense } from "react";
+import { type FormEvent, lazy, Suspense, useEffect } from "react";
 import { isView, VIEWS, type View } from "@/features/calendar/compute";
 import { addDays, type ISODate, isISODate, today } from "@/lib/dates";
 import { sync } from "../../api/mutations";
@@ -11,10 +11,10 @@ import { bars } from "../../features/calendar/bars";
 import { MonthGrid, WeeksGrid, YearGrid } from "../../features/calendar/grids";
 import { period, step } from "../../features/calendar/period";
 import { loadMessages, useI18n } from "../../i18n";
-import { color, text } from "../../tokens.stylex";
+import { color, radius, shadow, text } from "../../tokens.stylex";
 import { SubmitButton } from "../../ui/actions";
 import { buttonStyle } from "../../ui/button";
-import { EmptyState, Kbd, Notice, PageHeader } from "../../ui/primitives";
+import { Badge, EmptyState, Kbd, Notice, PageHeader } from "../../ui/primitives";
 
 export type CalendarSearch = {
   view?: View;
@@ -26,13 +26,30 @@ export type CalendarSearch = {
   new?: string;
 };
 
-// The side panels are only needed after a click: their code is fetched then, so the grid shows first.
-const StayPanel = lazy(() =>
-  import("../../features/calendar/panels").then((file) => ({ default: file.StayPanel })),
-);
-const NewStayPanel = lazy(() =>
-  import("../../features/calendar/panels").then((file) => ({ default: file.NewStayPanel })),
-);
+// The side panels are only needed after a click: their code is fetched apart, so the grid shows first.
+const loadPanels = () => import("../../features/calendar/panels");
+const StayPanel = lazy(() => loadPanels().then((file) => ({ default: file.StayPanel })));
+const NewStayPanel = lazy(() => loadPanels().then((file) => ({ default: file.NewStayPanel })));
+
+/**
+ * Fetches the panels' code as soon as a pointer, the keyboard or a finger
+ * reaches a link that opens one, so the panel is there by the time the click lands.
+ */
+function useWarmPanels() {
+  useEffect(() => {
+    const warm = (event: Event) => {
+      const link = event.target instanceof Element ? event.target.closest("a") : null;
+      if (!link || !/[?&](r|new)=/.test(link.search)) return;
+      void loadPanels();
+      for (const type of INTENT) document.removeEventListener(type, warm, true);
+    };
+    for (const type of INTENT) document.addEventListener(type, warm, { capture: true, passive: true });
+    return () => {
+      for (const type of INTENT) document.removeEventListener(type, warm, true);
+    };
+  }, []);
+}
+const INTENT = ["pointerover", "focusin", "touchstart"] as const;
 
 /** The stays on screen, from the eve of the first day so a departure that morning is drawn. */
 const staysOf = (start: ISODate, end: ISODate) => staysQuery({ from: addDays(start, -1), to: end });
@@ -47,8 +64,11 @@ export const Route = createFileRoute("/_app/calendar")({
   // Opening or closing a panel reads nothing new; only the period does.
   loaderDeps: ({ search }) => ({ view: search.view, start: search.start }),
   // Started while this route's code downloads; the components read the same queries.
-  loader: ({ context: { queryClient }, deps }) => {
+  loader: ({ context: { queryClient }, deps, location }) => {
     void loadMessages("calendar");
+    // The address already asks for a panel: fetch its code beside the data.
+    const asked = location.search as CalendarSearch;
+    if (asked.r || asked.new) void loadPanels();
     const { start, end } = period(deps.view ?? "month", deps.start, today());
     return Promise.all([
       queryClient.ensureQueryData(propertiesQuery),
@@ -62,10 +82,33 @@ export const Route = createFileRoute("/_app/calendar")({
 const styles = stylex.create({
   failing: { color: color.critical, fontWeight: 500, textDecoration: "underline", textUnderlineOffset: 2 },
   group: { display: "flex" },
+  // The three share one outline: each ring is a pixel outside its box, so a pixel apart they meet.
   first: { borderStartEndRadius: 0, borderEndEndRadius: 0 },
-  middle: { marginInlineStart: -1, borderRadius: 0 },
-  last: { marginInlineStart: -1, borderStartStartRadius: 0, borderEndStartRadius: 0 },
-  chosen: { backgroundColor: color.sunken, fontWeight: 600 },
+  middle: { marginInlineStart: 1, borderRadius: 0 },
+  last: { marginInlineStart: 1, borderStartStartRadius: 0, borderEndStartRadius: 0 },
+  // The views are a choice of one: a track, with the chosen view lifted off it.
+  views: {
+    display: "flex",
+    alignItems: "stretch",
+    minHeight: "2.125rem",
+    padding: 2,
+    borderRadius: radius.full,
+    backgroundColor: color.sunken,
+  },
+  view: {
+    display: "flex",
+    alignItems: "center",
+    paddingInline: "0.875rem",
+    borderRadius: radius.full,
+    color: { default: color.muted, ":hover": color.ink },
+    fontSize: text.base,
+    fontWeight: 500,
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    transitionProperty: "background-color, box-shadow, color",
+    transitionDuration: "200ms",
+  },
+  chosen: { backgroundColor: color.panel, boxShadow: shadow.card, color: color.ink },
   arrow: { paddingInline: "0.5rem" },
   key: {
     borderColor: `color-mix(in oklab, ${color.inverse} 30%, transparent)`,
@@ -83,8 +126,9 @@ const styles = stylex.create({
   legend: {
     display: "flex",
     flexWrap: "wrap",
+    alignItems: "center",
     columnGap: "1.25rem",
-    rowGap: "0.25rem",
+    rowGap: "0.5rem",
     margin: "1rem 0 0",
     padding: 0,
     listStyle: "none",
@@ -93,19 +137,16 @@ const styles = stylex.create({
   },
   entry: { display: "flex", alignItems: "center", gap: "0.375rem" },
   keys: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.25rem" },
-  swatch: {
-    width: "0.875rem",
-    height: "0.75rem",
-    borderLeftWidth: 3,
-    borderLeftStyle: "solid",
-    borderRadius: 3,
-  },
+  // A small slab of the same glass as the grid's.
+  swatch: { width: "1.5rem", height: "0.875rem", borderRadius: 5 },
+  keysEnd: { marginInlineStart: { default: 0, "@media (min-width: 64rem)": "auto" } },
 });
 
 function Calendar() {
   const { m, fmt } = useI18n("calendar");
   const t = m.calendar;
   const params = Route.useSearch();
+  useWarmPanels();
   const now = today();
   const view: View = params.view ?? "month";
   const { start, end } = period(view, params.start, now);
@@ -175,19 +216,15 @@ function Calendar() {
           </>
         }
       >
-        <nav aria-label={t.header.view} {...stylex.props(styles.group)}>
-          {VIEWS.map((option, index) => (
+        <nav aria-label={t.header.view} {...stylex.props(styles.views)}>
+          {VIEWS.map((option) => (
             <Link
               key={option}
               to="/calendar"
               // Keep looking at the same time: the month or year of the day the current view starts on.
               search={search({}, view === "weeks" ? addDays(start, 3) : start, option)}
               aria-current={option === view ? "page" : undefined}
-              {...stylex.props(
-                buttonStyle(),
-                index === 0 ? styles.first : index === VIEWS.length - 1 ? styles.last : styles.middle,
-                option === view && styles.chosen,
-              )}
+              {...stylex.props(styles.view, option === view && styles.chosen)}
             >
               {t.header.views[option]}
             </Link>
@@ -245,7 +282,7 @@ function Calendar() {
         </Notice>
       )}
       {conflicts.size > 0 && (
-        <Notice tone="critical" role="alert" xstyle={styles.notice}>
+        <Notice tone="clash" role="alert" xstyle={styles.notice}>
           <strong {...stylex.props(styles.strong)}>{t.conflict.title}</strong>{" "}
           {t.conflict.body(conflicts.size)}
         </Notice>
@@ -263,7 +300,9 @@ function Calendar() {
             search={search}
           />
         )}
-        {view === "year" && <YearGrid year={start} properties={properties} stays={stays} today={now} />}
+        {view === "year" && (
+          <YearGrid year={start} properties={properties} stays={stays} conflicts={conflicts} today={now} />
+        )}
         {view === "weeks" && (
           <WeeksGrid
             start={start}
@@ -308,7 +347,11 @@ function Calendar() {
           <span aria-hidden {...stylex.props(styles.swatch, bars.block)} />
           {t.legend.blocked}
         </li>
-        <li {...stylex.props(styles.keys)}>
+        <li {...stylex.props(styles.entry)}>
+          <span aria-hidden {...stylex.props(styles.swatch, bars.clash)} />
+          {conflicts.size > 0 ? <Badge tone="clash">{t.legend.clash}</Badge> : t.legend.clash}
+        </li>
+        <li {...stylex.props(styles.keys, styles.keysEnd)}>
           <Kbd>←</Kbd> <Kbd>→</Kbd> {t.legend.move}, <Kbd>T</Kbd> {t.legend.today}, <Kbd>N</Kbd>{" "}
           {t.legend.new}
         </li>

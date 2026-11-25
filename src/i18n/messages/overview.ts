@@ -9,6 +9,19 @@ const en = {
     leave: (names: string, count: number) => `${names} ${count > 1 ? "leave" : "leaves"}`,
     inProgress: (count: number) => `${count} ${count > 1 ? "stays" : "stay"} in progress`,
   },
+  /** The strip of the next fourteen nights; `row` is what a screen reader hears for one property. */
+  fortnight: {
+    title: "The next fourteen nights",
+    row: (property: string, parts: string[]) => `${property}: ${parts.join("; ")}.`,
+    stay: (guest: string, source: string, from: string, to: string) =>
+      `${guest}, ${source}, ${from} to ${to}`,
+    guest: "A guest",
+    blocked: (from: string, to: string) => `closed from ${from} to ${to}`,
+    free: "free for the fourteen nights",
+    clash: (nights: number) => `${nights} night${nights === 1 ? "" : "s"} booked twice`,
+    legendBlocked: "Closed",
+    legendClash: "Booked twice",
+  },
   stats: {
     netRevenue: (month: string) => `Net revenue, ${month}`,
     beforeCosts: (gross: string, charges: string) => `${gross} before ${charges} of costs`,
@@ -46,6 +59,17 @@ const fr: typeof en = {
     arrive: (names, count) => `${names} ${count > 1 ? "arrivent" : "arrive"}`,
     leave: (names, count) => `${names} ${count > 1 ? "partent" : "part"}`,
     inProgress: (count) => `${count} séjour${count > 1 ? "s" : ""} en cours`,
+  },
+  fortnight: {
+    title: "Les quatorze prochaines nuits",
+    row: (property, parts) => `${property} : ${parts.join(" ; ")}.`,
+    stay: (guest, source, from, to) => `${guest}, ${source}, du ${from} au ${to}`,
+    guest: "Un voyageur",
+    blocked: (from, to) => `fermé du ${from} au ${to}`,
+    free: "libre pendant les quatorze nuits",
+    clash: (nights) => `${nights} nuit${nights > 1 ? "s" : ""} réservée${nights > 1 ? "s" : ""} deux fois`,
+    legendBlocked: "Fermé",
+    legendClash: "Réservé deux fois",
   },
   stats: {
     netRevenue: (month) => `Revenus nets, ${month}`,

@@ -16,7 +16,7 @@ import {
 import { cleaningQuery } from "../../api/queries";
 import { Row } from "../../features/cleaning/row";
 import { loadMessages, useI18n } from "../../i18n";
-import { color, text } from "../../tokens.stylex";
+import { color, font, text } from "../../tokens.stylex";
 import { ConfirmButton, CopyButton, SubmitButton } from "../../ui/actions";
 import { Button } from "../../ui/button";
 import { Field, Input, Select } from "../../ui/form";
@@ -52,12 +52,20 @@ const styles = stylex.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.75rem",
-    padding: "1rem",
   },
   line: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", margin: 0 },
   form: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem" },
   whole: { alignSelf: "stretch" },
-  title: { marginBottom: "0.5rem", paddingInline: "0.25rem" },
+  // A period of the schedule, in the display face.
+  title: {
+    marginBottom: "0.625rem",
+    paddingInline: "0.25rem",
+    fontFamily: font.display,
+    fontSize: "1.375rem",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.2,
+  },
   list: { margin: 0, padding: 0, listStyle: "none" },
   item: {
     borderTopWidth: { default: 1, ":first-child": 0 },
@@ -65,7 +73,7 @@ const styles = stylex.create({
     borderTopColor: color.line,
   },
   head: {
-    padding: "0.75rem 1.25rem",
+    padding: "0.875rem 1.25rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: color.line,
@@ -128,8 +136,12 @@ function CleaningView() {
   const weekEnd = addDays(today, 7);
   const open = schedule.filter((entry) => entry.status === "pending");
   const groups = [
-    { title: t.groups.now, rows: open.filter((entry) => entry.date <= today) },
-    { title: t.groups.week, rows: open.filter((entry) => entry.date > today && entry.date < weekEnd) },
+    { title: t.groups.now, near: true, rows: open.filter((entry) => entry.date <= today) },
+    {
+      title: t.groups.week,
+      near: true,
+      rows: open.filter((entry) => entry.date > today && entry.date < weekEnd),
+    },
     { title: t.groups.later, rows: open.filter((entry) => entry.date >= weekEnd) },
     { title: t.groups.closed, rows: schedule.filter((entry) => entry.status !== "pending").reverse() },
   ].filter((group) => group.rows.length > 0);
@@ -157,13 +169,14 @@ function CleaningView() {
   return (
     <div {...stylex.props(styles.page)}>
       <div {...stylex.props(styles.column)}>
-        <Card xstyle={styles.summary}>
+        {/* The page's own bar stands on the ground: the panels below are the schedule. */}
+        <div {...stylex.props(styles.summary)}>
           <p {...stylex.props(styles.line)}>
             <Badge tone={thisWeek ? "neutral" : "good"}>
               {thisWeek ? t.summary.week(thisWeek) : t.summary.none}
             </Badge>
             {nobody > 0 && <Badge tone="warn">{t.summary.unassigned(nobody)}</Badge>}
-            {clashes > 0 && <Badge tone="critical">{t.summary.clashes(clashes)}</Badge>}
+            {clashes > 0 && <Badge tone="clash">{t.summary.clashes(clashes)}</Badge>}
           </p>
           <div {...stylex.props(styles.line)}>
             <Modal
@@ -221,7 +234,7 @@ function CleaningView() {
               {manual.error.message}
             </Notice>
           )}
-        </Card>
+        </div>
 
         {groups.length === 0 ? (
           <EmptyState title={t.empty.title}>
@@ -246,6 +259,7 @@ function CleaningView() {
                             named={properties.length > 1}
                             cleaners={cleaners}
                             overdue={entry.status === "pending" && entry.date < today}
+                            open={Boolean(group.near)}
                           />
                         </li>
                       )

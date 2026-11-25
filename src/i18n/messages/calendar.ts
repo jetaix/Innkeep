@@ -42,6 +42,7 @@ const en = {
   },
   legend: {
     blocked: "Blocked",
+    clash: "Double booking",
     move: "move",
     today: "today",
     new: "new",
@@ -128,6 +129,7 @@ const fr: typeof en = {
   },
   legend: {
     blocked: "Bloqué",
+    clash: "Double réservation",
     move: "naviguer",
     today: "aujourd’hui",
     new: "nouveau",

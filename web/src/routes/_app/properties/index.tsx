@@ -1,20 +1,23 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Bath, BedDouble, ImageOff, MapPin, Star, Users } from "lucide-react";
-import { monthOf, monthStart, summariseMonth } from "@/features/revenue/compute";
+import { Bath, BedDouble, MapPin, Star, Users } from "lucide-react";
+import type { Source } from "@/db/schema";
+import { addMonths, monthOf, monthStart, nightsWithin, summariseMonth } from "@/features/revenue/compute";
 import { INTL_LOCALE } from "@/i18n/config";
-import { today } from "@/lib/dates";
+import { diffDays, today } from "@/lib/dates";
 import { createProperty } from "../../../api/mutations";
 import { propertiesQuery, staysQuery } from "../../../api/queries";
+import { LogoMark } from "../../../brand/logo";
 import { PLATFORMS, sizedPhoto } from "../../../features/properties/shared";
 import { loadMessages, useI18n } from "../../../i18n";
-import { color, radius, shadow, text } from "../../../tokens.stylex";
+import { color, font, radius, shadow, text } from "../../../tokens.stylex";
 import { SubmitButton } from "../../../ui/actions";
 import { buttonStyle } from "../../../ui/button";
 import { Field, Input } from "../../../ui/form";
 import { Modal } from "../../../ui/modal";
 import { Badge, Card, EmptyState, Hidden, Notice, PageHeader, SourceDot } from "../../../ui/primitives";
+import { slabStyle } from "../../../ui/slab";
 
 /** The stays of this month and after: who is there now, who comes next, how full the month is. */
 const stays = () => staysQuery({ from: monthStart(monthOf(today())) });
@@ -27,17 +30,18 @@ export const Route = createFileRoute("/_app/properties/")({
   component: PropertiesPage,
 });
 
-const WIDE = "@media (min-width: 48rem)";
+const SOURCES = ["airbnb", "booking", "direct"] as const satisfies readonly Source[];
 
 const styles = stylex.create({
   form: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem" },
   field: { alignSelf: "stretch" },
-  failed: { marginBottom: "1rem", maxWidth: "64rem" },
+  failed: { marginBottom: "1rem", maxWidth: "72rem" },
+  // As many doorways side by side as fit: three on a wide screen, one on a phone.
   grid: {
     display: "grid",
-    gridTemplateColumns: { default: "1fr", [WIDE]: "1fr 1fr" },
-    gap: "1rem",
-    maxWidth: "64rem",
+    gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr))",
+    gap: "1.25rem",
+    maxWidth: "72rem",
     margin: 0,
     padding: 0,
     listStyle: "none",
@@ -47,12 +51,21 @@ const styles = stylex.create({
     display: "flex",
     flexDirection: "column",
     height: "100%",
-    overflow: "hidden",
-    boxShadow: { default: "none", ":hover": shadow.pop, ":focus-within": shadow.pop },
+    padding: "0.75rem",
+    borderRadius: "1.75rem",
+    boxShadow: { default: shadow.card, ":hover": shadow.panel, ":focus-within": shadow.panel },
     transitionProperty: "box-shadow",
-    transitionDuration: "150ms",
+    transitionDuration: "200ms",
   },
-  media: { position: "relative", aspectRatio: "16 / 9", backgroundColor: color.sunken },
+  // Each place is a doorway: the cover has the arch of the mark.
+  media: {
+    position: "relative",
+    aspectRatio: "6 / 5",
+    overflow: "hidden",
+    // Radii the browser scales down together, so the foot of the doorway keeps its corners.
+    borderRadius: "12rem 12rem 1.5rem 1.5rem",
+    backgroundColor: color.sunken,
+  },
   photo: { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" },
   noPhoto: {
     position: "absolute",
@@ -61,35 +74,46 @@ const styles = stylex.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "0.5rem",
-    padding: "1.5rem",
+    gap: "0.75rem",
+    padding: "3.5rem 2rem 3rem",
     color: color.muted,
     fontSize: text.sm,
+    lineHeight: 1.5,
     textAlign: "center",
+    textWrap: "balance",
   },
-  faint: { color: color.faint },
+  mark: { width: "2.25rem", height: "2.25rem", color: color.faint },
   price: {
     position: "absolute",
-    bottom: "0.5rem",
-    left: "0.5rem",
+    bottom: "0.625rem",
+    left: "0.625rem",
     margin: 0,
-    padding: "0.25rem 0.5rem",
-    borderRadius: radius.md,
-    backgroundColor: `color-mix(in oklab, ${color.bg} 90%, transparent)`,
+    padding: "0.25rem 0.625rem",
+    borderRadius: radius.full,
+    backgroundColor: color.panel,
+    boxShadow: shadow.card,
     fontSize: text.sm,
     fontWeight: 600,
     fontVariantNumeric: "tabular-nums",
   },
-  body: { display: "flex", flexGrow: 1, flexDirection: "column", gap: "0.75rem", padding: "1rem" },
+  body: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "column",
+    gap: "0.875rem",
+    padding: "1rem 0.5rem 0.5rem",
+  },
   head: { minWidth: 0 },
   name: {
     margin: 0,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
-    fontSize: "1rem",
-    fontWeight: 600,
-    letterSpacing: "-0.025em",
+    fontFamily: font.display,
+    fontSize: "1.375rem",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.25,
   },
   // Stretched over the card, so a click anywhere on it opens the property.
   open: {
@@ -141,14 +165,17 @@ const styles = stylex.create({
   },
   booked: { margin: 0, fontWeight: 500, fontVariantNumeric: "tabular-nums" },
   arrival: { margin: 0, color: color.muted },
+  // The month as a track; the booked nights lie in it as glass, one slab per source.
   meter: {
-    height: "0.375rem",
-    marginTop: "0.375rem",
-    overflow: "hidden",
+    display: "flex",
+    gap: 2,
+    height: "0.75rem",
+    marginTop: "0.5rem",
+    padding: 2,
     borderRadius: radius.full,
     backgroundColor: color.sunken,
   },
-  fill: { height: "100%", borderRadius: radius.full, backgroundColor: color.ink },
+  fill: { minWidth: "0.5rem", height: "100%", borderRadius: radius.full },
   width: (ratio: number) => ({ width: `${ratio * 100}%` }),
   badges: { display: "flex", flexWrap: "wrap", gap: "0.375rem", margin: 0, padding: 0, listStyle: "none" },
   off: { backgroundColor: color.lineStrong },
@@ -231,6 +258,14 @@ function PropertyList() {
         const staying = booked.some((stay) => stay.checkIn <= now && stay.checkOut > now);
         const next = booked.find((stay) => stay.checkIn > now);
         const month = summariseMonth(monthOf(now), booked, [], [property]);
+        const from = monthStart(monthOf(now));
+        const to = monthStart(addMonths(monthOf(now), 1));
+        const nightsBy = SOURCES.map((source) => ({
+          source,
+          nights: booked
+            .filter((stay) => stay.source === source)
+            .reduce((sum, stay) => sum + nightsWithin(stay, from, to), 0),
+        })).filter((part) => part.nights > 0);
 
         return (
           <li key={property.id}>
@@ -247,7 +282,7 @@ function PropertyList() {
                   />
                 ) : (
                   <div {...stylex.props(styles.noPhoto)}>
-                    <ImageOff aria-hidden size={24} {...stylex.props(styles.faint)} />
+                    <LogoMark xstyle={styles.mark} />
                     {t.list.noPhoto}
                   </div>
                 )}
@@ -330,7 +365,25 @@ function PropertyList() {
                     </p>
                   </div>
                   <div {...stylex.props(styles.meter)}>
-                    <div {...stylex.props(styles.fill, styles.width(Math.min(1, month.occupancy)))} />
+                    {nightsBy.map(({ source, nights }) => {
+                      const spoken = t.list.nightsFrom(
+                        m.common.sources[source],
+                        m.common.count.nights(nights),
+                      );
+                      return (
+                        <div
+                          key={source}
+                          title={spoken}
+                          {...stylex.props(
+                            slabStyle(source),
+                            styles.fill,
+                            styles.width(Math.min(1, nights / diffDays(from, to))),
+                          )}
+                        >
+                          <Hidden>{spoken}</Hidden>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

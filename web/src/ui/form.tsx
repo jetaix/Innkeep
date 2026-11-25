@@ -11,9 +11,12 @@ const styles = stylex.create({
     width: "100%",
     borderWidth: 1,
     borderStyle: "solid",
-    borderColor: color.lineStrong,
-    borderRadius: radius.md,
-    backgroundColor: { default: color.bg, ":read-only": color.subtle },
+    borderColor: { default: color.lineStrong, ":hover": color.faint },
+    borderRadius: radius.field,
+    backgroundColor: { default: color.panel, ":read-only": color.subtle },
+    boxShadow: { default: "inset 0 1px 2px rgb(0 0 0 / 0.04)", ":focus-visible": "none" },
+    transitionProperty: "border-color",
+    transitionDuration: "150ms",
     color: { default: color.ink, ":read-only": color.muted, "::placeholder": color.faint },
     paddingInline: "0.625rem",
     fontFamily: "inherit",
@@ -21,10 +24,10 @@ const styles = stylex.create({
     fontSize: { default: text.field, [WIDE]: text.base },
     minHeight: { default: null, [COARSE]: "2.5rem" },
   },
-  line: { height: "2rem" },
+  line: { height: "2.125rem" },
   area: { paddingBlock: "0.375rem", lineHeight: 1.625 },
   // A select is never read-only, though the browser's `:read-only` matches it.
-  select: { paddingInlineEnd: "1.75rem", backgroundColor: color.bg, color: color.ink },
+  select: { paddingInlineEnd: "1.75rem", backgroundColor: color.panel, color: color.ink },
   label: {
     display: "block",
     marginBottom: "0.25rem",
@@ -32,7 +35,7 @@ const styles = stylex.create({
     fontSize: text.sm,
     fontWeight: 500,
   },
-  hint: { margin: "0.25rem 0 0", color: color.faint, fontSize: text.sm },
+  hint: { margin: "0.25rem 0 0", color: color.muted, fontSize: text.sm },
 });
 
 type Styled<T> = Omit<T, "className" | "style"> & { xstyle?: stylex.StyleXStyles };

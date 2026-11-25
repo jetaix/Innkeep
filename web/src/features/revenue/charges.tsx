@@ -12,7 +12,7 @@ import { Notice } from "../../ui/primitives";
 
 const styles = stylex.create({
   item: {
-    padding: "0.625rem 1rem",
+    paddingBlock: "0.6875rem",
     borderTopWidth: { default: 1, ":first-child": 0 },
     borderTopStyle: "solid",
     borderTopColor: color.line,
@@ -41,19 +41,17 @@ const styles = stylex.create({
     flexDirection: "column",
     alignItems: "flex-start",
     gap: "0.75rem",
-    padding: "1rem",
+    paddingTop: "1.25rem",
     borderTopWidth: 1,
     borderTopStyle: "solid",
-    borderTopColor: color.line,
-    borderEndStartRadius: "inherit",
-    borderEndEndRadius: "inherit",
-    backgroundColor: color.subtle,
+    borderTopColor: color.lineStrong,
   },
-  formTitle: { margin: 0, fontSize: text.sm, fontWeight: 600 },
+  formTitle: { margin: 0, fontSize: text.md, fontWeight: 600, letterSpacing: "-0.01em" },
   fields: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "0.75rem",
+    columnGap: "0.75rem",
+    rowGap: "0.875rem",
     alignSelf: "stretch",
   },
   both: { gridColumnStart: "span 2" },
@@ -92,6 +90,7 @@ export function ChargeRow({
           {charge.frequency === "percent" ? `${charge.amount / 100}%` : fmt.money(charge.amount, currency)}
         </span>
         <ConfirmButton
+          variant="ghost"
           size="sm"
           message={t.charges.confirmRemove(charge.label)}
           pending={remove.isPending}

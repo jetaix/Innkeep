@@ -11,7 +11,7 @@ const HEIGHT = 180;
 export type ChartNight = Pick<Night, "date" | "takenBy" | "airbnb" | "booking">;
 
 const styles = stylex.create({
-  figure: { margin: 0, padding: "1rem 1rem 0.75rem" },
+  figure: { margin: 0 },
   legend: {
     display: "flex",
     flexWrap: "wrap",
@@ -34,7 +34,16 @@ const styles = stylex.create({
     touchAction: "pan-y",
   },
   svg: { display: "block", width: "100%", height: "11rem", overflow: "visible" },
-  taken: { fill: color.sunken },
+  taken: { fill: color.subtle },
+  // The band between the two lines, in the colour of the platform that asks more.
+  airbnbBand: { fill: `color-mix(in oklab, ${color.airbnb} 24%, transparent)` },
+  bookingBand: { fill: `color-mix(in oklab, ${color.booking} 24%, transparent)` },
+  bandKey: {
+    width: "1.25rem",
+    height: "0.625rem",
+    borderRadius: radius.sm,
+    backgroundImage: `linear-gradient(90deg, color-mix(in oklab, ${color.airbnb} 30%, transparent) 50%, color-mix(in oklab, ${color.booking} 30%, transparent) 50%)`,
+  },
   base: { stroke: color.lineStrong },
   airbnbLine: { stroke: color.airbnb },
   bookingLine: { stroke: color.booking },
@@ -52,7 +61,7 @@ const styles = stylex.create({
     height: "0.625rem",
     borderWidth: 2,
     borderStyle: "solid",
-    borderColor: color.bg,
+    borderColor: color.panel,
     borderRadius: radius.full,
     transform: "translate(-50%, -50%)",
     pointerEvents: "none",
@@ -72,7 +81,9 @@ const styles = stylex.create({
  * so colour is never the only cue. Nights that are taken are shaded and carry
  * no price, which is how the platforms' own calendars show them. Pointing at
  * a night, touching it, or moving with the arrow keys shows that night's
- * prices in the line above the chart. The table under the chart holds the
+ * prices in the line above the chart. Where the two platforms differ, the
+ * band between their lines is shaded in the colour of the one that asks
+ * more: the gap is the thing to see. The table under the chart holds the
  * same numbers as text.
  */
 export function PriceChart({ nights, currency }: { nights: ChartNight[]; currency: string }) {
@@ -110,6 +121,8 @@ export function PriceChart({ nights, currency }: { nights: ChartNight[]; currenc
   const months = nights
     .map((night, index) => ({ night, index }))
     .filter(({ night, index }) => index === 0 || night.date.endsWith("-01"))
+    // A month that starts right after the first night would be written over its date.
+    .filter(({ index }) => index === 0 || index / nights.length > 0.14)
     // On a year of nights every month would collide on a phone: every other one is enough.
     .filter((_, position, all) => all.length <= 7 || position % 2 === 0);
 
@@ -155,6 +168,10 @@ export function PriceChart({ nights, currency }: { nights: ChartNight[]; currenc
               <SourceDot source="booking" />
               {m.common.sources.booking}
             </span>
+            <span {...stylex.props(styles.series, styles.muted)}>
+              <span aria-hidden {...stylex.props(styles.bandKey)} />
+              {m.pricing.gap.band}
+            </span>
             <span {...stylex.props(styles.muted)}>{t.explore}</span>
           </>
         )}
@@ -198,6 +215,21 @@ export function PriceChart({ nights, currency }: { nights: ChartNight[]; currenc
                 {...stylex.props(styles.taken)}
               />
             ) : null,
+          )}
+          {nights.map((entry, index) =>
+            entry.takenBy ||
+            entry.airbnb == null ||
+            entry.booking == null ||
+            entry.airbnb === entry.booking ? null : (
+              <rect
+                key={entry.date}
+                x={index * step}
+                width={step}
+                y={y(Math.max(entry.airbnb, entry.booking))}
+                height={Math.abs(y(entry.airbnb) - y(entry.booking))}
+                {...stylex.props(entry.booking > entry.airbnb ? styles.bookingBand : styles.airbnbBand)}
+              />
+            ),
           )}
           <line x1={0} x2={WIDTH} y1={HEIGHT} y2={HEIGHT} strokeWidth={1} {...stylex.props(styles.base)} />
           {(["booking", "airbnb"] as const).map((key) => (

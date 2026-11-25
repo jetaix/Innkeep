@@ -13,7 +13,8 @@ const base = stylex.create({
     gap: "0.375rem",
     borderWidth: 1,
     borderStyle: "solid",
-    borderRadius: radius.md,
+    // Every control that acts is a pill.
+    borderRadius: radius.full,
     fontFamily: "inherit",
     fontWeight: 500,
     textDecoration: "none",
@@ -21,8 +22,9 @@ const base = stylex.create({
     userSelect: "none",
     cursor: { default: "pointer", ":disabled": "default" },
     opacity: { default: 1, ":disabled": 0.5 },
-    transitionProperty: "background-color, border-color, color, opacity",
-    transitionDuration: "150ms",
+    scale: { default: null, ":active": "0.97", ":disabled": "1" },
+    transitionProperty: "background-color, border-color, box-shadow, color, opacity, scale",
+    transitionDuration: "200ms",
     // A finger needs a taller target than a pointer.
     minHeight: { default: null, [COARSE]: "2.5rem" },
   },
@@ -30,15 +32,22 @@ const base = stylex.create({
 
 const variants = stylex.create({
   primary: {
-    borderColor: color.ink,
-    backgroundColor: color.ink,
+    borderColor: "transparent",
+    // Warms toward the overlap's violet under the pointer.
+    backgroundColor: {
+      default: color.ink,
+      ":hover": `color-mix(in oklab, ${color.ink} 86%, ${color.overlap})`,
+    },
     color: color.inverse,
-    opacity: { default: 1, ":hover": 0.9, ":disabled": 0.5 },
   },
   secondary: {
-    borderColor: color.lineStrong,
-    backgroundColor: { default: color.bg, ":hover": color.subtle },
+    borderColor: "transparent",
+    backgroundColor: color.panel,
     color: color.ink,
+    boxShadow: {
+      default: `0 0 0 1px ${color.line}, 0 8px 18px -14px rgb(0 0 0 / 0.45)`,
+      ":hover": `0 0 0 1px ${color.lineStrong}, 0 10px 20px -14px rgb(0 0 0 / 0.55)`,
+    },
   },
   ghost: {
     borderColor: "transparent",
@@ -46,16 +55,17 @@ const variants = stylex.create({
     color: { default: color.muted, ":hover": color.ink },
   },
   danger: {
-    borderColor: color.lineStrong,
-    backgroundColor: { default: color.bg, ":hover": color.criticalBg },
+    borderColor: "transparent",
+    backgroundColor: { default: color.panel, ":hover": color.criticalBg },
     color: color.critical,
+    boxShadow: `0 0 0 1px color-mix(in oklab, ${color.critical} 28%, ${color.line})`,
   },
 });
 
 const sizes = stylex.create({
-  sm: { height: "1.75rem", paddingInline: "0.5rem", fontSize: text.sm },
-  md: { height: "2rem", paddingInline: "0.75rem", fontSize: text.base },
-  lg: { height: "2.5rem", paddingInline: "1rem", fontSize: text.md },
+  sm: { height: "1.75rem", paddingInline: "0.75rem", fontSize: text.sm },
+  md: { height: "2.125rem", paddingInline: "0.9375rem", fontSize: text.base },
+  lg: { height: "2.75rem", paddingInline: "1.375rem", fontSize: text.md },
 });
 
 export type ButtonStyle = { variant?: keyof typeof variants; size?: keyof typeof sizes };

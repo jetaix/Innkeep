@@ -12,6 +12,10 @@ const styles = stylex.create({
     minHeight: "100dvh",
     backgroundColor: color.bg,
     color: color.ink,
+    // The parts of the page the browser draws follow the palette too.
+    accentColor: color.overlap,
+    caretColor: color.overlap,
+    scrollbarColor: `${color.lineStrong} transparent`,
     fontFamily: font.sans,
     fontSize: text.md,
     lineHeight: 1.5,

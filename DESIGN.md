@@ -183,8 +183,9 @@ components:
 
 # Design System: Innkeep
 
-This file records the `.brand` world of the public pages (landing, guides, alternatives) and the two-arch
-mark. The dashboard keeps a separate, older set of tokens; see the note at the end of the Overview.
+This file records the one world of Innkeep: the public pages (landing, guides, alternatives), the
+dashboard in `web/`, the Chrome extension and the two-arch mark. How the dashboard uses it is in the
+note at the end of the Overview.
 
 ## Overview
 
@@ -203,10 +204,27 @@ reading register (ground, ink and hairlines only, used for limits, guides and co
 Dark mode is its own set of values, not an inversion: the ground goes near-black, the glass colours
 brighten, the overlap becomes a light violet, and glass stops multiplying with what is beneath it.
 
-The dashboard under `src/app/(app)` is outside this system. It uses the monochrome `:root` tokens at the
-top of `src/app/globals.css` (white ground, Geist only, colour reserved for booking sources and states).
-The two worlds share the token names, the three source colours' meaning, and the mark, which the dashboard
-draws in a single ink tone.
+### The dashboard
+
+The dashboard in `web/` stands in the same world, in its working register. The tokens in
+`web/src/tokens.stylex.ts` are the brand's: the mineral ground, white panels (`panel`) that float over it
+on a low `card` shadow, the three source colours as glass, and violet (`clash`) wherever two stays share
+a night. It differs from the public pages in four ways:
+
+- **Glass is data, not decoration.** A slab of glass is always a booking (`web/src/ui/slab.tsx`); the
+  only decorative glass is on the sign-in door and the first-run welcome.
+- **States keep their own colours.** Good, warning and critical stay green, amber and red, because a
+  working tool has errors to show; violet is kept for a clash, focus and selection. The public pages
+  have no error state, so `critical` is violet there.
+- **The display face is for a page's title and its one figure.** Labels, buttons, tables and data are
+  Geist. Controls are pills; fields have a 10px radius.
+- **Each page has one signature, drawn from its own data:** the next fourteen nights on the overview,
+  glass slabs on the calendar, a ledger with date stubs for reservations, the turnover window for
+  cleaning, glass bars for revenue, the gap between the two platforms for pricing, a doorway for each
+  property, and the reading register (ground, ink, hairlines) for settings.
+
+The older Next.js dashboard under `src/app/(app)` keeps the monochrome tokens of `src/app/globals.css`
+until the Vite app replaces it.
 
 **Key Characteristics:**
 
@@ -454,5 +472,6 @@ seconds; choosing a scene pauses the film.
 - **Don't** use `faint` for sentences, or `muted` for a label on a booking slab.
 - **Don't** rely on the blend mode to show an overlap; draw it.
 - **Don't** add motion that bounces, loops for decoration, or ignores the reduced-motion preference.
-- **Don't** bring the `.brand` tokens into the dashboard, or the dashboard's bordered cards into the
-  public pages.
+- **Don't** use glass as decoration in the dashboard, or bordered cards anywhere; a card is a white
+  panel on a soft shadow.
+- **Don't** show a double booking in red; it is violet. Red is for errors and for actions that destroy.

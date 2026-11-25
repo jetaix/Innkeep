@@ -44,6 +44,14 @@ const en = {
     remove: "Remove",
     removeConfirm: "Remove this cleaning?",
   },
+  /** The turnover as a picture: who leaves, the time there is, who arrives. */
+  timeline: {
+    hours: (hours: number) => `${hours} h`,
+    days: (days: number) => `${days} day${days === 1 ? "" : "s"}`,
+    open: "Open",
+    toClean: "to clean",
+    arrival: (time: string) => `Check-in from ${time}`,
+  },
   /** The message a host sends their cleaner to ask whether a cleaning is possible. */
   request: {
     title: "Message for the cleaner",
@@ -185,6 +193,13 @@ const fr: typeof en = {
     save: "Enregistrer",
     remove: "Retirer",
     removeConfirm: "Retirer ce ménage ?",
+  },
+  timeline: {
+    hours: (hours) => `${hours} h`,
+    days: (days) => `${days} jour${days > 1 ? "s" : ""}`,
+    open: "Libre",
+    toClean: "pour le ménage",
+    arrival: (time) => `Arrivée à partir de ${time}`,
   },
   request: {
     title: "Message pour le ménage",

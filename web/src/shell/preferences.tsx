@@ -3,7 +3,7 @@ import { type LucideIcon, Monitor, Moon, Sun } from "lucide-react";
 import { LOCALE_NAMES, LOCALES, THEMES, type Theme } from "@/i18n/config";
 import { setLocale, useI18n } from "../i18n";
 import { setTheme, useTheme } from "../theme";
-import { color, radius, text } from "../tokens.stylex";
+import { color, radius, shadow, text } from "../tokens.stylex";
 
 const COARSE = "@media (pointer: coarse)";
 
@@ -12,11 +12,8 @@ const styles = stylex.create({
     display: "flex",
     height: { default: "1.75rem", [COARSE]: "2.5rem" },
     padding: "0.125rem",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
-    backgroundColor: color.bg,
+    borderRadius: radius.full,
+    backgroundColor: color.sunken,
   },
   option: {
     display: "flex",
@@ -28,7 +25,7 @@ const styles = stylex.create({
     gap: "0.375rem",
     paddingInline: "0.5rem",
     borderWidth: 0,
-    borderRadius: radius.sm,
+    borderRadius: radius.full,
     backgroundColor: "transparent",
     color: { default: color.muted, ":hover": color.ink },
     fontFamily: "inherit",
@@ -38,7 +35,7 @@ const styles = stylex.create({
     transitionProperty: "background-color, color",
     transitionDuration: "150ms",
   },
-  selected: { backgroundColor: color.sunken, color: color.ink },
+  selected: { backgroundColor: color.panel, color: color.ink, boxShadow: shadow.card },
 });
 
 /** A small set of mutually exclusive choices, shown side by side. */

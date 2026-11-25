@@ -2,19 +2,18 @@ import * as stylex from "@stylexjs/stylex";
 import type { ComponentProps, ReactNode } from "react";
 import type { Source } from "@/db/schema";
 import { useI18n } from "../i18n";
-import { color, radius, text } from "../tokens.stylex";
+import { color, font, radius, shadow, text } from "../tokens.stylex";
 
 type Styled<T> = Omit<T, "className" | "style"> & { xstyle?: stylex.StyleXStyles };
 
 const styles = stylex.create({
+  // Product material sits on a panel that floats just above the ground.
   card: {
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
     borderRadius: radius.lg,
-    backgroundColor: color.bg,
+    backgroundColor: color.panel,
+    boxShadow: shadow.card,
   },
-  sectionTitle: { margin: 0, color: color.ink, fontSize: text.base, fontWeight: 600 },
+  sectionTitle: { margin: 0, color: color.ink, fontSize: text.md, fontWeight: 600, letterSpacing: "-0.01em" },
   badge: {
     display: "inline-flex",
     alignItems: "center",
@@ -28,7 +27,13 @@ const styles = stylex.create({
     fontWeight: 500,
     whiteSpace: "nowrap",
   },
-  dot: { flexShrink: 0, width: "0.5rem", height: "0.5rem", borderRadius: radius.full },
+  dot: {
+    flexShrink: 0,
+    width: "0.5rem",
+    height: "0.5rem",
+    borderRadius: radius.full,
+    boxShadow: `inset 0 1px 0 ${color.glassHi}`,
+  },
   kbd: {
     display: "inline-flex",
     alignItems: "center",
@@ -43,6 +48,7 @@ const styles = stylex.create({
     backgroundColor: color.subtle,
     color: color.muted,
     fontFamily: "inherit",
+    fontVariantNumeric: "tabular-nums",
     fontSize: text.xs,
     fontWeight: 500,
   },
@@ -53,17 +59,40 @@ const styles = stylex.create({
     justifyContent: "space-between",
     columnGap: "1.5rem",
     rowGap: "0.75rem",
-    marginBottom: "1.5rem",
+    marginBottom: "1.75rem",
   },
   headerText: { minWidth: 0 },
-  pageTitle: { margin: 0, fontSize: text.lg, fontWeight: 600, letterSpacing: "-0.025em" },
-  description: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.base },
+  // The display face at regular weight: size carries the hierarchy, never bold.
+  pageTitle: {
+    margin: 0,
+    fontFamily: font.display,
+    fontSize: text.title,
+    fontWeight: 400,
+    letterSpacing: "-0.025em",
+    lineHeight: 1.15,
+    textWrap: "balance",
+  },
+  description: {
+    maxWidth: "44rem",
+    margin: "0.375rem 0 0",
+    color: color.muted,
+    fontSize: text.md,
+    lineHeight: 1.55,
+    textWrap: "pretty",
+  },
   row: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" },
   empty: { maxWidth: "36rem", padding: "1.5rem" },
-  emptyTitle: { margin: 0, fontSize: text.md, fontWeight: 600 },
+  emptyTitle: {
+    margin: 0,
+    fontFamily: font.display,
+    fontSize: "1.375rem",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.25,
+  },
   emptyBody: { marginTop: "0.375rem", color: color.muted, fontSize: text.base, lineHeight: 1.625 },
   emptyAction: { display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem" },
-  notice: { margin: 0, padding: "0.5rem 0.75rem", borderRadius: radius.md, fontSize: text.base },
+  notice: { margin: 0, padding: "0.5rem 0.75rem", borderRadius: radius.field, fontSize: text.base },
   status: { margin: 0, paddingBlock: "2.5rem", color: color.muted, fontSize: text.base },
   // Present for a screen reader, absent from the picture.
   hidden: {
@@ -88,6 +117,8 @@ const tones = stylex.create({
   },
   warn: { borderColor: "transparent", backgroundColor: color.warnBg, color: color.warn },
   critical: { borderColor: "transparent", backgroundColor: color.criticalBg, color: color.critical },
+  // Two stays on the same night.
+  clash: { borderColor: "transparent", backgroundColor: color.clashBg, color: color.clash },
 });
 
 const sources = stylex.create({
@@ -173,7 +204,7 @@ export function Notice({
   tone,
   xstyle,
   ...props
-}: Styled<ComponentProps<"p">> & { tone: "warn" | "critical" }) {
+}: Styled<ComponentProps<"p">> & { tone: "warn" | "critical" | "clash" }) {
   return <p {...props} {...stylex.props(styles.notice, tones[tone], xstyle)} />;
 }
 

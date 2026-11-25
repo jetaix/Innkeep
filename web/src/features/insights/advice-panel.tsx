@@ -7,7 +7,7 @@ import { requestAdvice } from "../../api/mutations";
 import { useI18n } from "../../i18n";
 import { color, text } from "../../tokens.stylex";
 import { Button } from "../../ui/button";
-import { Badge, Card, Notice, SectionTitle } from "../../ui/primitives";
+import { Badge, Notice } from "../../ui/primitives";
 
 const IMPACT_TONE = { high: "good", medium: "neutral", low: "neutral" } as const;
 
@@ -18,20 +18,38 @@ const styles = stylex.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.75rem",
-    padding: "0.75rem 1rem",
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
+    paddingBottom: "0.875rem",
   },
-  title: { display: "flex", alignItems: "center", gap: "0.375rem" },
-  source: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
+  // Another voice than the rules above: written advice, set as reading on the ground itself.
+  panel: {
+    paddingTop: "1.5rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.lineStrong,
+  },
+  title: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    margin: 0,
+    fontSize: text.lg,
+    fontWeight: 600,
+    letterSpacing: "-0.015em",
+  },
+  source: { margin: "0.25rem 0 0", color: color.muted, fontSize: text.sm },
   form: { margin: 0 },
-  failed: { margin: "1rem" },
-  setup: { margin: 0, maxWidth: "70ch", padding: "1rem", color: color.muted, lineHeight: 1.625 },
-  link: { color: color.ink, fontWeight: 500, textDecoration: "underline", textUnderlineOffset: 2 },
-  summary: { margin: 0, maxWidth: "70ch", padding: "1rem 1rem 0", lineHeight: 1.625 },
+  failed: { margin: "0 0 1rem" },
+  setup: { margin: 0, maxWidth: "68ch", color: color.muted, lineHeight: 1.625 },
+  link: {
+    color: color.ink,
+    fontWeight: 500,
+    textDecorationLine: "underline",
+    textDecorationColor: color.lineStrong,
+    textUnderlineOffset: 3,
+  },
+  summary: { margin: 0, maxWidth: "68ch", fontSize: "0.9375rem", lineHeight: 1.65, textWrap: "pretty" },
   list: {
-    margin: "0.75rem 0 0",
+    margin: "1.25rem 0 0",
     padding: 0,
     listStyle: "none",
     borderTopWidth: 1,
@@ -39,18 +57,18 @@ const styles = stylex.create({
     borderTopColor: color.line,
   },
   item: {
-    padding: "0.875rem 1rem",
+    paddingBlock: "1rem",
     borderTopWidth: { default: 1, ":first-child": 0 },
     borderTopStyle: "solid",
     borderTopColor: color.line,
   },
   itemHead: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" },
-  itemTitle: { margin: 0, fontSize: text.base, fontWeight: 500 },
+  itemTitle: { margin: 0, fontSize: text.md, fontWeight: 500 },
   property: { color: color.muted, fontSize: text.sm },
-  why: { margin: "0.375rem 0 0", maxWidth: "70ch", color: color.muted, lineHeight: 1.625 },
+  why: { margin: "0.375rem 0 0", maxWidth: "68ch", color: color.muted, lineHeight: 1.625 },
   steps: {
     margin: "0.5rem 0 0",
-    maxWidth: "70ch",
+    maxWidth: "68ch",
     paddingInlineStart: "1.25rem",
     listStyleType: "disc",
     lineHeight: 1.625,
@@ -58,13 +76,16 @@ const styles = stylex.create({
   step: { marginTop: { default: "0.25rem", ":first-child": 0 } },
   privacy: {
     margin: 0,
-    padding: "0.625rem 1rem",
+    maxWidth: "68ch",
+    paddingTop: "0.875rem",
     borderTopWidth: 1,
     borderTopStyle: "solid",
     borderTopColor: color.line,
     color: color.muted,
     fontSize: text.sm,
+    lineHeight: 1.55,
   },
+  gap: { marginTop: "1rem" },
 });
 
 /** AI-written advice: the stored result, a button to (re)generate it, and its failure states. */
@@ -85,12 +106,12 @@ export function AdvicePanel({
   const error = ask.error?.message ?? ask.data?.error;
 
   return (
-    <Card>
+    <section aria-labelledby="advice-heading" {...stylex.props(styles.panel)}>
       <div {...stylex.props(styles.head)}>
         <div>
-          <SectionTitle xstyle={styles.title}>
-            <Sparkles aria-hidden size={14} /> {t.title}
-          </SectionTitle>
+          <h2 id="advice-heading" {...stylex.props(styles.title)}>
+            <Sparkles aria-hidden size={16} strokeWidth={1.75} /> {t.title}
+          </h2>
           <p {...stylex.props(styles.source)}>{generatedLabel ?? t.source}</p>
         </div>
         {configured && (
@@ -156,7 +177,7 @@ export function AdvicePanel({
         )}
       </div>
 
-      {configured && <p {...stylex.props(styles.privacy)}>{t.privacy}</p>}
-    </Card>
+      {configured && <p {...stylex.props(styles.privacy, !advice && styles.gap)}>{t.privacy}</p>}
+    </section>
   );
 }

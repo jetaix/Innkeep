@@ -7,7 +7,7 @@ import { propertyQuery } from "../../../../api/queries";
 import { ChannelCard, CopyField } from "../../../../features/properties/channel-card";
 import { PLATFORMS, type PropertyAnswer } from "../../../../features/properties/shared";
 import { loadMessages, useI18n } from "../../../../i18n";
-import { color, text } from "../../../../tokens.stylex";
+import { color, font, text } from "../../../../tokens.stylex";
 import { ConfirmButton, SubmitButton } from "../../../../ui/actions";
 import { buttonStyle } from "../../../../ui/button";
 import { Field, Input, Textarea } from "../../../../ui/form";
@@ -31,22 +31,29 @@ const DESK = "@media (min-width: 80rem)";
 
 const styles = stylex.create({
   page: { maxWidth: "72rem" },
-  crumb: { margin: "0 0 0.25rem", fontSize: text.sm },
+  crumb: { margin: "0 0 0.375rem", fontSize: text.base },
   back: {
     color: color.muted,
     textDecoration: { default: "none", ":hover": "underline" },
     textUnderlineOffset: 2,
   },
-  faint: { color: color.faint },
+  faint: { color: color.muted },
   head: {
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.75rem",
-    marginBottom: "1.5rem",
+    marginBottom: "1.75rem",
   },
-  name: { margin: 0, fontSize: text.lg, fontWeight: 600, letterSpacing: "-0.025em" },
+  name: {
+    margin: 0,
+    fontFamily: font.display,
+    fontSize: text.title,
+    fontWeight: 400,
+    letterSpacing: "-0.025em",
+    lineHeight: 1.15,
+  },
   columns: {
     display: "grid",
     gridTemplateColumns: { default: "minmax(0, 1fr)", [DESK]: "minmax(0, 1fr) minmax(0, 1.1fr)" },
@@ -54,8 +61,8 @@ const styles = stylex.create({
     gap: "1.5rem",
   },
   card: { padding: "1.25rem" },
-  intro: { margin: "0.125rem 0 1rem", color: color.muted, fontSize: text.sm },
-  body: { margin: "0.125rem 0 0.75rem", color: color.muted, fontSize: text.sm },
+  intro: { margin: "0.25rem 0 1.125rem", color: color.muted, fontSize: text.base },
+  body: { margin: "0.25rem 0 0.875rem", color: color.muted, fontSize: text.base },
   channels: { display: "flex", flexDirection: "column", gap: "1.5rem" },
   form: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem" },
   stretch: { alignSelf: "stretch" },
@@ -109,11 +116,7 @@ function PropertyPage() {
       </p>
       <div {...stylex.props(styles.head)}>
         <h1 {...stylex.props(styles.name)}>{property.name}</h1>
-        <Link
-          to="/properties/$id/preview"
-          params={{ id: property.id }}
-          {...stylex.props(buttonStyle({ size: "sm" }))}
-        >
+        <Link to="/properties/$id/preview" params={{ id: property.id }} {...stylex.props(buttonStyle())}>
           {m.preview.link}
         </Link>
       </div>

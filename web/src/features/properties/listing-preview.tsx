@@ -6,6 +6,7 @@ import { useI18n } from "../../i18n";
 import { color, radius, text } from "../../tokens.stylex";
 import { buttonStyle } from "../../ui/button";
 import { Card, Hidden, SectionTitle, SourceDot } from "../../ui/primitives";
+import { figureStyle, washStyle } from "../../ui/slab";
 import { type PreviewAnswer, sizedPhoto } from "./shared";
 
 type Preview = NonNullable<PreviewAnswer["listings"][number]["preview"]>;
@@ -30,14 +31,11 @@ const styles = stylex.create({
     justifyContent: "space-between",
     gap: "0.5rem",
     padding: "0.75rem 1rem",
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
   },
   heading: { display: "flex", alignItems: "center", gap: "0.5rem" },
   tools: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" },
   small: { color: color.muted, fontSize: text.sm },
-  empty: { padding: "2rem 1rem" },
+  empty: { padding: "2rem 1.25rem" },
   emptyTitle: { margin: 0, fontWeight: 500 },
   emptyBody: {
     maxWidth: "60ch",
@@ -46,9 +44,15 @@ const styles = stylex.create({
     fontSize: text.base,
     lineHeight: 1.625,
   },
-  body: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "1rem", padding: "1rem" },
+  body: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "1.125rem",
+    padding: "1.25rem",
+  },
   stretch: { alignSelf: "stretch" },
-  title: { margin: 0, fontSize: "1rem", fontWeight: 600, lineHeight: 1.375, letterSpacing: "-0.025em" },
+  title: { margin: 0, fontSize: "1.0625rem", fontWeight: 600, lineHeight: 1.375, letterSpacing: "-0.02em" },
   meta: {
     display: "flex",
     flexWrap: "wrap",
@@ -63,15 +67,13 @@ const styles = stylex.create({
   ratingValue: { fontWeight: 500, fontVariantNumeric: "tabular-nums" },
   summary: { margin: "0.25rem 0 0", fontSize: text.base },
   price: {
-    padding: "0.625rem 0.75rem",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
+    padding: "0.75rem 0.875rem",
+    borderRadius: radius.slab,
+    backgroundColor: color.subtle,
   },
   priceTitle: { margin: 0, color: color.muted, fontSize: text.sm },
   priceLine: { margin: "0.125rem 0 0" },
-  total: { fontSize: "1rem", fontWeight: 600, fontVariantNumeric: "tabular-nums" },
+  total: { fontSize: "1.5rem" },
   stay: { marginInlineStart: "0.5rem", color: color.muted, fontSize: text.sm },
   noPrice: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.base },
   sub: { margin: 0, fontSize: text.base, fontWeight: 600 },
@@ -129,8 +131,8 @@ const styles = stylex.create({
     right: "0.5rem",
     bottom: "0.5rem",
     padding: "0.125rem 0.5rem",
-    borderRadius: radius.md,
-    backgroundColor: `color-mix(in oklab, ${color.bg} 90%, transparent)`,
+    borderRadius: radius.full,
+    backgroundColor: color.panel,
     fontSize: text.sm,
     fontWeight: 500,
     fontVariantNumeric: "tabular-nums",
@@ -203,7 +205,7 @@ export function ListingCard({
   return (
     <Card xstyle={styles.card}>
       <section aria-labelledby={headingId}>
-        <div {...stylex.props(styles.head)}>
+        <div {...stylex.props(washStyle(channel), styles.head)}>
           <SectionTitle id={headingId} xstyle={styles.heading}>
             <SourceDot source={channel} />
             {label}
@@ -250,7 +252,7 @@ export function ListingCard({
                 <p {...stylex.props(styles.priceTitle)}>{t.price.title}</p>
                 {quote ? (
                   <p {...stylex.props(styles.priceLine)}>
-                    <span {...stylex.props(styles.total)}>
+                    <span {...stylex.props(figureStyle, styles.total)}>
                       {fmt.money(quote.total, currency, { cents: false })}
                     </span>
                     <span {...stylex.props(styles.stay)}>

@@ -1,12 +1,13 @@
 import * as stylex from "@stylexjs/stylex";
 
 /**
- * Design tokens, as in `src/app/globals.css`.
+ * Design tokens: one world for the dashboard and the public pages.
  *
- * The dashboard is monochrome on purpose: the only colours on screen are the
- * three booking sources and the three states (good, warning, critical), so
- * colour always means something. Dark is its own set of values, not an
- * inversion.
+ * A pale mineral ground, white panels that float over it, and tinted glass.
+ * Colour always means something: coral is Airbnb, blue is Booking.com, green
+ * is a direct booking, violet is where two of them overlap, and the three
+ * states (good, warning, critical) keep their own. Dark is its own set of
+ * values, not an inversion.
  *
  * The values here follow the system. A host who picked light or dark, and
  * the public pages, re-point the same tokens with the themes in `themes.ts`.
@@ -14,41 +15,46 @@ import * as stylex from "@stylexjs/stylex";
 const DARK = "@media (prefers-color-scheme: dark)";
 
 export const color = stylex.defineVars({
-  bg: { default: "#ffffff", [DARK]: "#0f0f11" },
-  subtle: { default: "#f7f7f6", [DARK]: "#151518" },
-  sunken: { default: "#efefed", [DARK]: "#1d1d21" },
-  line: { default: "#e7e7e4", [DARK]: "#25252a" },
-  lineStrong: { default: "#d4d4d0", [DARK]: "#34343b" },
-  ink: { default: "#18181b", [DARK]: "#ededf0" },
-  muted: { default: "#6b6b73", [DARK]: "#9b9ba4" },
-  faint: { default: "#9a9aa2", [DARK]: "#6c6c75" },
-  inverse: { default: "#ffffff", [DARK]: "#0f0f11" },
+  // The ground the app stands on: a pale mineral grey-green, near-black in the dark.
+  bg: { default: "#f3f4ef", [DARK]: "#0d0f13" },
+  subtle: { default: "#eaece4", [DARK]: "#14171c" },
+  sunken: { default: "#e1e4da", [DARK]: "#1b1f26" },
+  line: { default: "#d9dcd1", [DARK]: "#252a32" },
+  lineStrong: { default: "#bfc4b6", [DARK]: "#363c46" },
+  ink: { default: "#15171c", [DARK]: "#eef0ea" },
+  muted: { default: "#555a61", [DARK]: "#a3a8ae" },
+  faint: { default: "#868b90", [DARK]: "#6f757c" },
+  inverse: { default: "#ffffff", [DARK]: "#0d0f13" },
+  // The surface product material is shown on: it floats over the ground.
+  panel: { default: "#ffffff", [DARK]: "#171a20" },
 
-  // Booking sources.
-  airbnb: { default: "#e0475c", [DARK]: "#f0647a" },
-  booking: { default: "#2f5fd6", [DARK]: "#6b8ff5" },
-  direct: { default: "#0f8f7c", [DARK]: "#2bb8a3" },
-  block: { default: "#9a9aa2", [DARK]: "#6c6c75" },
+  // Booking sources, as tinted glass.
+  airbnb: { default: "#ff5d73", [DARK]: "#ff6f83" },
+  booking: { default: "#3d6df2", [DARK]: "#5b84ff" },
+  direct: { default: "#10a88f", [DARK]: "#1fc2a6" },
+  block: { default: "#8b8f94", [DARK]: "#6f757c" },
 
   // States.
   good: { default: "#18794e", [DARK]: "#4cc38a" },
-  warn: { default: "#9a6700", [DARK]: "#f1c453" },
-  warnBg: { default: "#fff6d6", [DARK]: "#2b2410" },
+  warn: { default: "#8a5d00", [DARK]: "#f1c453" },
+  warnBg: { default: "#fbefc4", [DARK]: "#2b2410" },
   critical: { default: "#c62a2f", [DARK]: "#ff8589" },
-  criticalBg: { default: "#ffecec", [DARK]: "#2e1517" },
+  criticalBg: { default: "#ffe7e6", [DARK]: "#2e1517" },
+  // Two stays on the same night: the colour two sheets of glass make where they overlap.
+  clash: { default: "#4b2bbd", [DARK]: "#b6a2ff" },
+  clashBg: { default: "#ece6ff", [DARK]: "#251d44" },
 
   // What the keyboard focus ring and a text selection are drawn in.
-  focus: { default: "#18181b", [DARK]: "#ededf0" },
+  focus: { default: "#4b2bbd", [DARK]: "#b6a2ff" },
 
-  // Brand: the glass colours of the mark and the public pages.
-  panel: "#ffffff",
-  glassCoral: "#ff5d73",
-  glassBlue: "#3d6df2",
-  glassGreen: "#10a88f",
-  overlap: "#4b2bbd",
-  glassBlend: "multiply",
-  glassTint: "#ffffff",
-  glassHi: "rgb(255 255 255 / 0.55)",
+  // The glass colours of the mark and of decoration.
+  glassCoral: { default: "#ff5d73", [DARK]: "#ff6f83" },
+  glassBlue: { default: "#3d6df2", [DARK]: "#5b84ff" },
+  glassGreen: { default: "#10a88f", [DARK]: "#1fc2a6" },
+  overlap: { default: "#4b2bbd", [DARK]: "#b6a2ff" },
+  glassBlend: { default: "multiply", [DARK]: "normal" },
+  glassTint: { default: "#ffffff", [DARK]: "#0d0f13" },
+  glassHi: { default: "rgb(255 255 255 / 0.55)", [DARK]: "rgb(255 255 255 / 0.14)" },
 });
 
 export const shadow = stylex.defineVars({
@@ -56,8 +62,20 @@ export const shadow = stylex.defineVars({
     default: "0 16px 48px -12px rgb(0 0 0 / 0.22), 0 0 0 1px rgb(0 0 0 / 0.06)",
     [DARK]: "0 16px 48px -12px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.08)",
   },
-  panel:
-    "0 1px 0 rgb(255 255 255 / 0.9) inset, 0 40px 80px -40px rgb(21 23 28 / 0.28), 0 12px 28px -18px rgb(21 23 28 / 0.18), 0 0 0 1px rgb(21 23 28 / 0.05)",
+  // A working card: close to the ground, so a page of them stays calm.
+  card: {
+    default:
+      "0 1px 0 rgb(255 255 255 / 0.9) inset, 0 0 0 1px rgb(21 23 28 / 0.05), 0 20px 36px -30px rgb(21 23 28 / 0.3)",
+    [DARK]:
+      "0 1px 0 rgb(255 255 255 / 0.05) inset, 0 0 0 1px rgb(255 255 255 / 0.06), 0 20px 36px -26px rgb(0 0 0 / 0.75)",
+  },
+  // The one panel a page lifts higher than the rest.
+  panel: {
+    default:
+      "0 1px 0 rgb(255 255 255 / 0.9) inset, 0 40px 80px -40px rgb(21 23 28 / 0.28), 0 12px 28px -18px rgb(21 23 28 / 0.18), 0 0 0 1px rgb(21 23 28 / 0.05)",
+    [DARK]:
+      "0 1px 0 rgb(255 255 255 / 0.06) inset, 0 40px 80px -40px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.07)",
+  },
 });
 
 export const font = stylex.defineVars({
@@ -72,14 +90,17 @@ export const text = stylex.defineVars({
   sm: "0.75rem", // 12 px: labels, hints
   base: "0.8125rem", // 13 px: the dashboard's body size
   md: "0.875rem", // 14 px
-  lg: "1.125rem", // 18 px: page titles
+  lg: "1.125rem", // 18 px: a panel's own title
+  title: "1.75rem", // 28 px: page titles, in the display face
   field: "1rem", // 16 px: keeps a phone from zooming into a field
 });
 
 export const radius = stylex.defineVars({
   sm: "4px",
-  md: "6px",
-  lg: "8px",
-  xl: "12px",
+  md: "8px",
+  lg: "16px", // a card
+  xl: "20px",
+  slab: "12px", // a booking on a calendar
+  field: "10px", // a form field
   full: "999px",
 });

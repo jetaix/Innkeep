@@ -10,9 +10,9 @@ import { TelegramTest } from "../../features/cleaning/telegram-test";
 import { DataSection } from "../../features/settings/data-section";
 import { loadMessages, useI18n } from "../../i18n";
 import { LanguageSwitch, ThemeSwitch } from "../../shell/preferences";
-import { color, font, radius, text } from "../../tokens.stylex";
+import { color, font, radius, shadow, text } from "../../tokens.stylex";
 import { CopyButton, SubmitButton } from "../../ui/actions";
-import { Badge, Card, Kbd, Notice, PageHeader, SectionTitle } from "../../ui/primitives";
+import { Badge, Kbd, Notice, PageHeader } from "../../ui/primitives";
 
 /** The page in four parts, one on screen at a time. The first is the default. */
 const TABS = ["general", "connections", "assistant", "data"] as const;
@@ -45,41 +45,71 @@ const README = "https://github.com/jetaix/Innkeep#configuration";
 const WIDE = "@media (min-width: 40rem)";
 const COARSE = "@media (pointer: coarse)";
 
+const DESK = "@media (min-width: 64rem)";
+
+/*
+ * The reading register: ground, ink and hairlines, no panels. Each part of
+ * the page is a row, its name in the display face on the left and what it
+ * holds on the right; on a phone the name sits above.
+ */
 const styles = stylex.create({
-  page: { display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "48rem" },
+  page: { display: "flex", flexDirection: "column", gap: "2.5rem", maxWidth: "68rem" },
   tabs: {
     display: "flex",
-    gap: "0.25rem",
+    alignSelf: "flex-start",
+    gap: "0.125rem",
+    maxWidth: "100%",
+    padding: "0.1875rem",
     overflowX: "auto",
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
+    borderRadius: radius.full,
+    backgroundColor: color.sunken,
+    scrollbarWidth: "none",
   },
   tab: {
     display: "flex",
     flexShrink: 0,
     alignItems: "center",
-    height: { default: "2.25rem", [COARSE]: "2.75rem" },
-    marginBottom: -1,
-    paddingInline: "0.75rem",
-    borderBottomWidth: 2,
-    borderBottomStyle: "solid",
-    borderBottomColor: "transparent",
+    height: { default: "2rem", [COARSE]: "2.5rem" },
+    paddingInline: "0.875rem",
+    borderRadius: radius.full,
     color: { default: color.muted, ":hover": color.ink },
     fontSize: text.base,
     fontWeight: 500,
     textDecoration: "none",
     whiteSpace: "nowrap",
-    transitionProperty: "color, border-color",
-    transitionDuration: "150ms",
+    transitionProperty: "background-color, box-shadow, color",
+    transitionDuration: "200ms",
   },
-  current: { borderBottomColor: color.ink, color: color.ink },
-  head: {
-    padding: "0.75rem 1rem",
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
+  current: { backgroundColor: color.panel, color: color.ink, boxShadow: shadow.card },
+  parts: { display: "flex", flexDirection: "column", gap: "3rem" },
+  section: {
+    display: "grid",
+    gridTemplateColumns: { default: "minmax(0, 1fr)", [DESK]: "minmax(0, 16rem) minmax(0, 1fr)" },
+    columnGap: "3rem",
+    rowGap: "1rem",
+    alignItems: "start",
+    paddingTop: "1.5rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.lineStrong,
   },
+  stacked: { gridTemplateColumns: "minmax(0, 1fr)" },
+  sectionTitle: {
+    margin: 0,
+    fontFamily: font.display,
+    fontSize: "1.375rem",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.25,
+  },
+  sectionNote: {
+    maxWidth: "60ch",
+    margin: "0.5rem 0 0",
+    color: color.muted,
+    fontSize: text.base,
+    lineHeight: 1.6,
+  },
+  sectionBody: { minWidth: 0 },
   list: { margin: 0, padding: 0, listStyle: "none" },
   divided: {
     borderTopWidth: { default: 1, ":first-child": 0 },
@@ -92,29 +122,24 @@ const styles = stylex.create({
     alignItems: { default: "stretch", [WIDE]: "center" },
     justifyContent: "space-between",
     gap: { default: "0.5rem", [WIDE]: "1.5rem" },
-    padding: "0.875rem 1rem",
+    paddingBlock: { default: "1rem", ":first-child": "0 1rem" },
   },
   preferenceText: { flexGrow: 1, flexBasis: 0, minWidth: 0 },
   name: { margin: 0, fontSize: "inherit", fontWeight: 500 },
-  help: { margin: "0.125rem 0 0", color: color.muted, lineHeight: 1.625 },
+  help: { margin: "0.125rem 0 0", color: color.muted, lineHeight: 1.6 },
   control: { flexShrink: 0, width: { default: "100%", [WIDE]: "15rem" } },
-  integration: { padding: "0.875rem 1rem" },
+  integration: { paddingBlock: { default: "1.125rem", ":first-child": "0 1.125rem" } },
   integrationHead: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" },
   variable: { marginInlineStart: "auto", color: color.muted, fontFamily: font.mono, fontSize: text.sm },
-  body: { maxWidth: "65ch", marginTop: "0.375rem", color: color.muted, lineHeight: 1.625 },
+  body: { maxWidth: "65ch", marginTop: "0.375rem", color: color.muted, lineHeight: 1.6 },
   action: { marginTop: "0.75rem" },
   block: { display: "block", marginTop: "0.25rem" },
-  link: { color: color.ink, textUnderlineOffset: 2 },
-  footer: {
-    margin: 0,
-    padding: "0.75rem 1rem",
-    borderTopWidth: 1,
-    borderTopStyle: "solid",
-    borderTopColor: color.line,
-    color: color.muted,
-    fontSize: text.sm,
+  link: { color: color.ink, textDecorationColor: color.lineStrong, textUnderlineOffset: 4 },
+  footerLink: {
+    color: color.ink,
+    textDecorationColor: { default: color.lineStrong, ":hover": color.ink },
+    textUnderlineOffset: 4,
   },
-  footerLink: { color: { default: "inherit", ":hover": color.ink }, textUnderlineOffset: 2 },
   mono: { fontFamily: font.mono },
   steps: { display: "block", marginTop: "0.75rem", color: color.ink, fontSize: text.sm, fontWeight: 500 },
   ordered: {
@@ -128,37 +153,41 @@ const styles = stylex.create({
   step: { "::marker": { color: color.ink, fontWeight: 500 } },
   where: { display: "block", marginTop: "0.5rem" },
   snippet: { display: "flex", alignItems: "flex-start", gap: "0.5rem", marginTop: "0.375rem" },
+  // The one white surface of the page: a thing to copy as it is.
   code: {
     position: "relative",
     flexGrow: 1,
     flexBasis: 0,
     minWidth: 0,
     margin: 0,
-    padding: "0.625rem",
+    padding: "0.75rem 0.875rem",
     overflowX: "auto",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
-    backgroundColor: color.subtle,
+    borderRadius: radius.slab,
+    backgroundColor: color.panel,
+    boxShadow: shadow.card,
     color: color.ink,
     fontFamily: font.mono,
     fontSize: text.sm,
     lineHeight: 1.625,
   },
-  shortcuts: { margin: 0 },
+  shortcuts: {
+    display: "grid",
+    gridTemplateColumns: { default: "minmax(0, 1fr)", [WIDE]: "repeat(2, minmax(0, 1fr))" },
+    columnGap: "2.5rem",
+    margin: 0,
+  },
   shortcut: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "1rem",
-    padding: "0.5rem 1rem",
+    paddingBlock: "0.5rem",
+    borderBottomWidth: 1,
+    borderBottomStyle: "solid",
+    borderBottomColor: color.line,
   },
   term: { color: color.muted },
   keys: { display: "flex", flexShrink: 0, gap: "0.25rem", margin: 0 },
-  dataHead: { marginBottom: "1rem", paddingInline: "0.25rem" },
-  dataTitle: { margin: 0, fontSize: "inherit", fontWeight: 600 },
-  dataDescription: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.base },
 });
 
 function SettingsPage() {
@@ -199,15 +228,9 @@ function Settings() {
       {tab === "connections" && <Connections />}
       {tab === "assistant" && <Assistant />}
       {tab === "data" && (
-        <section aria-labelledby="data-heading">
-          <div {...stylex.props(styles.dataHead)}>
-            <h2 id="data-heading" {...stylex.props(styles.dataTitle)}>
-              {m.data.title}
-            </h2>
-            <p {...stylex.props(styles.dataDescription)}>{m.data.description}</p>
-          </div>
+        <Section id="data-heading" title={m.data.title} note={m.data.description} stacked>
           <DataSection />
-        </section>
+        </Section>
       )}
     </div>
   );
@@ -222,11 +245,8 @@ function General() {
   const leave = useMutation(signOut);
 
   return (
-    <>
-      <Card>
-        <div {...stylex.props(styles.head)}>
-          <SectionTitle>{t.appearance.title}</SectionTitle>
-        </div>
+    <div {...stylex.props(styles.parts)}>
+      <Section id="appearance-heading" title={t.appearance.title}>
         <div>
           <Preference label={m.common.preferences.theme} help={t.appearance.themeHelp}>
             <ThemeSwitch withLabels />
@@ -235,11 +255,8 @@ function General() {
             <LanguageSwitch withLabels />
           </Preference>
         </div>
-      </Card>
-      <Card>
-        <div {...stylex.props(styles.head)}>
-          <SectionTitle>{t.tabs.access}</SectionTitle>
-        </div>
+      </Section>
+      <Section id="access-heading" title={t.tabs.access}>
         <ul {...stylex.props(styles.list)}>
           <Integration
             name={i.password.name}
@@ -268,11 +285,8 @@ function General() {
             )}
           </Integration>
         </ul>
-      </Card>
-      <Card>
-        <div {...stylex.props(styles.head)}>
-          <SectionTitle>{t.shortcuts.title}</SectionTitle>
-        </div>
+      </Section>
+      <Section id="shortcuts-heading" title={t.shortcuts.title}>
         <dl {...stylex.props(styles.shortcuts)}>
           <Shortcut keys={["⌘", "K"]}>{t.shortcuts.commandMenu}</Shortcut>
           {NAV.map((item) => (
@@ -285,8 +299,8 @@ function General() {
           <Shortcut keys={["T"]}>{t.shortcuts.today}</Shortcut>
           <Shortcut keys={["Esc"]}>{t.shortcuts.close}</Shortcut>
         </dl>
-      </Card>
-    </>
+      </Section>
+    </div>
   );
 }
 
@@ -301,10 +315,7 @@ function Connections() {
   const telegramOn = telegramChat !== null;
 
   return (
-    <Card>
-      <div {...stylex.props(styles.head)}>
-        <SectionTitle>{t.tabs.connections}</SectionTitle>
-      </div>
+    <Section id="connections-heading" title={t.tabs.connections} note={<Footer />}>
       <ul {...stylex.props(styles.list)}>
         <Integration
           name={i.sync.name}
@@ -349,8 +360,7 @@ function Connections() {
           {i.ai.body}
         </Integration>
       </ul>
-      <Footer />
-    </Card>
+    </Section>
   );
 }
 
@@ -391,10 +401,7 @@ function Assistant() {
   ];
 
   return (
-    <Card>
-      <div {...stylex.props(styles.head)}>
-        <SectionTitle>{t.tabs.assistant}</SectionTitle>
-      </div>
+    <Section id="assistant-heading" title={t.tabs.assistant} note={<Footer />}>
       <ul {...stylex.props(styles.list)}>
         <Integration name={i.mcp.name} on={mcpOn} status={mcpOn ? i.on : i.off} variable="MCP_TOKEN">
           {i.mcp.body}
@@ -423,8 +430,7 @@ function Assistant() {
           </ol>
         </Integration>
       </ul>
-      <Footer />
-    </Card>
+    </Section>
   );
 }
 
@@ -432,13 +438,41 @@ function Assistant() {
 function Footer() {
   const i = useI18n("settings").m.settings.integrations;
   return (
-    <p {...stylex.props(styles.footer)}>
+    <>
       {i.footer.beforeFile} <code {...stylex.props(styles.mono)}>.env</code> {i.footer.afterFile}{" "}
       <a href={README} {...stylex.props(styles.footerLink)}>
         {i.footer.link}
       </a>{" "}
       {i.footer.after}
-    </p>
+    </>
+  );
+}
+
+/** One part of the page: its name and what to know about it beside what it holds. */
+function Section({
+  id,
+  title,
+  note,
+  stacked,
+  children,
+}: {
+  id: string;
+  title: string;
+  note?: ReactNode;
+  /** The name above instead of beside, for a part too wide to share a row. */
+  stacked?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} {...stylex.props(styles.section, stacked && styles.stacked)}>
+      <div>
+        <h2 id={id} {...stylex.props(styles.sectionTitle)}>
+          {title}
+        </h2>
+        {note && <p {...stylex.props(styles.sectionNote)}>{note}</p>}
+      </div>
+      <div {...stylex.props(styles.sectionBody)}>{children}</div>
+    </section>
   );
 }
 
@@ -492,7 +526,7 @@ function Snippet({ code }: { code: string }) {
 
 function Shortcut({ keys, children }: { keys: string[]; children: ReactNode }) {
   return (
-    <div {...stylex.props(styles.divided, styles.shortcut)}>
+    <div {...stylex.props(styles.shortcut)}>
       <dt {...stylex.props(styles.term)}>{children}</dt>
       <dd {...stylex.props(styles.keys)}>
         {keys.map((key) => (

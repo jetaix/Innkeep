@@ -10,19 +10,25 @@ import { color, font, radius, text } from "../../tokens.stylex";
 import { ConfirmButton, SubmitButton } from "../../ui/actions";
 import { buttonStyle } from "../../ui/button";
 import { Field, Input } from "../../ui/form";
-import { Badge, Card, Hidden, Notice, SectionTitle } from "../../ui/primitives";
+import { Badge, Hidden, Notice, SectionTitle } from "../../ui/primitives";
 
 const CONSOLE_KEYS = "https://console.anthropic.com/settings/keys";
 
 const styles = stylex.create({
-  section: { display: "flex", flexDirection: "column", gap: "1.5rem" },
+  // Reading register: blocks on the ground itself, told apart by hairlines.
+  section: { display: "flex", flexDirection: "column" },
+  block: {
+    paddingBlock: "1.25rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.line,
+  },
   status: {
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.75rem",
-    padding: "1.25rem",
   },
   statusText: { minWidth: 0 },
   name: {
@@ -34,21 +40,13 @@ const styles = stylex.create({
     fontWeight: 500,
   },
   where: { margin: "0.25rem 0 0", color: color.muted, fontSize: text.base },
-  stepsHead: {
-    padding: "0.75rem 1.25rem",
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
-  },
+  stepsHead: { paddingBottom: "0.25rem" },
   subtitle: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
   steps: { margin: 0, padding: 0, listStyle: "none", counterReset: "step" },
   step: {
     display: "flex",
     gap: "0.75rem",
-    padding: "1rem 1.25rem",
-    borderTopWidth: { default: 1, ":first-child": 0 },
-    borderTopStyle: "solid",
-    borderTopColor: color.line,
+    paddingTop: "1rem",
     counterIncrement: "step",
   },
   number: {
@@ -56,8 +54,8 @@ const styles = stylex.create({
     flexShrink: 0,
     alignItems: "center",
     justifyContent: "center",
-    width: "1.25rem",
-    height: "1.25rem",
+    width: "1.375rem",
+    height: "1.375rem",
     borderRadius: radius.full,
     backgroundColor: color.sunken,
     fontSize: text.xs,
@@ -79,8 +77,8 @@ const styles = stylex.create({
   },
   field: { alignSelf: "stretch" },
   key: { fontFamily: font.mono, fontSize: { default: text.field, "@media (min-width: 48rem)": text.sm } },
-  pad: { padding: "1.25rem" },
-  intro: { margin: "0.5rem 0 0", color: color.muted, fontSize: text.base },
+
+  intro: { margin: "0.5rem 0 0", maxWidth: "68ch", color: color.muted, fontSize: text.base },
   sent: {
     margin: "0.5rem 0 0",
     paddingInlineStart: "1.25rem",
@@ -90,13 +88,24 @@ const styles = stylex.create({
     lineHeight: 1.625,
   },
   sentLine: { marginTop: { default: "0.25rem", ":first-child": 0 } },
-  line: { margin: "0.75rem 0 0", fontSize: text.base, lineHeight: 1.625 },
+  line: { margin: "0.75rem 0 0", maxWidth: "68ch", fontSize: text.base, lineHeight: 1.625 },
   close: { marginTop: "0.25rem" },
   muted: { color: color.muted },
   strong: { color: color.ink, fontWeight: 500 },
   small: { fontSize: text.sm },
-  link: { color: color.ink, textDecoration: "underline", textUnderlineOffset: 2 },
-  other: { margin: "0.5rem 0 0", color: color.muted, fontSize: text.base, lineHeight: 1.625 },
+  link: {
+    color: color.ink,
+    textDecorationLine: "underline",
+    textDecorationColor: color.lineStrong,
+    textUnderlineOffset: 3,
+  },
+  other: {
+    margin: "0.5rem 0 0",
+    maxWidth: "68ch",
+    color: color.muted,
+    fontSize: text.base,
+    lineHeight: 1.625,
+  },
 });
 
 function Step({ title, done, children }: { title: string; done?: boolean; children: ReactNode }) {
@@ -166,7 +175,7 @@ export function ClaudeSection() {
 
   return (
     <div {...stylex.props(styles.section)}>
-      <Card xstyle={styles.status}>
+      <div {...stylex.props(styles.block, styles.status)}>
         <div {...stylex.props(styles.statusText)}>
           <p {...stylex.props(styles.name)}>
             Claude
@@ -199,10 +208,10 @@ export function ClaudeSection() {
             {t.status.disconnect}
           </ConfirmButton>
         )}
-      </Card>
+      </div>
 
       {key.source !== "environment" && (
-        <Card>
+        <div {...stylex.props(styles.block)}>
           <div {...stylex.props(styles.stepsHead)}>
             <SectionTitle>{t.steps.title}</SectionTitle>
             <p {...stylex.props(styles.subtitle)}>{t.steps.subtitle}</p>
@@ -229,10 +238,10 @@ export function ClaudeSection() {
             </Step>
             <Step title={t.steps.ask.title}>{connected ? t.steps.ask.body : t.steps.ask.waiting}</Step>
           </ol>
-        </Card>
+        </div>
       )}
 
-      <Card xstyle={styles.pad}>
+      <div {...stylex.props(styles.block)}>
         <SectionTitle>{t.data.title}</SectionTitle>
         <p {...stylex.props(styles.intro)}>{t.data.intro}</p>
         <ul {...stylex.props(styles.sent)}>
@@ -251,9 +260,9 @@ export function ClaudeSection() {
         )}
         <p {...stylex.props(styles.line, styles.muted, styles.small)}>{t.data.market}</p>
         <p {...stylex.props(styles.line, styles.muted, styles.small, styles.close)}>{t.data.cost}</p>
-      </Card>
+      </div>
 
-      <Card xstyle={styles.pad}>
+      <div {...stylex.props(styles.block)}>
         <SectionTitle>{t.other.title}</SectionTitle>
         <p {...stylex.props(styles.other)}>
           {t.other.body}{" "}
@@ -262,7 +271,7 @@ export function ClaudeSection() {
           </Link>
           .
         </p>
-      </Card>
+      </div>
     </div>
   );
 }

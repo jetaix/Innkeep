@@ -4,10 +4,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ApiError, rpc, unwrap } from "../api/client";
 import { loadMessages, useI18n } from "../i18n";
-import { color, text } from "../tokens.stylex";
+import { Glass } from "../brand/glass";
+import { LogoMark } from "../brand/logo";
+import { color, font, radius, shadow, text } from "../tokens.stylex";
 import { Button } from "../ui/button";
 import { Field, Input } from "../ui/form";
-import { Card, Loading, Notice } from "../ui/primitives";
+import { Loading, Notice } from "../ui/primitives";
 
 export const Route = createFileRoute("/login")({
   loader: () => {
@@ -15,6 +17,11 @@ export const Route = createFileRoute("/login")({
   },
   component: () => (
     <main {...stylex.props(styles.main)}>
+      {/* The two calendars as two doorways of glass, overlapping behind the door. */}
+      <div aria-hidden {...stylex.props(styles.glass)}>
+        <Glass tint="coral" xstyle={styles.archOne} />
+        <Glass tint="blue" xstyle={styles.archTwo} />
+      </div>
       <Suspense fallback={<Loading />}>
         <LoginPage />
       </Suspense>
@@ -22,25 +29,51 @@ export const Route = createFileRoute("/login")({
   ),
 });
 
+const SMALL = "@media (min-width: 40rem)";
+
 const styles = stylex.create({
   main: {
+    position: "relative",
+    isolation: "isolate",
     display: "flex",
     flexDirection: "column",
+    alignItems: "center",
     justifyContent: "center",
-    maxWidth: "24rem",
     minHeight: "100dvh",
-    marginInline: "auto",
     padding: "3rem 1.25rem",
+    overflow: "hidden",
   },
-  title: { margin: 0, fontSize: "1.25rem", fontWeight: 600, letterSpacing: "-0.025em" },
-  intro: { margin: "0.25rem 0 1.25rem", color: color.muted, fontSize: text.md },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "0.75rem",
-    padding: "1.25rem",
+  glass: {
+    position: "absolute",
+    zIndex: -1,
+    top: "50%",
+    left: "50%",
+    width: { default: "22rem", [SMALL]: "34rem" },
+    height: { default: "30rem", [SMALL]: "40rem" },
+    translate: "-50% -50%",
   },
+  archOne: { top: 0, left: 0, width: "62%", height: "88%", rotate: "-4deg" },
+  archTwo: { bottom: 0, right: 0, width: "62%", height: "88%", rotate: "3deg" },
+  door: {
+    width: "100%",
+    maxWidth: "23rem",
+    padding: { default: "1.5rem", [SMALL]: "2rem" },
+    borderRadius: "1.75rem",
+    backgroundColor: color.panel,
+    boxShadow: shadow.panel,
+  },
+  mark: { width: "2.25rem", height: "2.25rem" },
+  title: {
+    margin: "0.875rem 0 0",
+    fontFamily: font.display,
+    fontSize: "2rem",
+    fontWeight: 400,
+    letterSpacing: "-0.03em",
+    lineHeight: 1.1,
+  },
+  intro: { margin: "0.5rem 0 1.5rem", color: color.muted, fontSize: text.md, lineHeight: 1.55 },
+  form: { display: "flex", flexDirection: "column", alignItems: "stretch", gap: "0.875rem" },
+  field: { height: "2.75rem", borderRadius: radius.xl },
   wide: { width: "100%" },
 });
 
@@ -65,9 +98,10 @@ function LoginPage() {
   return (
     <>
       <title>{`${t.title} · Innkeep`}</title>
-      <h1 {...stylex.props(styles.title)}>Innkeep</h1>
-      <p {...stylex.props(styles.intro)}>{t.intro}</p>
-      <Card>
+      <div {...stylex.props(styles.door)}>
+        <LogoMark tone="color" xstyle={styles.mark} />
+        <h1 {...stylex.props(styles.title)}>Innkeep</h1>
+        <p {...stylex.props(styles.intro)}>{t.intro}</p>
         <form
           {...stylex.props(styles.form)}
           onSubmit={(event) => {
@@ -84,6 +118,7 @@ function LoginPage() {
               autoFocus
               autoComplete="current-password"
               aria-describedby={error ? "password-error" : undefined}
+              xstyle={styles.field}
             />
           </Field>
           {error && (
@@ -91,11 +126,17 @@ function LoginPage() {
               {error}
             </Notice>
           )}
-          <Button type="submit" variant="primary" disabled={signIn.isPending} aria-busy={signIn.isPending}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={signIn.isPending}
+            aria-busy={signIn.isPending}
+          >
             {signIn.isPending ? t.checking : t.submit}
           </Button>
         </form>
-      </Card>
+      </div>
     </>
   );
 }

@@ -5,16 +5,17 @@ import { lazy, Suspense } from "react";
 import type { Property } from "@/db/schema";
 import type { Pricing } from "@/features/pricing/queries";
 import { pricingQuery, propertiesQuery } from "../../api/queries";
+import { NOTABLE, summariseGap } from "../../features/pricing/gap";
 import { ReadPrices } from "../../features/pricing/read-prices";
 import { GuestChecks, NightTable, ToAdjust } from "../../features/pricing/tables";
 import { loadMessages, useI18n } from "../../i18n";
-import { color, radius, text } from "../../tokens.stylex";
-import { Card, EmptyState, PageHeader, SectionTitle } from "../../ui/primitives";
+import { color, radius, shadow, text } from "../../tokens.stylex";
+import { Card, EmptyState, PageHeader, SourceDot } from "../../ui/primitives";
+import { figureStyle } from "../../ui/slab";
 
-// The chart sits below the first screen: its code is fetched apart from the page's.
-const PriceChart = lazy(() =>
-  import("../../features/pricing/price-chart").then((file) => ({ default: file.PriceChart })),
-);
+// The chart sits below the first screen: its code is fetched apart from the page's, and beside the page's data.
+const loadChart = () => import("../../features/pricing/price-chart");
+const PriceChart = lazy(() => loadChart().then((file) => ({ default: file.PriceChart })));
 
 const whole = (value: unknown) =>
   Number.isInteger(Number(value)) && Number(value) > 0 ? Number(value) : undefined;
@@ -39,6 +40,8 @@ export const Route = createFileRoute("/_app/pricing")({
   // instead of blanking it; the components read the same queries.
   loader: async ({ context: { queryClient }, deps }) => {
     void loadMessages("pricing", "extension");
+    // Not waited for: the page shows without the chart, which then has less far to come.
+    void loadChart();
     const { properties } = await queryClient.ensureQueryData(propertiesQuery);
     const property = chosen(properties, deps);
     if (property) await queryClient.ensureQueryData(pricingOf(property, deps));
@@ -56,29 +59,59 @@ const styles = stylex.create({
   option: {
     display: "flex",
     alignItems: "center",
-    height: "1.75rem",
-    paddingInline: "0.625rem",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
+    height: "1.875rem",
+    paddingInline: "0.75rem",
+    borderRadius: radius.full,
+    backgroundColor: { default: "transparent", ":hover": color.sunken },
     color: { default: color.muted, ":hover": color.ink },
     fontSize: text.sm,
     fontWeight: 500,
     textDecoration: "none",
-    transitionProperty: "color, background-color, border-color",
-    transitionDuration: "150ms",
+    transitionProperty: "color, background-color, box-shadow",
+    transitionDuration: "200ms",
   },
-  current: { borderColor: color.lineStrong, backgroundColor: color.sunken, color: color.ink },
-  head: {
-    padding: "0.75rem 1rem",
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
+  current: {
+    backgroundColor: { default: color.panel, ":hover": color.panel },
+    color: color.ink,
+    boxShadow: shadow.card,
   },
-  subtitle: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
+  // The one lifted panel of the page: the gap between the two platforms.
+  gap: {
+    padding: { default: "1.25rem", [WIDE]: "1.75rem" },
+    borderRadius: { default: radius.xl, [WIDE]: "28px" },
+    backgroundColor: color.panel,
+    boxShadow: shadow.panel,
+  },
+  statement: { maxWidth: "40rem", margin: 0, fontWeight: 400 },
+  figure: { display: "block", fontSize: { default: "3rem", [WIDE]: "4rem" } },
+  sentence: {
+    display: "block",
+    marginTop: "0.5rem",
+    color: color.ink,
+    fontSize: text.md,
+    lineHeight: 1.55,
+    textWrap: "pretty",
+  },
+  detail: {
+    maxWidth: "40rem",
+    margin: "0.375rem 0 0",
+    color: color.muted,
+    fontSize: text.md,
+    lineHeight: 1.55,
+    textWrap: "pretty",
+  },
+  chartHead: {
+    margin: "1.5rem 0 0.75rem",
+    paddingTop: "1.25rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.line,
+    color: color.muted,
+    fontSize: text.base,
+  },
+  chartTitle: { display: "inline", margin: 0, color: color.ink, fontSize: text.base, fontWeight: 600 },
   // As tall as the chart with its legend and its axis, so nothing moves when it arrives.
-  chartSpace: { minHeight: "17.25rem" },
+  chartSpace: { minHeight: "16.25rem" },
   summary: {
     paddingInline: "0.25rem",
     fontSize: text.base,
@@ -97,22 +130,27 @@ const styles = stylex.create({
     gridTemplateColumns: { default: "1fr", [WIDE]: "repeat(3, 1fr)" },
     margin: 0,
     overflow: "hidden",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
     borderRadius: radius.lg,
-    backgroundColor: color.line,
+    backgroundColor: color.panel,
+    boxShadow: shadow.card,
   },
-  tile: { margin: 1, padding: "0.75rem 1rem", backgroundColor: color.bg },
-  tileLabel: { color: color.muted, fontSize: text.sm },
-  tileValue: {
-    margin: "0.25rem 0 0",
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    letterSpacing: "-0.025em",
-    fontVariantNumeric: "tabular-nums",
+  tile: {
+    padding: "1rem 1.25rem",
+    borderColor: color.line,
+    borderStyle: "solid",
+    borderWidth: 0,
+    borderTopWidth: { default: 1, ":first-child": 0, [WIDE]: 0 },
+    borderInlineStartWidth: { default: 0, [WIDE]: 1, ":first-child": 0 },
   },
-  tileHint: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
+  tileLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    color: color.muted,
+    fontSize: text.base,
+  },
+  tileValue: { margin: "0.5rem 0 0", fontSize: "1.75rem" },
+  tileHint: { margin: "0.375rem 0 0", color: color.muted, fontSize: text.sm, lineHeight: 1.45 },
   // The notes
   notes: { padding: "1.25rem" },
   noteList: {
@@ -206,18 +244,20 @@ function PropertyPricing({ properties, property }: { properties: Property[]; pro
 
       {hasPrices ? (
         <>
-          <Tiles summary={pricing.summary} currency={property.currency} />
-          <Card>
-            <div {...stylex.props(styles.head)}>
-              <SectionTitle>{t.chart.title}</SectionTitle>
-              <p {...stylex.props(styles.subtitle)}>{t.chart.subtitle(Math.round(days / 30))}</p>
+          <section {...stylex.props(styles.gap)}>
+            <Gap nights={pricing.nights} currency={property.currency} />
+            <div {...stylex.props(styles.chartHead)}>
+              <h3 {...stylex.props(styles.chartTitle)}>{t.chart.title}</h3>
+              {". "}
+              {t.chart.subtitle(Math.round(days / 30))}
             </div>
             {charted && (
               <Suspense fallback={<div {...stylex.props(styles.chartSpace)} />}>
                 <PriceChart nights={pricing.nights} currency={property.currency} />
               </Suspense>
             )}
-          </Card>
+          </section>
+          <Tiles summary={pricing.summary} currency={property.currency} />
           <ToAdjust nights={pricing.nights} currency={property.currency} />
           <GuestChecks
             pricing={pricing}
@@ -287,6 +327,45 @@ function Choice({
   );
 }
 
+/**
+ * The difference between the two platforms' prices, said before it is drawn:
+ * the average gap as a figure, then which platform is cheaper on how many
+ * nights and where the gap is widest.
+ */
+function Gap({ nights, currency }: { nights: Pricing["nights"]; currency: string }) {
+  const { m, fmt } = useI18n("pricing");
+  const t = m.pricing.gap;
+  const gap = summariseGap(nights);
+  if (gap.compared === 0) return <p {...stylex.props(styles.detail)}>{t.none}</p>;
+  const money = (amount: number) => fmt.money(amount, currency, { cents: false });
+  const { airbnb, booking } = m.common.sources;
+  // Whole units of currency: a gap under one is no gap.
+  const average = Math.round(gap.average / 100) * 100;
+  return (
+    <>
+      <h2 {...stylex.props(styles.statement)}>
+        <span {...stylex.props(figureStyle, styles.figure)}>{money(Math.abs(average))}</span>
+        <span {...stylex.props(styles.sentence)}>
+          {average === 0
+            ? t.same(gap.compared)
+            : average > 0
+              ? t.more(booking, airbnb, gap.compared)
+              : t.more(airbnb, booking, gap.compared)}
+        </span>
+      </h2>
+      <p {...stylex.props(styles.detail)}>
+        {t.split(airbnb, gap.airbnbCheaper, booking, gap.bookingCheaper, gap.close, fmt.percent(NOTABLE))}
+        {gap.widest &&
+          ` ${t.widest(
+            money(gap.widest.amount),
+            fmt.date(gap.widest.date, { weekday: "short", day: "numeric", month: "short" }),
+            m.common.sources[gap.widest.dearer],
+          )}`}
+      </p>
+    </>
+  );
+}
+
 function Tiles({ summary, currency }: { summary: Pricing["summary"]; currency: string }) {
   const { m, fmt } = useI18n("pricing");
   const t = m.pricing.tiles;
@@ -294,11 +373,13 @@ function Tiles({ summary, currency }: { summary: Pricing["summary"]; currency: s
   const toAdjust = summary.bookingLower + summary.bookingHigher;
   const tiles = [
     ...(["airbnb", "booking"] as const).map((channel) => ({
+      source: channel,
       label: t.average(m.common.sources[channel]),
       value: summary[channel].average == null ? "–" : money(summary[channel].average),
       hint: summary[channel].nights ? t.freeNights(summary[channel].nights) : t.noPrices,
     })),
     {
+      source: null,
       label: t.toAdjust,
       value: String(toAdjust),
       hint: summary.shortfall > 0 ? t.toAdjustHint(money(summary.shortfall)) : t.aligned,
@@ -309,8 +390,11 @@ function Tiles({ summary, currency }: { summary: Pricing["summary"]; currency: s
     <dl {...stylex.props(styles.tiles)}>
       {tiles.map((tile) => (
         <div key={tile.label} {...stylex.props(styles.tile)}>
-          <dt {...stylex.props(styles.tileLabel)}>{tile.label}</dt>
-          <dd {...stylex.props(styles.tileValue)}>{tile.value}</dd>
+          <dt {...stylex.props(styles.tileLabel)}>
+            {tile.source && <SourceDot source={tile.source} />}
+            {tile.label}
+          </dt>
+          <dd {...stylex.props(figureStyle, styles.tileValue)}>{tile.value}</dd>
           <dd {...stylex.props(styles.tileHint)}>{tile.hint}</dd>
         </div>
       ))}

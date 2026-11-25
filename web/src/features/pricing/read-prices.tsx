@@ -18,14 +18,16 @@ const styles = stylex.create({
   list: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.125rem",
+    gap: "0.375rem",
     margin: 0,
     padding: 0,
     listStyle: "none",
     color: color.muted,
     fontSize: text.sm,
   },
-  item: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.375rem" },
+  item: { display: "flex", alignItems: "flex-start", gap: "0.5rem" },
+  dot: { marginTop: "0.4375rem" },
+  what: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", minWidth: 0 },
 });
 
 const CHANNELS: OtaChannel[] = ["airbnb", "booking"];
@@ -76,16 +78,20 @@ export function ReadPrices({
           const label = m.common.sources[channel];
           return (
             <li key={channel} {...stylex.props(styles.item)}>
-              <SourceDot source={channel} />
-              {covered
-                ? t.read.covered(
-                    label,
-                    covered.nights,
-                    fmt.date(covered.until, { day: "numeric", month: "short", year: "numeric" }),
-                    fmt.timeAgo(covered.seenAt),
-                  )
-                : t.read.never(label)}
-              {!covered && <SyncCta state={extension} scope="all" />}
+              <SourceDot source={channel} xstyle={styles.dot} />
+              <span {...stylex.props(styles.what)}>
+                <span>
+                  {covered
+                    ? t.read.covered(
+                        label,
+                        covered.nights,
+                        fmt.date(covered.until, { day: "numeric", month: "short", year: "numeric" }),
+                        fmt.timeAgo(covered.seenAt),
+                      )
+                    : t.read.never(label)}
+                </span>
+                {!covered && <SyncCta state={extension} scope="all" variant="secondary" />}
+              </span>
             </li>
           );
         })}

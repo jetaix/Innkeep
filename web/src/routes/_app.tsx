@@ -57,16 +57,11 @@ const styles = stylex.create({
     flexDirection: "column",
     flexShrink: 0,
     gap: "0.75rem",
-    padding: "0.75rem",
-    backgroundColor: color.subtle,
-    borderColor: color.line,
-    borderStyle: "solid",
-    borderWidth: 0,
-    borderBottomWidth: { default: 1, [WIDE]: 0 },
-    borderRightWidth: { default: 0, [WIDE]: 1 },
+    // The menu stands on the ground itself; only the page's panels are white.
+    padding: { default: "0.75rem", [WIDE]: "1.25rem 0.75rem 1rem 1rem" },
     position: { default: "static", [WIDE]: "sticky" },
     top: 0,
-    width: { default: "auto", [WIDE]: "14rem" },
+    width: { default: "auto", [WIDE]: "15rem" },
     height: { default: "auto", [WIDE]: "100dvh" },
   },
   // One row on a phone, so the page itself starts higher up.
@@ -80,7 +75,7 @@ const styles = stylex.create({
     flexShrink: 0,
     alignSelf: { default: "auto", [WIDE]: "flex-start" },
     padding: "0.25rem 0.5rem",
-    borderRadius: radius.md,
+    borderRadius: radius.full,
     color: color.ink,
     textDecoration: "none",
   },
@@ -96,9 +91,11 @@ const styles = stylex.create({
   main: {
     flexGrow: 1,
     minWidth: 0,
-    paddingTop: "1.5rem",
+    width: "100%",
+    maxWidth: "88rem",
+    paddingTop: { default: "1rem", [WIDE]: "1.75rem" },
     paddingBottom: "5rem",
-    paddingInline: { default: "1rem", [WIDE]: "2rem" },
+    paddingInline: { default: "1rem", [WIDE]: "1.5rem 2rem" },
   },
   banner: {
     display: "flex",
@@ -107,12 +104,11 @@ const styles = stylex.create({
     justifyContent: "space-between",
     columnGap: "1rem",
     rowGap: "0.5rem",
-    paddingBlock: "0.5rem",
-    paddingInline: { default: "1rem", [WIDE]: "2rem" },
-    borderBottomWidth: 1,
-    borderBottomStyle: "solid",
-    borderBottomColor: color.line,
-    backgroundColor: color.subtle,
+    marginTop: { default: "0.75rem", [WIDE]: "1.25rem" },
+    marginInline: { default: "1rem", [WIDE]: "1.5rem 2rem" },
+    padding: "0.5rem 0.5rem 0.5rem 1rem",
+    borderRadius: radius.xl,
+    backgroundColor: color.sunken,
     fontSize: text.base,
   },
   sample: { backgroundColor: color.warnBg, color: color.warn },
@@ -140,7 +136,7 @@ function AppFrame() {
       <aside {...stylex.props(styles.aside)}>
         <div {...stylex.props(styles.top)}>
           <Link to="/overview" {...stylex.props(styles.home)}>
-            <Logo />
+            <Logo tone="color" />
           </Link>
           <div {...stylex.props(styles.search)}>
             <CommandMenu canSync={session.signedIn} />

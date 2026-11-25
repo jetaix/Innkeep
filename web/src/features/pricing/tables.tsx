@@ -8,21 +8,29 @@ import { useI18n } from "../../i18n";
 import { color, text } from "../../tokens.stylex";
 import { buttonStyle } from "../../ui/button";
 import { Card, Hidden, SectionTitle, SourceDot } from "../../ui/primitives";
+import { cheaperOf } from "./gap";
 
 const WIDE = "@media (min-width: 40rem)";
 
 const styles = stylex.create({
   head: {
-    padding: "0.75rem 1rem",
+    padding: "0.875rem 1.25rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: color.line,
   },
-  subtitle: { maxWidth: "80ch", margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
-  none: { margin: 0, padding: "1rem", color: color.muted, fontSize: text.base },
+  subtitle: {
+    maxWidth: "75ch",
+    margin: "0.25rem 0 0",
+    color: color.muted,
+    fontSize: text.base,
+    lineHeight: 1.5,
+    textWrap: "pretty",
+  },
+  none: { margin: 0, padding: "1rem 1.25rem", color: color.muted, fontSize: text.base },
   foot: {
     margin: 0,
-    padding: "0.625rem 1rem",
+    padding: "0.75rem 1.25rem",
     borderTopWidth: 1,
     borderTopStyle: "solid",
     borderTopColor: color.line,
@@ -37,10 +45,12 @@ const styles = stylex.create({
     textAlign: "start",
     fontVariantNumeric: "tabular-nums",
   },
-  th: { color: color.muted, fontSize: text.sm, fontWeight: 500, textAlign: "start" },
+  th: { color: color.muted, fontSize: text.sm, fontWeight: 500, textAlign: "start", verticalAlign: "bottom" },
   row: { borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: color.line },
-  takenRow: { backgroundColor: color.subtle, color: color.muted },
-  edge: { padding: "0.5rem 1rem" },
+  takenRow: { color: color.muted },
+  // Wide enough for its five columns: on a phone it scrolls inside its frame.
+  roomy: { minWidth: "46rem" },
+  edge: { padding: "0.5rem 1.25rem" },
   cell: { padding: "0.5rem 0.75rem" },
   end: { textAlign: "end" },
   nowrap: { whiteSpace: "nowrap" },
@@ -48,6 +58,9 @@ const styles = stylex.create({
   strong: { fontWeight: 500 },
   muted: { color: color.muted },
   faint: { color: color.faint },
+  // The lower of two prices: heavier, and said in words.
+  lower: { fontWeight: 600 },
+  lowerLabel: { marginInlineEnd: "0.5rem", color: color.muted, fontSize: text.sm, fontWeight: 400 },
   small: { fontSize: text.sm },
   below: { display: "block", color: color.muted, fontSize: text.sm },
   note: { marginInlineStart: "0.5rem", color: color.muted, fontSize: text.sm },
@@ -61,7 +74,7 @@ const styles = stylex.create({
     gridTemplateColumns: { default: "1fr", [WIDE]: "14rem 1fr" },
     columnGap: "1rem",
     rowGap: "0.125rem",
-    padding: "0.625rem 1rem",
+    padding: "0.6875rem 1.25rem",
     borderTopWidth: { default: 1, ":first-child": 0 },
     borderTopStyle: "solid",
     borderTopColor: color.line,
@@ -106,7 +119,7 @@ export function GuestChecks({
         <p {...stylex.props(styles.none)}>{t.none}</p>
       ) : (
         <div {...stylex.props(styles.scroll)}>
-          <table {...stylex.props(styles.table)}>
+          <table {...stylex.props(styles.table, styles.roomy)}>
             <thead>
               <tr>
                 <th scope="col" {...stylex.props(styles.th, styles.edge)}>
@@ -133,6 +146,7 @@ export function GuestChecks({
               {rows.map((check) => {
                 const { airbnb, booking } = check.quotes;
                 const gap = airbnb && booking ? booking.total - airbnb.total : null;
+                const cheaper = cheaperOf(airbnb?.total ?? null, booking?.total ?? null);
                 return (
                   <tr key={check.checkIn} {...stylex.props(styles.row)}>
                     <td {...stylex.props(styles.edge, styles.nowrap)}>
@@ -148,7 +162,12 @@ export function GuestChecks({
                         <td key={channel} {...stylex.props(styles.cell, styles.end)}>
                           {quote ? (
                             <>
-                              <span {...stylex.props(styles.strong)}>{money(quote.total)}</span>
+                              {cheaper === channel && (
+                                <span {...stylex.props(styles.lowerLabel)}>{m.pricing.gap.lower}</span>
+                              )}
+                              <span {...stylex.props(cheaper === channel ? styles.lower : styles.strong)}>
+                                {money(quote.total)}
+                              </span>
                               <span {...stylex.props(styles.below)}>
                                 {t.perNight(money(quote.total / 3))}
                               </span>
@@ -383,14 +402,19 @@ function FreeNight({
 }) {
   const { m } = useI18n("pricing");
   const priced = night.airbnb != null || night.booking != null;
+  const cheaper = cheaperOf(night.airbnb, night.booking);
   return (
     <tr {...stylex.props(styles.row)}>
       <td {...stylex.props(styles.edge, styles.nowrap)}>
         {day(night.date)}
         {night.note && <span {...stylex.props(styles.note)}>{night.note}</span>}
       </td>
-      <td {...stylex.props(styles.cell, styles.end)}>{money(night.airbnb)}</td>
-      <td {...stylex.props(styles.cell, styles.end)}>{money(night.booking)}</td>
+      {CHANNELS.map((channel) => (
+        <td key={channel} {...stylex.props(styles.cell, styles.end, styles.nowrap)}>
+          {cheaper === channel && <span {...stylex.props(styles.lowerLabel)}>{m.pricing.gap.lower}</span>}
+          <span {...stylex.props(cheaper === channel && styles.lower)}>{money(night[channel])}</span>
+        </td>
+      ))}
       <td
         {...stylex.props(
           styles.cell,

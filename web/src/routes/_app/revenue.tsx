@@ -8,9 +8,9 @@ import { revenueQuery, revenueYearsQuery } from "../../api/queries";
 import { ChargeForm, ChargeRow } from "../../features/revenue/charges";
 import { MonthChart } from "../../features/revenue/month-chart";
 import { loadMessages, useI18n } from "../../i18n";
-import { color, text } from "../../tokens.stylex";
-import { buttonStyle } from "../../ui/button";
+import { color, radius, shadow, text } from "../../tokens.stylex";
 import { Card, EmptyState, PageHeader, SectionTitle } from "../../ui/primitives";
+import { figureStyle } from "../../ui/slab";
 
 /** The last twelve months, this one and the four ahead. */
 const months = () => revenueQuery({ back: 12 });
@@ -30,75 +30,123 @@ export const Route = createFileRoute("/_app/revenue")({
   component: RevenuePage,
 });
 
+const WIDE = "@media (min-width: 40rem)";
 const XL = "@media (min-width: 80rem)";
 
 const styles = stylex.create({
   page: {
     display: "grid",
-    gridTemplateColumns: { default: "minmax(0, 1fr)", [XL]: "minmax(0, 1.5fr) minmax(0, 1fr)" },
+    gridTemplateColumns: { default: "minmax(0, 1fr)", [XL]: "minmax(0, 1.6fr) minmax(0, 1fr)" },
     alignItems: "start",
-    gap: "1.5rem",
-    maxWidth: "72rem",
+    columnGap: "2.5rem",
+    rowGap: "2rem",
+    maxWidth: "76rem",
   },
-  main: { display: "flex", flexDirection: "column", gap: "1.5rem" },
+  main: { display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 },
+  // The one lifted panel of the page: what the month pays, and the months around it.
+  pays: {
+    padding: { default: "1.25rem", [WIDE]: "1.75rem" },
+    borderRadius: { default: radius.xl, [WIDE]: "28px" },
+    backgroundColor: color.panel,
+    boxShadow: shadow.panel,
+  },
+  split: {
+    display: "flex",
+    // The switch goes above the figure when the two do not fit side by side.
+    flexWrap: "wrap-reverse",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: "1rem",
+  },
+  statement: { flexBasis: "18rem", flexGrow: 1, minWidth: 0, maxWidth: "36rem", margin: 0, fontWeight: 400 },
+  figure: { display: "block", fontSize: { default: "3rem", [WIDE]: "4rem" } },
+  loss: { color: color.critical },
+  sentence: {
+    display: "block",
+    marginTop: "0.5rem",
+    color: color.muted,
+    fontSize: text.md,
+    lineHeight: 1.55,
+    textWrap: "pretty",
+  },
+  // Two views of the same figures, side by side in one pill.
+  views: {
+    display: "flex",
+    flexShrink: 0,
+    padding: "0.1875rem",
+    borderRadius: radius.full,
+    backgroundColor: color.sunken,
+  },
+  view: {
+    display: "flex",
+    alignItems: "center",
+    height: "1.75rem",
+    paddingInline: "0.75rem",
+    borderRadius: radius.full,
+    color: { default: color.muted, ":hover": color.ink },
+    fontSize: text.sm,
+    fontWeight: 500,
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    transitionProperty: "background-color, box-shadow, color",
+    transitionDuration: "200ms",
+  },
+  chosen: { backgroundColor: color.panel, color: color.ink, boxShadow: shadow.card },
   head: {
-    padding: "0.75rem 1rem",
+    padding: "0.875rem 1.25rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: color.line,
   },
-  split: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: "0.75rem",
-  },
-  headText: { minWidth: 0 },
-  hint: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
-  views: { display: "flex" },
-  first: { borderStartEndRadius: 0, borderEndEndRadius: 0 },
-  next: { marginInlineStart: -1, borderStartStartRadius: 0, borderEndStartRadius: 0 },
-  chosen: { backgroundColor: color.sunken, fontWeight: 600 },
-  scroll: {
-    position: "relative",
-    overflowX: "auto",
-    borderTopWidth: 1,
-    borderTopStyle: "solid",
-    borderTopColor: color.line,
-  },
+  hint: { margin: "0.25rem 0 0", color: color.muted, fontSize: text.base, lineHeight: 1.5 },
+  scroll: { position: "relative", overflowX: "auto" },
   table: {
     width: "100%",
     borderCollapse: "collapse",
     textAlign: "start",
+    fontSize: text.md,
     fontVariantNumeric: "tabular-nums",
   },
+  caption: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    overflow: "hidden",
+    clipPath: "inset(50%)",
+    whiteSpace: "nowrap",
+  },
   columns: { color: color.muted, fontSize: text.sm },
-  column: { padding: "0.5rem 0.75rem", fontWeight: 500, textAlign: "end" },
+  column: { padding: "0.75rem 0.75rem 0.625rem", fontWeight: 500, textAlign: "end", whiteSpace: "nowrap" },
   line: { borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: color.line },
-  now: { backgroundColor: color.subtle },
-  cell: { padding: "0.5rem 0.75rem", textAlign: "end" },
-  name: { fontWeight: 500, textAlign: "start", whiteSpace: "nowrap" },
-  start: { paddingInlineStart: "1rem", textAlign: "start" },
-  end: { paddingInlineEnd: "1rem" },
+  cell: { padding: "0.5625rem 0.75rem", textAlign: "end", whiteSpace: "nowrap" },
+  name: { fontWeight: 500, textAlign: "start" },
+  start: { paddingInlineStart: "1.25rem", textAlign: "start" },
+  end: { paddingInlineEnd: "1.25rem" },
   muted: { color: color.muted },
   strong: { fontWeight: 500 },
-  loss: { color: color.critical },
+  // A month with no stay in it: present, and quiet.
+  quiet: { color: color.muted, fontWeight: 400 },
+  // The month we are in is told by weight and by words, not by a grey block.
+  now: { color: color.ink, fontWeight: 600 },
   below: { display: "block", color: color.muted, fontSize: text.sm, fontWeight: 400 },
   list: { margin: 0, padding: 0, listStyle: "none" },
   figures: { fontVariantNumeric: "tabular-nums" },
   cost: {
     display: "flex",
-    alignItems: "center",
+    alignItems: "baseline",
     justifyContent: "space-between",
     gap: "1rem",
-    padding: "0.5rem 1rem",
+    padding: "0.5625rem 1.25rem",
     borderTopWidth: { default: 1, ":first-child": 0 },
     borderTopStyle: "solid",
     borderTopColor: color.line,
   },
   small: { color: color.muted, fontSize: text.sm },
-  none: { margin: 0, padding: "1.25rem 1rem", color: color.muted },
+  // The charges are read and edited on the ground itself: ink and hairlines, no panel.
+  aside: { minWidth: 0 },
+  asideHead: { paddingBottom: "0.875rem" },
+  ruled: { borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: color.lineStrong },
+  none: { margin: 0, paddingBlock: "1rem", color: color.muted, lineHeight: 1.55 },
 });
 
 function RevenuePage() {
@@ -148,34 +196,35 @@ function Revenue({
   const money = (value: number) => fmt.money(value, currency, { cents: false });
   const monthName = (month: string) => (byYear ? month : formatMonth(month, "long", INTL_LOCALE[locale]));
 
+  // A month with no stay and no revenue is listed, quietly.
+  const empty = (summary: MonthSummary) => summary.gross === 0 && summary.bookedNights === 0;
+
   return (
     <div {...stylex.props(styles.page)}>
       <div {...stylex.props(styles.main)}>
-        <Card>
-          <div {...stylex.props(styles.head, styles.split)}>
-            <div {...stylex.props(styles.headText)}>
-              <SectionTitle>{byYear ? t.years.title : t.months.title}</SectionTitle>
-              <p {...stylex.props(styles.hint)}>
-                {(byYear ? t.years : t.months).summary(
+        <section {...stylex.props(styles.pays)}>
+          <div {...stylex.props(styles.split)}>
+            <h2 {...stylex.props(styles.statement)}>
+              <span {...stylex.props(figureStyle, styles.figure, thisMonth.net < 0 && styles.loss)}>
+                {money(thisMonth.net)}
+              </span>
+              <span {...stylex.props(styles.sentence)}>
+                {t.months.leaves(
                   monthName(current),
                   money(thisMonth.gross),
                   money(thisMonth.charges),
                   thisMonth.estimated > 0 ? money(thisMonth.estimated) : null,
                 )}
-              </p>
-            </div>
+              </span>
+            </h2>
             <nav aria-label={t.view.label} {...stylex.props(styles.views)}>
-              {REVENUE_VIEWS.map((option, index) => (
+              {REVENUE_VIEWS.map((option) => (
                 <Link
                   key={option}
                   to="/revenue"
                   search={{ view: option === "years" ? "years" : undefined }}
                   aria-current={option === view ? "page" : undefined}
-                  {...stylex.props(
-                    buttonStyle({ size: "sm" }),
-                    index === 0 ? styles.first : styles.next,
-                    option === view && styles.chosen,
-                  )}
+                  {...stylex.props(styles.view, option === view && styles.chosen)}
                 >
                   {t.view[option]}
                 </Link>
@@ -188,8 +237,12 @@ function Revenue({
             currency={currency}
             unit={byYear ? "year" : "month"}
           />
+        </section>
+
+        <Card>
           <div {...stylex.props(styles.scroll)}>
             <table {...stylex.props(styles.table)}>
+              <caption {...stylex.props(styles.caption)}>{byYear ? t.years.title : t.months.title}</caption>
               <thead {...stylex.props(styles.columns)}>
                 <tr>
                   <th scope="col" {...stylex.props(styles.column, styles.start)}>
@@ -218,29 +271,56 @@ function Revenue({
                 </tr>
               </thead>
               <tbody>
-                {summaries.map((summary) => (
-                  <tr
-                    key={summary.month}
-                    {...stylex.props(styles.line, summary.month === current && styles.now)}
-                  >
-                    <th scope="row" {...stylex.props(styles.cell, styles.name, styles.start)}>
-                      {t.months.label(monthName(summary.month))}
-                      {byYear && summary.month === current && (
-                        <span {...stylex.props(styles.below)}>{t.years.inProgress}</span>
-                      )}
-                    </th>
-                    {byYear && <td {...stylex.props(styles.cell, styles.muted)}>{summary.arrivals}</td>}
-                    <td {...stylex.props(styles.cell)}>{money(summary.gross)}</td>
-                    <td {...stylex.props(styles.cell, styles.muted)}>{money(summary.charges)}</td>
-                    <td {...stylex.props(styles.cell, styles.strong, summary.net < 0 && styles.loss)}>
-                      {money(summary.net)}
-                    </td>
-                    <td {...stylex.props(styles.cell, styles.muted)}>{summary.bookedNights}</td>
-                    <td {...stylex.props(styles.cell, styles.muted, styles.end)}>
-                      {fmt.percent(summary.occupancy)}
-                    </td>
-                  </tr>
-                ))}
+                {summaries.map((summary) => {
+                  const isNow = summary.month === current;
+                  const quiet = empty(summary) && !isNow;
+                  return (
+                    <tr
+                      key={summary.month}
+                      aria-current={isNow ? "date" : undefined}
+                      {...stylex.props(styles.line)}
+                    >
+                      <th
+                        scope="row"
+                        {...stylex.props(
+                          styles.cell,
+                          styles.name,
+                          styles.start,
+                          quiet && styles.quiet,
+                          isNow && styles.now,
+                        )}
+                      >
+                        {t.months.label(monthName(summary.month))}
+                        {isNow && (
+                          <span {...stylex.props(styles.below)}>
+                            {byYear ? t.years.inProgress : t.months.now}
+                          </span>
+                        )}
+                      </th>
+                      {byYear && <td {...stylex.props(styles.cell, styles.muted)}>{summary.arrivals}</td>}
+                      <td {...stylex.props(styles.cell, quiet && styles.quiet, isNow && styles.now)}>
+                        {money(summary.gross)}
+                      </td>
+                      <td {...stylex.props(styles.cell, styles.muted)}>{money(summary.charges)}</td>
+                      <td
+                        {...stylex.props(
+                          styles.cell,
+                          styles.strong,
+                          quiet && styles.quiet,
+                          isNow && styles.now,
+                          // A loss is a state only where there were stays to pay for it.
+                          !quiet && summary.net < 0 && styles.loss,
+                        )}
+                      >
+                        {money(summary.net)}
+                      </td>
+                      <td {...stylex.props(styles.cell, styles.muted)}>{summary.bookedNights}</td>
+                      <td {...stylex.props(styles.cell, styles.muted, styles.end)}>
+                        {fmt.percent(summary.occupancy)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -267,22 +347,22 @@ function Revenue({
         )}
       </div>
 
-      <Card>
-        <div {...stylex.props(styles.head)}>
+      <section {...stylex.props(styles.aside)}>
+        <div {...stylex.props(styles.asideHead)}>
           <SectionTitle>{t.charges.title}</SectionTitle>
           <p {...stylex.props(styles.hint)}>{t.charges.hint}</p>
         </div>
         {charges.length > 0 ? (
-          <ul {...stylex.props(styles.list)}>
+          <ul {...stylex.props(styles.list, styles.ruled)}>
             {charges.map((charge) => (
               <ChargeRow key={charge.id} charge={charge} properties={properties} currency={currency} />
             ))}
           </ul>
         ) : (
-          <p {...stylex.props(styles.none)}>{t.charges.empty}</p>
+          <p {...stylex.props(styles.none, styles.ruled)}>{t.charges.empty}</p>
         )}
         <ChargeForm properties={properties} />
-      </Card>
+      </section>
     </div>
   );
 }

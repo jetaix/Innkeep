@@ -7,13 +7,17 @@ import { type Month, occupancyAhead } from "@/features/revenue/compute";
 import { addDays, rangesOverlap, today } from "@/lib/dates";
 import { loadSampleData } from "../../api/mutations";
 import { propertiesQuery, revenueQuery, staysQuery, suggestionsQuery } from "../../api/queries";
+import { Glass } from "../../brand/glass";
+import { LogoMark } from "../../brand/logo";
 import { SuggestionList } from "../../features/insights/suggestion-list";
+import { Fortnight } from "../../features/overview/fortnight";
 import { StayList } from "../../features/reservations/stay-list";
 import { currentLocale, loadMessages, useI18n } from "../../i18n";
-import { color, radius, text } from "../../tokens.stylex";
+import { color, font, shadow, text } from "../../tokens.stylex";
 import { SubmitButton } from "../../ui/actions";
 import { buttonStyle } from "../../ui/button";
-import { Card, EmptyState, Loading, Notice, PageHeader, SectionTitle } from "../../ui/primitives";
+import { Card, Loading, Notice, PageHeader, SectionTitle } from "../../ui/primitives";
+import { figureStyle } from "../../ui/slab";
 
 // Asking from yesterday keeps the stays that end today, for the departures line.
 const recentStays = () => staysQuery({ from: addDays(today(), -1) });
@@ -36,38 +40,51 @@ export const Route = createFileRoute("/_app/overview")({
 const LARGE = "@media (min-width: 64rem)";
 const XLARGE = "@media (min-width: 80rem)";
 
+const WIDE = "@media (min-width: 48rem)";
+
 const styles = stylex.create({
+  // The one panel the page lifts: today, the fortnight, and the four figures.
+  lead: {
+    marginBottom: "1.5rem",
+    overflow: "hidden",
+    borderRadius: { default: "1.25rem", [WIDE]: "1.75rem" },
+    backgroundColor: color.panel,
+    boxShadow: shadow.panel,
+  },
+  today: {
+    maxWidth: "46rem",
+    margin: 0,
+    padding: { default: "1.25rem 1rem 0.25rem", [WIDE]: "1.75rem 1.5rem 0.25rem" },
+    fontFamily: font.display,
+    fontSize: { default: "1.375rem", [WIDE]: "1.75rem" },
+    fontWeight: 400,
+    letterSpacing: "-0.025em",
+    lineHeight: 1.2,
+    textWrap: "balance",
+  },
+  // The hairlines between the figures are the grid's own background showing through its gaps.
   stats: {
     display: "grid",
     gridTemplateColumns: { default: "repeat(2, minmax(0, 1fr))", [LARGE]: "repeat(4, minmax(0, 1fr))" },
     gap: 1,
-    margin: "0 0 1.5rem",
-    overflow: "hidden",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.lg,
+    margin: 0,
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.line,
     backgroundColor: color.line,
   },
   stat: {
     display: "block",
-    padding: "0.875rem 1rem",
-    backgroundColor: { default: color.bg, ":hover": color.subtle },
+    padding: { default: "0.875rem 1rem 1rem", [WIDE]: "1rem 1.5rem 1.25rem" },
+    backgroundColor: { default: color.panel, ":hover": color.subtle },
     color: color.ink,
     textDecoration: "none",
     transitionProperty: "background-color",
     transitionDuration: "150ms",
   },
   label: { color: color.muted, fontSize: text.sm },
-  value: {
-    margin: "0.25rem 0 0",
-    fontSize: "1.5rem",
-    fontWeight: 600,
-    letterSpacing: "-0.025em",
-    lineHeight: 1.333,
-    fontVariantNumeric: "tabular-nums",
-  },
-  detail: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.sm },
+  value: { margin: "0.375rem 0 0", fontSize: { default: "1.625rem", [WIDE]: "2rem" } },
+  detail: { margin: "0.25rem 0 0", color: color.muted, fontSize: text.sm },
   columns: {
     display: "grid",
     gridTemplateColumns: { default: "minmax(0, 1fr)", [XLARGE]: "minmax(0, 1.4fr) minmax(0, 1fr)" },
@@ -78,7 +95,7 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0.75rem 1rem",
+    padding: "0.875rem 1rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: color.line,
@@ -86,11 +103,52 @@ const styles = stylex.create({
   all: {
     color: { default: color.muted, ":hover": color.ink },
     fontSize: text.sm,
-    textDecoration: "underline",
-    textUnderlineOffset: 2,
+    textDecorationLine: "underline",
+    textDecorationColor: color.lineStrong,
+    textUnderlineOffset: 3,
   },
   none: { margin: 0, padding: "1.5rem 1rem", color: color.muted },
-  welcome: { maxWidth: "36rem", marginTop: "4rem", marginInline: "auto" },
+  // The first run: a door to walk through, the two calendars as glass behind it.
+  welcome: {
+    position: "relative",
+    isolation: "isolate",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "min(40rem, 78dvh)",
+    paddingBlock: "2rem",
+  },
+  glass: {
+    position: "absolute",
+    zIndex: -1,
+    top: "50%",
+    left: "50%",
+    width: { default: "20rem", [WIDE]: "34rem" },
+    height: { default: "28rem", [WIDE]: "36rem" },
+    translate: "-50% -50%",
+  },
+  archOne: { top: 0, left: 0, width: "60%", height: "86%", rotate: "-4deg" },
+  archTwo: { bottom: 0, right: 0, width: "60%", height: "86%", rotate: "3deg" },
+  door: {
+    width: "100%",
+    maxWidth: "30rem",
+    padding: { default: "1.5rem", [WIDE]: "2.25rem" },
+    borderRadius: "1.75rem",
+    backgroundColor: color.panel,
+    boxShadow: shadow.panel,
+  },
+  mark: { width: "2.25rem", height: "2.25rem" },
+  welcomeTitle: {
+    margin: "0.875rem 0 0",
+    fontFamily: font.display,
+    fontSize: { default: "1.75rem", [WIDE]: "2.25rem" },
+    fontWeight: 400,
+    letterSpacing: "-0.03em",
+    lineHeight: 1.1,
+    textWrap: "balance",
+  },
+  welcomeBody: { margin: "0.75rem 0 0", color: color.muted, fontSize: text.md, lineHeight: 1.6 },
+  actions: { display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1.5rem" },
   form: { margin: 0 },
   failed: { marginTop: "0.75rem" },
 });
@@ -148,44 +206,44 @@ function Overview() {
 
   return (
     <>
-      <PageHeader
-        title={t.title}
-        description={t.today.description(
-          fmt.date(now, { weekday: "long", day: "numeric", month: "long" }),
-          todayLine,
-        )}
-      />
+      <PageHeader title={t.title} />
 
-      <dl {...stylex.props(styles.stats)}>
-        <Link to="/revenue" {...stylex.props(styles.stat)}>
-          <Stat
-            label={t.stats.netRevenue(monthName(thisMonth.month))}
-            value={money(thisMonth.net)}
-            detail={t.stats.beforeCosts(money(thisMonth.gross), money(thisMonth.charges))}
-          />
-        </Link>
-        <Link to="/revenue" {...stylex.props(styles.stat)}>
-          <Stat
-            label={t.stats.netRevenue(monthName(nextMonth.month))}
-            value={money(nextMonth.net)}
-            detail={t.stats.arrivalsBooked(nextMonth.arrivals)}
-          />
-        </Link>
-        <Link to="/calendar" {...stylex.props(styles.stat)}>
-          <Stat
-            label={t.stats.booked}
-            value={fmt.percent(occupancy)}
-            detail={t.stats.acrossProperties(properties.length)}
-          />
-        </Link>
-        <Link to="/suggestions" {...stylex.props(styles.stat)}>
-          <Stat
-            label={t.stats.needsAttention}
-            value={String(suggestions.filter((s) => s.severity !== "idea").length)}
-            detail={t.stats.moreIdeas(suggestions.filter((s) => s.severity === "idea").length)}
-          />
-        </Link>
-      </dl>
+      <div {...stylex.props(styles.lead)}>
+        <p {...stylex.props(styles.today)}>
+          {t.today.description(fmt.date(now, { weekday: "long", day: "numeric", month: "long" }), todayLine)}
+        </p>
+        <Fortnight properties={properties} stays={stays} today={now} />
+        <dl {...stylex.props(styles.stats)}>
+          <Link to="/revenue" {...stylex.props(styles.stat)}>
+            <Stat
+              label={t.stats.netRevenue(monthName(thisMonth.month))}
+              value={money(thisMonth.net)}
+              detail={t.stats.beforeCosts(money(thisMonth.gross), money(thisMonth.charges))}
+            />
+          </Link>
+          <Link to="/revenue" {...stylex.props(styles.stat)}>
+            <Stat
+              label={t.stats.netRevenue(monthName(nextMonth.month))}
+              value={money(nextMonth.net)}
+              detail={t.stats.arrivalsBooked(nextMonth.arrivals)}
+            />
+          </Link>
+          <Link to="/calendar" {...stylex.props(styles.stat)}>
+            <Stat
+              label={t.stats.booked}
+              value={fmt.percent(occupancy)}
+              detail={t.stats.acrossProperties(properties.length)}
+            />
+          </Link>
+          <Link to="/suggestions" {...stylex.props(styles.stat)}>
+            <Stat
+              label={t.stats.needsAttention}
+              value={String(suggestions.filter((s) => s.severity !== "idea").length)}
+              detail={t.stats.moreIdeas(suggestions.filter((s) => s.severity === "idea").length)}
+            />
+          </Link>
+        </dl>
+      </div>
 
       <div {...stylex.props(styles.columns)}>
         <Card>
@@ -224,7 +282,7 @@ function Stat({ label, value, detail }: { label: string; value: string; detail: 
   return (
     <>
       <dt {...stylex.props(styles.label)}>{label}</dt>
-      <dd {...stylex.props(styles.value)}>{value}</dd>
+      <dd {...stylex.props(figureStyle, styles.value)}>{value}</dd>
       <dd {...stylex.props(styles.detail)}>{detail}</dd>
     </>
   );
@@ -236,34 +294,36 @@ function Welcome() {
   const load = useMutation(loadSampleData);
   return (
     <div {...stylex.props(styles.welcome)}>
-      <EmptyState
-        title={t.title}
-        action={
-          <>
-            <Link to="/properties" {...stylex.props(buttonStyle({ variant: "primary" }))}>
-              {t.addProperty}
-            </Link>
-            <form
-              {...stylex.props(styles.form)}
-              onSubmit={(event) => {
-                event.preventDefault();
-                load.mutate();
-              }}
-            >
-              <SubmitButton pending={load.isPending} pendingLabel={m.common.loading}>
-                {t.loadSample}
-              </SubmitButton>
-            </form>
-          </>
-        }
-      >
-        {t.body}
+      <div aria-hidden {...stylex.props(styles.glass)}>
+        <Glass tint="coral" xstyle={styles.archOne} />
+        <Glass tint="blue" xstyle={styles.archTwo} />
+      </div>
+      <div {...stylex.props(styles.door)}>
+        <LogoMark tone="color" xstyle={styles.mark} />
+        <h1 {...stylex.props(styles.welcomeTitle)}>{t.title}</h1>
+        <p {...stylex.props(styles.welcomeBody)}>{t.body}</p>
+        <div {...stylex.props(styles.actions)}>
+          <Link to="/properties" {...stylex.props(buttonStyle({ variant: "primary", size: "lg" }))}>
+            {t.addProperty}
+          </Link>
+          <form
+            {...stylex.props(styles.form)}
+            onSubmit={(event) => {
+              event.preventDefault();
+              load.mutate();
+            }}
+          >
+            <SubmitButton size="lg" pending={load.isPending} pendingLabel={m.common.loading}>
+              {t.loadSample}
+            </SubmitButton>
+          </form>
+        </div>
         {load.error && (
           <Notice tone="critical" role="alert" xstyle={styles.failed}>
             {load.error.message}
           </Notice>
         )}
-      </EmptyState>
+      </div>
     </div>
   );
 }

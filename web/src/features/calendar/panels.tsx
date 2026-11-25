@@ -18,7 +18,7 @@ const styles = stylex.create({
   panel: {
     flexShrink: 0,
     width: { default: "100%", "@media (min-width: 80rem)": "20rem" },
-    padding: "1rem",
+    padding: "1.125rem",
   },
   head: {
     display: "flex",
@@ -167,7 +167,7 @@ export function StayPanel({
       )}
       <PlatformFacts stay={stay} currency={property.currency} />
       {conflict && (
-        <Notice tone="critical" xstyle={styles.overlap}>
+        <Notice tone="clash" xstyle={styles.overlap}>
           {t.overlap}
         </Notice>
       )}

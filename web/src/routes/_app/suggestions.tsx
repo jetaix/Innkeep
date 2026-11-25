@@ -25,13 +25,13 @@ export const Route = createFileRoute("/_app/suggestions")({
 });
 
 const styles = stylex.create({
-  page: { display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "48rem" },
+  page: { display: "flex", flexDirection: "column", gap: "2rem", maxWidth: "50rem" },
   head: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.75rem",
-    padding: "0.75rem 1rem",
+    padding: "0.875rem 1rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: color.line,
@@ -42,13 +42,21 @@ const styles = stylex.create({
   claude: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.75rem",
-    paddingTop: "1rem",
+    gap: "1rem",
+    paddingTop: "1.5rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.lineStrong,
     scrollMarginTop: "1.5rem",
   },
-  claudeHead: { paddingInline: "0.25rem" },
-  claudeTitle: { margin: 0, fontSize: text.base, fontWeight: 600 },
-  claudeAbout: { margin: "0.125rem 0 0", color: color.muted, fontSize: text.base },
+  claudeTitle: { margin: 0, fontSize: text.lg, fontWeight: 600, letterSpacing: "-0.015em" },
+  claudeAbout: {
+    margin: "0.25rem 0 0",
+    maxWidth: "68ch",
+    color: color.muted,
+    fontSize: text.base,
+    lineHeight: 1.55,
+  },
 });
 
 function SuggestionsPage() {
@@ -109,7 +117,7 @@ function Suggestions() {
 
       {/* The advice above is Claude's, set up here. */}
       <section id="claude" aria-labelledby="claude-heading" {...stylex.props(styles.claude)}>
-        <div {...stylex.props(styles.claudeHead)}>
+        <div>
           <h2 id="claude-heading" {...stylex.props(styles.claudeTitle)}>
             {m.assistant.title}
           </h2>

@@ -10,9 +10,10 @@ import { addDays, diffDays, today } from "@/lib/dates";
 import { chargesQuery, propertiesQuery, staysQuery } from "../../api/queries";
 import { StayList } from "../../features/reservations/stay-list";
 import { loadMessages, useI18n } from "../../i18n";
-import { color, radius, text } from "../../tokens.stylex";
+import { color, font, radius, shadow, text } from "../../tokens.stylex";
 import { buttonStyle } from "../../ui/button";
 import { Badge, Card, EmptyState, Hidden, Kbd, PageHeader, SectionTitle } from "../../ui/primitives";
+import { figureStyle } from "../../ui/slab";
 
 /** A year back and everything ahead: the lists, the totals and the months are all cut from it. */
 const stays = () => staysQuery({ from: addDays(today(), -365) });
@@ -48,21 +49,51 @@ const styles = stylex.create({
   title: { marginBottom: "0.5rem", paddingInline: "0.25rem" },
   inset: { paddingInline: "0.25rem" },
   two: { display: "grid", gridTemplateColumns: { default: "1fr", [WIDE]: "1fr 1fr" }, gap: "1rem" },
-  views: { display: "flex", paddingInline: "0.25rem" },
-  first: { borderStartEndRadius: 0, borderEndEndRadius: 0 },
-  next: { marginInlineStart: -1, borderStartStartRadius: 0, borderEndStartRadius: 0 },
-  chosen: { backgroundColor: color.sunken, fontWeight: 600 },
+  // A choice of one: a track, with the chosen list lifted off it.
+  views: {
+    display: "flex",
+    alignSelf: "flex-start",
+    alignItems: "stretch",
+    minHeight: "2.125rem",
+    padding: 2,
+    borderRadius: radius.full,
+    backgroundColor: color.sunken,
+  },
+  view: {
+    display: "flex",
+    alignItems: "center",
+    paddingInline: "0.875rem",
+    borderRadius: radius.full,
+    color: { default: color.muted, ":hover": color.ink },
+    fontSize: text.base,
+    fontWeight: 500,
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    transitionProperty: "background-color, box-shadow, color",
+    transitionDuration: "200ms",
+  },
+  chosen: { backgroundColor: color.panel, boxShadow: shadow.card, color: color.ink },
   section: { display: "flex", flexDirection: "column", gap: "0.75rem" },
+  // The headings of the ledger are in the display face: a period, then its stays.
+  period: {
+    fontFamily: font.display,
+    fontSize: "1.375rem",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.2,
+  },
   groupHead: {
     display: "flex",
+    flexWrap: "wrap",
     alignItems: "baseline",
     justifyContent: "space-between",
-    gap: "1rem",
-    marginBottom: "0.5rem",
+    columnGap: "1rem",
+    rowGap: "0.125rem",
+    marginBottom: "0.625rem",
     paddingInline: "0.25rem",
   },
   figures: { margin: 0, color: color.muted, fontSize: text.sm, fontVariantNumeric: "tabular-nums" },
-  month: { display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.75rem 1rem" },
+  month: { display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.875rem 1rem 1rem" },
   between: {
     display: "flex",
     flexWrap: "wrap",
@@ -73,8 +104,11 @@ const styles = stylex.create({
   },
   monthName: {
     margin: 0,
-    fontSize: text.md,
-    fontWeight: 500,
+    fontFamily: font.display,
+    fontSize: "1.375rem",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.2,
     "::first-letter": { textTransform: "uppercase" },
   },
   booked: {
@@ -82,7 +116,7 @@ const styles = stylex.create({
     alignItems: "center",
     gap: "0.5rem",
     margin: 0,
-    fontWeight: 600,
+    fontWeight: 500,
     fontVariantNumeric: "tabular-nums",
   },
   meter: { height: "0.5rem", overflow: "hidden", borderRadius: radius.full, backgroundColor: color.sunken },
@@ -121,7 +155,8 @@ const styles = stylex.create({
   muted: { color: color.muted },
   link: { color: color.ink, textUnderlineOffset: 2 },
   net: { fontWeight: 500 },
-  netValue: { fontWeight: 600 },
+  netLine: { alignItems: "center", paddingBlock: "0.75rem 0.875rem" },
+  netValue: { fontSize: "1.625rem" },
   loss: { color: color.critical },
 });
 
@@ -234,17 +269,13 @@ function Reservations() {
         </div>
       </section>
       <nav aria-label={t.view.label} {...stylex.props(styles.views)}>
-        {LISTS.map((option, index) => (
+        {LISTS.map((option) => (
           <Link
             key={option}
             to="/reservations"
             search={{ view: option === "list" ? undefined : option }}
             aria-current={option === view ? "page" : undefined}
-            {...stylex.props(
-              buttonStyle(),
-              index === 0 ? styles.first : styles.next,
-              option === view && styles.chosen,
-            )}
+            {...stylex.props(styles.view, option === view && styles.chosen)}
           >
             {t.view[option]}
           </Link>
@@ -309,7 +340,9 @@ function Reservations() {
           return (
             <section key={group.id} aria-labelledby={`group-${group.id}`}>
               <div {...stylex.props(styles.groupHead)}>
-                <SectionTitle id={`group-${group.id}`}>{group.title}</SectionTitle>
+                <SectionTitle id={`group-${group.id}`} xstyle={styles.period}>
+                  {group.title}
+                </SectionTitle>
                 <p {...stylex.props(styles.figures)}>
                   {m.common.count.stays(group.stays.length)}, {m.common.count.nights(nights)},{" "}
                   {fmt.money(total, currency, { cents: false })}
@@ -399,9 +432,9 @@ function Totals({
             )}
           </dd>
         </div>
-        <div {...stylex.props(styles.line)}>
+        <div {...stylex.props(styles.line, styles.netLine)}>
           <dt {...stylex.props(styles.net)}>{t.net}</dt>
-          <dd {...stylex.props(styles.value, styles.netValue, totals.net < 0 && styles.loss)}>
+          <dd {...stylex.props(styles.value, figureStyle, styles.netValue, totals.net < 0 && styles.loss)}>
             {money(totals.net)}
           </dd>
         </div>

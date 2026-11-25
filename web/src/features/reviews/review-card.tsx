@@ -3,11 +3,11 @@ import { Star } from "lucide-react";
 import type { OtaChannel, Review } from "@/db/schema";
 import { isLow } from "@/features/reviews/compute";
 import { useI18n } from "../../i18n";
-import { color, text } from "../../tokens.stylex";
+import { color, radius, text } from "../../tokens.stylex";
 import { Badge, Card, Hidden, SourceBadge } from "../../ui/primitives";
 
 const styles = stylex.create({
-  card: { padding: "1rem" },
+  card: { padding: { default: "1rem", "@media (min-width: 40rem)": "1.25rem 1.5rem" } },
   header: {
     display: "flex",
     flexWrap: "wrap",
@@ -15,7 +15,7 @@ const styles = stylex.create({
     columnGap: "0.75rem",
     rowGap: "0.25rem",
   },
-  author: { margin: 0, fontSize: "inherit", fontWeight: 500 },
+  author: { margin: 0, fontSize: text.md, fontWeight: 600 },
   rating: {
     display: "inline-flex",
     alignItems: "center",
@@ -26,34 +26,37 @@ const styles = stylex.create({
   },
   low: { color: color.warn },
   small: { color: color.muted, fontSize: text.sm },
-  title: { margin: "0.5rem 0 0", fontWeight: 500 },
+  title: { margin: "0.75rem 0 0", fontSize: "0.9375rem", fontWeight: 500 },
+  // The guest's own words, at a size for reading.
   sides: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.375rem",
-    margin: "0.5rem 0 0",
-    fontSize: text.base,
-    lineHeight: 1.625,
+    gap: "0.5rem",
+    maxWidth: "68ch",
+    margin: "0.625rem 0 0",
+    fontSize: "0.9375rem",
+    lineHeight: 1.65,
   },
   words: { margin: 0, whiteSpace: "pre-line" },
   body: {
-    margin: "0.5rem 0 0",
-    maxWidth: "75ch",
-    fontSize: text.base,
-    lineHeight: 1.625,
+    margin: "0.625rem 0 0",
+    maxWidth: "68ch",
+    fontSize: "0.9375rem",
+    lineHeight: 1.65,
     whiteSpace: "pre-line",
+    textWrap: "pretty",
   },
+  // The host's answer sits a step back from the guest's words.
   reply: {
-    marginTop: "0.75rem",
-    paddingInlineStart: "0.75rem",
-    borderInlineStartWidth: 2,
-    borderInlineStartStyle: "solid",
-    borderInlineStartColor: color.lineStrong,
+    maxWidth: "68ch",
+    marginTop: "0.875rem",
+    padding: "0.75rem 0.875rem",
+    borderRadius: radius.field,
+    backgroundColor: color.subtle,
   },
-  replyLabel: { margin: 0, color: color.muted, fontSize: text.sm },
+  replyLabel: { margin: 0, color: color.muted, fontSize: text.sm, fontWeight: 500 },
   replyText: {
-    margin: "0.125rem 0 0",
-    maxWidth: "75ch",
+    margin: "0.25rem 0 0",
     fontSize: text.base,
     lineHeight: 1.625,
     whiteSpace: "pre-line",
@@ -63,10 +66,14 @@ const styles = stylex.create({
     flexWrap: "wrap",
     alignItems: "center",
     gap: "0.5rem",
-    margin: "0.75rem 0 0",
+    margin: "0.875rem 0 0",
     fontSize: text.sm,
   },
-  link: { color: { default: color.muted, ":hover": color.ink }, textUnderlineOffset: 2 },
+  link: {
+    color: { default: color.muted, ":hover": color.ink },
+    textDecorationColor: color.lineStrong,
+    textUnderlineOffset: 3,
+  },
 });
 
 export function ReviewCard({
@@ -120,7 +127,7 @@ export function ReviewCard({
             </div>
           </dl>
         ) : (
-          review.body && <p {...stylex.props(styles.body)}>{review.body}</p>
+          review.body && <blockquote {...stylex.props(styles.body)}>{review.body}</blockquote>
         )}
 
         {review.reply ? (

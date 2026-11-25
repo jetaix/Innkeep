@@ -2,7 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useMutation } from "@tanstack/react-query";
 import { chooseTelegramChat, findTelegramChats } from "../../api/mutations";
 import { useI18n } from "../../i18n";
-import { color, radius, text } from "../../tokens.stylex";
+import { color, text } from "../../tokens.stylex";
 import { Button } from "../../ui/button";
 import { Notice } from "../../ui/primitives";
 
@@ -21,10 +21,10 @@ const styles = stylex.create({
     margin: 0,
     padding: 0,
     listStyle: "none",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: color.line,
-    borderRadius: radius.md,
+    // Reading register: two hairlines, no box.
+    borderBlockWidth: 1,
+    borderBlockStyle: "solid",
+    borderBlockColor: color.line,
   },
   chat: {
     display: "flex",
@@ -32,7 +32,7 @@ const styles = stylex.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: "0.5rem",
-    padding: "0.5rem 0.75rem",
+    padding: "0.625rem 0",
     borderTopWidth: { default: 1, ":first-child": 0 },
     borderTopStyle: "solid",
     borderTopColor: color.line,

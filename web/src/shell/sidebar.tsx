@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { NAV } from "@/config/navigation";
 import { useI18n } from "../i18n";
-import { color, radius, text } from "../tokens.stylex";
+import { color, radius, shadow, text } from "../tokens.stylex";
 import { Hidden } from "../ui/primitives";
 
 const WIDE = "@media (min-width: 48rem)";
@@ -16,30 +16,36 @@ const styles = stylex.create({
     display: "flex",
     flexDirection: { default: "row", [WIDE]: "column" },
     gap: "0.125rem",
+    // Room for the lifted pill's shadow inside the strip that scrolls.
+    padding: { default: "0.25rem", [WIDE]: 0 },
+    margin: { default: "-0.25rem", [WIDE]: 0 },
     overflowX: { default: "auto", [WIDE]: "visible" },
+    scrollbarWidth: "none",
   },
   item: {
     display: "flex",
     flexShrink: 0,
     alignItems: "center",
     gap: "0.625rem",
-    height: { default: "2rem", [COARSE]: "2.5rem" },
-    paddingInline: "0.625rem",
-    borderRadius: radius.md,
+    height: { default: "2.125rem", [COARSE]: "2.5rem" },
+    paddingInline: "0.75rem",
+    borderRadius: radius.full,
     backgroundColor: {
       default: "transparent",
-      ":hover": `color-mix(in oklab, ${color.sunken} 60%, transparent)`,
+      ":hover": `color-mix(in oklab, ${color.sunken} 70%, transparent)`,
     },
     color: { default: color.muted, ":hover": color.ink },
     fontSize: text.base,
     fontWeight: 500,
     textDecoration: "none",
-    transitionProperty: "background-color, color",
-    transitionDuration: "150ms",
+    transitionProperty: "background-color, box-shadow, color",
+    transitionDuration: "200ms",
   },
+  // The page that is open is a white pill lifted off the ground.
   current: {
-    backgroundColor: { default: color.sunken, ":hover": color.sunken },
+    backgroundColor: { default: color.panel, ":hover": color.panel },
     color: color.ink,
+    boxShadow: shadow.card,
   },
   label: { flexGrow: 1 },
   count: {
