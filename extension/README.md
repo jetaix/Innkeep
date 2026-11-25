@@ -92,6 +92,27 @@ already open: tabs opened before a reload keep the old script.
 Chrome may show "Disable developer mode extensions" when it starts. Dismiss
 it; disabling would switch the extension off.
 
+### Safari on a Mac
+
+Safari takes an extension only inside an app, so `safari/` holds a small Xcode
+project that wraps this folder. It needs a Mac with Xcode.
+
+1. **Build it.** Run `bun run build:safari`. It writes
+   `safari/build/Build/Products/Release/Innkeep Companion.app`.
+2. **Allow it.** In Safari, open Settings → Advanced and tick **Show features
+   for web developers**. Then Settings → Developer → **Allow unsigned
+   extensions**. Safari asks for your password, and forgets this choice each
+   time it quits: the app is signed for this Mac only, not by Apple.
+3. **Open the app once**, then turn on Innkeep Companion in Safari's Settings
+   → Extensions.
+4. **Let it read the sites.** Safari asks per site: on Airbnb and Booking.com,
+   click the extension's icon and choose **Always Allow on This Website**.
+   Until then the "Send to Innkeep" button does not appear.
+5. **Connect it** as in step 5 above: icon → **Settings**, address, token,
+   **Save and test**.
+
+After changing a file in this folder, build again and reopen Safari.
+
 ### One click from Innkeep
 
 Once connected, the Reservations page in Innkeep shows **Update reservations
@@ -202,7 +223,8 @@ it would be counted twice.
 - Booking.com listing details.
 - All-numeric dates. Airbnb writes the month as a word in the languages
   tested (French on the live page; English, German and Spanish in unit tests).
-- Firefox and Safari.
+- Firefox.
+- Safari on iPhone and iPad.
 
 ## Files
 
@@ -214,3 +236,4 @@ it would be counted twice.
 | `ui.js`                      | The "Send to Innkeep" control and automatic sending            |
 | `background.js`              | The only code that uses the network, and only to reach Innkeep |
 | `options.html`, `options.js` | Connection settings                                            |
+| `../safari/`                 | The Xcode project that wraps this folder for Safari on a Mac   |

@@ -218,7 +218,9 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     case "innkeep:tour-status": {
       // A page script asking is a page that loaded: the step reached the site it was meant for.
       const step = tour && tabId === tour.tabId ? tour.steps[tour.index] : null;
-      if (step && sender.url && hostOf(sender.url) === hostOf(step.url)) step.arrived = true;
+      // Safari may leave `sender.url` out; the tab's address says the same thing.
+      const from = sender.url ?? sender.tab?.url;
+      if (step && from && hostOf(from) === hostOf(step.url)) step.arrived = true;
       respond(tourStatus(tabId));
       return false;
     }

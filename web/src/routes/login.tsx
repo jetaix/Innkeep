@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { api } from "../api/client";
+import { rpc, unwrap } from "../api/client";
 import { color } from "../tokens.stylex";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
@@ -46,7 +46,7 @@ const styles = stylex.create({
 function LoginPage() {
   const navigate = useNavigate();
   const signIn = useMutation({
-    mutationFn: (password: string) => api<{ ok: true }>("/session", { method: "POST", body: { password } }),
+    mutationFn: (password: string) => unwrap(rpc.session.$post({ json: { password } })),
     onSuccess: async (_data, _password, _context, { client }) => {
       await client.invalidateQueries();
       await navigate({ to: "/overview" });

@@ -8,6 +8,7 @@
     "start": "next start",
     "app": "node scripts/start.mjs",
     "package:extension": "node scripts/package-extension.mjs",
+    "build:safari": "node scripts/build-safari.mjs",
     "lint": "biome lint .",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit && bun scripts/check-awaits.ts",
