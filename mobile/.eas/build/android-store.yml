@@ -1,0 +1,31 @@
+# The Android app for Google Play: a bundle signed with the upload key kept as
+# secrets on expo.dev (EXACT_KEYSTORE, a file, and EXACT_KEYSTORE_PASSWORD,
+# EXACT_KEY_ALIAS, EXACT_KEY_PASSWORD).
+build:
+  name: Innkeep for Android
+  steps:
+    - eas/checkout
+    - run:
+        name: Prepare Exact
+        shell: /bin/sh
+        command: |
+          set -eu
+          sh .ci/prepare-native.sh android
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            'platforms;android-37.2' 'build-tools;37.0.0' 'ndk;27.1.12297006'
+    - eas/install_node_modules
+    - eas/resolve_build_config
+    - run:
+        name: Bundle
+        command: |
+          set -eu
+          bun "$EXACT/scripts/exact.mjs" setup --check --platform android
+          export EXACT_BUILD_NUMBER="${ eas.job.version.versionCode }"
+          bun exact.mjs android --bundle --json > artifact.json
+          # Expo looks for the artifact from the repository's root, one folder up: leave a copy there.
+          cp target/android/app/outputs/bundle/release/app-release.aab ../innkeep.aab
+    - eas/upload_artifact:
+        inputs:
+          type: application-archive
+          path: innkeep.aab

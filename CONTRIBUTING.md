@@ -46,6 +46,7 @@ src/
   db/                  Schema, migrations, sample data
   i18n/                Languages: messages/<area>.ts (English and French side by side), formats
 extension/             Innkeep browser extension (plain JS, no build step)
+mobile/                The iPhone and Android app, built with Exact (see mobile/README.md)
   lib/                 Dates, money, iCal, small helpers
 ```
 

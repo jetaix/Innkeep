@@ -9,7 +9,12 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/*.test.ts", "extension/**/*.test.ts", "web/server/**/*.test.ts"],
+    include: [
+      "src/**/*.test.ts",
+      "extension/**/*.test.ts",
+      "web/server/**/*.test.ts",
+      "mobile/tools/**/*.test.ts",
+    ],
     setupFiles: ["./vitest.setup.ts"],
   },
 });

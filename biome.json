@@ -13,7 +13,10 @@
       "!docs/store",
       "!docs/screenshots",
       "!bun.lock",
-      "!safari"
+      "!safari",
+      "!mobile/exact.mjs",
+      "!mobile/bun.lock",
+      "!mobile/.vscode"
     ]
   },
   "formatter": {

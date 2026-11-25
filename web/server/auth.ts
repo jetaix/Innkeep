@@ -36,30 +36,39 @@ async function failures(): Promise<number[]> {
   }
 }
 
+/**
+ * Checks the password that was sent and answers with the session it opens.
+ * A wrong one is counted and answered slowly; too many and all are refused.
+ */
+async function admit(sent: unknown, password: string): Promise<string> {
+  const given = z.object({ password: z.string().max(500) }).safeParse(sent);
+  const now = Date.now();
+  const earlier = await failures();
+  if (tooManyAttempts(earlier, now)) {
+    throw new HTTPException(429, { message: "Too many attempts. Try again in ten minutes." });
+  }
+  if (!given.success || !passwordMatches(given.data.password, password)) {
+    const value = JSON.stringify([...recentFailures(earlier, now), now]);
+    await withData("real", () =>
+      getDb()
+        .insert(appState)
+        .values({ key: FAILURES, value })
+        .onConflictDoUpdate({ target: appState.key, set: { value } })
+        .run(),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    throw new HTTPException(401, { message: "That is not the password. Check it and try again." });
+  }
+  return sessionValue(password);
+}
+
 /** Signing in and out: the only requests answered before the data a request may see is decided. */
 export const auth = new Hono<Env>()
   .post("/session", async (c) => {
     const password = appPassword();
     if (!password) return c.json({ ok: true as const });
-    const given = z.object({ password: z.string().max(500) }).safeParse(await c.req.json().catch(() => null));
-    const now = Date.now();
-    const earlier = await failures();
-    if (tooManyAttempts(earlier, now)) {
-      throw new HTTPException(429, { message: "Too many attempts. Try again in ten minutes." });
-    }
-    if (!given.success || !passwordMatches(given.data.password, password)) {
-      const value = JSON.stringify([...recentFailures(earlier, now), now]);
-      await withData("real", () =>
-        getDb()
-          .insert(appState)
-          .values({ key: FAILURES, value })
-          .onConflictDoUpdate({ target: appState.key, set: { value } })
-          .run(),
-      );
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      throw new HTTPException(401, { message: "That is not the password. Check it and try again." });
-    }
-    setCookie(c, SESSION_COOKIE, sessionValue(password), {
+    const value = await admit(await c.req.json().catch(() => null), password);
+    setCookie(c, SESSION_COOKIE, value, {
       path: "/",
       httpOnly: true,
       sameSite: "Lax",
@@ -67,6 +76,17 @@ export const auth = new Hono<Env>()
       maxAge: 60 * 60 * 24 * SESSION_DAYS,
     });
     return c.json({ ok: true as const });
+  })
+  /*
+   * Signing in from the phone app, which keeps no cookies: the same password
+   * and the same limit, and the session comes back in the answer for the app
+   * to keep in the phone's keychain and send as `Authorization: Bearer`. The
+   * web app never calls this: its session stays in a cookie no script reads.
+   */
+  .post("/session/native", async (c) => {
+    const password = appPassword();
+    if (!password) return c.json({ ok: true as const, token: "" });
+    return c.json({ ok: true as const, token: await admit(await c.req.json().catch(() => null), password) });
   })
   // Early access to the hosted version: open to anyone, touches no data, sends one message.
   .post("/access", async (c) => {

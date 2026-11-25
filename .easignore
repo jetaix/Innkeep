@@ -1,0 +1,14 @@
+# What a build on Expo is sent. Only the phone app is built there, so only
+# `mobile/` goes: nothing else in the repository, and no local data or secrets.
+# This file replaces every .gitignore for that upload, so mobile's own ignored
+# paths are repeated here.
+/*
+!/mobile
+/mobile/node_modules
+/mobile/target
+/mobile/dist
+/mobile/dist.*
+/mobile/.exact
+/mobile/app.contract.d.ts
+/mobile/.env*
+.DS_Store
