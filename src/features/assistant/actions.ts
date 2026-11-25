@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { refresh } from "next/cache";
 import { z } from "zod";
+import { hostOnly } from "@/db";
 import { AI_MODEL } from "@/features/insights/ai";
 import { MESSAGES } from "@/i18n/messages";
 import { getLocale } from "@/i18n/server";
@@ -21,6 +22,7 @@ const keySchema = z
  * the key may use that model.
  */
 export async function connectClaude(_previous: ConnectState, form: FormData): Promise<ConnectState> {
+  await hostOnly();
   const t = MESSAGES[await getLocale()].assistant.errors;
   const parsed = keySchema.safeParse(form.get("apiKey"));
   if (!parsed.success) return { error: t.format };
@@ -43,6 +45,7 @@ export async function connectClaude(_previous: ConnectState, form: FormData): Pr
 }
 
 export async function disconnectClaude() {
+  await hostOnly();
   await removeApiKey();
   refresh();
 }

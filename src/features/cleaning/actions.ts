@@ -10,6 +10,7 @@ import {
   cleaners,
   cleanings,
   getDb,
+  hostOnly,
   properties,
 } from "@/db";
 import { MESSAGES } from "@/i18n/messages";
@@ -142,6 +143,7 @@ export type TelegramTestState = { sent: boolean; error: string | null };
 
 /** Checks the Telegram settings with a real message, then sends whatever is waiting. */
 export async function sendTelegramTest(): Promise<TelegramTestState> {
+  await hostOnly();
   try {
     await sendTelegram(
       MESSAGES[telegramLocale()].cleaning.telegram.test,
@@ -159,6 +161,7 @@ export type TelegramChatsState = { chats: TelegramChat[] | null; error: string |
 
 /** Asks Telegram which chats the bot was recently written to in. */
 export async function findTelegramChatsAction(): Promise<TelegramChatsState> {
+  await hostOnly();
   try {
     return { chats: await findTelegramChats(), error: null };
   } catch (cause) {
@@ -170,6 +173,7 @@ const chosenChat = z.object({ id: z.string().regex(/^-?\d{3,20}$/), title: text.
 
 /** Keeps the chat the host picked, and proves it works with a first message. */
 export async function chooseTelegramChat(form: FormData) {
+  await hostOnly();
   const parsed = parseForm(chosenChat, form);
   if (!parsed.success) return;
   // Only a chat Telegram itself listed for this bot can be chosen.

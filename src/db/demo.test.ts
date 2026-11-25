@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDb, onlyReads, properties, withData } from "@/db";
+import { getDb, hostOnly, onlyReads, properties, withData } from "@/db";
 
 describe("the public demo", () => {
   it("tells a read from a write", () => {
@@ -28,6 +28,12 @@ describe("the public demo", () => {
 
     const real = await db.select({ name: properties.name }).from(properties).all();
     expect(real.map((row) => row.name)).toEqual(["The host's flat"]);
+  });
+
+  it("keeps the host's own accounts from a visitor", async () => {
+    await expect(withData("demo", () => hostOnly())).rejects.toThrow("This is a demo");
+    await expect(withData("demo-readonly", () => hostOnly())).rejects.toThrow("This is a demo");
+    await expect(withData("real", () => hostOnly())).resolves.toBeUndefined();
   });
 
   it("refuses a visitor's changes and leaves the host's data alone", async () => {

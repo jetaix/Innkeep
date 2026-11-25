@@ -1,7 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { aiAdvice, dismissedSuggestions, getDb } from "@/db";
+import { aiAdvice, dismissedSuggestions, getDb, hostOnly } from "@/db";
 import { getPricing } from "@/features/pricing/queries";
 import { getStays } from "@/features/reservations/queries";
 import { getCharges } from "@/features/revenue/queries";
@@ -29,6 +29,7 @@ export type AdviceState = { error: string | null };
 
 /** Asks the model for advice and stores it, so the page can show it without another call. */
 export async function requestAdvice(): Promise<AdviceState> {
+  await hostOnly();
   const locale = await getLocale();
   const errors = MESSAGES[locale].insights.errors;
   if (!(await aiConfigured())) return { error: errors.notConfigured };
