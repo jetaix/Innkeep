@@ -83,12 +83,17 @@ function DemoBanner() {
 
 function Overview() {
   const { data } = useSuspenseQuery(overviewQuery);
-  const money = new Intl.NumberFormat("en", { style: "currency", currency: data.currency, maximumFractionDigits: 0 });
+  const money = new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: data.currency,
+    maximumFractionDigits: 0,
+  });
   return (
     <>
       <h1 {...stylex.props(styles.title)}>Overview</h1>
       <p {...stylex.props(styles.muted)}>
-        {data.properties} {data.properties === 1 ? "property" : "properties"}, {data.arrivingToday} arriving today.
+        {data.properties} {data.properties === 1 ? "property" : "properties"}, {data.arrivingToday} arriving
+        today.
       </p>
       <dl {...stylex.props(styles.figures)}>
         {data.months.map((month) => (
@@ -109,9 +114,7 @@ function Overview() {
       <ul {...stylex.props(styles.list)}>
         {data.upcoming.map((stay) => (
           <li key={stay.id} {...stylex.props(styles.row)}>
-            <span>
-              {stay.guest ?? stay.property} · {stay.property}
-            </span>
+            <span>{stay.guest ? `${stay.guest} · ${stay.property}` : stay.property}</span>
             <span {...stylex.props(styles.label)}>
               {stay.checkIn} to {stay.checkOut}
             </span>

@@ -13,7 +13,13 @@ import { brotliCompressSync } from "node:zlib";
  */
 const BUDGET = { coldEntry: 150_000, route: 50_000, css: 20_000 };
 
-type Chunk = { file: string; isEntry?: boolean; isDynamicEntry?: boolean; imports?: string[]; css?: string[] };
+type Chunk = {
+  file: string;
+  isEntry?: boolean;
+  isDynamicEntry?: boolean;
+  imports?: string[];
+  css?: string[];
+};
 
 const dist = path.join(import.meta.dirname, "..", "dist");
 const manifest: Record<string, Chunk> = JSON.parse(
@@ -30,7 +36,10 @@ function closure(key: string, seen = new Set<string>()): Set<string> {
 }
 
 const sizeOf = (keys: Iterable<string>) =>
-  [...keys].reduce((sum, key) => sum + (manifest[key]?.file.endsWith(".js") ? brotli(manifest[key].file) : 0), 0);
+  [...keys].reduce(
+    (sum, key) => sum + (manifest[key]?.file.endsWith(".js") ? brotli(manifest[key].file) : 0),
+    0,
+  );
 
 const entry = Object.keys(manifest).find((key) => manifest[key]?.isEntry);
 if (!entry) throw new Error("The manifest names no entry");
@@ -39,7 +48,8 @@ const shellSize = sizeOf(shell);
 
 const cssFiles = new Set<string>();
 for (const key of shell) for (const file of manifest[key]?.css ?? []) cssFiles.add(file);
-for (const file of fs.readdirSync(path.join(dist, "assets"))) if (file.endsWith(".css")) cssFiles.add(`assets/${file}`);
+for (const file of fs.readdirSync(path.join(dist, "assets")))
+  if (file.endsWith(".css")) cssFiles.add(`assets/${file}`);
 const cssSize = [...cssFiles].reduce((sum, file) => sum + brotli(file), 0);
 
 const kb = (bytes: number) => `${(bytes / 1000).toFixed(1)} kB`.padStart(9);

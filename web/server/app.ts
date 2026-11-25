@@ -58,7 +58,8 @@ app.post("/session", async (c) => {
   const given = z.object({ password: z.string().max(500) }).safeParse(await c.req.json().catch(() => null));
   const now = Date.now();
   const earlier = await failures();
-  if (tooManyAttempts(earlier, now)) return c.json({ error: "Too many attempts. Try again in ten minutes." }, 429);
+  if (tooManyAttempts(earlier, now))
+    return c.json({ error: "Too many attempts. Try again in ten minutes." }, 429);
   if (!given.success || !passwordMatches(given.data.password, password)) {
     const value = JSON.stringify([...recentFailures(earlier, now), now]);
     await withData("real", () =>

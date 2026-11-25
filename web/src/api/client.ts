@@ -10,7 +10,10 @@ export class ApiError extends Error {
 }
 
 /** One JSON request to the Innkeep API. The session cookie travels with it. */
-export async function api<T>(path: string, init?: { method?: "POST" | "DELETE"; body?: unknown }): Promise<T> {
+export async function api<T>(
+  path: string,
+  init?: { method?: "POST" | "DELETE"; body?: unknown },
+): Promise<T> {
   const response = await fetch(`/api/app${path}`, {
     method: init?.method ?? "GET",
     credentials: "same-origin",
