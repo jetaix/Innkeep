@@ -16,7 +16,7 @@
     "format:check": "biome format .",
     "check": "biome check . && bun run typecheck && bun run test && bun run build",
     "prepare": "node scripts/hooks.mjs",
-    "web:check": "cd web && bun install --frozen-lockfile && bun run check && bun run build"
+    "web:check": "cd web && bun install --frozen-lockfile && bun run build && bun run check"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
