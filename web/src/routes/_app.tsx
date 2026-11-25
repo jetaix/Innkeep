@@ -6,6 +6,8 @@ import { NAV } from "@/config/navigation";
 import { clearSampleData } from "../api/mutations";
 import { navQuery, sessionQuery } from "../api/queries";
 import { Logo } from "../brand/logo";
+import { ExtensionSetupButton } from "../features/extension/setup-button";
+import { UpdatePrompt } from "../features/extension/update-prompt";
 import { currentLocale, useI18n } from "../i18n";
 import { CommandMenu } from "../shell/command-menu";
 import { KeepFresh } from "../shell/keep-fresh";
@@ -151,12 +153,23 @@ function AppFrame() {
       <div {...stylex.props(styles.column)}>
         {session.demo && <DemoBanner />}
         {session.signedIn && <SampleDataBanner />}
+        {/* The host's own: their words arrive after the frame, and nothing waits for them. */}
+        {session.signedIn && (
+          <Suspense>
+            <UpdatePrompt />
+          </Suspense>
+        )}
         <main id="main" {...stylex.props(styles.main)}>
           {/* A page's own text and data arrive inside the frame, which is already on screen. */}
           <Suspense fallback={<Loading />}>
             <Outlet />
           </Suspense>
         </main>
+        {session.signedIn && (
+          <Suspense>
+            <ExtensionSetupButton />
+          </Suspense>
+        )}
       </div>
       <RefusedNotice />
     </div>

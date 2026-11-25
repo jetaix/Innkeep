@@ -1,3 +1,4 @@
+import path from "node:path";
 import { and, count, eq, gte, lte } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -17,8 +18,9 @@ import { hasSampleData } from "../../src/db/seed";
 import { getKeyStatus } from "../../src/features/assistant/key";
 import { getCleaning } from "../../src/features/cleaning/queries";
 import { getTelegramChat } from "../../src/features/cleaning/telegram-chat";
+import { installFacts } from "../../src/features/extension/install";
 import { getExtensionStatus, REQUIRED_EXTENSION } from "../../src/features/extension/status";
-import { countToRefresh, getDataSources } from "../../src/features/freshness/sources";
+import { countToRefresh, getDataSources, olderThanADay } from "../../src/features/freshness/sources";
 import { AI_MODEL, aiConfigured } from "../../src/features/insights/ai";
 import { getAdvice, getSuggestions } from "../../src/features/insights/queries";
 import { getPricing, PRICING_WINDOWS } from "../../src/features/pricing/queries";
@@ -33,6 +35,7 @@ import {
   reviewPageLinks,
 } from "../../src/features/reservations/platform-links";
 import { findConflicts, getProperties, getStays } from "../../src/features/reservations/queries";
+import { getSetupProgress, getSetupProperty, getSetupSummary } from "../../src/features/setup/queries";
 import { occupancyAhead } from "../../src/features/revenue/compute";
 import { getCharges, getRevenue, getRevenueYears } from "../../src/features/revenue/queries";
 import { LOCALES } from "../../src/i18n/config";
@@ -41,6 +44,9 @@ import { isPrivateAddress } from "../../src/lib/net";
 import { appPassword, publicDemo } from "../../src/lib/session";
 import { telegramBot } from "../../src/lib/telegram";
 import { badRequest, type Env, hostOnly, notFound } from "./env";
+
+/** The folder Innkeep itself is in: the extension is loaded from a folder beside this one. */
+const ROOT = path.resolve(import.meta.dirname, "../..");
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const id = z.coerce.number().int().positive();
@@ -319,6 +325,8 @@ export const read = new Hono<Env>()
     return c.json({
       sources,
       toRefresh: countToRefresh(sources),
+      // What the host is asked to refresh on opening Innkeep: the lines not read for over a day.
+      old: olderThanADay(sources).map((source) => source.id),
       // Whether the extension can be asked to read: decides what the "refresh" buttons offer.
       extension: (await getExtensionStatus()).state,
     });
@@ -327,7 +335,39 @@ export const read = new Hono<Env>()
   // Below: how this Innkeep is set up. The demo has nothing to show there.
   .get("/extension", async (c) => {
     if (!c.get("signedIn")) throw hostOnly();
-    return c.json({ status: await getExtensionStatus(), required: REQUIRED_EXTENSION });
+    const token = process.env.EXTENSION_TOKEN;
+    return c.json({
+      status: await getExtensionStatus(),
+      required: REQUIRED_EXTENSION,
+      // What the setup guide gives the host to paste in the extension's settings. The address is
+      // the public one when it is configured; otherwise the page uses the one it was opened at.
+      origin: process.env.APP_URL?.replace(/\/$/, "") ?? null,
+      token: token || null,
+      ...installFacts(ROOT),
+      // The host's own reservations page on each platform, to read one at a time.
+      links: token ? await reservationLinks() : [],
+    });
+  })
+
+  // The "Add a property" guide: what a waiting step asks every few seconds, then the property being set up.
+  .get("/setup/progress", async (c) => {
+    if (!c.get("signedIn")) throw hostOnly();
+    return c.json(await getSetupProgress());
+  })
+  .get("/setup/:id", async (c) => {
+    if (!c.get("signedIn")) throw hostOnly();
+    const propertyId = idOf(c.req.param("id"));
+    const found = await getSetupProperty(propertyId);
+    if (!found) throw notFound("That property");
+    return c.json({
+      property: { id: found.property.id, name: found.property.name },
+      listings: found.listings.map((listing) => ({
+        channel: listing.channel,
+        icalUrl: listing.icalUrl,
+        lastSyncError: listing.lastSyncError,
+      })),
+      summary: await getSetupSummary(propertyId),
+    });
   })
   .get("/settings", async (c) => {
     if (!c.get("signedIn")) throw hostOnly();

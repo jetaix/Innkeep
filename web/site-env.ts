@@ -11,7 +11,7 @@ export const siteEnv = {
     process.env.APP_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "http://localhost:5173")
+      : "http://localhost:3000")
   ).replace(/\/$/, ""),
   /** Only the public pages are published; there is no dashboard to open. */
   landingOnly,

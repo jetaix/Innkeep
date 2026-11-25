@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Writes `public/innkeep-extension.zip` before each build, so the app can
+ * Writes `web/public/innkeep-extension.zip` (and the same file for the older Next.js app) before each build, so the app can
  * offer the browser extension as a download. The archive holds one folder,
  * `innkeep-extension/`, with the extension's files and nothing else (no
  * README, no tests): the folder to choose in "Load unpacked".
@@ -12,7 +12,7 @@ import path from "node:path";
 import { crc32, deflateRawSync } from "node:zlib";
 
 const source = "extension";
-const target = path.join("public", "innkeep-extension.zip");
+const targets = ["web/public", "public"].map((folder) => path.join(folder, "innkeep-extension.zip"));
 const folder = "innkeep-extension";
 /** Files that document or test the extension but are not part of it. */
 const LEFT_OUT = [/\.md$/, /\.test\.ts$/, /^\.DS_Store$/];
@@ -74,7 +74,9 @@ end.writeUInt16LE(files.length, 10);
 end.writeUInt32LE(directorySize, 12);
 end.writeUInt32LE(offset, 16);
 
-mkdirSync(path.dirname(target), { recursive: true });
-writeFileSync(target, Buffer.concat([...parts, ...directory, end]));
+for (const target of targets) {
+  mkdirSync(path.dirname(target), { recursive: true });
+  writeFileSync(target, Buffer.concat([...parts, ...directory, end]));
+}
 const { version } = JSON.parse(readFileSync(path.join(source, "manifest.json"), "utf8"));
-console.log(`${target}  (extension ${version}, ${files.length} files)`);
+console.log(`${targets[0]}  (extension ${version}, ${files.length} files)`);

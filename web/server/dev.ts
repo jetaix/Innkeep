@@ -8,7 +8,7 @@ process.env.TURSO_DATABASE_URL = "";
 process.env.TURSO_AUTH_TOKEN = "";
 process.env.DATABASE_PATH ??= path.join(import.meta.dirname, "..", ".data", "innkeep.db");
 
-const { app } = await import("./app");
+const { server } = await import("./app");
 const port = Number(process.env.API_PORT ?? 3001);
-Bun.serve({ port, fetch: app.fetch });
+Bun.serve({ port, fetch: server.fetch });
 console.log(`Innkeep API on http://localhost:${port}`);

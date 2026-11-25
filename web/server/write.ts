@@ -7,6 +7,7 @@ import * as insights from "../../src/features/insights/mutations";
 import * as place from "../../src/features/properties/mutations";
 import * as stay from "../../src/features/reservations/mutations";
 import * as revenue from "../../src/features/revenue/mutations";
+import * as setup from "../../src/features/setup/mutations";
 import { LOCALES } from "../../src/i18n/config";
 import { badRequest, type Env, hostOnly } from "./env";
 
@@ -96,6 +97,12 @@ export const write = new Hono<Env>()
   .post("/listings/:id/published", async (c) =>
     c.json({ published: await place.markPublished(num(c.req.param("id"))) }),
   )
+  // The "Add a property" guide: saves the calendar links and reads each at once, which
+  // reaches the address given, so only the host may ask.
+  .put("/setup/:id/calendars", json, async (c) => {
+    if (!c.get("signedIn")) throw hostOnly();
+    return c.json(await setup.connectCalendars(num(c.req.param("id")), c.req.valid("json")));
+  })
   // Imports every calendar; with `onlyIfStale`, only when the last import is old.
   .post("/sync", json, async (c) => {
     const { onlyIfStale } = z.object({ onlyIfStale: z.boolean().default(false) }).parse(c.req.valid("json"));

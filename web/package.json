@@ -2,20 +2,22 @@
   "name": "innkeep-web",
   "private": true,
   "type": "module",
-  "description": "The client-rendered Innkeep: a Vite app and the HTTP API it talks to. Replaces the Next.js app at cutover.",
+  "description": "Innkeep: a client-rendered Vite app and the HTTP server behind it.",
   "scripts": {
     "dev": "bun run dev:api & vite",
     "dev:app": "vite",
     "dev:api": "bun --conditions=react-server --watch server/dev.ts",
-    "build": "vite build && vite build --ssr src/prerender.tsx --outDir dist-ssr && bun scripts/prerender.ts && bun scripts/budget.ts",
+    "build": "vite build && vite build --ssr src/prerender.tsx --outDir dist-ssr && tsx scripts/prerender.ts && vite build --config vite.server.config.ts",
+    "vercel-output": "tsx scripts/vercel-output.ts",
     "build:react-dom": "RENDERER=react-dom vite build",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit && bun scripts/budget.ts",
     "budget": "bun scripts/budget.ts"
   },
   "dependencies": {
     "@fontsource-variable/funnel-display": "5.3.0",
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/geist-mono": "5.3.0",
+    "@hono/node-server": "2.1.11",
     "@stylexjs/stylex": "0.19.2",
     "@tanstack/react-query": "5.108.2",
     "@tanstack/react-router": "1.170.46",
@@ -37,6 +39,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "6.3.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.8"
   }

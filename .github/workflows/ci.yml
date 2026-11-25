@@ -35,8 +35,9 @@ jobs:
         run: bun run typecheck
       - name: Tests
         run: bun run test
-      - name: Build
-        run: bun run build
-      # The client-rendered app that replaces the Next.js one: types, build and the first-view size budget.
-      - name: New app (types, build, size budget)
+      # The older Next.js app, kept building until it is removed.
+      - name: Build (Next.js)
+        run: bun run build:next
+      # Innkeep itself: the pages, the server, types and the first-view size budget.
+      - name: App (build, types, size budget)
         run: bun run web:check

@@ -30,7 +30,7 @@ const OPEN = [
   "/advice",
   "/freshness",
 ];
-const HOST_ONLY = ["/extension", "/settings"];
+const HOST_ONLY = ["/extension", "/settings", "/setup/progress", "/setup/1"];
 
 describe("the read API", () => {
   beforeAll(async () => {
@@ -58,6 +58,29 @@ describe("the read API", () => {
     expect(own.properties.map((property) => property.name)).toEqual(["The host's flat"]);
   });
 
+  it("gives the host what the extension's guide and the setup guide show", async () => {
+    process.env.EXTENSION_TOKEN = "a token only the test knows";
+    const guide = (await (await get("/extension", session)).json()) as Record<string, unknown>;
+    expect(guide).toMatchObject({
+      token: "a token only the test knows",
+      hosted: false,
+      store: null,
+      links: [],
+    });
+    expect(guide.version).toMatch(/^\d+\.\d+/);
+    expect((guide.paths as { extension: string }).extension).toMatch(/extension$/);
+    delete process.env.EXTENSION_TOKEN;
+    expect(await (await get("/extension", session)).json()).toMatchObject({ token: null });
+
+    expect(await (await get("/setup/1", session)).json()).toEqual({
+      property: { id: 1, name: "The host's flat" },
+      listings: [],
+      summary: { stays: 0, named: 0 },
+    });
+    expect(await (await get("/setup/progress", session)).json()).toEqual({ extension: false, readAt: 0 });
+    expect(await (await get("/freshness", session)).json()).toMatchObject({ old: [] });
+  });
+
   it("turns everyone without a session away when no demo is offered", async () => {
     process.env.PUBLIC_DEMO = "";
     for (const path of [...OPEN, ...HOST_ONLY]) expect((await get(path)).status).toBe(401);
@@ -67,6 +90,8 @@ describe("the read API", () => {
   it.each([
     ["/properties/999", 404],
     ["/properties/abc", 404],
+    ["/setup/999", 404],
+    ["/setup/abc", 404],
     ["/pricing", 400],
     ["/pricing?property=999", 404],
     ["/stays?from=yesterday", 400],

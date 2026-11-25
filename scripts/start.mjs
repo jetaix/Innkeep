@@ -61,6 +61,21 @@ if (!existsSync(installed) || statSync("package.json").mtimeMs > statSync(instal
   writeFileSync(installed, new Date().toISOString());
 }
 
+// The app itself lives in `web/`, with its own list of what it needs.
+const webInstalled = path.join("web", "node_modules", ".innkeep-installed");
+if (
+  !existsSync(webInstalled) ||
+  statSync(path.join("web", "package.json")).mtimeMs > statSync(webInstalled).mtimeMs
+) {
+  const result = spawnSync(runner, hasBun ? ["install"] : ["install", "--no-audit", "--no-fund"], {
+    cwd: "web",
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  });
+  if (result.status !== 0) stop(`That step failed. Copy the lines above and ask for help.`);
+  writeFileSync(webInstalled, new Date().toISOString());
+}
+
 // The settings file. The browser extension needs a password to talk to Innkeep:
 // one is made here, so there is nothing to type.
 const settings = ".env.local";
@@ -74,8 +89,18 @@ if (!/^EXTENSION_TOKEN=.+/m.test(current)) {
   say("Created the settings file (.env.local) with a password for the browser extension.");
 }
 
-const built = path.join(".next", "BUILD_ID");
-const changed = Math.max(newest("src"), statSync("package.json").mtimeMs, statSync(settings).mtimeMs);
+// The settings decide what the pages show (a demo, the public website), so they are read before building.
+process.loadEnvFile(settings);
+
+const built = path.join("web", "dist-server", "serve.js");
+const changed = Math.max(
+  newest("src"),
+  newest(path.join("web", "src")),
+  newest(path.join("web", "server")),
+  statSync("package.json").mtimeMs,
+  statSync(path.join("web", "package.json")).mtimeMs,
+  statSync(settings).mtimeMs,
+);
 if (!existsSync(built) || statSync(built).mtimeMs < changed) {
   run(runner, ["run", "build"], "Preparing the app.");
 }
@@ -93,15 +118,15 @@ if (taken) {
 }
 
 say(`Starting Innkeep at ${address}`);
-const server = spawn(runner, ["run", "start", "--", "-p", String(port)], {
+const server = spawn(process.execPath, [built], {
   stdio: ["inherit", "pipe", "inherit"],
-  shell: process.platform === "win32",
+  env: { ...process.env, PORT: String(port) },
 });
 
 let opened = false;
 server.stdout.on("data", (chunk) => {
   process.stdout.write(chunk);
-  if (opened || !/ready|started server|localhost/i.test(String(chunk))) return;
+  if (opened || !/is running at/i.test(String(chunk))) return;
   opened = true;
   const opener = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
   spawn(opener, [`${address}/overview`], {
