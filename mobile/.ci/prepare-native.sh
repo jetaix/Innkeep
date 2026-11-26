@@ -2,7 +2,7 @@
 # Puts Exact on a build worker: the commit eas.json names (EXACT_REF), its
 # packages, the pinned Rust with one platform's target, and the Hermes bundle
 # that bakes app.ts. From Exact's guide, docs/reference.md "Native CI
-# preparation". Run as `sh .ci/prepare-native.sh ios|android|web`.
+# preparation". Run as `sh .ci/prepare-native.sh ios|ios-simulator|android|web`.
 set -eu
 export EXACT="$PWD/../exact"
 git clone https://github.com/expo/exact.git "$EXACT"
@@ -18,6 +18,7 @@ export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
 pin=$(bun -e 'console.log(Bun.TOML.parse(await Bun.file(process.env.EXACT + "/rust-toolchain.toml").text()).toolchain.channel)')
 case "$1" in
   ios) triple=aarch64-apple-ios ;;
+  ios-simulator) triple=aarch64-apple-ios-sim ;;
   android) triple=aarch64-linux-android ;;
   # The checks run the app in a browser: Exact's own setup installs what that takes.
   web)

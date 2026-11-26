@@ -4,3 +4,5 @@ theme
   welcome.night = #0b0d13  scheme=fixed
   welcome.ink = #ffffff  scheme=fixed
   welcome.soft = #c9cdd8  scheme=fixed
+  welcome.coral = #ff5d73  scheme=fixed
+  welcome.blue = #3d6df2  scheme=fixed

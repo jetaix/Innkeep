@@ -6,7 +6,7 @@
  * EAS_PROJECT_ID is the id of the project on expo.dev (Project settings),
  * EXPO_OWNER the account it lives under. Neither is a secret.
  */
-const ID = "io.github.jetaix.innkeep.mobile";
+const ID = "club.innkeep.main";
 
 module.exports = {
   name: "Innkeep",

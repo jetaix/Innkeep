@@ -6,7 +6,6 @@
   "tab.settings": "Settings",
   "welcome.tagline": "Your places, wherever you are.",
   "connect.address": "Address of your Innkeep",
-  "connect.address.placeholder": "innkeep.example.com",
   "connect.password": "Password",
   "connect.hint": "Type the address you open Innkeep at in a browser. Leave the password empty if yours asks for none, or to look at a demo.",
   "connect.action": "Connect",

@@ -41,6 +41,14 @@
       "android": {
         "config": "android-store.yml"
       }
+    },
+    "development": {
+      "extends": "base",
+      "environment": "development",
+      "ios": {
+        "simulator": true,
+        "config": "ios-simulator.yml"
+      }
     }
   },
   "submit": {

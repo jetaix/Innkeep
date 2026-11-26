@@ -91,6 +91,8 @@ component App
   state draftPassword = ""
   state now = 0
   resource time = exactTime() as shape Time else empty()
+  // Whether the welcome's shader has drawn: until it has, a still picture stands in for it.
+  resource fx = exactSurface("shader") as shape ShaderState else empty()
   derive today = formatDate(time.epochAtZero + now, time.utcOffset, "iso")
   derive lang = t("locale")
 
@@ -166,6 +168,13 @@ component App
                     status-bar-style="light-content"
                     canvas surface=shader(src="assets/welcome.wgsl", energy=(pending(connected) ? 1 : 0), maxFps=30)
                       position="absolute" inset=0 width="100%" height="100%" aria-hidden=true
+                    // Where the shader cannot draw (an older phone, an emulator), the same two doorways, still.
+                    if not fx.presented
+                      view position="absolute" inset=0 aria-hidden=true testId="welcome-still"
+                        view position="absolute" top="20vh" left="18vw" width="36vw" height="50vw"
+                          border-radius="18vw 18vw 3vw 3vw" background-color="welcome.coral" opacity=0.85
+                        view position="absolute" top="20vh" left="46vw" width="36vw" height="50vw"
+                          border-radius="18vw 18vw 3vw 3vw" background-color="welcome.blue" opacity=0.8
                     scroll flex=1 min-height=0 position="relative" keyboardDismissMode="interactive"
                       column min-height="100%" box-sizing="border-box" justify-content="flex-end" gap=24
                         padding="calc(24px + var(--exact-safe-area-inset-top)) 24px calc(24px + var(--exact-safe-area-inset-bottom)) 24px"
@@ -176,7 +185,7 @@ component App
                             color="welcome.ink" testId="welcome-title"
                           text t("welcome.tagline") font="-exact-title3" color="welcome.soft"
                         column backgroundMaterial="glass" border-radius=24 padding=16 gap=12
-                          input value=draftAddress input=editAddress placeholder=t("connect.address.placeholder")
+                          input value=draftAddress input=editAddress placeholder=t("connect.address")
                             aria-label=t("connect.address") inputmode="url" autocapitalize="none" autocorrect="off"
                             spellcheck=false autocomplete="url" enterkeyhint="next" testId="address"
                           input type="password" value=draftPassword input=editPassword submit=connect

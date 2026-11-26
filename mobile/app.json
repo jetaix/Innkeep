@@ -18,11 +18,11 @@
   "$schema": ".exact/checkout/scripts/app.schema.json",
   "name": "Innkeep",
   "short_name": "Innkeep",
-  "id": "io.github.jetaix.innkeep.mobile",
+  "id": "club.innkeep.main",
   "start_url": "/",
   "display": "standalone",
   "app": {
-    "id": "io.github.jetaix.innkeep.mobile",
+    "id": "club.innkeep.main",
     "name": "Innkeep"
   },
   "strings": {

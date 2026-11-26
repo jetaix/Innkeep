@@ -21,7 +21,7 @@ can supply is marked **You**.
 
 - An Apple Developer Program membership.
 - In Certificates, Identifiers & Profiles: an App ID for
-  `io.github.jetaix.innkeep.mobile` (no capabilities needed), an Apple
+  `club.innkeep.main` (no capabilities needed), an Apple
   Distribution certificate, and an App Store provisioning profile for that
   App ID.
 - In App Store Connect: a new app, platform iOS, primary language English
@@ -31,20 +31,27 @@ can supply is marked **You**.
 
 ## 2. The listing
 
-Push the text, categories, age rating and release settings:
+Push the text, categories, version and release settings:
 
 ```bash
 bunx eas metadata:push
 ```
 
-It reads `store.config.json`. What it sets:
+It reads `store.config.json`. Its `version` must be the build's
+(`EXACT_VERSION` in `eas.json`): the push renames the version App Store
+Connect created ("1.0") to it. The age rating is not in that file: Apple's
+questionnaire has a question (`socialMedia`) that eas-cli 27.11.0 cannot
+send, so the push fails if it tries. Answer it by hand (**You**) under App
+Information, Age Rating: "None" or "No" to every question gives 4+.
+
+What the listing comes to:
 
 | Field              | English                                    | French                       |
 | ------------------ | ------------------------------------------ | ---------------------------- |
 | Name               | Innkeep                                    | Innkeep                      |
 | Subtitle           | Bookings and cleanings, to go              | Séjours et ménages, en poche |
 | Categories         | Business, then Productivity                | same                         |
-| Age rating         | 4+ (every answer "none")                   | same                         |
+| Age rating         | 4+ (every answer "none"), set by hand      | same                         |
 | Release            | Manual, after approval; phased for updates | same                         |
 | Support URL        | github.com/jetaix/Innkeep/issues           | same                         |
 | Privacy policy URL | mobile/docs/PRIVACY.md on GitHub           | same, French section         |
@@ -161,7 +168,8 @@ version, and submit for review.
 - [ ] VoiceOver reads the welcome screen and the tabs; the largest text size does not clip
 - [ ] Screenshots uploaded for English and French
 - [ ] App Privacy answered; privacy policy URL opens
-- [ ] Version in `eas.json` (`EXACT_VERSION`) matches the version in App Store Connect
+- [ ] Age rating answered in App Store Connect
+- [ ] Version in `eas.json` (`EXACT_VERSION`) matches `version` in `store.config.json` and the version in App Store Connect
 
 ## Not covered here
 

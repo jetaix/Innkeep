@@ -6,7 +6,6 @@
   "tab.settings": "Réglages",
   "welcome.tagline": "Vos logements, où que vous soyez.",
   "connect.address": "Adresse de votre Innkeep",
-  "connect.address.placeholder": "innkeep.exemple.fr",
   "connect.password": "Mot de passe",
   "connect.hint": "Saisissez l’adresse à laquelle vous ouvrez Innkeep dans un navigateur. Laissez le mot de passe vide si le vôtre n’en demande pas, ou pour voir une démo.",
   "connect.action": "Se connecter",

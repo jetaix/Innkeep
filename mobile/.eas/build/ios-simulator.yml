@@ -1,0 +1,23 @@
+# A development build for the iOS Simulator: no Apple account, no signing. Unpack
+# the archive and drag Innkeep.app onto a simulator, or `xcrun simctl install`.
+build:
+  name: Innkeep for the iOS Simulator (development)
+  steps:
+    - eas/checkout
+    - run:
+        name: Prepare Exact
+        command: sh .ci/prepare-native.sh ios-simulator
+    - eas/install_node_modules
+    - run:
+        name: Build
+        command: |
+          set -eu
+          bun "$EXACT/scripts/exact.mjs" setup --check --platform ios || true
+          bun exact.mjs ios --no-install --json > artifact.json
+          app=$(bun -e 'console.log(require("./artifact.json").path)')
+          # Expo looks for the artifact from the repository's root, one folder up.
+          tar -czf ../innkeep-simulator.tar.gz -C "$(dirname "$app")" "$(basename "$app")"
+    - eas/upload_artifact:
+        inputs:
+          type: application-archive
+          path: innkeep-simulator.tar.gz

@@ -69,6 +69,15 @@ or Google account. Link the repository to the Expo project (expo.dev, Project
 settings, GitHub) with `mobile` as the base directory, and set
 `EAS_PROJECT_ID` in [app.config.js](app.config.js).
 
+To try the iPhone app without an Apple account, build it for the Simulator:
+
+```bash
+bunx eas build --profile development --platform ios
+```
+
+Unpack the archive it produces and drag `Innkeep.app` onto a running
+simulator. It runs on Xcode 26's simulators too.
+
 [.eas/workflows/release.yml](.eas/workflows/release.yml) builds the signed
 apps for the stores, when asked:
 
@@ -78,13 +87,13 @@ bunx eas workflow:run release.yml
 
 It reads these from the project's production environment on expo.dev:
 
-| Name                                                               | Kind        | What                                                                 |
-| ------------------------------------------------------------------ | ----------- | -------------------------------------------------------------------- |
-| `CI_IOS_P12`                                                       | secret file | Apple distribution certificate with its key                          |
-| `CI_IOS_P12_PASSWORD`                                              | secret      | That file's password                                                 |
-| `EXACT_PROFILE`                                                    | secret file | App Store provisioning profile for `io.github.jetaix.innkeep.mobile` |
-| `EXACT_KEYSTORE`                                                   | secret file | Android upload keystore                                              |
-| `EXACT_KEYSTORE_PASSWORD`, `EXACT_KEY_ALIAS`, `EXACT_KEY_PASSWORD` | secrets     | That keystore's                                                      |
+| Name                                                               | Kind        | What                                                   |
+| ------------------------------------------------------------------ | ----------- | ------------------------------------------------------ |
+| `CI_IOS_P12`                                                       | secret file | Apple distribution certificate with its key            |
+| `CI_IOS_P12_PASSWORD`                                              | secret      | That file's password                                   |
+| `EXACT_PROFILE`                                                    | secret file | App Store provisioning profile for `club.innkeep.main` |
+| `EXACT_KEYSTORE`                                                   | secret file | Android upload keystore                                |
+| `EXACT_KEYSTORE_PASSWORD`, `EXACT_KEY_ALIAS`, `EXACT_KEY_PASSWORD` | secrets     | That keystore's                                        |
 
 To move to a newer Exact, change `EXACT_REF` in `eas.json`, pull the same
 commit locally, then run `bun exact.mjs update` and the checks above.
