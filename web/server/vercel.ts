@@ -10,9 +10,13 @@ import { server } from "./app";
  */
 export default getRequestListener((request) => {
   const url = new URL(request.url);
+  // Vercel ends HTTPS before the function, which would otherwise write `http://` into its redirects.
+  const scheme = request.headers.get("x-forwarded-proto");
+  if (scheme === "https" || scheme === "http") url.protocol = `${scheme}:`;
   const asked = url.searchParams.get("__path");
-  if (asked === null) return server.fetch(request);
-  url.searchParams.delete("__path");
-  url.pathname = `/${asked}`;
+  if (asked !== null) {
+    url.searchParams.delete("__path");
+    url.pathname = `/${asked}`;
+  }
   return server.fetch(new Request(url, request));
 });
