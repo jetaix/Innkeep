@@ -42,6 +42,20 @@ const en = {
     occupancy: "Share of nights booked",
     none: "No reservation this month.",
   },
+  chart: {
+    title: "Reservations per month",
+    hint: "Each reservation is counted in the month the guest arrives.",
+    /** Read aloud for one point: "November 2026: 5 reservations". */
+    point: (month: string, count: number): string =>
+      `${month}: ${count} reservation${count === 1 ? "" : "s"}`,
+    /** Legend of the dashed part of the line. */
+    upcoming: "This month and ahead: bookings still coming in",
+  },
+  details: {
+    /** The panel a row opens, and what closes it when clicked beside it. */
+    close: "Close the reservation",
+    calendar: "See it in the calendar",
+  },
   groups: {
     now: "Staying now",
     week: "Arriving in the next 7 days",
@@ -109,6 +123,16 @@ const fr: typeof en = {
     nights: (booked, available) => `${booked} nuits sur ${available}`,
     occupancy: "Part des nuits réservées",
     none: "Aucune réservation ce mois-ci.",
+  },
+  chart: {
+    title: "Réservations par mois",
+    hint: "Chaque réservation est comptée dans le mois d’arrivée du voyageur.",
+    point: (month, count) => `${month} : ${count} réservation${count > 1 ? "s" : ""}`,
+    upcoming: "Ce mois-ci et après : des réservations arrivent encore",
+  },
+  details: {
+    close: "Fermer la réservation",
+    calendar: "Voir dans le calendrier",
   },
   groups: {
     now: "En cours",

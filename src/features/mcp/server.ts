@@ -5,7 +5,7 @@ import { getDb, reservations } from "@/db";
 import { getSuggestions } from "@/features/insights/queries";
 import { findConflicts, getProperties, getStays } from "@/features/reservations/queries";
 import { addMonths, monthOf, monthStart, stayValue, summariseMonth } from "@/features/revenue/compute";
-import { getCharges } from "@/features/revenue/queries";
+import { getCosts } from "@/features/revenue/queries";
 import { addDays, rangesOverlap, today } from "@/lib/dates";
 
 /**
@@ -113,7 +113,7 @@ export function createMcpServer(): McpServer {
       const properties = await getProperties();
       const first = month ?? monthOf(today());
       const stays = (await getStays(monthStart(first))).filter((stay) => stay.kind === "reservation");
-      const charges = await getCharges();
+      const charges = await getCosts();
       return json({
         currency: properties[0]?.currency ?? "EUR",
         months: Array.from({ length: months ?? 3 }, (_, index) => {

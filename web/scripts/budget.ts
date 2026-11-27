@@ -68,7 +68,14 @@ const frames = ["_app", "_site"].map((name) => {
   };
 });
 
+/**
+ * Code fetched only after an action, never as part of a page's first view:
+ * the PDF reader, which arrives when a host chooses a PDF to import.
+ */
+const ON_DEMAND = ["src/features/revenue/pdf-text.ts"];
+
 for (const key of lazy) {
+  if (ON_DEMAND.includes(key)) continue;
   const own = [...closure(key)].filter((name) => !shell.has(name));
   const size = sizeOf(own);
   // The text of one area of the interface, downloaded beside the page that uses it.

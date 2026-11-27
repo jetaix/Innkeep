@@ -1,14 +1,14 @@
 import { aiAdvice, dismissedSuggestions, getDb } from "@/db";
 import { getPricing } from "@/features/pricing/queries";
 import { getStays } from "@/features/reservations/queries";
-import { getCharges } from "@/features/revenue/queries";
+import { getCosts } from "@/features/revenue/queries";
 import type { Locale } from "@/i18n/config";
 import { MESSAGES } from "@/i18n/messages";
 import { addDays } from "@/lib/dates";
 import { aiConfigured, buildSnapshot, generateAdvice } from "./ai";
 import { getSuggestions } from "./queries";
 
-/** Changes to suggestions and advice. Called by the Next.js actions and by the API; no framework in here. */
+/** Changes to suggestions and advice. Called by the API; no framework in here. */
 export async function dismissSuggestion(key: string) {
   await getDb()
     .insert(dismissedSuggestions)
@@ -41,10 +41,7 @@ export async function requestAdvice(locale: Locale): Promise<AdviceState> {
   );
   // The rules only look ahead; the model also gets the past year, where the real payouts are.
   const withHistory = { ...input, stays: await getStays(addDays(input.today, -400)) };
-  const result = await generateAdvice(
-    buildSnapshot(withHistory, await getCharges(), active, pricing),
-    locale,
-  );
+  const result = await generateAdvice(buildSnapshot(withHistory, await getCosts(), active, pricing), locale);
   if (!result.ok) return { error: result.error };
 
   const row = { generatedAt: Date.now(), model: result.model, payload: JSON.stringify(result.advice) };

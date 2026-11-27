@@ -28,6 +28,23 @@ export const deleteCharge = mutationOptions({
   mutationFn: (charge: number) => unwrap(rpc.charges[":id"].$delete({ param: id(charge) })),
   ...stale(["charges"], ...FIGURES),
 });
+export const addLoan = mutationOptions({
+  mutationFn: (json: Fields) => unwrap(rpc.loans.$post({ json })),
+  ...stale(["charges"], ...FIGURES),
+});
+export const deleteLoan = mutationOptions({
+  mutationFn: (loan: number) => unwrap(rpc.loans[":id"].$delete({ param: id(loan) })),
+  ...stale(["charges"], ...FIGURES),
+});
+export const importSchedule = mutationOptions({
+  mutationFn: ({ loan, table }: { loan: number; table: string }) =>
+    unwrap(rpc.loans[":id"].schedule.$put({ param: id(loan), json: { table } })),
+  ...stale(["charges"], ...FIGURES),
+});
+export const clearSchedule = mutationOptions({
+  mutationFn: (loan: number) => unwrap(rpc.loans[":id"].schedule.$delete({ param: id(loan) })),
+  ...stale(["charges"], ...FIGURES),
+});
 
 // Suggestions and advice
 export const dismissSuggestion = mutationOptions({

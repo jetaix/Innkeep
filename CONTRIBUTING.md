@@ -36,71 +36,65 @@ dashboard's API, `machine.ts` for the calendar feeds, the extension, MCP and
 the scheduler, `serve.ts` for a machine of your own, `vercel.ts` for Vercel).
 `bun run dev` starts it at http://localhost:3000.
 
-The logic it runs is shared code under `src/`: `features/<name>/queries.ts`,
-`compute.ts` and `rules.ts`, `channels/`, `db/`, `i18n/` and `lib/`. The
-Next.js app under `src/app`, with the components and server actions only it
-uses, is the previous version: it still builds in CI (`bun run dev:next`,
-`bun run build:next`) and is being removed. The layout below describes `src/`.
+The logic it runs is shared code under `src/`, with no framework in it:
 
 ```
 src/
-  app/                 Routes only: pages compose features, API routes stay thin
-    (marketing)/       Landing page
-    (app)/             The dashboard, behind the sidebar shell
-    api/               iCal export, extension ingest, MCP
   features/<name>/     One folder per product area
     queries.ts         Reads (server only)
-    actions.ts         Writes, as server actions validated with zod
-    *.tsx              Components used by that feature's pages
-    compute.ts, rules.ts   Pure logic, unit tested
-  channels/            Airbnb and Booking.com adapters, sync engine (no Next.js imports)
-  components/ui/       Presentational primitives with no data access
-  components/shell/    Sidebar, command menu and keyboard layer
+    mutations.ts       Writes, validated with zod
+    compute.ts, rules.ts   Pure logic, unit tested, also run in the browser
+  channels/            Airbnb and Booking.com adapters, sync engine
   db/                  Schema, migrations, sample data
   i18n/                Languages: messages/<area>.ts (English and French side by side), formats
-extension/             Innkeep browser extension (plain JS, no build step)
   lib/                 Dates, money, iCal, small helpers
+extension/             Innkeep browser extension (plain JS, no build step)
 ```
 
 Conventions:
 
-- **Server first.** Pages are server components that read through `queries.ts`.
-  Add `"use client"` only for real interactivity.
-- **Request-time data** sits in an async component inside `<Suspense>` that
-  calls `await connection()` first. Next.js 16 Cache Components requires it.
+- **Pages read and write through the API.** A page asks for data with a query
+  from `web/src/api/queries.ts` and changes it with a mutation from
+  `mutations.ts`; each mutation names the queries it makes stale. The handler
+  in `web/server` stays thin and calls `src/features/<name>`.
+- **Server code stays out of the browser.** A file that reads the database or
+  a secret starts with `import "server-only"`. Pages may import the pure files
+  of `src/` (`compute.ts`, `rules.ts`, messages, `lib/`), nothing else.
 - **Pure logic stays pure.** Revenue maths and suggestion rules take plain rows
   and return plain values, so they are tested without a database.
 - **Schema changes** append a migration to `MIGRATIONS` in `src/db/index.ts`.
   Never edit one that has shipped.
-- **Who sees which data** is decided in `src/proxy.ts` and enforced in
-  `src/db`: only a signed-in host and the API routes listed in `API_ROUTES`
-  reach the host's database. Add a new API route to that list, and keep its
-  own token check.
+- **Who sees which data** is decided in `web/server/scope.ts` and enforced in
+  `src/db`: every request to the pages' API runs inside the data its session
+  may see, so a visitor of the demo never reaches the host's database. The
+  addresses in `web/server/machine.ts` have no session and see the host's
+  data: each one must keep its own token check.
 - **Money** is stored in minor units (cents). Use `formatMoney` and `parseMoney`.
 - **Colour means something.** The interface is monochrome; the only colours
   are the three booking sources and good / warning / critical. Use the tokens
-  in `globals.css`, never raw hex values.
+  in `web/src/tokens.stylex.ts`, never raw hex values.
 - **Keyboard and screen readers.** Every action must be reachable by keyboard
   and every control labelled. Add page shortcuts with `data-shortcut="key"`.
 - **Phones first-class.** Hosts check bookings and cleanings from a phone, so
   every page must work at 390 px wide. The page itself never scrolls
-  sideways: a wide table or calendar goes inside a `relative overflow-x-auto`
-  wrapper (`relative` keeps screen-reader-only text from widening the page),
-  and a grid that gains columns at a breakpoint starts at `grid-cols-1`.
-  Form fields are 16 px on phones, or iOS zooms in on focus; the shared
-  `Input`, `Select` and `Textarea` do this, so do not override their text
-  size below `md:`. Buttons and fields grow to 40 px on touch screens. What
-  only makes sense on a computer, such as starting the browser extension, is
-  hidden below `md:`. Look at your change in a phone-sized window before
+  sideways: a wide table or calendar goes inside a wrapper that scrolls
+  (`position: relative; overflow-x: auto`; `relative` keeps
+  screen-reader-only text from widening the page), and a grid that gains
+  columns at a breakpoint starts at one column. Form fields are 16 px on
+  phones, or iOS zooms in on focus; the shared `Input`, `Select` and
+  `Textarea` do this, so do not make their text smaller on a narrow screen.
+  Buttons and fields grow to 40 px on touch screens. What only makes sense on
+  a computer, such as starting the browser extension, is hidden on a narrow
+  screen. Look at your change in a phone-sized window before
   opening a pull request.
 - **Copy** is plain and specific: say what happened and what to do next.
 - **Every string is in two languages.** No text in components: add it to
   `src/i18n/messages/<area>.ts` in English and French (the French object is
   typed from the English one, so a missing translation fails the type check).
-  Server components read it with `await getI18n()`, client components with
-  `useI18n()`. Dates and amounts go through `fmt` from the same call, not
+  Components read it with `useI18n("<area>")`, and a route's loader calls
+  `loadMessages("<area>")` so the text downloads beside the data. Dates and amounts go through `fmt` from the same call, not
   through `lib/` directly.
-- **Light and dark** are separate token sets in `globals.css`. The host's
+- **Light and dark** are separate token sets in `web/src/tokens.stylex.ts`. The host's
   choice is a `data-theme` attribute on `<html>`; never branch on the system
   setting in a component.
 

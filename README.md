@@ -236,8 +236,7 @@ report a vulnerability.
 
 A client-rendered React app (Vite, TanStack Router and Query, StyleX) in `web/`, a Hono
 server behind it, TypeScript, SQLite (libSQL: a local file, or Turso when hosted) with
-Drizzle, zod, Vitest. The older Next.js app under `src/app` is no longer what runs and
-is being removed.
+Drizzle, zod, Vitest.
 [docs/TECH-BENCHMARK.md](docs/TECH-BENCHMARK.md) explains each choice and what
 was considered instead. [CONTRIBUTING.md](CONTRIBUTING.md) describes how the
 code is organised.

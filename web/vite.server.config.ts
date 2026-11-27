@@ -12,7 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": new URL("../src", import.meta.url).pathname,
-      // The package throws unless Next.js imports it; the code it guards only ever runs on the server here.
+      // The package throws unless a framework that knows it imports it; the code it guards only ever runs on the server here.
       "server-only": new URL("./server/server-only.ts", import.meta.url).pathname,
     },
   },
@@ -25,8 +25,6 @@ export default defineConfig({
     outDir: "dist-server",
     emptyOutDir: true,
     rollupOptions: {
-      // One shared file still asks Next.js which data a request may see; here every request is told, so it is never loaded.
-      external: [/^next\//],
       input: { serve: "server/serve.ts", vercel: "server/vercel.ts" },
       output: { entryFileNames: "[name].js", chunkFileNames: "chunks/[name]-[hash].js" },
     },

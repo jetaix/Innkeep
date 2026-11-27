@@ -1,6 +1,6 @@
 /**
- * Stands in for the `server-only` package in tests. That package throws
- * unless Next.js is the one importing it; the queries it guards are still
- * shared with the Next.js app until the cutover.
+ * Stands in for the `server-only` package in tests and in the server's
+ * build. That package throws unless a framework that knows it does the
+ * importing; here the code it guards only ever runs on the server.
  */
 export {};

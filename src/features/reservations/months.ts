@@ -77,6 +77,28 @@ export function reservationMonths<S extends Stay>(input: {
   return { upcoming, past };
 }
 
+/**
+ * How many reservations arrive in each month, from eleven months back to the
+ * last month with an arrival. A stay is counted once, in the month it starts.
+ */
+export function reservationCounts(input: {
+  today: ISODate;
+  stays: Pick<Stay, "checkIn" | "kind" | "status">[];
+}): { month: Month; count: number }[] {
+  const current = monthOf(input.today);
+  const first = addMonths(current, -11);
+  const arrivals = input.stays
+    .filter((stay) => stay.kind === "reservation" && stay.status === "confirmed")
+    .map((stay) => monthOf(stay.checkIn))
+    .filter((month) => month >= first);
+  const last = arrivals.reduce((latest, month) => (month > latest ? month : latest), current);
+  const counts: { month: Month; count: number }[] = [];
+  for (let month = first; month <= last; month = addMonths(month, 1)) {
+    counts.push({ month, count: arrivals.filter((arrival) => arrival === month).length });
+  }
+  return counts;
+}
+
 function previousDay(date: ISODate): ISODate {
   const day = new Date(`${date}T00:00:00Z`);
   day.setUTCDate(day.getUTCDate() - 1);

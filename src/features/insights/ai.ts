@@ -2,8 +2,14 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { addMonths, formatMonth, monthOf, occupancyAhead, summariseMonth } from "@/features/revenue/compute";
-import type { Charge } from "@/db/schema";
+import {
+  addMonths,
+  type Cost,
+  formatMonth,
+  monthOf,
+  occupancyAhead,
+  summariseMonth,
+} from "@/features/revenue/compute";
 import { getApiKey } from "@/features/assistant/key";
 import type { Pricing } from "@/features/pricing/queries";
 import type { Locale } from "@/i18n/config";
@@ -115,7 +121,7 @@ function pricingSnapshot(pricing: Pricing | undefined) {
 /** Builds the snapshot sent to the model. Exported for tests and for the "what is sent" preview. */
 export function buildSnapshot(
   input: InsightInput,
-  charges: Charge[],
+  charges: Cost[],
   flagged: Suggestion[],
   /** Nightly prices per property id, when the extension has read any. */
   pricing: Map<number, Pricing> = new Map(),
@@ -179,12 +185,15 @@ export function buildSnapshot(
         occupancy: Math.round(summary.occupancy * 100) / 100,
       };
     }),
-    recurringCosts: charges.map((charge) => ({
-      label: charge.label,
-      category: charge.category,
-      frequency: charge.frequency,
-      amount: charge.frequency === "percent" ? `${charge.amount / 100}%` : charge.amount / 100,
-    })),
+    // A loan with its bank's table is one cost per month: say it once.
+    recurringCosts: charges
+      .filter((charge, index) => charges.findIndex((other) => other.id === charge.id) === index)
+      .map((charge) => ({
+        label: charge.label,
+        category: charge.category,
+        frequency: charge.frequency,
+        amount: charge.frequency === "percent" ? `${charge.amount / 100}%` : charge.amount / 100,
+      })),
     alreadyFlagged: flagged.map((suggestion) => suggestion.title),
   };
 }

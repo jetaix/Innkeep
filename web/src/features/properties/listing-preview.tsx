@@ -326,7 +326,6 @@ function Photos({ preview }: { preview: Preview }) {
   // Each photo fills a fixed cell, so the mosaic keeps its shape whatever the photos' own proportions.
   const photo = (url: string, index: number, width: number) => (
     <div key={url} {...stylex.props(styles.cell)}>
-      {/* biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers */}
       <img
         src={sizedPhoto(url, width)}
         alt={t.photoAlt(index + 1, preview.title)}

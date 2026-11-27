@@ -1,11 +1,8 @@
 import "server-only";
 import { getDb, listings, type OtaChannel } from "@/db";
-import { addDays, today } from "@/lib/dates";
+import { today } from "@/lib/dates";
 
 export type PlatformLink = { id: number; channel: OtaChannel; href: string };
-
-/** How far back the reservations pages are asked to go, so a full year of history comes in. */
-const HISTORY_DAYS = 400;
 
 /**
  * The host's own reservations page on each connected platform, opened on the
@@ -24,13 +21,14 @@ export async function reservationLinks(): Promise<PlatformLink[]> {
             : "https://www.airbnb.com";
           return [{ id: listing.id, channel: listing.channel, href: `${origin}/hosting/reservations/all` }];
         }
-        // Booking.com needs the property id, and only lists the dates asked for.
+        // Booking.com needs the property id, and only lists the dates asked for:
+        // arrivals from today to the end of next year.
         if (!listing.externalId) return [];
         const query = new URLSearchParams({
           hotel_id: listing.externalId,
           date_type: "arrival",
-          date_from: addDays(now, -HISTORY_DAYS),
-          date_to: addDays(now, 540),
+          date_from: now,
+          date_to: `${Number(now.slice(0, 4)) + 1}-12-31`,
         });
         return [
           {

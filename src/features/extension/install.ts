@@ -1,7 +1,7 @@
 import path from "node:path";
 import manifest from "../../../extension/manifest.json";
 
-/** How the extension reaches a browser from this Innkeep. No Next.js imports: the API of `web/` reads it too. */
+/** How the extension reaches a browser from this Innkeep. */
 
 /** On a server there is no folder on the host's computer to point at: the extension is downloaded. */
 export const isHosted = () => Boolean(process.env.VERCEL);

@@ -45,4 +45,4 @@ jobs:
           else
             gh release create extension --title "Browser extension $version" --notes "$notes" --target "$GITHUB_SHA"
           fi
-          gh release upload extension public/innkeep-extension.zip --clobber
+          gh release upload extension web/public/innkeep-extension.zip --clobber

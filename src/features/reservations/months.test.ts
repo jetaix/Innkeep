@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { reservationMonths } from "./months";
+import { reservationCounts, reservationMonths } from "./months";
 
 const stay = (checkIn: string, checkOut: string, extra = {}) => ({
   propertyId: 1,
@@ -74,5 +74,31 @@ describe("reservationMonths", () => {
       properties,
     });
     expect(upcoming[1]).toMatchObject({ revenue: 20_000, estimated: 20_000 });
+  });
+});
+
+describe("reservationCounts", () => {
+  it("counts each reservation once, in the month it arrives", () => {
+    const counts = reservationCounts({
+      today,
+      stays: [
+        // Arrived before the twelve months shown: not counted.
+        stay("2026-03-28", "2026-04-03"),
+        stay("2027-01-10", "2027-01-12"),
+        stay("2027-01-30", "2027-02-02"),
+        stay("2027-05-01", "2027-05-06"),
+        stay("2027-05-10", "2027-05-12", { kind: "block" }),
+      ],
+    });
+    expect(counts[0]).toEqual({ month: "2026-04", count: 0 });
+    expect(counts.at(-1)).toEqual({ month: "2027-05", count: 1 });
+    expect(counts.filter((entry) => entry.count > 0)).toEqual([
+      { month: "2027-01", count: 2 },
+      { month: "2027-05", count: 1 },
+    ]);
+  });
+
+  it("stops at the current month when nothing is booked ahead", () => {
+    expect(reservationCounts({ today, stays: [] })).toHaveLength(12);
   });
 });

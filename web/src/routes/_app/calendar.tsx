@@ -322,7 +322,7 @@ function Calendar() {
               // A stay always belongs to a property that is listed.
               property={properties.find((p) => p.id === selected.propertyId) ?? properties[0]}
               conflict={conflicts.has(selected.id)}
-              close={close}
+              close={{ to: "/calendar", search: close }}
             />
           )}
           {creating && (
@@ -330,7 +330,7 @@ function Calendar() {
               properties={properties}
               propertyId={Number(newProperty) || properties[0].id}
               date={isISODate(newDate) ? newDate : now}
-              close={close}
+              close={{ to: "/calendar", search: close }}
             />
           )}
         </Suspense>

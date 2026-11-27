@@ -5,8 +5,7 @@ import { parse, text } from "@/lib/form";
 import { getSetupProperty } from "./queries";
 
 /**
- * What the "Add a property" guide changes. No Next.js imports: the server
- * actions and the API of `web/` both call these.
+ * What the "Add a property" guide changes. Called by the API; no framework in here.
  */
 const propertyId = z.number().int().positive();
 const links = z.object(Object.fromEntries(OTA_CHANNELS.map((channel) => [channel, text.default("")])));
