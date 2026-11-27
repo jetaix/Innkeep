@@ -69,6 +69,39 @@ const en = {
       after: "lists them all.",
     },
   },
+  members: {
+    title: "Members",
+    note: "Who can open this Innkeep, and what each of them may do.",
+    owner: "Owner",
+    ownerNote: "Signs in with the password of this Innkeep. Always an admin.",
+    you: "you",
+    role: "Role",
+    /** Under the role, in the list of choices. */
+    can: {
+      admin: "Sees and changes everything",
+      visitor: "Sees the cleaning and the properties only",
+    },
+    remove: "Remove",
+    confirmRemove: (name: string): string => `Remove ${name}? They are signed out at once.`,
+    invite: {
+      title: "Invite someone",
+      note: "Who is it for? (optional)",
+      notePlaceholder: "Sandrine, cleaning",
+      submit: "Create the invitation link",
+      creating: "Creating…",
+      ready: "Send this link to the person. It works once, for seven days, and cannot be shown again.",
+      waiting: "Invitations waiting",
+      /** "Visitor, for Sandrine, until 5 Dec" */
+      pending: (role: string, note: string, until: string): string =>
+        `${role}${note ? `, for ${note}` : ""}, until ${until}`,
+      revoke: "Cancel",
+    },
+    needsPassword: {
+      before: "Set ",
+      after:
+        " on the server first: without it Innkeep opens for anyone who reaches it, and there is nothing to sign in to.",
+    },
+  },
   shortcuts: {
     title: "Keyboard shortcuts",
     commandMenu: "Open the command menu",
@@ -148,6 +181,37 @@ const fr: typeof en = {
       afterFile: "puis redémarrez le serveur. Le",
       link: "README",
       after: "les recense toutes.",
+    },
+  },
+  members: {
+    title: "Membres",
+    note: "Qui peut ouvrir cet Innkeep, et ce que chacun peut y faire.",
+    owner: "Propriétaire",
+    ownerNote: "Se connecte avec le mot de passe de cet Innkeep. Toujours administrateur.",
+    you: "vous",
+    role: "Rôle",
+    can: {
+      admin: "Voit et modifie tout",
+      visitor: "Voit seulement le ménage et les logements",
+    },
+    remove: "Retirer",
+    confirmRemove: (name) => `Retirer ${name} ? Cette personne est déconnectée aussitôt.`,
+    invite: {
+      title: "Inviter quelqu’un",
+      note: "Pour qui ? (facultatif)",
+      notePlaceholder: "Sandrine, ménage",
+      submit: "Créer le lien d’invitation",
+      creating: "Création…",
+      ready:
+        "Envoyez ce lien à la personne. Il fonctionne une seule fois, pendant sept jours, et ne pourra plus être affiché.",
+      waiting: "Invitations en attente",
+      pending: (role, note, until) => `${role}${note ? `, pour ${note}` : ""}, jusqu’au ${until}`,
+      revoke: "Annuler",
+    },
+    needsPassword: {
+      before: "Définissez d’abord ",
+      after:
+        " sur le serveur : sans lui, Innkeep s’ouvre à quiconque y accède, et il n’y a rien à quoi se connecter.",
     },
   },
   shortcuts: {

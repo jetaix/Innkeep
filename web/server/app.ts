@@ -4,10 +4,10 @@ import { HTTPException } from "hono/http-exception";
 import { withData } from "../../src/db";
 import { appPassword } from "../../src/lib/session";
 import { auth } from "./auth";
-import type { Env } from "./env";
+import { adminOnly, type Env } from "./env";
 import { machine } from "./machine";
 import { read } from "./read";
-import { decide, SESSION_COOKIE } from "./scope";
+import { decide, SESSION_COOKIE, visitorMay } from "./scope";
 import { write } from "./write";
 
 /**
@@ -23,9 +23,15 @@ export const app = new Hono<Env>()
   .basePath("/api/app")
   .route("/", auth)
   .use("*", async (c, next) => {
-    const verdict = decide(c.req.method, getCookie(c, SESSION_COOKIE));
+    const verdict = await decide(c.req.method, getCookie(c, SESSION_COOKIE));
     if ("refuse" in verdict) throw new HTTPException(401, { message: "Sign in first." });
+    // A visitor's role is enforced here, once, for every address: no handler has to remember it.
+    if (verdict.role === "visitor" && !visitorMay(c.req.method, c.req.path.replace(/^\/api\/app/, ""))) {
+      throw adminOnly();
+    }
     c.set("signedIn", verdict.signedIn);
+    c.set("role", verdict.role);
+    c.set("member", verdict.member);
     await withData(verdict.scope, next);
   })
   .route("/", read)

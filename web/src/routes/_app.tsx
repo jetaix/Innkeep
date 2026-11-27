@@ -1,14 +1,15 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { NAV } from "@/config/navigation";
-import { clearSampleData } from "../api/mutations";
+import { NAV, type NavId } from "@/config/navigation";
+import { clearSampleData, signOut } from "../api/mutations";
 import { navQuery, sessionQuery } from "../api/queries";
 import { Logo } from "../brand/logo";
 import { ExtensionSetupButton } from "../features/extension/setup-button";
 import { UpdatePrompt } from "../features/extension/update-prompt";
 import { currentLocale, useI18n } from "../i18n";
+import { mayOpen, VISITOR_HOME, VISITOR_PAGES } from "../roles";
 import { CommandMenu } from "../shell/command-menu";
 import { KeepFresh } from "../shell/keep-fresh";
 import { LanguageSwitch, ThemeSwitch } from "../shell/preferences";
@@ -16,6 +17,7 @@ import { RefusedNotice } from "../shell/refused";
 import { SidebarNav } from "../shell/sidebar";
 import { color, radius, text } from "../tokens.stylex";
 import { ConfirmButton } from "../ui/actions";
+import { Button } from "../ui/button";
 import { Loading } from "../ui/primitives";
 
 /**
@@ -24,9 +26,11 @@ import { Loading } from "../ui/primitives";
  * visitor when this instance offers the demo; anyone else is sent to sign in.
  */
 export const Route = createFileRoute("/_app")({
-  beforeLoad: async ({ context: { queryClient } }) => {
+  beforeLoad: async ({ context: { queryClient }, location }) => {
     const session = await queryClient.ensureQueryData(sessionQuery);
     if (!session.signedIn && !session.demo) throw redirect({ to: "/login" });
+    // A visitor has two pages: any other address leads back to the first.
+    if (!mayOpen(session.role, location.pathname)) throw redirect({ to: VISITOR_HOME });
   },
   loader: ({ context: { queryClient } }) => {
     void queryClient.prefetchQuery(navQuery(currentLocale()));
@@ -119,11 +123,23 @@ const styles = stylex.create({
   link: { color: color.ink, fontWeight: 500, textUnderlineOffset: 2 },
   quietLink: { color: { default: color.muted, ":hover": color.ink }, textUnderlineOffset: 2 },
   strong: { fontWeight: 600 },
+  account: {
+    display: { default: "none", [WIDE]: "flex" },
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "0.5rem",
+    paddingInline: "0.5rem",
+  },
+  who: { minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", color: color.muted, fontSize: text.sm },
 });
 
 function AppFrame() {
   const { m } = useI18n();
   const { data: session } = useSuspenseQuery(sessionQuery);
+  const visitor = session.role === "visitor";
+  // What only an admin's session can use: the sync, the extension, the sample data.
+  const admin = session.signedIn && !visitor;
   // The tab is named after the page of the menu that is open.
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const page = NAV.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
@@ -131,30 +147,32 @@ function AppFrame() {
   return (
     <div {...stylex.props(styles.frame)}>
       <title>{title}</title>
-      {session.signedIn && <KeepFresh />}
+      {admin && <KeepFresh />}
       <a href="#main" {...stylex.props(styles.skip)}>
         {m.common.nav.skipToContent}
       </a>
       <aside {...stylex.props(styles.aside)}>
         <div {...stylex.props(styles.top)}>
-          <Link to="/overview" {...stylex.props(styles.home)}>
+          <Link to={visitor ? VISITOR_HOME : "/overview"} {...stylex.props(styles.home)}>
             <Logo tone="color" />
           </Link>
           <div {...stylex.props(styles.search)}>
-            <CommandMenu canSync={session.signedIn} />
+            <CommandMenu canSync={admin} only={visitor ? VISITOR_PAGES : undefined} />
           </div>
         </div>
-        <Menu />
+        <Menu only={visitor ? VISITOR_PAGES : undefined} />
         <div {...stylex.props(styles.switches)}>
           <ThemeSwitch />
           <LanguageSwitch />
         </div>
+        {/* A visitor has no Settings page to sign out from. */}
+        {visitor && <SignOut name={session.member?.name} />}
       </aside>
       <div {...stylex.props(styles.column)}>
         {session.demo && <DemoBanner />}
-        {session.signedIn && <SampleDataBanner />}
+        {admin && <SampleDataBanner />}
         {/* The host's own: their words arrive after the frame, and nothing waits for them. */}
-        {session.signedIn && (
+        {admin && (
           <Suspense>
             <UpdatePrompt />
           </Suspense>
@@ -165,22 +183,44 @@ function AppFrame() {
             <Outlet />
           </Suspense>
         </main>
-        {session.signedIn && (
+        {admin && (
           <Suspense>
             <ExtensionSetupButton />
           </Suspense>
         )}
       </div>
-      <RefusedNotice />
+      <RefusedNotice readOnly={visitor} />
     </div>
   );
 }
 
 /** The menu shows at once; its counts are added when they arrive. */
-function Menu() {
+function Menu({ only }: { only?: readonly NavId[] }) {
   const { locale } = useI18n();
   const { data } = useQuery(navQuery(locale));
-  return <SidebarNav badges={data && { "/suggestions": data.urgent, "/settings": data.toRefresh }} />;
+  return (
+    <SidebarNav only={only} badges={data && { "/suggestions": data.urgent, "/settings": data.toRefresh }} />
+  );
+}
+
+/** Who is signed in, and the way out. */
+function SignOut({ name }: { name?: string }) {
+  const { m } = useI18n();
+  const navigate = useNavigate();
+  const leave = useMutation(signOut);
+  return (
+    <div {...stylex.props(styles.account)}>
+      {name && <span {...stylex.props(styles.who)}>{name}</span>}
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled={leave.isPending}
+        onClick={() => leave.mutate(undefined, { onSuccess: () => navigate({ to: "/login" }) })}
+      >
+        {m.common.account.signOut}
+      </Button>
+    </div>
+  );
 }
 
 /** Tells a visitor of the public demo what they are looking at. */

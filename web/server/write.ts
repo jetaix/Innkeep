@@ -4,6 +4,7 @@ import { z } from "zod";
 import * as assistant from "../../src/features/assistant/mutations";
 import * as cleaning from "../../src/features/cleaning/mutations";
 import * as insights from "../../src/features/insights/mutations";
+import * as members from "../../src/features/members/mutations";
 import * as place from "../../src/features/properties/mutations";
 import * as stay from "../../src/features/reservations/mutations";
 import * as revenue from "../../src/features/revenue/mutations";
@@ -57,6 +58,24 @@ export const write = new Hono<Env>()
   })
   .delete("/loans/:id", async (c) => {
     await revenue.deleteLoan(num(c.req.param("id")));
+    return c.json(done);
+  })
+
+  // Members: an admin's alone, which the role check in `app.ts` already holds a visitor to.
+  .post("/invitations", json, async (c) => {
+    if (!c.get("signedIn")) throw hostOnly();
+    return c.json(await members.invite(c.req.valid("json")));
+  })
+  .delete("/invitations/:id", async (c) => {
+    await members.revokeInvitation(num(c.req.param("id")));
+    return c.json(done);
+  })
+  .put("/members/:id", json, async (c) => {
+    await members.setRole(num(c.req.param("id")), c.req.valid("json"));
+    return c.json(done);
+  })
+  .delete("/members/:id", async (c) => {
+    await members.removeMember(num(c.req.param("id")));
     return c.json(done);
   })
 

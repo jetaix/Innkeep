@@ -230,6 +230,46 @@ export const loanPayments = sqliteTable(
   (t) => [uniqueIndex("loan_payments_date").on(t.loanId, t.date)],
 );
 
+export const ROLES = ["admin", "visitor"] as const;
+/** What a member may do: an admin everything, a visitor only see the cleaning and the properties. */
+export type Role = (typeof ROLES)[number];
+
+/**
+ * The people an admin invited to this Innkeep, each with a password of their
+ * own. The owner is not in here: they sign in with `APP_PASSWORD` and are
+ * always an admin, so nobody can lock the household out.
+ */
+export const users = sqliteTable(
+  "users",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    /** Lower case; what the member signs in with. */
+    email: text("email").notNull(),
+    name: text("name").notNull(),
+    role: text("role").$type<Role>().notNull(),
+    /** "salt:hash", both hex, from scrypt. Never the password. */
+    passwordHash: text("password_hash").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [uniqueIndex("users_email").on(t.email)],
+);
+
+/** An invitation to join, sent by an admin as a link. Used once, and only for a while. */
+export const invitations = sqliteTable(
+  "invitations",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    /** SHA-256 of the secret in the link: the link itself is shown once and never kept. */
+    tokenHash: text("token_hash").notNull(),
+    /** Who it is for, as a note for the admin. The person joining chooses their own address. */
+    email: text("email").notNull().default(""),
+    role: text("role").$type<Role>().notNull(),
+    createdAt: integer("created_at").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [uniqueIndex("invitations_token").on(t.tokenHash)],
+);
+
 export const dismissedSuggestions = sqliteTable("dismissed_suggestions", {
   key: text("key").primaryKey(),
   dismissedAt: integer("dismissed_at").notNull(),
@@ -245,6 +285,8 @@ export const aiAdvice = sqliteTable("ai_advice", {
 
 export type Charge = typeof charges.$inferSelect;
 export type Loan = typeof loans.$inferSelect;
+export type User = typeof users.$inferSelect;
+export type Invitation = typeof invitations.$inferSelect;
 export type LoanPayment = typeof loanPayments.$inferSelect;
 export type Property = typeof properties.$inferSelect;
 export type Listing = typeof listings.$inferSelect;

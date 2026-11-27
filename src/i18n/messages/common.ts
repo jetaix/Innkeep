@@ -41,6 +41,13 @@ const en = {
     newTab: "(opens a new tab)",
   },
   loading: "Loading…",
+  /** What a member may do. Keyed by the stored value. */
+  roles: { admin: "Admin", visitor: "Visitor" },
+  account: {
+    signOut: "Sign out",
+    /** Said when someone with the visitor role tries to change something. */
+    readOnly: "Your access is read-only: ask an admin to make this change.",
+  },
   notFound: {
     title: "This page does not exist",
     body: "The address may be mistyped, or the page may have been moved.",
@@ -106,6 +113,11 @@ const fr: typeof en = {
     newTab: "(ouvre un nouvel onglet)",
   },
   loading: "Chargement…",
+  roles: { admin: "Administrateur", visitor: "Visiteur" },
+  account: {
+    signOut: "Se déconnecter",
+    readOnly: "Votre accès est en lecture seule : demandez à un administrateur de faire ce changement.",
+  },
   notFound: {
     title: "Cette page n’existe pas",
     body: "L’adresse est peut-être mal saisie, ou la page a été déplacée.",
