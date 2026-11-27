@@ -49,18 +49,18 @@ const styles = stylex.create({
     borderTopColor: color.lineStrong,
   },
   top: (px: number) => ({ top: px }),
-  // A bar is a sheet of ink glass as tall as the month's revenue.
   piece: {
     position: "absolute",
-    left: "50%",
-    width: "100%",
-    maxWidth: "2.5rem",
-    transform: "translateX(-50%)",
+    width: "calc(50% - 1px)",
+    maxWidth: "1.5rem",
     transitionProperty: "background-color, opacity",
     transitionDuration: "150ms",
   },
+  // The pair meets in the middle of its column: revenue on the left, costs on the right.
+  left: { right: "calc(50% + 1px)" },
+  right: { left: "calc(50% + 1px)" },
   pieceAt: (top: number, height: number) => ({ top, height }),
-  // What is left once the costs are paid.
+  // What came in.
   net: {
     backgroundColor: `color-mix(in oklab, ${color.ink} 62%, ${color.panel})`,
     boxShadow: `inset 0 1px 0 ${color.glassHi}, 0 10px 14px -12px ${color.ink}`,
@@ -69,15 +69,14 @@ const styles = stylex.create({
   ahead: { backgroundColor: `color-mix(in oklab, ${color.ink} 26%, ${color.panel})`, boxShadow: "none" },
   current: { backgroundColor: color.ink },
   pointed: { backgroundColor: `color-mix(in oklab, ${color.ink} 82%, ${color.panel})` },
-  // The costs: the top of the bar, cut away.
+  // What went out.
   cut: {
     backgroundImage: `repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in oklab, ${color.ink} 34%, transparent) 4px 5px)`,
     boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${color.ink} 26%, transparent)`,
   },
-  // Costs that revenue did not cover hang under the baseline.
+  // Costs above the month's revenue.
   loss: { backgroundColor: `color-mix(in oklab, ${color.critical} 72%, ${color.panel})` },
   up: { borderStartStartRadius: radius.md, borderStartEndRadius: radius.md },
-  down: { borderEndStartRadius: radius.md, borderEndEndRadius: radius.md },
   value: {
     position: "absolute",
     left: "50%",
@@ -131,13 +130,12 @@ const styles = stylex.create({
 });
 
 /**
- * What each month pays, as bars of ink glass.
- *
- * A bar is as tall as the month's revenue. Its top is cut away by the costs,
- * so the solid part is what is left; costs that revenue did not cover hang
- * under the baseline. The current month is the darkest bar, the months still
- * to come are paler. Every bar is focusable with the full breakdown in a
- * tooltip, and the table under the chart carries the same numbers as text.
+ * What comes in and what goes out, month by month, as two bars side by side
+ * on one scale: revenue in ink, costs (charges and loans) hatched. A month
+ * whose costs are above its revenue has its costs in the loss colour. The
+ * current month is the darkest, the months still to come are paler. Every
+ * pair is focusable with the full breakdown in a tooltip, and the table under
+ * the chart carries the same numbers as text.
  */
 export function MonthChart({
   summaries,
@@ -156,12 +154,11 @@ export function MonthChart({
   const [hovered, setHovered] = useState<Month | null>(null);
   const [focused, setFocused] = useState<Month | null>(null);
 
-  const highest = Math.max(0, ...summaries.map((s) => s.gross));
-  const lowest = Math.max(0, ...summaries.map((s) => -s.net));
-  const range = highest + lowest || 1;
-  const above = Math.round((HEIGHT * highest) / range);
+  // One scale for both bars, from zero: the taller of the two, over every month.
+  const range = Math.max(1, ...summaries.flatMap((s) => [s.gross, s.charges]));
+  const above = HEIGHT;
   const px = (amount: number) => (amount > 0 ? Math.max(2, Math.round((amount / range) * HEIGHT)) : 0);
-  const anyLoss = lowest > 0;
+  const anyLoss = summaries.some((s) => s.charges > s.gross && s.gross > 0);
   const nowIndex = Math.max(
     0,
     summaries.findIndex((s) => s.month === current),
@@ -183,9 +180,10 @@ export function MonthChart({
       >
         {summaries.map((summary, index) => {
           const isCurrent = summary.month === current;
-          const kept = px(Math.max(0, summary.net));
-          const cut = px(Math.min(summary.charges, Math.max(0, summary.gross)));
-          const lost = px(-summary.net);
+          const earned = px(Math.max(0, summary.gross));
+          const spent = px(summary.charges);
+          // A loss is a state only where there were stays to pay for the costs.
+          const over = summary.charges > summary.gross && summary.gross > 0;
           const pointed = hovered === summary.month || focused === summary.month;
           return (
             <div
@@ -207,38 +205,35 @@ export function MonthChart({
               {...stylex.props(styles.column)}
             >
               <div {...stylex.props(styles.plot)}>
-                {cut > 0 && (
+                {earned > 0 && (
                   <div
                     {...stylex.props(
                       styles.piece,
-                      styles.cut,
-                      styles.up,
-                      styles.pieceAt(above - kept - cut, cut),
-                    )}
-                  />
-                )}
-                {kept > 0 && (
-                  <div
-                    {...stylex.props(
-                      styles.piece,
+                      styles.left,
                       styles.net,
-                      cut === 0 && styles.up,
+                      styles.up,
                       summary.month > current && styles.ahead,
                       pointed && styles.pointed,
                       isCurrent && styles.current,
-                      styles.pieceAt(above - kept, kept),
+                      styles.pieceAt(above - earned, earned),
                     )}
                   />
                 )}
-                {lost > 0 && (
+                {spent > 0 && (
                   <div
-                    {...stylex.props(styles.piece, styles.loss, styles.down, styles.pieceAt(above, lost))}
+                    {...stylex.props(
+                      styles.piece,
+                      styles.right,
+                      over ? styles.loss : styles.cut,
+                      styles.up,
+                      styles.pieceAt(above - spent, spent),
+                    )}
                   />
                 )}
                 {/* Zero baseline */}
                 <div {...stylex.props(styles.baseline, styles.top(above))} />
                 {isCurrent && (
-                  <span {...stylex.props(styles.value, styles.top(above - kept - cut - 22))}>
+                  <span {...stylex.props(styles.value, styles.top(above - Math.max(earned, spent) - 22))}>
                     {money(summary.net)}
                   </span>
                 )}
@@ -273,7 +268,7 @@ export function MonthChart({
       <ul {...stylex.props(styles.legend)}>
         <li {...stylex.props(styles.key)}>
           <span aria-hidden {...stylex.props(styles.swatch, styles.net)} />
-          {t.net}
+          {t.revenue}
         </li>
         <li {...stylex.props(styles.key)}>
           <span aria-hidden {...stylex.props(styles.swatch, styles.cut)} />

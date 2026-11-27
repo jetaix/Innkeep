@@ -6,6 +6,31 @@ const en = {
     title: "No properties yet",
     body: "Add a property to start estimating revenue.",
   },
+  profit: {
+    title: "Is it profitable?",
+    yes: "Profitable",
+    no: "At a loss",
+    /** Follows the figure, written large: "+€312 a month is what it leaves you…". */
+    leaves: "a month is what it leaves you",
+    costs: "a month is what it costs you",
+    /** "On average over the last 8 months, loan and charges included." */
+    over: (months: number): string =>
+      months === 1
+        ? "This month so far, loan and charges included."
+        : `On average over the last ${months} months, loan and charges included.`,
+    income: "Income",
+    charges: "Charges",
+    loan: "Loan",
+    left: "Left for you",
+    short: "You are short by",
+    /** A property with no stay recorded yet. */
+    unknown: "No stay recorded yet",
+    unknownBody:
+      "Once a first reservation is in, this says whether the rent covers the charges and the loan.",
+    /** Read aloud for the bars: "Income €1,450, charges €320, loan €906". */
+    bars: (income: string, charges: string, loan: string): string =>
+      `Income ${income}, charges ${charges}, loan ${loan}`,
+  },
   months: {
     title: "Net revenue by month",
     /** "November 2026: €1,200 revenue, €300 costs, of which €400 is estimated from nightly rates." */
@@ -25,7 +50,7 @@ const en = {
       }.`,
     /** Legend of the chart. */
     upcoming: "Not over yet",
-    loss: "Costs revenue did not cover",
+    loss: "Costs above revenue",
     /** Under the name of the month we are in. */
     now: "this month",
     month: "Month",
@@ -180,6 +205,26 @@ const fr: typeof en = {
     title: "Aucun logement pour l’instant",
     body: "Ajoutez un logement pour commencer à estimer vos revenus.",
   },
+  profit: {
+    title: "Est-il rentable ?",
+    yes: "Rentable",
+    no: "À perte",
+    leaves: "par mois, c’est ce qu’il vous laisse",
+    costs: "par mois, c’est ce qu’il vous coûte",
+    over: (months) =>
+      months === 1
+        ? "Ce mois-ci à ce jour, crédit et charges compris."
+        : `En moyenne sur les ${months} derniers mois, crédit et charges compris.`,
+    income: "Revenus",
+    charges: "Charges",
+    loan: "Crédit",
+    left: "Il vous reste",
+    short: "Il vous manque",
+    unknown: "Aucun séjour enregistré pour l’instant",
+    unknownBody:
+      "Dès la première réservation, vous saurez ici si les loyers couvrent les charges et le crédit.",
+    bars: (income, charges, loan) => `Revenus ${income}, charges ${charges}, crédit ${loan}`,
+  },
   months: {
     title: "Revenus nets par mois",
     summary: (month, revenue, costs, estimated) =>
@@ -194,7 +239,7 @@ const fr: typeof en = {
         estimated ? `. ${estimated} de ces revenus sont estimés d’après les tarifs par nuit` : ""
       }.`,
     upcoming: "Pas encore terminé",
-    loss: "Charges que les revenus n’ont pas couvertes",
+    loss: "Charges supérieures aux revenus",
     now: "ce mois-ci",
     month: "Mois",
     revenue: "Revenus",

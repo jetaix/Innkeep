@@ -12,6 +12,9 @@ minor version may change how things work.
 - Loans on the Revenue page: enter the amount borrowed, the rate, the duration
   and the insurance, and the monthly payment counts as a cost until the last
   one. Each loan shows what is still owed and what the borrowing costs.
+- The Revenue page opens on one question per property: is it profitable? A
+  verdict, what an average month leaves or costs, and the income, charges and
+  loan behind it.
 - A loan takes its bank's amortisation table, read from the bank's PDF or a CSV
   file, or pasted: each month then costs exactly what the bank takes.
 - Clicking a reservation on the Reservations page opens its details in a panel
@@ -42,6 +45,8 @@ minor version may change how things work.
 
 ### Changed
 
+- The Revenue chart shows each month as two bars side by side: what came in
+  and what went out.
 - The Booking.com reservations page opens on arrivals from today to
   31 December of next year.
 - Every page works on a phone.

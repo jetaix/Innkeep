@@ -1,13 +1,15 @@
 import * as stylex from "@stylexjs/stylex";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { Charge, Property } from "@/db/schema";
+import type { Charge, Property, Reservation } from "@/db/schema";
 import { formatMonth, type MonthSummary } from "@/features/revenue/compute";
+import { loanCosts } from "@/features/revenue/loans";
 import { INTL_LOCALE } from "@/i18n/config";
 import { revenueQuery, revenueYearsQuery } from "../../api/queries";
 import { ChargeForm, ChargeRow } from "../../features/revenue/charges";
 import { LoanForm, LoanRow, type LoanWithTable } from "../../features/revenue/loans";
 import { MonthChart } from "../../features/revenue/month-chart";
+import { ProfitCards } from "../../features/revenue/profit";
 import { loadMessages, useI18n } from "../../i18n";
 import { color, radius, shadow, text } from "../../tokens.stylex";
 import { Card, EmptyState, PageHeader, SectionTitle } from "../../ui/primitives";
@@ -179,6 +181,7 @@ function Revenue({
   charges,
   loans,
   properties,
+  guestStays,
   byYear = false,
 }: {
   currency: string;
@@ -187,6 +190,7 @@ function Revenue({
   charges: Charge[];
   loans: LoanWithTable[];
   properties: Property[];
+  guestStays: Reservation[];
   byYear?: boolean;
 }) {
   const { locale, m, fmt } = useI18n("revenue");
@@ -206,6 +210,12 @@ function Revenue({
   return (
     <div {...stylex.props(styles.page)}>
       <div {...stylex.props(styles.main)}>
+        <ProfitCards
+          properties={properties}
+          stays={guestStays}
+          costs={[...charges, ...loanCosts(loans)]}
+          currency={currency}
+        />
         <section {...stylex.props(styles.pays)}>
           <div {...stylex.props(styles.split)}>
             <h2 {...stylex.props(styles.statement)}>

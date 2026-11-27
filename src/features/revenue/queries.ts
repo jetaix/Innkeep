@@ -87,5 +87,6 @@ export async function getRevenueYears() {
     charges: allCharges,
     loans: allLoans,
     properties,
+    guestStays,
   };
 }

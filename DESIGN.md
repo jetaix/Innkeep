@@ -220,7 +220,7 @@ a night. It differs from the public pages in four ways:
   Geist. Controls are pills; fields have a 10px radius.
 - **Each page has one signature, drawn from its own data:** the next fourteen nights on the overview,
   glass slabs on the calendar, a ledger with date stubs for reservations, the turnover window for
-  cleaning, glass bars for revenue, the gap between the two platforms for pricing, a doorway for each
+  cleaning, income and costs side by side for revenue, the gap between the two platforms for pricing, a doorway for each
   property, and the reading register (ground, ink, hairlines) for settings.
 
 
