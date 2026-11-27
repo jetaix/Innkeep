@@ -229,7 +229,7 @@ example conversation and its limits.
 
 `APP_PASSWORD` protects every page and is the owner's own way in. From
 Settings, an admin invites other people with a link: an admin sees and changes
-everything, a visitor sees the cleaning and the properties only. Set the
+everything, a visitor sees the cleaning and the properties only, and can mark a cleaning as done. Set the
 password before Innkeep is reachable from the internet. See
 [SECURITY.md](SECURITY.md) for the routes that are safe to expose and how to
 report a vulnerability.

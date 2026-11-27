@@ -15,7 +15,7 @@ const en = {
     invited: (role: string): string => `You are invited as ${role}.`,
     can: {
       admin: "You will see and change everything: bookings, revenue, settings and members.",
-      visitor: "You will see the cleaning schedule and the properties, without changing them.",
+      visitor: "You will see the properties and the cleaning schedule, and mark cleanings as done.",
     },
     name: "Your name",
     email: "Your email",
@@ -47,7 +47,7 @@ const fr: typeof en = {
     invited: (role) => `Vous êtes invité en tant que ${role}.`,
     can: {
       admin: "Vous verrez et pourrez modifier tout : réservations, revenus, réglages et membres.",
-      visitor: "Vous verrez le planning de ménage et les logements, sans pouvoir les modifier.",
+      visitor: "Vous verrez les logements et le planning de ménage, et pourrez marquer un ménage comme fait.",
     },
     name: "Votre nom",
     email: "Votre e-mail",

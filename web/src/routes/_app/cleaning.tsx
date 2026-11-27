@@ -13,7 +13,7 @@ import {
   deleteCleaner,
   setCleaningEnabled,
 } from "../../api/mutations";
-import { cleaningQuery } from "../../api/queries";
+import { cleaningQuery, sessionQuery } from "../../api/queries";
 import { Row } from "../../features/cleaning/row";
 import { loadMessages, useI18n } from "../../i18n";
 import { color, font, text } from "../../tokens.stylex";
@@ -130,6 +130,8 @@ function CleaningView() {
   const t = m.cleaning;
   const { today, properties, cleaners, assignments, schedule } = useSuspenseQuery(cleaningQuery).data;
   const manual = useMutation(addManualCleaning);
+  // A visitor says what was cleaned; planning, the team and the messages are an admin's.
+  const visitor = useSuspenseQuery(sessionQuery).data.role === "visitor";
   if (properties.length === 0) return <EmptyState title={t.noProperty.title}>{t.noProperty.body}</EmptyState>;
 
   const names = new Map(properties.map((property) => [property.id, property]));
@@ -179,51 +181,60 @@ function CleaningView() {
             {clashes > 0 && <Badge tone="clash">{t.summary.clashes(clashes)}</Badge>}
           </p>
           <div {...stylex.props(styles.line)}>
-            <Modal
-              label={t.manual.open}
-              title={t.manual.title}
-              description={t.manual.hint}
-              variant="primary"
-              size="sm"
-            >
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const form = event.currentTarget;
-                  const sent = new FormData(form);
-                  manual.mutate(
-                    {
-                      propertyId: Number(sent.get("propertyId")),
-                      date: String(sent.get("date")),
-                      notes: String(sent.get("notes") ?? ""),
-                    },
-                    { onSuccess: () => form.reset() },
-                  );
-                }}
-                {...stylex.props(styles.form)}
+            {!visitor && (
+              <Modal
+                label={t.manual.open}
+                title={t.manual.title}
+                description={t.manual.hint}
+                variant="primary"
+                size="sm"
               >
-                {properties.length > 1 ? (
-                  <Field label={t.manual.property} htmlFor="manual-property" xstyle={styles.whole}>
-                    <Select id="manual-property" name="propertyId" defaultValue={properties[0].id}>
-                      {properties.map((property) => (
-                        <option key={property.id} value={property.id}>
-                          {property.name}
-                        </option>
-                      ))}
-                    </Select>
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const form = event.currentTarget;
+                    const sent = new FormData(form);
+                    manual.mutate(
+                      {
+                        propertyId: Number(sent.get("propertyId")),
+                        date: String(sent.get("date")),
+                        notes: String(sent.get("notes") ?? ""),
+                      },
+                      { onSuccess: () => form.reset() },
+                    );
+                  }}
+                  {...stylex.props(styles.form)}
+                >
+                  {properties.length > 1 ? (
+                    <Field label={t.manual.property} htmlFor="manual-property" xstyle={styles.whole}>
+                      <Select id="manual-property" name="propertyId" defaultValue={properties[0].id}>
+                        {properties.map((property) => (
+                          <option key={property.id} value={property.id}>
+                            {property.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                  ) : (
+                    <input type="hidden" name="propertyId" value={properties[0].id} />
+                  )}
+                  <Field label={t.manual.date} htmlFor="manual-date" xstyle={styles.whole}>
+                    <Input
+                      id="manual-date"
+                      name="date"
+                      type="date"
+                      required
+                      defaultValue={today}
+                      min={today}
+                    />
                   </Field>
-                ) : (
-                  <input type="hidden" name="propertyId" value={properties[0].id} />
-                )}
-                <Field label={t.manual.date} htmlFor="manual-date" xstyle={styles.whole}>
-                  <Input id="manual-date" name="date" type="date" required defaultValue={today} min={today} />
-                </Field>
-                <Field label={t.manual.notes} htmlFor="manual-notes" xstyle={styles.whole}>
-                  <Input id="manual-notes" name="notes" maxLength={500} />
-                </Field>
-                <SubmitButton pending={manual.isPending}>{t.manual.submit}</SubmitButton>
-              </form>
-            </Modal>
+                  <Field label={t.manual.notes} htmlFor="manual-notes" xstyle={styles.whole}>
+                    <Input id="manual-notes" name="notes" maxLength={500} />
+                  </Field>
+                  <SubmitButton pending={manual.isPending}>{t.manual.submit}</SubmitButton>
+                </form>
+              </Modal>
+            )}
             <CopyButton value={shareText} label={t.share.copy} />
             <Button size="sm" onClick={() => window.print()}>
               {t.share.print}
@@ -260,6 +271,7 @@ function CleaningView() {
                             cleaners={cleaners}
                             overdue={entry.status === "pending" && entry.date < today}
                             open={Boolean(group.near)}
+                            statusOnly={visitor}
                           />
                         </li>
                       )
@@ -272,21 +284,23 @@ function CleaningView() {
         )}
       </div>
 
-      <div {...stylex.props(styles.column, styles.side)}>
-        <Team cleaners={cleaners} />
-        <Card>
-          <div {...stylex.props(styles.head)}>
-            <SectionTitle>{t.places.title}</SectionTitle>
-          </div>
-          <ul {...stylex.props(styles.list)}>
-            {properties.map((property) => (
-              <li key={property.id} {...stylex.props(styles.item)}>
-                <Place property={property} cleaners={cleaners} assignments={assignments} />
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
+      {!visitor && (
+        <div {...stylex.props(styles.column, styles.side)}>
+          <Team cleaners={cleaners} />
+          <Card>
+            <div {...stylex.props(styles.head)}>
+              <SectionTitle>{t.places.title}</SectionTitle>
+            </div>
+            <ul {...stylex.props(styles.list)}>
+              {properties.map((property) => (
+                <li key={property.id} {...stylex.props(styles.item)}>
+                  <Place property={property} cleaners={cleaners} assignments={assignments} />
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

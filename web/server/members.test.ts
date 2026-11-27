@@ -99,7 +99,15 @@ describe("members and their roles", () => {
     ]) {
       expect([path, (await call("GET", path, cookie)).status]).toEqual([path, 403]);
     }
-    // No change at all, on the pages they see or anywhere else.
+    // One change is theirs: saying a cleaning is done. Nothing else about it, and nothing elsewhere.
+    const day = `/cleanings/${flat}/2027-03-05`;
+    expect((await call("PUT", day, cookie, { status: "done" })).status).toBe(200);
+    expect((await call("PUT", day, cookie, { status: "done", notes: "mine" })).status).toBe(403);
+    expect((await call("PUT", day, cookie, { request: "confirmed" })).status).toBe(403);
+    expect((await call("DELETE", day, cookie)).status).toBe(403);
+    expect((await call("POST", "/cleanings", cookie, { propertyId: flat, date: "2027-03-06" })).status).toBe(
+      403,
+    );
     expect((await call("PUT", `/properties/${flat}`, cookie, { name: "Mine now" })).status).toBe(403);
     expect((await call("POST", "/invitations", cookie, { role: "admin" })).status).toBe(403);
     expect((await call("POST", "/sync", cookie)).status).toBe(403);

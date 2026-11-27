@@ -49,12 +49,16 @@ export async function decide(method: string, cookie: string | undefined): Promis
 
 /**
  * What a member with the visitor role may ask for: the cleaning schedule and
- * the properties, to read. Everything else, and every change, is an admin's.
- * Paths are the API's own, after `/api/app`.
+ * the properties, to read, and one change: saying a cleaning is done, skipped
+ * or to do again (the handler takes nothing else from them). Everything else
+ * is an admin's. Paths are the API's own, after `/api/app`.
  */
 const VISITOR_READS = /^\/(?:session|nav|cleaning|stays|properties(?:\/\d+(?:\/preview)?)?)$/;
+const VISITOR_CLEANING = /^\/cleanings\/\d+\/\d{4}-\d{2}-\d{2}$/;
 
 export const visitorMay = (method: string, path: string) =>
-  (method === "GET" || method === "HEAD") && VISITOR_READS.test(path);
+  method === "GET" || method === "HEAD"
+    ? VISITOR_READS.test(path)
+    : method === "PUT" && VISITOR_CLEANING.test(path);
 
 export { SESSION_COOKIE };

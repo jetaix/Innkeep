@@ -93,7 +93,7 @@ docker run -d --name innkeep --restart unless-stopped \
 `APP_PASSWORD` is the owner's password: every page asks for it once per
 browser, then remembers it for 90 days. To let someone else in, an admin
 creates an invitation link under Settings, Members, and chooses a role: admin
-(everything) or visitor (the cleaning and the properties, to read). The
+(everything) or visitor (the cleaning and the properties, and marking a cleaning as done). The
 person picks a password of their own; Innkeep sends no email, so you pass the
 link on yourself. Changing `APP_PASSWORD` signs everyone out. After twenty wrong
 passwords in ten minutes, sign-in is refused until the ten minutes have

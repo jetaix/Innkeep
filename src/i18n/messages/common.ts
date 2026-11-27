@@ -46,7 +46,7 @@ const en = {
   account: {
     signOut: "Sign out",
     /** Said when someone with the visitor role tries to change something. */
-    readOnly: "Your access is read-only: ask an admin to make this change.",
+    readOnly: "Your access does not allow this change: ask an admin.",
   },
   notFound: {
     title: "This page does not exist",
@@ -116,7 +116,7 @@ const fr: typeof en = {
   roles: { admin: "Administrateur", visitor: "Visiteur" },
   account: {
     signOut: "Se déconnecter",
-    readOnly: "Votre accès est en lecture seule : demandez à un administrateur de faire ce changement.",
+    readOnly: "Votre accès ne permet pas ce changement : demandez à un administrateur.",
   },
   notFound: {
     title: "Cette page n’existe pas",

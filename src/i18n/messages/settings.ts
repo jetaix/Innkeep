@@ -79,7 +79,7 @@ const en = {
     /** Under the role, in the list of choices. */
     can: {
       admin: "Sees and changes everything",
-      visitor: "Sees the cleaning and the properties only",
+      visitor: "Sees the properties and the cleaning only, and marks cleanings as done",
     },
     remove: "Remove",
     confirmRemove: (name: string): string => `Remove ${name}? They are signed out at once.`,
@@ -192,7 +192,7 @@ const fr: typeof en = {
     role: "Rôle",
     can: {
       admin: "Voit et modifie tout",
-      visitor: "Voit seulement le ménage et les logements",
+      visitor: "Voit seulement les logements et le ménage, et marque les ménages faits",
     },
     remove: "Retirer",
     confirmRemove: (name) => `Retirer ${name} ? Cette personne est déconnectée aussitôt.`,
