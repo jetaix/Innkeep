@@ -272,7 +272,6 @@ function PropertyList() {
             <Card xstyle={styles.card}>
               <div {...stylex.props(styles.media)}>
                 {cover ? (
-                  // biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers
                   <img
                     src={sizedPhoto(cover, 720)}
                     alt={t.list.photoAlt(property.name)}

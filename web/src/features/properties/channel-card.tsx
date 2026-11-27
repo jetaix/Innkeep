@@ -495,7 +495,6 @@ function AdminPages({ channel, listing }: { channel: OtaChannel; listing: Proper
                   <div {...stylex.props(styles.photos)}>
                     {page.images.slice(0, 24).map((image) => (
                       // Photos load from the platform's own image servers.
-                      // biome-ignore lint/performance/noImgElement: photos come from the platforms' own servers
                       <img
                         key={image}
                         src={image}

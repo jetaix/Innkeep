@@ -15,7 +15,7 @@ import { findTelegramChats, sendTelegram, type TelegramChat } from "@/lib/telegr
 import { notifyCleanings, telegramLocale } from "./notify";
 import { getTelegramChat, rememberMovedChat, saveTelegramChat } from "./telegram-chat";
 
-/** Changes to cleanings, cleaners and the Telegram chat. Called by the Next.js actions and by the API; no framework in here. */
+/** Changes to cleanings, cleaners and the Telegram chat. Called by the API; no framework in here. */
 const day = z.object({ propertyId: z.coerce.number().int().positive(), date: isoDate });
 const cleanerChoice = z.union([z.literal(""), z.coerce.number().int().positive()]);
 

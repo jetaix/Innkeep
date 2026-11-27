@@ -1,16 +1,12 @@
 # dependencies
 /node_modules
 
-# next.js
-/.next/
 /out/
 
 # packaged browser extension
 /dist
-/public/innkeep-extension.zip
 /safari/build
 xcuserdata/
-next-env.d.ts
 *.tsbuildinfo
 
 # local data and secrets

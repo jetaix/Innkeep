@@ -53,8 +53,7 @@ const UNCONFIGURED = "Innkeep is not configured: set APP_PASSWORD, then redeploy
 
 /**
  * Everything the server answers: the app's API and the routes machines call.
- * This is what gets deployed. The two rules in front of them are the ones the
- * Next.js proxy applied to every request.
+ * This is what gets deployed, with two rules in front of them.
  *
  * `app` must have its error handler before it is mounted here, so this stays
  * below `app.onError`.

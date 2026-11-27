@@ -4,7 +4,7 @@ import { getDb, reservations } from "@/db";
 import { InvalidInput, isoDate, parse, text, wholeNumber } from "@/lib/form";
 import { parseMoney } from "@/lib/money";
 
-/** Changes to stays and blocked dates. Called by the Next.js actions and by the API; no framework in here. */
+/** Changes to stays and blocked dates. Called by the API; no framework in here. */
 const stayDates = z
   .object({ checkIn: isoDate, checkOut: isoDate })
   .refine((value) => value.checkOut > value.checkIn, { path: ["checkOut"] });

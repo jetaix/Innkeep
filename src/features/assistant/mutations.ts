@@ -5,7 +5,7 @@ import type { Locale } from "@/i18n/config";
 import { MESSAGES } from "@/i18n/messages";
 import { removeApiKey, saveApiKey } from "./key";
 
-/** Connecting Claude. Called by the Next.js actions and by the API; no framework in here. */
+/** Connecting Claude. Called by the API; no framework in here. */
 export type ConnectState = { error: string | null; connected?: boolean };
 
 const keySchema = z

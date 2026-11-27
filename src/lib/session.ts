@@ -51,9 +51,8 @@ export const tooManyAttempts = (failures: number[], now: number) =>
 export const publicDemo = () => process.env.PUBLIC_DEMO === "1" && appPassword() != null;
 
 /**
- * Which data a request sees, set by `src/proxy.ts` on every request and read
+ * Which data a request sees, decided by the server for every request (`web/server/scope.ts`) and read
  * by `src/db`. `real` is the host's own; `demo` is the sample data;
  * `demo-readonly` is the sample data for a request that tries to change something.
  */
 export type DataScope = "real" | "demo" | "demo-readonly";
-export const DATA_HEADER = "x-innkeep-data";

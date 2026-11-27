@@ -223,8 +223,6 @@ a night. It differs from the public pages in four ways:
   cleaning, glass bars for revenue, the gap between the two platforms for pricing, a doorway for each
   property, and the reading register (ground, ink, hairlines) for settings.
 
-The older Next.js dashboard under `src/app/(app)` keeps the monochrome tokens of `src/app/globals.css`
-until the Vite app replaces it.
 
 **Key Characteristics:**
 

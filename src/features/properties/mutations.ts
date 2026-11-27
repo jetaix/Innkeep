@@ -8,7 +8,7 @@ import { newToken, removeSampleData, seedDemo } from "@/db/seed";
 import { parse, text, wholeNumber } from "@/lib/form";
 import { airbnbListingId } from "./link";
 
-/** Changes to properties and their listings. Called by the Next.js actions and by the API; no framework in here. */
+/** Changes to properties and their listings. Called by the API; no framework in here. */
 const time = z.string().regex(/^\d{2}:\d{2}$/);
 
 const propertyDetails = z.object({

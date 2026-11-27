@@ -6,21 +6,21 @@ minutes and a contributor can understand in an afternoon.
 
 ## Decision summary
 
-| Layer            | Chosen                               | Runner-up                        | Why                                                                                 |
-| ---------------- | ------------------------------------ | -------------------------------- | ----------------------------------------------------------------------------------- |
-| App framework    | **Next.js 16 (App Router)**          | Vite + React SPA with a Hono API | One codebase and one process for UI, API routes, server actions and background sync |
-| Language         | **TypeScript**                       | —                                | Shared types from database to UI                                                    |
-| Database         | **SQLite** (libSQL, file or Turso)   | PostgreSQL                       | Zero setup; a host's data is a few thousand rows                                    |
-| ORM              | **Drizzle**                          | Prisma                           | SQL-shaped, no codegen step, no engine binary, portable to Postgres later           |
-| Styling          | **Tailwind CSS 4**                   | CSS modules                      | Fast to write, no component library lock-in                                         |
-| Calendar UI      | **Custom CSS timeline**              | FullCalendar                     | The multi-property timeline is FullCalendar's paid tier; ours is ~100 lines         |
-| iCal             | **Hand-written parser** (~150 lines) | node-ical / ical.js              | Feeds only use all-day VEVENTs; no recurrence or timezone engine needed             |
-| Validation       | **zod**                              | Hand-written checks              | One schema validates forms, the AI's structured output and MCP tool inputs          |
-| Command menu     | **cmdk**                             | Hand-rolled dialog               | Accessible combobox and focus handling that are easy to get wrong                   |
-| UI primitives    | **Own components** (~250 lines)      | shadcn/ui                        | A handful of buttons, fields and badges does not need a component kit               |
-| AI advice        | **Anthropic SDK**, structured output | Vercel AI SDK                    | Optional feature with one provider: one dependency and one key                      |
-| Assistant access | **MCP SDK**, stateless HTTP          | Custom REST API                  | Works with any MCP client with no client code to write                              |
-| Tests            | **Vitest**                           | node:test                        | Path aliases and TypeScript without config                                          |
+| Layer            | Chosen                               | Runner-up            | Why                                                                               |
+| ---------------- | ------------------------------------ | -------------------- | --------------------------------------------------------------------------------- |
+| App framework    | **Vite + React SPA with a Hono API** | Next.js (App Router) | Pages are static files; one API serves the pages, the phone app and the extension |
+| Language         | **TypeScript**                       | —                    | Shared types from database to UI                                                  |
+| Database         | **SQLite** (libSQL, file or Turso)   | PostgreSQL           | Zero setup; a host's data is a few thousand rows                                  |
+| ORM              | **Drizzle**                          | Prisma               | SQL-shaped, no codegen step, no engine binary, portable to Postgres later         |
+| Styling          | **StyleX**                           | Tailwind CSS         | Styles are typed, sit beside their component and compile to one small stylesheet  |
+| Calendar UI      | **Custom CSS timeline**              | FullCalendar         | The multi-property timeline is FullCalendar's paid tier; ours is ~100 lines       |
+| iCal             | **Hand-written parser** (~150 lines) | node-ical / ical.js  | Feeds only use all-day VEVENTs; no recurrence or timezone engine needed           |
+| Validation       | **zod**                              | Hand-written checks  | One schema validates forms, the AI's structured output and MCP tool inputs        |
+| Command menu     | **The browser's own `<dialog>`**     | cmdk                 | A filtered list in a native dialog covers it without a dependency                 |
+| UI primitives    | **Own components** (~250 lines)      | shadcn/ui            | A handful of buttons, fields and badges does not need a component kit             |
+| AI advice        | **Anthropic SDK**, structured output | Vercel AI SDK        | Optional feature with one provider: one dependency and one key                    |
+| Assistant access | **MCP SDK**, stateless HTTP          | Custom REST API      | Works with any MCP client with no client code to write                            |
+| Tests            | **Vitest**                           | node:test            | Path aliases and TypeScript without config                                        |
 
 ## Frontend / app framework
 
@@ -33,22 +33,21 @@ minutes and a contributor can understand in an afternoon.
 | Contributor pool                  | Largest                                  | Largest                                 | Medium                 | Smaller        | Large, different language |
 | Background jobs                   | In-process timer (fine for one instance) | Same                                    | Same                   | Same           | First-class queues        |
 
-**Why Next.js.** The app is mostly forms and server-rendered lists over a
-database. Server components read SQLite directly and server actions write to
-it, so there is no REST layer or client-side cache to keep in step. The
-dashboard ships very little JavaScript: the client components are the sidebar
-highlight, the command menu, the AI advice panel and the copy/submit/confirm
-buttons.
+**What was chosen.** Innkeep was first built on Next.js, with server
+components and server actions, and now runs as a client-rendered app
+(`web/src`) over an HTTP API (`web/server`, Hono on Bun). The public pages are
+written to static HTML at build; the dashboard is drawn in the browser from
+the API's answers, with the same pure functions the server uses. The one API
+is also what the phone app and the browser extension talk to.
 
-**What it costs.** Next.js moves fast. Version 16 enables Cache Components by
-default, which requires request-time data to sit behind `<Suspense>` plus
-`connection()`; every page here follows that pattern. A plain SPA would have
-fewer framework rules but twice the plumbing.
+**What it costs.** There is a REST layer and a client-side cache to keep in
+step: every change names the queries it makes stale (`web/src/api`). The
+server and the build need Bun.
 
 **When to revisit.** Real-time messaging (websockets from a partner API) or
 heavy scheduled work (pricing rules, automated messages) would justify a
-separate worker process. The channel code in `src/channels/` has no Next.js
-imports, so it can move into one unchanged.
+separate worker process. The code in `src/` has no framework imports, so it
+can move into one unchanged.
 
 ## Database
 
