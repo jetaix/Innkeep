@@ -120,8 +120,8 @@ const en = {
       why: "With the bank’s own table, each month costs exactly what the bank takes: a deferred start, insurance that changes, a renegotiated rate.",
       label: "The table’s lines",
       placeholder: "05/01/2026   1 196,21   641,67   554,54   30,00   199 445,46",
-      hint: "Copy the lines from the bank’s PDF or spreadsheet and paste them here. Each line needs its date, the interest and the capital; the insurance and what is still owed are read when they are there. The order of the columns does not matter.",
-      file: "Or choose a CSV or text file",
+      hint: "Choose the bank’s PDF below, or paste the lines here. Each line needs its date, the interest and the capital; the insurance and what is still owed are read when they are there. The order of the columns does not matter.",
+      file: "The bank’s file (PDF, CSV or text)",
       submit: "Import",
       submitting: "Reading…",
       cancel: "Cancel",
@@ -131,6 +131,7 @@ const en = {
       /** Keyed by what the server could not do. */
       problem: {
         empty: "No line with a date was found. Paste the lines of the table, one payment per line.",
+        file: "This file could not be read. Open it, copy the lines of the table and paste them above.",
         columns:
           "The columns could not be told apart. Each line needs at least the interest and the capital, as two separate amounts.",
       },
@@ -279,8 +280,8 @@ const fr: typeof en = {
       why: "Avec le tableau de la banque, chaque mois coûte exactement ce que la banque prélève : différé, assurance qui évolue, taux renégocié.",
       label: "Les lignes du tableau",
       placeholder: "05/01/2026   1 196,21   641,67   554,54   30,00   199 445,46",
-      hint: "Copiez les lignes depuis le PDF ou le tableur de la banque et collez-les ici. Chaque ligne doit contenir sa date, les intérêts et le capital ; l’assurance et le capital restant dû sont lus s’ils y figurent. L’ordre des colonnes n’a pas d’importance.",
-      file: "Ou choisissez un fichier CSV ou texte",
+      hint: "Choisissez le PDF de la banque ci-dessous, ou collez les lignes ici. Chaque ligne doit contenir sa date, les intérêts et le capital ; l’assurance et le capital restant dû sont lus s’ils y figurent. L’ordre des colonnes n’a pas d’importance.",
+      file: "Le fichier de la banque (PDF, CSV ou texte)",
       submit: "Importer",
       submitting: "Lecture…",
       cancel: "Annuler",
@@ -289,6 +290,7 @@ const fr: typeof en = {
         `Retirer le tableau de la banque de « ${label} » ? Ses échéances sont de nouveau calculées à partir du montant, du taux et de la durée.`,
       problem: {
         empty: "Aucune ligne datée n’a été trouvée. Collez les lignes du tableau, une échéance par ligne.",
+        file: "Ce fichier n’a pas pu être lu. Ouvrez-le, copiez les lignes du tableau et collez-les ci-dessus.",
         columns:
           "Les colonnes n’ont pas pu être distinguées. Chaque ligne doit contenir au moins les intérêts et le capital, en deux montants séparés.",
       },

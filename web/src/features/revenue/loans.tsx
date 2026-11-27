@@ -209,8 +209,20 @@ function ScheduleImport({ loan }: { loan: LoanWithTable }) {
   const [table, setTable] = useState("");
   const send = useMutation(importSchedule);
   const clear = useMutation(clearSchedule);
+  const [unreadable, setUnreadable] = useState(false);
   const fullDate = { day: "numeric", month: "short", year: "numeric" } as const;
   const lines = loan.schedule;
+
+  /** Puts the file's lines in the field, for the host to see before importing. A PDF is read here, in the browser. */
+  async function read(file: File) {
+    setUnreadable(false);
+    try {
+      const pdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+      setTable(pdf ? await (await import("./pdf-text")).pdfText(file) : await file.text());
+    } catch {
+      setUnreadable(true);
+    }
+  }
   const field = `loan-${loan.id}-table`;
   // The server names what it could not do; anything else is said as it came.
   const problem = send.error
@@ -219,7 +231,9 @@ function ScheduleImport({ loan }: { loan: LoanWithTable }) {
       : send.error.message.includes("table-columns")
         ? t.problem.columns
         : send.error.message
-    : clear.error?.message;
+    : unreadable
+      ? t.problem.file
+      : clear.error?.message;
 
   return (
     <div {...stylex.props(styles.table)}>
@@ -263,10 +277,10 @@ function ScheduleImport({ loan }: { loan: LoanWithTable }) {
             <input
               id={`${field}-file`}
               type="file"
-              accept=".csv,.tsv,.txt,text/csv,text/plain"
+              accept=".pdf,.csv,.tsv,.txt,application/pdf,text/csv,text/plain"
               onChange={(event) => {
                 const file = event.currentTarget.files?.[0];
-                if (file) void file.text().then(setTable);
+                if (file) void read(file);
               }}
               {...stylex.props(styles.file)}
             />

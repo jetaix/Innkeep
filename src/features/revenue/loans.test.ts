@@ -89,6 +89,14 @@ describe("a loan with its bank's table", () => {
     expect(summariseMonth("2026-04", [], costs, rates).charges).toBe(0);
   });
 
+  it("keeps the computed payment for the months before the table starts", () => {
+    const late = schedule.map((line) => ({ ...line, date: line.date.replace("2026", "2027") }));
+    const costs = loanCosts([{ ...loan, schedule: late }]);
+    expect(summariseMonth("2026-12", [], costs, rates).charges).toBe(1_226_21);
+    expect(summariseMonth("2027-01", [], costs, rates).charges).toBe(30_00);
+    expect(summariseMonth("2027-04", [], costs, rates).charges).toBe(0);
+  });
+
   it("stands where the table says", () => {
     expect(loanState(loan, "2026-02-10", schedule)).toMatchObject({
       total: 3,

@@ -145,14 +145,27 @@ export function parseSchedule(text: string): ParsedSchedule {
   const columns = usable(heading) ? heading : width >= 2 ? fromFigures(kept.map((row) => row.figures)) : null;
   if (!usable(columns)) return { ok: false, problem: "columns" };
 
+  // Some banks print what is owed before each payment, not after: then a line's
+  // balance less its capital is the next line's balance.
+  const owed = (row: { figures: number[] }) => Math.abs(row.figures[columns.remaining ?? 0]);
+  const paid = (row: { figures: number[] }) => Math.abs(row.figures[columns.capital]);
+  const before =
+    columns.remaining != null &&
+    kept.length > 1 &&
+    mostly(
+      kept.slice(0, -1).map((_, index) => [index]),
+      ([index]) => near(owed(kept[index]) - paid(kept[index]), owed(kept[index + 1])),
+    );
+
   const lines = new Map<ISODate, ScheduleLine>();
-  for (const { date, figures } of kept) {
+  for (const row of kept) {
+    const { date, figures } = row;
     lines.set(date, {
       date,
       interest: Math.abs(figures[columns.interest]),
       capital: Math.abs(figures[columns.capital]),
       insurance: columns.insurance == null ? 0 : Math.abs(figures[columns.insurance]),
-      remaining: columns.remaining == null ? null : Math.abs(figures[columns.remaining]),
+      remaining: columns.remaining == null ? null : before ? Math.max(0, owed(row) - paid(row)) : owed(row),
     });
   }
   return { ok: true, lines: [...lines.values()] };

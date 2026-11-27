@@ -58,6 +58,20 @@ describe("parseSchedule", () => {
     ]);
   });
 
+  it("turns a balance printed before each payment into what is owed after it", () => {
+    // Date, owed before, capital, interest, insurance, payment with insurance.
+    const pasted = `
+      05/12/2026   116072,34   585,06   314,36   6,22   905,64
+      05/01/2027   115487,28   586,64   312,78   6,22   905,64
+      05/02/2027   114900,64   588,23   311,19   6,14   905,56
+    `;
+    expect(lines(pasted)).toEqual([
+      { date: "2026-12-05", interest: 314_36, capital: 585_06, insurance: 6_22, remaining: 115_487_28 },
+      { date: "2027-01-05", interest: 312_78, capital: 586_64, insurance: 6_22, remaining: 114_900_64 },
+      { date: "2027-02-05", interest: 311_19, capital: 588_23, insurance: 6_14, remaining: 114_312_41 },
+    ]);
+  });
+
   it("says what is wrong instead of guessing", () => {
     expect(parseSchedule("nothing to see here")).toEqual({ ok: false, problem: "empty" });
     expect(parseSchedule("05/01/2026 1 196,21\n05/02/2026 1 196,21")).toEqual({

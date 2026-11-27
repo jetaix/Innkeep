@@ -147,17 +147,27 @@ function scheduleCosts(loan: CostedLoan, schedule: Line[]): Cost[] {
     const month = monthOf(line.date);
     months.set(month, (months.get(month) ?? 0) + line.interest + line.capital + line.insurance);
   }
-  return [...months].map(([month, amount]) => ({
-    id: -loan.id,
-    propertyId: loan.propertyId,
-    label: loan.label,
-    category: "loan",
-    frequency: "once",
-    amount,
-    appliesTo: "all",
-    startsOn: `${month}-01`,
-    endsOn: null,
-  }));
+  // A table printed part-way through the loan says nothing of the months before it: those keep the computed payment.
+  const first = [...months.keys()].sort()[0];
+  const earlier = computedCosts(loan)
+    .filter((cost) => monthOf(cost.startsOn) < first)
+    .map((cost) => ({ ...cost, endsOn: `${addMonths(first, -1)}-01` }));
+  return [
+    ...earlier,
+    ...[...months].map(
+      ([month, amount]): Cost => ({
+        id: -loan.id,
+        propertyId: loan.propertyId,
+        label: loan.label,
+        category: "loan",
+        frequency: "once",
+        amount,
+        appliesTo: "all",
+        startsOn: `${month}-01`,
+        endsOn: null,
+      }),
+    ),
+  ];
 }
 
 function computedCosts(loan: CostedLoan): Cost[] {
