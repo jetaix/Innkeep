@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient, type Client, type Transaction } from "@libsql/client";
 import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
-import { DATA_HEADER, type DataScope } from "@/lib/session";
+import type { DataScope } from "@/lib/session";
 import * as schema from "./schema";
 
 /**
@@ -269,6 +269,20 @@ CREATE TABLE IF NOT EXISTS reservation_events (
   at INTEGER NOT NULL
 );
 `,
+  // 19: loans to repay, counted as a monthly cost until the last payment
+  `
+CREATE TABLE IF NOT EXISTS loans (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  principal INTEGER NOT NULL,
+  rate INTEGER NOT NULL,
+  months INTEGER NOT NULL,
+  insurance INTEGER NOT NULL DEFAULT 0,
+  starts_on TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */
@@ -328,8 +342,8 @@ function connect(): Client {
 /**
  * Which data a request sees. An Innkeep protected by a password keeps two
  * databases apart: the host's own, and a demo with sample bookings that lives
- * in memory. `src/proxy.ts` decides for each request and says so in a header;
- * nothing else may set it. Someone who is not signed in therefore never
+ * in memory. The server decides for each request (`web/server/scope.ts`) and runs it
+ * inside `withData`; nothing else may set it. Someone who is not signed in therefore never
  * reaches the host's data, whatever page or action they aim at: with
  * `PUBLIC_DEMO` they see the demo, without it they only ever see the sign-in page.
  *
@@ -344,21 +358,13 @@ const seeding = new AsyncLocalStorage<true>();
 /** Runs `work` against the given data, whatever the request says. For filling the demo, and for tests. */
 export const withData = <T>(scope: DataScope, work: () => Promise<T>): Promise<T> => forced.run(scope, work);
 
-/** The data the current request sees. Outside a request (a background sync) it is the host's own. */
+/**
+ * The data the current request sees. Every request to the API is wrapped in
+ * `withData` by the server (see `web/server`), which decides from the session.
+ * Outside a request (the background sync, a script) it is the host's own.
+ */
 export async function dataScope(): Promise<DataScope> {
-  const set = forced.getStore();
-  if (set) return set;
-  // Without a password there is one household and one set of data.
-  if (!process.env.APP_PASSWORD) return "real";
-  let given: string | null;
-  try {
-    const { headers } = await import("next/headers");
-    given = (await headers()).get(DATA_HEADER);
-  } catch {
-    return "real";
-  }
-  // Inside a request, anything the proxy did not mark as the host's own is the demo.
-  return given === "real" ? "real" : given === "demo" ? "demo" : "demo-readonly";
+  return forced.getStore() ?? "real";
 }
 
 export const isDemo = async () => (await dataScope()) !== "real";

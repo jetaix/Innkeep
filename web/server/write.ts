@@ -33,8 +33,7 @@ const json = validator(
 
 /**
  * Every change the pages can make, one address each. The changes themselves
- * live in `src/features/<name>/mutations.ts`, shared with the Next.js
- * actions until the cutover.
+ * live in `src/features/<name>/mutations.ts`, with no framework in them.
  *
  * A visitor of the demo may call any of these: the database refuses their
  * writes. The few that reach outside the database (Telegram, Anthropic)
@@ -45,6 +44,12 @@ export const write = new Hono<Env>()
   .post("/charges", json, async (c) => c.json({ id: await revenue.addCharge(c.req.valid("json")) }))
   .delete("/charges/:id", async (c) => {
     await revenue.deleteCharge(num(c.req.param("id")));
+    return c.json(done);
+  })
+
+  .post("/loans", json, async (c) => c.json({ id: await revenue.addLoan(c.req.valid("json")) }))
+  .delete("/loans/:id", async (c) => {
+    await revenue.deleteLoan(num(c.req.param("id")));
     return c.json(done);
   })
 

@@ -12,7 +12,11 @@ import { ConfirmButton, SubmitButton } from "../../ui/actions";
 import { buttonStyle } from "../../ui/button";
 import { Field, Input, Select, Textarea } from "../../ui/form";
 import { Card, Kbd, Notice, SectionTitle, SourceBadge } from "../../ui/primitives";
+import type { ListView } from "@/features/reservations/months";
 import type { Search } from "./period";
+
+/** Where closing a panel leads: the calendar as it was, or the list the stay was opened from. */
+export type Back = { to: "/calendar"; search: Search } | { to: "/reservations"; search: { view?: ListView } };
 
 const styles = stylex.create({
   panel: {
@@ -64,16 +68,27 @@ const styles = stylex.create({
   small: { margin: 0, color: color.muted, fontSize: text.sm },
 });
 
-function Panel({ title, close, children }: { title: string; close: Search; children: ReactNode }) {
+function Panel({
+  title,
+  close,
+  xstyle,
+  children,
+}: {
+  title: string;
+  close: Back;
+  xstyle?: stylex.StyleXStyles;
+  children: ReactNode;
+}) {
   const { m } = useI18n();
   return (
-    <Card xstyle={styles.panel}>
+    <Card xstyle={[styles.panel, xstyle]}>
       <aside aria-label={title}>
         <div {...stylex.props(styles.head)}>
           <SectionTitle>{title}</SectionTitle>
           <Link
-            to="/calendar"
-            search={close}
+            {...close}
+            // The page behind stays where it was scrolled to.
+            resetScroll={false}
             data-shortcut="Escape"
             {...stylex.props(buttonStyle({ variant: "ghost", size: "sm" }))}
           >
@@ -100,6 +115,7 @@ function PlatformFacts({ stay, currency }: { stay: Reservation; currency: string
       t.bookedOn,
       fmt.date(stay.bookedOn, { day: "numeric", month: "short", year: "numeric" }),
     ],
+    stay.unitName && [t.unit, stay.unitName],
     stay.grossAmount != null && [t.guestPaid, money(stay.grossAmount)],
     stay.channelFees != null && [t.fees, money(stay.channelFees)],
   ].filter((fact): fact is [string, string] => Boolean(fact));
@@ -123,11 +139,16 @@ export function StayPanel({
   property,
   conflict,
   close,
+  xstyle,
+  more,
 }: {
   stay: Reservation;
   property: Property;
   conflict: boolean;
-  close: Search;
+  close: Back;
+  xstyle?: stylex.StyleXStyles;
+  /** Shown under everything else: a way on from the panel. */
+  more?: ReactNode;
 }) {
   const { m, fmt } = useI18n("calendar");
   const t = m.calendar.panel;
@@ -138,7 +159,7 @@ export function StayPanel({
   const direct = stay.source === "direct";
   const estimate = property.basePrice * nights * 100;
   // Awaited rather than left to a callback: once the stay is gone from the data, this panel is too.
-  const done = () => navigate({ to: "/calendar", search: close });
+  const done = () => navigate({ ...close, resetScroll: false });
   const failed = update.error ?? remove.error;
 
   function save(event: FormEvent<HTMLFormElement>) {
@@ -148,7 +169,7 @@ export function StayPanel({
   }
 
   return (
-    <Panel title={stay.kind === "block" ? t.blockedDates : t.reservation} close={close}>
+    <Panel title={stay.kind === "block" ? t.blockedDates : t.reservation} close={close} xstyle={xstyle}>
       <div {...stylex.props(styles.where)}>
         <SourceBadge source={stay.source} />
         <span {...stylex.props(styles.strong)}>{property.name}</span>
@@ -240,6 +261,7 @@ export function StayPanel({
       ) : (
         <p {...stylex.props(styles.note)}>{t.datesFrom(m.common.sources[stay.source])}</p>
       )}
+      {more}
     </Panel>
   );
 }
@@ -254,7 +276,7 @@ export function NewStayPanel({
   properties: Property[];
   propertyId: number;
   date: string;
-  close: Search;
+  close: Back;
 }) {
   const { m } = useI18n("calendar");
   const t = m.calendar.create;
@@ -265,7 +287,7 @@ export function NewStayPanel({
   function add(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     create.mutateAsync(Object.fromEntries(new FormData(event.currentTarget))).then(
-      () => navigate({ to: "/calendar", search: close }),
+      () => navigate(close),
       () => {},
     );
   }

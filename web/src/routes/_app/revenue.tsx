@@ -1,11 +1,12 @@
 import * as stylex from "@stylexjs/stylex";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { Charge, Property } from "@/db/schema";
+import type { Charge, Loan, Property } from "@/db/schema";
 import { formatMonth, type MonthSummary } from "@/features/revenue/compute";
 import { INTL_LOCALE } from "@/i18n/config";
 import { revenueQuery, revenueYearsQuery } from "../../api/queries";
 import { ChargeForm, ChargeRow } from "../../features/revenue/charges";
+import { LoanForm, LoanRow } from "../../features/revenue/loans";
 import { MonthChart } from "../../features/revenue/month-chart";
 import { loadMessages, useI18n } from "../../i18n";
 import { color, radius, shadow, text } from "../../tokens.stylex";
@@ -145,6 +146,7 @@ const styles = stylex.create({
   // The charges are read and edited on the ground itself: ink and hairlines, no panel.
   aside: { minWidth: 0 },
   asideHead: { paddingBottom: "0.875rem" },
+  next: { marginTop: "2.5rem" },
   ruled: { borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: color.lineStrong },
   none: { margin: 0, paddingBlock: "1rem", color: color.muted, lineHeight: 1.55 },
 });
@@ -175,6 +177,7 @@ function Revenue({
   current,
   summaries,
   charges,
+  loans,
   properties,
   byYear = false,
 }: {
@@ -182,6 +185,7 @@ function Revenue({
   current: string;
   summaries: MonthSummary[];
   charges: Charge[];
+  loans: Loan[];
   properties: Property[];
   byYear?: boolean;
 }) {
@@ -362,6 +366,21 @@ function Revenue({
           <p {...stylex.props(styles.none, styles.ruled)}>{t.charges.empty}</p>
         )}
         <ChargeForm properties={properties} />
+
+        <div {...stylex.props(styles.asideHead, styles.next)}>
+          <SectionTitle>{t.loans.title}</SectionTitle>
+          <p {...stylex.props(styles.hint)}>{t.loans.hint}</p>
+        </div>
+        {loans.length > 0 ? (
+          <ul {...stylex.props(styles.list, styles.ruled)}>
+            {loans.map((loan) => (
+              <LoanRow key={loan.id} loan={loan} properties={properties} currency={currency} />
+            ))}
+          </ul>
+        ) : (
+          <p {...stylex.props(styles.none, styles.ruled)}>{t.loans.empty}</p>
+        )}
+        <LoanForm properties={properties} />
       </section>
     </div>
   );

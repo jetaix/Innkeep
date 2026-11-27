@@ -9,6 +9,13 @@ minor version may change how things work.
 
 ### Added
 
+- Loans on the Revenue page: enter the amount borrowed, the rate, the duration
+  and the insurance, and the monthly payment counts as a cost until the last
+  one. Each loan shows what is still owed and what the borrowing costs.
+- Clicking a reservation on the Reservations page opens its details in a panel
+  beside the list, where the guest name, payout and notes can be changed.
+- A line chart of reservations per month on the Reservations page.
+
 - A public demo (`PUBLIC_DEMO=1`): visitors see a read-only dashboard on
   sample bookings, and the host signs in at `/login` to see their own.
 
@@ -33,6 +40,8 @@ minor version may change how things work.
 
 ### Changed
 
+- The Booking.com reservations page opens on arrivals from today to
+  31 December of next year.
 - Every page works on a phone.
 - Settings are in four tabs. Assistant moved into Suggestions and Data into Settings.
 - The Pricing page is simpler and shows a year by default.

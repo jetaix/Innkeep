@@ -1,24 +1,44 @@
 import "server-only";
 import { asc } from "drizzle-orm";
-import { charges, getDb } from "@/db";
+import { charges, getDb, loans } from "@/db";
 import { getProperties, getStays } from "@/features/reservations/queries";
 import { today } from "@/lib/dates";
-import { addMonths, monthOf, monthStart, summariseMonth, summariseYear, type Month } from "./compute";
+import {
+  addMonths,
+  type Cost,
+  monthOf,
+  monthStart,
+  summariseMonth,
+  summariseYear,
+  type Month,
+} from "./compute";
+import { loanCosts } from "./loans";
 
 export async function getCharges() {
   return await getDb().select().from(charges).orderBy(asc(charges.createdAt)).all();
+}
+
+export async function getLoans() {
+  return await getDb().select().from(loans).orderBy(asc(loans.createdAt)).all();
+}
+
+/** Everything set against revenue: the charges, and each loan as its monthly payment. */
+export async function getCosts(): Promise<Cost[]> {
+  return [...(await getCharges()), ...loanCosts(await getLoans())];
 }
 
 /** Monthly summaries from `monthsBack` months ago to `monthsAhead` months ahead. */
 export async function getRevenue({ monthsBack = 1, monthsAhead = 4 } = {}) {
   const properties = await getProperties();
   const allCharges = await getCharges();
+  const allLoans = await getLoans();
+  const costs = [...allCharges, ...loanCosts(allLoans)];
   const current = monthOf(today());
   const first = addMonths(current, -monthsBack);
   const months: Month[] = Array.from({ length: monthsBack + monthsAhead + 1 }, (_, i) => addMonths(first, i));
 
   const guestStays = (await getStays(monthStart(first))).filter((stay) => stay.kind === "reservation");
-  const summaries = months.map((month) => summariseMonth(month, guestStays, allCharges, properties));
+  const summaries = months.map((month) => summariseMonth(month, guestStays, costs, properties));
 
   return {
     // One currency for the whole account: the first property's.
@@ -27,6 +47,7 @@ export async function getRevenue({ monthsBack = 1, monthsAhead = 4 } = {}) {
     summaries,
     thisMonth: summaries[monthsBack],
     charges: allCharges,
+    loans: allLoans,
     properties,
     guestStays,
   };
@@ -39,6 +60,8 @@ const YEARS_BACK = 5;
 export async function getRevenueYears() {
   const properties = await getProperties();
   const allCharges = await getCharges();
+  const allLoans = await getLoans();
+  const costs = [...allCharges, ...loanCosts(allLoans)];
   const thisYear = Number(today().slice(0, 4));
   const guestStays = (await getStays(`${thisYear - YEARS_BACK}-01-01`)).filter(
     (stay) => stay.kind === "reservation",
@@ -53,9 +76,10 @@ export async function getRevenueYears() {
     currency: properties[0]?.currency ?? "EUR",
     current: String(thisYear),
     summaries: Array.from({ length: last - first + 1 }, (_, i) =>
-      summariseYear(String(first + i), guestStays, allCharges, properties),
+      summariseYear(String(first + i), guestStays, costs, properties),
     ),
     charges: allCharges,
+    loans: allLoans,
     properties,
   };
 }

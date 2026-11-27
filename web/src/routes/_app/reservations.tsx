@@ -2,12 +2,20 @@ import * as stylex from "@stylexjs/stylex";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
-import { isListView, LISTS, type ListView, reservationMonths } from "@/features/reservations/months";
+import { lazy, Suspense } from "react";
+import {
+  isListView,
+  LISTS,
+  type ListView,
+  reservationCounts,
+  reservationMonths,
+} from "@/features/reservations/months";
 import { reservationsOverview, type StaysTotal } from "@/features/reservations/overview";
 import { addMonths, formatMonth, monthOf, monthStart, stayValue } from "@/features/revenue/compute";
 import { INTL_LOCALE } from "@/i18n/config";
 import { addDays, diffDays, today } from "@/lib/dates";
 import { chargesQuery, propertiesQuery, staysQuery } from "../../api/queries";
+import { CountChart } from "../../features/reservations/count-chart";
 import { StayList } from "../../features/reservations/stay-list";
 import { loadMessages, useI18n } from "../../i18n";
 import { color, font, radius, shadow, text } from "../../tokens.stylex";
@@ -15,16 +23,25 @@ import { buttonStyle } from "../../ui/button";
 import { Badge, Card, EmptyState, Hidden, Kbd, PageHeader, SectionTitle } from "../../ui/primitives";
 import { figureStyle } from "../../ui/slab";
 
+// The panel of an open reservation is the calendar's own; its code is fetched on the first click.
+const StayPanel = lazy(() =>
+  import("../../features/calendar/panels").then((file) => ({ default: file.StayPanel })),
+);
+
 /** A year back and everything ahead: the lists, the totals and the months are all cut from it. */
 const stays = () => staysQuery({ from: addDays(today(), -365) });
 
 export const Route = createFileRoute("/_app/reservations")({
-  validateSearch: (search: Record<string, unknown>): { view?: ListView } => ({
+  validateSearch: (search: Record<string, unknown>): { view?: ListView; r?: number } => ({
     view: isListView(search.view) && search.view !== "list" ? search.view : undefined,
+    // The reservation open in the panel.
+    r: Number.isInteger(Number(search.r)) && Number(search.r) > 0 ? Number(search.r) : undefined,
   }),
   // Started while this route's code downloads; the components read the same queries.
   loader: ({ context: { queryClient } }) => {
     void loadMessages("reservations");
+    // The words of the panel a reservation opens in.
+    void loadMessages("calendar");
     return Promise.all([
       queryClient.ensureQueryData(stays()),
       queryClient.ensureQueryData(propertiesQuery),
@@ -158,6 +175,26 @@ const styles = stylex.create({
   netLine: { alignItems: "center", paddingBlock: "0.75rem 0.875rem" },
   netValue: { fontSize: "1.625rem" },
   loss: { color: color.critical },
+  // An open reservation: a sheet on the right edge, over a dimmed page.
+  dim: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 40,
+    backgroundColor: "rgb(13 15 19 / 0.45)",
+  },
+  drawer: {
+    position: "fixed",
+    insetBlock: 0,
+    right: 0,
+    zIndex: 50,
+    width: "100%",
+    maxWidth: "24rem",
+    padding: { default: "0.5rem", [WIDE]: "0.75rem" },
+    overflowY: "auto",
+    overscrollBehavior: "contain",
+  },
+  sheet: { width: "100%", minHeight: "100%", boxShadow: shadow.panel },
+  onward: { marginTop: "1rem" },
 });
 
 function ReservationsPage() {
@@ -182,10 +219,10 @@ function ReservationsPage() {
 function Reservations() {
   const { m, fmt, locale } = useI18n("reservations");
   const t = m.reservations;
-  const { view = "list" } = Route.useSearch();
+  const { view = "list", r } = Route.useSearch();
   const { data } = useSuspenseQuery(stays());
   const { properties } = useSuspenseQuery(propertiesQuery).data;
-  const { charges } = useSuspenseQuery(chargesQuery).data;
+  const { costs: charges } = useSuspenseQuery(chargesQuery).data;
 
   const now = today();
   const conflicts = new Set(data.conflicts);
@@ -216,6 +253,11 @@ function Reservations() {
   const yearOfStays = data.stays.filter((stay) => stay.checkOut > yearStart);
   const overview = reservationsOverview({ today: now, stays: yearOfStays, charges, properties });
   const months = reservationMonths({ today: now, stays: yearOfStays, properties });
+  const counts = reservationCounts({ today: now, stays: data.stays });
+  // Any stay on the page can be opened: the year behind, and everything ahead.
+  const selected = r ? data.stays.find((stay) => stay.id === r && stay.kind === "reservation") : undefined;
+  const selectedProperty = selected && properties.find((place) => place.id === selected.propertyId);
+  const close = { to: "/reservations", search: { view: view === "list" ? undefined : view } } as const;
   const monthSections = [
     { id: "months-upcoming", title: t.months.upcoming, rows: months.upcoming },
     { id: "months-past", title: t.months.past, rows: months.past },
@@ -268,6 +310,15 @@ function Reservations() {
           />
         </div>
       </section>
+      <Card>
+        <div {...stylex.props(styles.head)}>
+          <div>
+            <SectionTitle>{t.chart.title}</SectionTitle>
+            <p {...stylex.props(styles.small)}>{t.chart.hint}</p>
+          </div>
+        </div>
+        <CountChart counts={counts} current={monthOf(now)} />
+      </Card>
       <nav aria-label={t.view.label} {...stylex.props(styles.views)}>
         {LISTS.map((option) => (
           <Link
@@ -323,7 +374,14 @@ function Reservations() {
                   </div>
                   {row.stays.length > 0 ? (
                     <div {...stylex.props(styles.under)}>
-                      <StayList stays={row.stays} properties={properties} conflicts={conflicts} today={now} />
+                      <StayList
+                        stays={row.stays}
+                        properties={properties}
+                        conflicts={conflicts}
+                        today={now}
+                        panel={{ view }}
+                        selectedId={selected?.id}
+                      />
                     </div>
                   ) : (
                     <p {...stylex.props(styles.none, styles.under)}>{t.months.none}</p>
@@ -349,12 +407,51 @@ function Reservations() {
                 </p>
               </div>
               <Card>
-                <StayList stays={group.stays} properties={properties} conflicts={conflicts} today={now} />
+                <StayList
+                  stays={group.stays}
+                  properties={properties}
+                  conflicts={conflicts}
+                  today={now}
+                  panel={{ view }}
+                  selectedId={selected?.id}
+                />
               </Card>
             </section>
           );
         })}
       <p {...stylex.props(styles.note)}>{t.estimateNote}</p>
+      {selected && selectedProperty && (
+        <>
+          {/* A click beside the panel closes it. Escape and the panel's own button do too. */}
+          <Link
+            {...close}
+            resetScroll={false}
+            aria-label={t.details.close}
+            tabIndex={-1}
+            {...stylex.props(styles.dim)}
+          />
+          <div {...stylex.props(styles.drawer)}>
+            <Suspense fallback={null}>
+              <StayPanel
+                stay={selected}
+                property={selectedProperty}
+                conflict={conflicts.has(selected.id)}
+                close={close}
+                xstyle={styles.sheet}
+                more={
+                  <Link
+                    to="/calendar"
+                    search={{ view: "weeks", start: addDays(selected.checkIn, -3), r: selected.id }}
+                    {...stylex.props(buttonStyle({ size: "sm" }), styles.onward)}
+                  >
+                    {t.details.calendar}
+                  </Link>
+                }
+              />
+            </Suspense>
+          </div>
+        </>
+      )}
     </div>
   );
 }

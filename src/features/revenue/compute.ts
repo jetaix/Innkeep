@@ -1,4 +1,4 @@
-import type { Charge, Property, Reservation } from "@/db/schema";
+import type { Charge, CostCategory, Property, Reservation } from "@/db/schema";
 import { addDays, diffDays, type ISODate } from "@/lib/dates";
 import type { Minor } from "@/lib/money";
 
@@ -15,10 +15,11 @@ export type Month = string; // "YYYY-MM"
 
 type Stay = Pick<Reservation, "propertyId" | "source" | "checkIn" | "checkOut" | "amount">;
 type Rate = Pick<Property, "id" | "basePrice">;
-type Cost = Pick<
+/** A charge, or something counted like one: a loan's monthly payment (see `loans.ts`). */
+export type Cost = Pick<
   Charge,
-  "id" | "propertyId" | "label" | "category" | "frequency" | "amount" | "appliesTo" | "startsOn" | "endsOn"
->;
+  "id" | "propertyId" | "label" | "frequency" | "amount" | "appliesTo" | "startsOn" | "endsOn"
+> & { category: CostCategory };
 
 export type MonthSummary = {
   month: Month;
@@ -28,7 +29,7 @@ export type MonthSummary = {
   estimated: Minor;
   charges: Minor;
   net: Minor;
-  chargeLines: { id: number; label: string; category: Charge["category"]; amount: Minor }[];
+  chargeLines: { id: number; label: string; category: CostCategory; amount: Minor }[];
   bookedNights: number;
   availableNights: number;
   occupancy: number;

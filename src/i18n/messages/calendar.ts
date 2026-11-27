@@ -56,6 +56,8 @@ const en = {
     overlap: "Overlaps another stay on this property.",
     statusOn: (source: string) => `Status on ${source}`,
     bookedOn: "Booked on",
+    /** The listing or room the guest booked, as the platform names it. */
+    unit: "Booked",
     guestPaid: "Guest paid",
     fees: "Commission and fees",
     guestName: "Guest name",
@@ -142,6 +144,7 @@ const fr: typeof en = {
     overlap: "Chevauche un autre séjour dans ce logement.",
     statusOn: (source) => `Statut sur ${source}`,
     bookedOn: "Réservé le",
+    unit: "Réservé",
     guestPaid: "Payé par le voyageur",
     fees: "Commission et frais",
     guestName: "Nom du voyageur",

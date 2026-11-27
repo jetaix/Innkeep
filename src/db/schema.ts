@@ -184,6 +184,28 @@ export const charges = sqliteTable("charges", {
   createdAt: integer("created_at").notNull(),
 });
 
+/** What a line of costs can be filed under: a charge's own category, or a loan's repayment. */
+export type CostCategory = ChargeCategory | "loan";
+
+/** Money borrowed for a property, repaid in equal monthly payments. */
+export const loans = sqliteTable("loans", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  /** Null counts the loan against every property. */
+  propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  /** The amount borrowed, in minor units (cents). */
+  principal: integer("principal").notNull(),
+  /** Yearly interest rate in basis points (385 = 3.85%). */
+  rate: integer("rate").notNull(),
+  /** How many monthly payments repay it. */
+  months: integer("months").notNull(),
+  /** Borrower's insurance paid with each payment, in minor units. */
+  insurance: integer("insurance").notNull().default(0),
+  /** The day of the first payment. */
+  startsOn: text("starts_on").notNull(),
+  createdAt: integer("created_at").notNull(),
+});
+
 export const dismissedSuggestions = sqliteTable("dismissed_suggestions", {
   key: text("key").primaryKey(),
   dismissedAt: integer("dismissed_at").notNull(),
@@ -198,6 +220,7 @@ export const aiAdvice = sqliteTable("ai_advice", {
 });
 
 export type Charge = typeof charges.$inferSelect;
+export type Loan = typeof loans.$inferSelect;
 export type Property = typeof properties.$inferSelect;
 export type Listing = typeof listings.$inferSelect;
 export type Reservation = typeof reservations.$inferSelect;

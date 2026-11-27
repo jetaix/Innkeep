@@ -77,6 +77,54 @@ const en = {
     maintenance: "Maintenance",
     tax: "Tax",
     other: "Other",
+    loan: "Loan",
+  },
+  loans: {
+    title: "Loans",
+    hint: "The monthly payment counts as a cost until the last one.",
+    empty: "No loan entered. Add a mortgage or a works loan to see what is left after repaying it.",
+    /** Under the name: "€200,000 at 3.85% over 20 years". */
+    terms: (amount: string, rate: string, duration: string): string =>
+      `${amount} at ${rate} over ${duration}`,
+    /** "20 years", "12 years and 6 months", "8 months". */
+    duration: (months: number): string => {
+      const years = Math.floor(months / 12);
+      const rest = months % 12;
+      const y = years > 0 ? `${years} year${years === 1 ? "" : "s"}` : "";
+      const m = rest > 0 ? `${rest} month${rest === 1 ? "" : "s"}` : "";
+      return y && m ? `${y} and ${m}` : y || m;
+    },
+    perMonth: (amount: string): string => `${amount} a month`,
+    insurance: (amount: string): string => `of which ${amount} insurance`,
+    remaining: "Still owed",
+    paid: "Payments made",
+    /** "11 of 240" */
+    paidOf: (paid: number, total: number): string => `${paid} of ${total}`,
+    thisMonth: "This month’s payment",
+    split: (interest: string, capital: string): string => `${interest} interest, ${capital} capital`,
+    lastPayment: "Last payment",
+    cost: "Cost of the loan",
+    costNote: "interest and insurance over its whole life",
+    notStarted: (date: string): string => `First payment on ${date}`,
+    finished: "Repaid",
+    progress: "Share of the capital repaid",
+    remove: "Remove",
+    confirmRemove: (label: string): string => `Remove "${label}"? Past and future months are recalculated.`,
+    form: {
+      title: "Add a loan",
+      name: "Name",
+      namePlaceholder: "Mortgage, works loan…",
+      principal: "Amount borrowed",
+      rate: "Rate (% a year)",
+      rateHint: "Without insurance. 3.85 means 3.85%.",
+      years: "Duration (years)",
+      yearsHint: "12.5 for 150 months.",
+      insurance: "Insurance a month (optional)",
+      startsOn: "First payment",
+      property: "Property",
+      submit: "Add loan",
+      submitting: "Adding…",
+    },
   },
   form: {
     title: "Add a charge",
@@ -168,6 +216,51 @@ const fr: typeof en = {
     maintenance: "Entretien",
     tax: "Taxes",
     other: "Autre",
+    loan: "Crédit",
+  },
+  loans: {
+    title: "Crédits",
+    hint: "La mensualité compte comme une charge jusqu’à la dernière échéance.",
+    empty:
+      "Aucun crédit saisi. Ajoutez un prêt immobilier ou un prêt travaux pour voir ce qu’il reste une fois la mensualité payée.",
+    terms: (amount, rate, duration) => `${amount} à ${rate} sur ${duration}`,
+    duration: (months) => {
+      const years = Math.floor(months / 12);
+      const rest = months % 12;
+      const y = years > 0 ? `${years} an${years > 1 ? "s" : ""}` : "";
+      const m = rest > 0 ? `${rest} mois` : "";
+      return y && m ? `${y} et ${m}` : y || m;
+    },
+    perMonth: (amount) => `${amount} par mois`,
+    insurance: (amount) => `dont ${amount} d’assurance`,
+    remaining: "Reste à rembourser",
+    paid: "Échéances payées",
+    paidOf: (paid, total) => `${paid} sur ${total}`,
+    thisMonth: "Mensualité de ce mois",
+    split: (interest, capital) => `${interest} d’intérêts, ${capital} de capital`,
+    lastPayment: "Dernière échéance",
+    cost: "Coût du crédit",
+    costNote: "intérêts et assurance sur toute la durée",
+    notStarted: (date) => `Première échéance le ${date}`,
+    finished: "Remboursé",
+    progress: "Part du capital remboursée",
+    remove: "Supprimer",
+    confirmRemove: (label) => `Supprimer « ${label} » ? Les mois passés et à venir sont recalculés.`,
+    form: {
+      title: "Ajouter un crédit",
+      name: "Nom",
+      namePlaceholder: "Prêt immobilier, prêt travaux…",
+      principal: "Montant emprunté",
+      rate: "Taux (% par an)",
+      rateHint: "Hors assurance. 3,85 signifie 3,85 %.",
+      years: "Durée (années)",
+      yearsHint: "12,5 pour 150 mois.",
+      insurance: "Assurance par mois (facultatif)",
+      startsOn: "Première échéance",
+      property: "Logement",
+      submit: "Ajouter le crédit",
+      submitting: "Ajout…",
+    },
   },
   form: {
     title: "Ajouter une charge",

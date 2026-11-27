@@ -1,6 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link } from "@tanstack/react-router";
 import type { Property, Reservation } from "@/db/schema";
+import type { ListView } from "@/features/reservations/months";
 import { stayValue } from "@/features/revenue/compute";
 import type { Messages } from "@/i18n/messages";
 import { addDays, diffDays, type ISODate } from "@/lib/dates";
@@ -35,6 +36,7 @@ const styles = stylex.create({
     transitionProperty: "background-color",
     transitionDuration: "150ms",
   },
+  open: { backgroundColor: color.subtle },
   stub: {
     display: "flex",
     flexDirection: "column",
@@ -106,17 +108,26 @@ function when(stay: Stay, today: ISODate, row: Messages["reservations"]["row"]):
   return row.inDays(days);
 }
 
-/** Rows of guest stays. Each row opens the reservation in the calendar. */
+/**
+ * Rows of guest stays. A row opens the reservation in the calendar, or, with
+ * `panel`, in the panel the Reservations page shows beside its list.
+ */
 export function StayList({
   stays,
   properties,
   conflicts,
   today,
+  panel,
+  selectedId,
 }: {
   stays: Stay[];
   properties: Property[];
   conflicts: Set<number>;
   today: ISODate;
+  /** Set on the Reservations page, with the list it is showing. */
+  panel?: { view: ListView };
+  /** The stay whose panel is open. */
+  selectedId?: number;
 }) {
   const { m, fmt } = useI18n("reservations");
   const row = m.reservations.row;
@@ -127,46 +138,64 @@ export function StayList({
         const nights = diffDays(stay.checkIn, stay.checkOut);
         const value = stayValue(stay, properties);
         const clash = conflicts.has(stay.id);
+        const line = (
+          <>
+            {/* The dates are written out beside it: the stub is for the eye. */}
+            <span aria-hidden {...stylex.props(styles.stub, washStyle(clash ? "clash" : stay.source))}>
+              <span {...stylex.props(figureStyle, styles.day)}>{Number(stay.checkIn.slice(8))}</span>
+              <span {...stylex.props(styles.month)}>{fmt.date(stay.checkIn, { month: "short" })}</span>
+            </span>
+            <span {...stylex.props(styles.who)}>
+              <span {...stylex.props(styles.line)}>
+                <span {...stylex.props(styles.name, !stay.guestName && styles.missing)}>
+                  {stay.guestName || row.guestMissing}
+                </span>
+                {clash && <Badge tone="clash">{row.doubleBooking}</Badge>}
+              </span>
+              <span {...stylex.props(styles.source)}>
+                <SourceDot source={stay.source} />
+                <span {...stylex.props(styles.clip)}>
+                  {m.common.sources[stay.source]}, {property?.name}
+                </span>
+              </span>
+            </span>
+            <span {...stylex.props(styles.dates)}>
+              <span {...stylex.props(styles.range)}>
+                {row.range(fmt.date(stay.checkIn), fmt.date(stay.checkOut))}
+              </span>
+              <span {...stylex.props(styles.sub)}>
+                <span {...stylex.props(styles.lead)}> · </span>
+                {m.common.count.nights(nights)} · {when(stay, today, row)}
+              </span>
+            </span>
+            <span {...stylex.props(styles.amount)} title={value.estimated ? row.estimated : row.entered}>
+              {value.estimated && <span {...stylex.props(styles.about)}>≈ </span>}
+              {fmt.money(value.total, property?.currency ?? "EUR")}
+            </span>
+          </>
+        );
         return (
           <li key={stay.id} {...stylex.props(styles.item)}>
-            <Link
-              to="/calendar"
-              search={{ view: "weeks", start: addDays(stay.checkIn, -3), r: stay.id }}
-              {...stylex.props(styles.row)}
-            >
-              {/* The dates are written out beside it: the stub is for the eye. */}
-              <span aria-hidden {...stylex.props(styles.stub, washStyle(clash ? "clash" : stay.source))}>
-                <span {...stylex.props(figureStyle, styles.day)}>{Number(stay.checkIn.slice(8))}</span>
-                <span {...stylex.props(styles.month)}>{fmt.date(stay.checkIn, { month: "short" })}</span>
-              </span>
-              <span {...stylex.props(styles.who)}>
-                <span {...stylex.props(styles.line)}>
-                  <span {...stylex.props(styles.name, !stay.guestName && styles.missing)}>
-                    {stay.guestName || row.guestMissing}
-                  </span>
-                  {clash && <Badge tone="clash">{row.doubleBooking}</Badge>}
-                </span>
-                <span {...stylex.props(styles.source)}>
-                  <SourceDot source={stay.source} />
-                  <span {...stylex.props(styles.clip)}>
-                    {m.common.sources[stay.source]}, {property?.name}
-                  </span>
-                </span>
-              </span>
-              <span {...stylex.props(styles.dates)}>
-                <span {...stylex.props(styles.range)}>
-                  {row.range(fmt.date(stay.checkIn), fmt.date(stay.checkOut))}
-                </span>
-                <span {...stylex.props(styles.sub)}>
-                  <span {...stylex.props(styles.lead)}> · </span>
-                  {m.common.count.nights(nights)} · {when(stay, today, row)}
-                </span>
-              </span>
-              <span {...stylex.props(styles.amount)} title={value.estimated ? row.estimated : row.entered}>
-                {value.estimated && <span {...stylex.props(styles.about)}>≈ </span>}
-                {fmt.money(value.total, property?.currency ?? "EUR")}
-              </span>
-            </Link>
+            {panel ? (
+              <Link
+                to="/reservations"
+                search={{ view: panel.view === "list" ? undefined : panel.view, r: stay.id }}
+                // The list stays where it was scrolled to.
+                resetScroll={false}
+                aria-current={stay.id === selectedId ? "true" : undefined}
+                {...stylex.props(styles.row, stay.id === selectedId && styles.open)}
+              >
+                {line}
+              </Link>
+            ) : (
+              <Link
+                to="/calendar"
+                search={{ view: "weeks", start: addDays(stay.checkIn, -3), r: stay.id }}
+                {...stylex.props(styles.row)}
+              >
+                {line}
+              </Link>
+            )}
           </li>
         );
       })}

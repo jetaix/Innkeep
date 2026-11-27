@@ -2,8 +2,14 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { addMonths, formatMonth, monthOf, occupancyAhead, summariseMonth } from "@/features/revenue/compute";
-import type { Charge } from "@/db/schema";
+import {
+  addMonths,
+  type Cost,
+  formatMonth,
+  monthOf,
+  occupancyAhead,
+  summariseMonth,
+} from "@/features/revenue/compute";
 import { getApiKey } from "@/features/assistant/key";
 import type { Pricing } from "@/features/pricing/queries";
 import type { Locale } from "@/i18n/config";
@@ -115,7 +121,7 @@ function pricingSnapshot(pricing: Pricing | undefined) {
 /** Builds the snapshot sent to the model. Exported for tests and for the "what is sent" preview. */
 export function buildSnapshot(
   input: InsightInput,
-  charges: Charge[],
+  charges: Cost[],
   flagged: Suggestion[],
   /** Nightly prices per property id, when the extension has read any. */
   pricing: Map<number, Pricing> = new Map(),

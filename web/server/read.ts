@@ -37,7 +37,7 @@ import {
 import { findConflicts, getProperties, getStays } from "../../src/features/reservations/queries";
 import { getSetupProgress, getSetupProperty, getSetupSummary } from "../../src/features/setup/queries";
 import { occupancyAhead } from "../../src/features/revenue/compute";
-import { getCharges, getRevenue, getRevenueYears } from "../../src/features/revenue/queries";
+import { getCharges, getCosts, getRevenue, getRevenueYears } from "../../src/features/revenue/queries";
 import { LOCALES } from "../../src/i18n/config";
 import { addDays, today } from "../../src/lib/dates";
 import { isPrivateAddress } from "../../src/lib/net";
@@ -231,7 +231,8 @@ export const read = new Hono<Env>()
     return c.json(await getRevenue({ monthsBack: range.back, monthsAhead: range.ahead }));
   })
   .get("/revenue/years", async (c) => c.json(await getRevenueYears()))
-  .get("/charges", async (c) => c.json({ charges: await getCharges() }))
+  // `costs` is what the figures count: the charges, and each loan as its monthly payment.
+  .get("/charges", async (c) => c.json({ charges: await getCharges(), costs: await getCosts() }))
 
   .get("/pricing", async (c) => {
     const asked = query(
