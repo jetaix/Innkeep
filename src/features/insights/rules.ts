@@ -1,6 +1,7 @@
 import type { PublishState } from "@/channels/content";
 import { sourceLabel } from "@/channels";
 import type { Listing, Property, Reservation } from "@/db/schema";
+import { auditPage, type PageFacts, type ReviewFacts, reviewThemes, unansweredLow } from "./listing-audit";
 import { addDays, diffDays, rangesOverlap, type ISODate } from "@/lib/dates";
 import { occupancyAhead } from "@/features/revenue/compute";
 import type { Format } from "@/i18n/format";
@@ -32,7 +33,13 @@ export type InsightInput = {
   today: ISODate;
   now: number;
   properties: Property[];
-  listings: (Listing & { publishState: PublishState })[];
+  listings: (Listing & {
+    publishState: PublishState;
+    /** The listing as its public page shows it, when the extension has read it. */
+    page?: PageFacts | null;
+  })[];
+  /** Guest reviews read from the platforms. */
+  reviews?: (ReviewFacts & { propertyId: number })[];
   /** Confirmed stays and blocks that have not ended yet. */
   stays: Reservation[];
   chargeCount: number;
@@ -213,6 +220,55 @@ export function buildSuggestions(
       });
     }
   }
+  // The public page, read as a guest reads it
+  for (const listing of listings) {
+    if (!listing.page) continue;
+    const { findings, unsaid } = auditPage(listing.page);
+    if (findings.length === 0) continue;
+    suggestions.push({
+      key: `page:${listing.id}:${findings.join(",")}`,
+      severity: "idea",
+      area: "listing",
+      title: t.page.title(sourceLabel(listing.channel), nameOf(listing.propertyId), findings.length),
+      body: findings
+        .map((finding) => (finding === "amenitiesUnsaid" ? t.page.amenitiesUnsaid(unsaid) : t.page[finding]))
+        .join(" "),
+      action: { label: t.page.action, href: `/properties/${listing.propertyId}/preview` },
+    });
+  }
+
+  // What guests keep saying
+  for (const property of properties) {
+    const reviews = (input.reviews ?? []).filter((review) => review.propertyId === property.id);
+    const pages = listings.filter((listing) => listing.propertyId === property.id);
+    const text = [
+      property.description,
+      property.houseRules,
+      ...pages.map((l) => l.page?.description ?? ""),
+    ].join(" ");
+    for (const found of reviewThemes(reviews, text)) {
+      suggestions.push({
+        key: `review-theme:${property.id}:${found.theme}:${found.count}`,
+        severity: "recommended",
+        area: "guests",
+        title: t.reviewTheme.title(found.count, property.name, t.reviewTheme.theme[found.theme]),
+        body: found.said ? t.reviewTheme.said : t.reviewTheme.unsaid,
+        action: { label: t.reviewTheme.action, href: "/reviews?show=low" },
+      });
+    }
+    const unanswered = unansweredLow(reviews);
+    if (unanswered > 0) {
+      suggestions.push({
+        key: `review-unanswered:${property.id}:${unanswered}`,
+        severity: "recommended",
+        area: "guests",
+        title: t.lowReviews.title(unanswered, property.name),
+        body: t.lowReviews.body,
+        action: { label: t.lowReviews.action, href: "/reviews?show=unanswered" },
+      });
+    }
+  }
+
   for (const property of properties) {
     const connected = listings.filter((listing) => listing.propertyId === property.id && listing.icalUrl);
     if (connected.length === 1) {

@@ -21,9 +21,11 @@ import type { InsightInput, Suggestion } from "./rules";
  * Anthropic API key is configured, the host can also ask Claude for advice
  * written for their listings.
  *
- * Privacy: the request contains listing content, nightly prices, occupancy,
- * payouts per stay and revenue totals. It never contains guest names,
- * messages, confirmation codes or reservation links.
+ * Privacy: the request contains listing content (the host's own text and
+ * what each platform's public page shows), the text of public guest reviews
+ * without their authors, nightly prices, occupancy, payouts per stay and
+ * revenue totals. It never contains guest names, messages, confirmation
+ * codes or reservation links.
  */
 
 export const AI_MODEL = process.env.AI_MODEL ?? "claude-opus-5-5";
@@ -48,6 +50,39 @@ const adviceSchema = z.object({
       }),
     )
     .describe("Three to six recommendations, most valuable first."),
+  listings: z
+    .array(
+      z.object({
+        property: z.string().describe("The property's name as it appears in the snapshot."),
+        position: z
+          .string()
+          .describe("One sentence: what this place is, where, and the kind of trip it suits best."),
+        scorecard: z
+          .array(
+            z.object({
+              dimension: z.enum(["clarity", "trust", "conversion", "search", "experience"]),
+              verdict: z.enum(["strong", "fix", "missing"]),
+              finding: z.string().describe("What the listing does today, quoting or naming it."),
+              fix: z.string().describe("What to change. Empty when the verdict is strong."),
+            }),
+          )
+          .describe("One entry for each of the five dimensions, in that order."),
+        titles: z
+          .array(z.string())
+          .describe("Three titles, each built on a different angle, each within the platform's length."),
+        opening: z.string().describe("The first paragraph of the description, rewritten in full."),
+        benefits: z
+          .array(z.string())
+          .describe("Three to six amenities the listing has, each written as what it lets a guest do."),
+        photos: z
+          .string()
+          .describe("What the photo count and the page suggest is missing. One or two sentences."),
+        toVerify: z
+          .array(z.string())
+          .describe("Anything in the rewrite the host must check before publishing. Empty when nothing."),
+      }),
+    )
+    .describe("One audit per property that has listing text or a public page in the snapshot."),
 });
 
 export type Advice = z.infer<typeof adviceSchema>;
@@ -60,11 +95,15 @@ Write practical recommendations for this host specifically. Ground every recomme
 
 Pricing recommendations must come from the snapshot's own numbers: the host's past earnings per night for the same month, the gap between platforms, how full the coming weeks are, and how far ahead a free night is. You have no data on other listings or on the local market, so never state or imply what competitors charge, and say so if the host would need that to decide. Quote amounts in the property's currency. A platform with no prices in the snapshot has simply not been read yet; suggest reading its calendar rather than guessing.
 
+Besides the recommendations, audit each property's listing as a guest would read it, under "listings". Judge five things: clarity (what the place is, where, how many it sleeps, what is included), trust (specific, accurate, open about its limits and rules), conversion (the opening line, how easily it scans, features turned into benefits), search (the words a guest would type appear naturally, never stuffed) and experience (arrival, parking, sleep, work, cooking, noise, stairs). Use the public page each platform shows where the snapshot has it, and the guests' own reviews: what they praise is a proof point to lead with, what several of them dislike is either fixed or said plainly as a trade-off.
+
+Everything you write for a listing must be true of this property. Use only facts present in the snapshot: never add an amenity, a view, a distance, a neighbourhood quality or an accessibility claim that is not there. If a rewrite needs a fact you do not have, leave a bracketed gap for the host to fill and list it under toVerify. Lead with concrete details before adjectives. Describe who the place suits by the trip (remote work, a weekend for two, a family with a car), never by who the guests are. Do not promise a better ranking or more bookings, do not invent urgency, and do not present platform rules, taxes or local regulations as checked. You only know how many photos the page shows, not what is in them: say what a guest would expect to see, not what you see.
+
 Revenue marked estimated is nights multiplied by the nightly rate, not a real payout; treat it as approximate. If the snapshot is too thin to support a recommendation, give fewer recommendations rather than generic ones.`;
 
 /** Added to the instructions when the host does not read English. */
 const LANGUAGE: Partial<Record<Locale, string>> = {
-  fr: `Write the summary and every recommendation (title, why and steps) in French: the host reads French. Address the host as "vous", use sentence case and keep the wording short and plain. In the property field, give the property's name as it appears in the snapshot, or "Tous les logements" when it applies to all of them. Keep the impact and area values exactly as the schema defines them.`,
+  fr: `Write the summary, every recommendation (title, why and steps) and every listing audit (position, findings, fixes, titles, opening, benefits, photos, toVerify) in French: the host reads French and so do most of the guests. Address the host as "vous", use sentence case and keep the wording short and plain. In the property field, give the property's name as it appears in the snapshot, or "Tous les logements" when it applies to all of them. Keep the impact and area values exactly as the schema defines them.`,
 };
 
 /**
@@ -142,6 +181,27 @@ export function buildSnapshot(
       checkIn: property.checkInTime,
       checkOut: property.checkOutTime,
       channels: input.listings.filter((l) => l.propertyId === property.id && l.icalUrl).map((l) => l.channel),
+      // What a guest actually sees on each platform, as the extension read it.
+      publicPages: input.listings
+        .filter((l) => l.propertyId === property.id && l.page)
+        .map((l) => ({
+          channel: l.channel,
+          title: l.page?.title,
+          description: l.page?.description,
+          photosShown: l.page?.photos,
+          amenities: l.page?.amenities,
+          location: l.page?.location,
+        })),
+      // Public reviews, newest first, without their authors.
+      reviews: (input.reviews ?? [])
+        .filter((review) => review.propertyId === property.id)
+        .slice(0, 25)
+        .map((review) => ({
+          rating: review.rating == null ? "none" : `${review.rating}/${review.scale}`,
+          ...(review.body ? { liked: review.body.slice(0, 600) } : {}),
+          ...(review.negative ? { disliked: review.negative.slice(0, 600) } : {}),
+          hostReplied: review.reply.trim() !== "",
+        })),
       occupancyNext30Days: Math.round(occupancyAhead(property.id, guestStays, input.today, 30) * 100) / 100,
       occupancyNext90Days: Math.round(occupancyAhead(property.id, guestStays, input.today, 90) * 100) / 100,
       upcomingStays: guestStays

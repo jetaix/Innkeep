@@ -150,3 +150,57 @@ describe("buildSuggestions", () => {
     );
   });
 });
+
+describe("what guests read and say", () => {
+  const listing = (extra: object): InsightInput["listings"][number] =>
+    ({
+      id: 7,
+      propertyId: 1,
+      channel: "airbnb",
+      icalUrl: "",
+      publishState: "never",
+      publishedAt: null,
+      lastSyncedAt: null,
+      lastSyncError: null,
+      ...extra,
+    }) as InsightInput["listings"][number];
+  const base: InsightInput = {
+    today: "2027-03-01",
+    now,
+    properties: [property],
+    listings: [],
+    stays: [],
+    chargeCount: 1,
+  };
+  const titles = (data: InsightInput) => buildSuggestions(data).map((suggestion) => suggestion.title);
+
+  it("audits the public page the extension read", () => {
+    const page = { title: "NICE FLAT!!", description: "Small.", photos: 3, amenities: [], location: "" };
+    const found = buildSuggestions({ ...base, listings: [listing({ page })] }).find((suggestion) =>
+      suggestion.key.startsWith("page:"),
+    );
+    expect(found?.title).toBe("3 things to sharpen on the Airbnb page of Canal Loft");
+    expect(found?.action.href).toBe("/properties/1/preview");
+  });
+
+  it("raises what several reviews complain about, and low reviews left unanswered", () => {
+    const review = (extra: object) => ({
+      propertyId: 1,
+      rating: 3,
+      scale: 5,
+      body: "",
+      negative: "",
+      reply: "",
+      ...extra,
+    });
+    const found = titles({
+      ...base,
+      reviews: [
+        review({ body: "Very noisy at night" }),
+        review({ body: "Noisy street", reply: "Thank you" }),
+      ],
+    });
+    expect(found).toContain("2 guests of Canal Loft mention noise");
+    expect(found).toContain("A low review of Canal Loft has no reply");
+  });
+});

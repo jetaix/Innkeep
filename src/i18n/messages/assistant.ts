@@ -52,7 +52,8 @@ const en = {
     title: "What Claude receives",
     intro: "Each time you ask for advice, Innkeep sends one summary of your account to Anthropic:",
     sent: [
-      "Your listing: title, description, house rules, capacity and address.",
+      "Your listing: title, description, house rules, capacity and address, and what each platform's public page shows (text, amenities, number of photos).",
+      "Public guest reviews: their text and score, without the guest's name.",
       "Stays: dates, platform and payout. For finished stays, what each night earned.",
       "Nightly prices of free nights on each platform, by month, and the nights where they disagree.",
       "Monthly revenue, costs and occupancy for the past year and the next three months.",
@@ -138,7 +139,8 @@ const fr: typeof en = {
     title: "Ce que Claude reçoit",
     intro: "À chaque demande de conseils, Innkeep envoie à Anthropic un seul résumé de votre compte :",
     sent: [
-      "Votre annonce : titre, description, règlement intérieur, capacité et adresse.",
+      "Votre annonce : titre, description, règlement intérieur, capacité et adresse, et ce qu’affiche la page publique de chaque plateforme (texte, équipements, nombre de photos).",
+      "Les avis publics des voyageurs : leur texte et leur note, sans le nom du voyageur.",
       "Les séjours : dates, plateforme et versement. Pour les séjours terminés, ce que chaque nuit a rapporté.",
       "Les prix par nuit des nuits libres sur chaque plateforme, par mois, et les nuits où ils divergent.",
       "Revenus, charges et taux d’occupation mensuels de l’année écoulée et des trois prochains mois.",
