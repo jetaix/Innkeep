@@ -283,6 +283,19 @@ CREATE TABLE IF NOT EXISTS loans (
   created_at INTEGER NOT NULL
 );
 `,
+  // 20: a loan's amortisation table, imported from the bank's own
+  `
+CREATE TABLE IF NOT EXISTS loan_payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loan_id INTEGER NOT NULL REFERENCES loans(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  interest INTEGER NOT NULL,
+  capital INTEGER NOT NULL,
+  insurance INTEGER NOT NULL DEFAULT 0,
+  remaining INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS loan_payments_date ON loan_payments (loan_id, date);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

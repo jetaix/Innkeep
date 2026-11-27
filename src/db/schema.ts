@@ -206,6 +206,30 @@ export const loans = sqliteTable("loans", {
   createdAt: integer("created_at").notNull(),
 });
 
+/**
+ * One line of a loan's amortisation table, as the bank printed it. When a
+ * loan has such lines they replace the computed payments: the bank's figures
+ * are the real ones (deferred start, changing insurance, a renegotiated rate).
+ */
+export const loanPayments = sqliteTable(
+  "loan_payments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    loanId: integer("loan_id")
+      .notNull()
+      .references(() => loans.id, { onDelete: "cascade" }),
+    /** The day the payment is taken. */
+    date: text("date").notNull(),
+    /** Minor units, like every amount below. */
+    interest: integer("interest").notNull(),
+    capital: integer("capital").notNull(),
+    insurance: integer("insurance").notNull().default(0),
+    /** Capital still owed after this payment, when the table says so. */
+    remaining: integer("remaining"),
+  },
+  (t) => [uniqueIndex("loan_payments_date").on(t.loanId, t.date)],
+);
+
 export const dismissedSuggestions = sqliteTable("dismissed_suggestions", {
   key: text("key").primaryKey(),
   dismissedAt: integer("dismissed_at").notNull(),
@@ -221,6 +245,7 @@ export const aiAdvice = sqliteTable("ai_advice", {
 
 export type Charge = typeof charges.$inferSelect;
 export type Loan = typeof loans.$inferSelect;
+export type LoanPayment = typeof loanPayments.$inferSelect;
 export type Property = typeof properties.$inferSelect;
 export type Listing = typeof listings.$inferSelect;
 export type Reservation = typeof reservations.$inferSelect;

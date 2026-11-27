@@ -1,8 +1,17 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { CHARGE_CATEGORIES, CHARGE_FREQUENCIES, charges, getDb, loans, OTA_CHANNELS } from "@/db";
+import {
+  CHARGE_CATEGORIES,
+  CHARGE_FREQUENCIES,
+  charges,
+  getDb,
+  loanPayments,
+  loans,
+  OTA_CHANNELS,
+} from "@/db";
 import { blankAsNull, InvalidInput, isoDate, parse, text, wholeNumber } from "@/lib/form";
 import { parseMoney } from "@/lib/money";
+import { parseSchedule } from "./schedule";
 
 /** Changes to the costs. Called by the API; no framework in here. */
 const newCharge = z.object({
@@ -82,4 +91,32 @@ export async function addLoan(input: unknown) {
 
 export async function deleteLoan(id: number) {
   await getDb().delete(loans).where(eq(loans.id, id)).run();
+}
+
+/** Longest table taken: fifty years of monthly payments. */
+const MAX_LINES = 600;
+
+/**
+ * Replaces a loan's amortisation table with the one pasted or uploaded. From
+ * then on the loan's costs are the bank's own figures, month by month.
+ */
+export async function importSchedule(loanId: number, input: unknown) {
+  const { table } = parse(z.object({ table: z.string().max(200_000) }), input);
+  const parsed = parseSchedule(table);
+  // The field's name carries the reason: nothing dated in the text, or columns that could not be told apart.
+  if (!parsed.ok) throw new InvalidInput(parsed.problem === "empty" ? "table-empty" : "table-columns");
+  if (parsed.lines.length > MAX_LINES) throw new InvalidInput("table-columns");
+  const db = getDb();
+  const loan = await db.select({ id: loans.id }).from(loans).where(eq(loans.id, loanId)).get();
+  if (!loan) throw new InvalidInput("loan");
+  await db.batch([
+    db.delete(loanPayments).where(eq(loanPayments.loanId, loanId)),
+    db.insert(loanPayments).values(parsed.lines.map((line) => ({ ...line, loanId }))),
+  ]);
+  return parsed.lines.length;
+}
+
+/** Back to the payments computed from the amount, the rate and the duration. */
+export async function clearSchedule(loanId: number) {
+  await getDb().delete(loanPayments).where(eq(loanPayments.loanId, loanId)).run();
 }

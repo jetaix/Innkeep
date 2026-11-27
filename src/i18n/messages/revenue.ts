@@ -110,6 +110,31 @@ const en = {
     progress: "Share of the capital repaid",
     remove: "Remove",
     confirmRemove: (label: string): string => `Remove "${label}"? Past and future months are recalculated.`,
+    table: {
+      /** The bank's amortisation table, in place of the computed payments. */
+      import: "Import the amortisation table",
+      replace: "Replace the table",
+      /** "Bank's table: 240 payments, 5 Jan 2026 to 5 Dec 2045" */
+      imported: (count: number, from: string, to: string): string =>
+        `Bank’s table: ${count} payment${count === 1 ? "" : "s"}, ${from} to ${to}`,
+      why: "With the bank’s own table, each month costs exactly what the bank takes: a deferred start, insurance that changes, a renegotiated rate.",
+      label: "The table’s lines",
+      placeholder: "05/01/2026   1 196,21   641,67   554,54   30,00   199 445,46",
+      hint: "Copy the lines from the bank’s PDF or spreadsheet and paste them here. Each line needs its date, the interest and the capital; the insurance and what is still owed are read when they are there. The order of the columns does not matter.",
+      file: "Or choose a CSV or text file",
+      submit: "Import",
+      submitting: "Reading…",
+      cancel: "Cancel",
+      clear: "Go back to computed payments",
+      confirmClear: (label: string): string =>
+        `Remove the bank’s table of "${label}"? Its payments are computed again from the amount, the rate and the duration.`,
+      /** Keyed by what the server could not do. */
+      problem: {
+        empty: "No line with a date was found. Paste the lines of the table, one payment per line.",
+        columns:
+          "The columns could not be told apart. Each line needs at least the interest and the capital, as two separate amounts.",
+      },
+    },
     form: {
       title: "Add a loan",
       name: "Name",
@@ -246,6 +271,28 @@ const fr: typeof en = {
     progress: "Part du capital remboursée",
     remove: "Supprimer",
     confirmRemove: (label) => `Supprimer « ${label} » ? Les mois passés et à venir sont recalculés.`,
+    table: {
+      import: "Importer le tableau d’amortissement",
+      replace: "Remplacer le tableau",
+      imported: (count, from, to) =>
+        `Tableau de la banque : ${count} échéance${count > 1 ? "s" : ""}, du ${from} au ${to}`,
+      why: "Avec le tableau de la banque, chaque mois coûte exactement ce que la banque prélève : différé, assurance qui évolue, taux renégocié.",
+      label: "Les lignes du tableau",
+      placeholder: "05/01/2026   1 196,21   641,67   554,54   30,00   199 445,46",
+      hint: "Copiez les lignes depuis le PDF ou le tableur de la banque et collez-les ici. Chaque ligne doit contenir sa date, les intérêts et le capital ; l’assurance et le capital restant dû sont lus s’ils y figurent. L’ordre des colonnes n’a pas d’importance.",
+      file: "Ou choisissez un fichier CSV ou texte",
+      submit: "Importer",
+      submitting: "Lecture…",
+      cancel: "Annuler",
+      clear: "Revenir aux échéances calculées",
+      confirmClear: (label) =>
+        `Retirer le tableau de la banque de « ${label} » ? Ses échéances sont de nouveau calculées à partir du montant, du taux et de la durée.`,
+      problem: {
+        empty: "Aucune ligne datée n’a été trouvée. Collez les lignes du tableau, une échéance par ligne.",
+        columns:
+          "Les colonnes n’ont pas pu être distinguées. Chaque ligne doit contenir au moins les intérêts et le capital, en deux montants séparés.",
+      },
+    },
     form: {
       title: "Ajouter un crédit",
       name: "Nom",

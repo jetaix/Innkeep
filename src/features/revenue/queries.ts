@@ -1,6 +1,6 @@
 import "server-only";
 import { asc } from "drizzle-orm";
-import { charges, getDb, loans } from "@/db";
+import { charges, getDb, type Loan, type LoanPayment, loanPayments, loans } from "@/db";
 import { getProperties, getStays } from "@/features/reservations/queries";
 import { today } from "@/lib/dates";
 import {
@@ -18,8 +18,14 @@ export async function getCharges() {
   return await getDb().select().from(charges).orderBy(asc(charges.createdAt)).all();
 }
 
-export async function getLoans() {
-  return await getDb().select().from(loans).orderBy(asc(loans.createdAt)).all();
+/** A loan with the lines of its bank's table, when one was imported. */
+export type LoanWithSchedule = Loan & { schedule: LoanPayment[] };
+
+export async function getLoans(): Promise<LoanWithSchedule[]> {
+  const db = getDb();
+  const all = await db.select().from(loans).orderBy(asc(loans.createdAt)).all();
+  const lines = await db.select().from(loanPayments).orderBy(asc(loanPayments.date)).all();
+  return all.map((loan) => ({ ...loan, schedule: lines.filter((line) => line.loanId === loan.id) }));
 }
 
 /** Everything set against revenue: the charges, and each loan as its monthly payment. */

@@ -185,12 +185,15 @@ export function buildSnapshot(
         occupancy: Math.round(summary.occupancy * 100) / 100,
       };
     }),
-    recurringCosts: charges.map((charge) => ({
-      label: charge.label,
-      category: charge.category,
-      frequency: charge.frequency,
-      amount: charge.frequency === "percent" ? `${charge.amount / 100}%` : charge.amount / 100,
-    })),
+    // A loan with its bank's table is one cost per month: say it once.
+    recurringCosts: charges
+      .filter((charge, index) => charges.findIndex((other) => other.id === charge.id) === index)
+      .map((charge) => ({
+        label: charge.label,
+        category: charge.category,
+        frequency: charge.frequency,
+        amount: charge.frequency === "percent" ? `${charge.amount / 100}%` : charge.amount / 100,
+      })),
     alreadyFlagged: flagged.map((suggestion) => suggestion.title),
   };
 }

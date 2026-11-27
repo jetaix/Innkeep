@@ -48,6 +48,13 @@ export const write = new Hono<Env>()
   })
 
   .post("/loans", json, async (c) => c.json({ id: await revenue.addLoan(c.req.valid("json")) }))
+  .put("/loans/:id/schedule", json, async (c) =>
+    c.json({ lines: await revenue.importSchedule(num(c.req.param("id")), c.req.valid("json")) }),
+  )
+  .delete("/loans/:id/schedule", async (c) => {
+    await revenue.clearSchedule(num(c.req.param("id")));
+    return c.json(done);
+  })
   .delete("/loans/:id", async (c) => {
     await revenue.deleteLoan(num(c.req.param("id")));
     return c.json(done);

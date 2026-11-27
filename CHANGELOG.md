@@ -12,6 +12,8 @@ minor version may change how things work.
 - Loans on the Revenue page: enter the amount borrowed, the rate, the duration
   and the insurance, and the monthly payment counts as a cost until the last
   one. Each loan shows what is still owed and what the borrowing costs.
+- A loan takes its bank's amortisation table, pasted from the PDF or read from
+  a CSV file: each month then costs exactly what the bank takes.
 - Clicking a reservation on the Reservations page opens its details in a panel
   beside the list, where the guest name, payout and notes can be changed.
 - A line chart of reservations per month on the Reservations page.
@@ -50,6 +52,8 @@ minor version may change how things work.
 
 ### Removed
 
+- The Next.js app. Innkeep has run on the app in `web/` since the previous
+  change; `bun run dev:next` and `bun run build:next` are gone.
 - Guest messaging. Messages are read and answered on each platform.
 
 ### Fixed

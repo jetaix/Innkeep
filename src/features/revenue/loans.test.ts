@@ -73,3 +73,38 @@ describe("loanCosts", () => {
     ]);
   });
 });
+
+describe("a loan with its bank's table", () => {
+  const schedule = [
+    { date: "2026-01-05", interest: 0, capital: 0, insurance: 30_00, remaining: 200_000_00 },
+    { date: "2026-02-05", interest: 641_67, capital: 554_54, insurance: 30_00, remaining: 199_445_46 },
+    { date: "2026-03-05", interest: 639_89, capital: 556_32, insurance: 32_00, remaining: null },
+  ];
+  const rates = [{ id: 1, basePrice: 100 }];
+
+  it("costs each month what the table says, not the computed payment", () => {
+    const costs = loanCosts([{ ...loan, schedule }]);
+    expect(summariseMonth("2026-01", [], costs, rates).charges).toBe(30_00);
+    expect(summariseMonth("2026-03", [], costs, rates).charges).toBe(639_89 + 556_32 + 32_00);
+    expect(summariseMonth("2026-04", [], costs, rates).charges).toBe(0);
+  });
+
+  it("stands where the table says", () => {
+    expect(loanState(loan, "2026-02-10", schedule)).toMatchObject({
+      total: 3,
+      paid: 2,
+      remaining: 199_445_46,
+      interestNow: 641_67,
+      capitalNow: 554_54,
+      monthlyCost: 1_226_21,
+      lastMonth: "2026-03",
+      finished: false,
+    });
+    // No balance on the last line: what the capital paid leaves.
+    expect(loanState(loan, "2026-03-05", schedule)).toMatchObject({
+      finished: true,
+      remaining: 200_000_00 - 554_54 - 556_32,
+      cost: 641_67 + 639_89 + 92_00,
+    });
+  });
+});

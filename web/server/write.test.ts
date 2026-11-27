@@ -102,6 +102,43 @@ describe("the write API", () => {
     expect(await count(reservations)).toBe(0);
   });
 
+  it("counts a loan from its bank's table once one is imported", async () => {
+    const added = await host("POST", "/loans", {
+      label: "Mortgage",
+      principal: "200000",
+      rate: "3,85",
+      years: "20",
+      insurance: "",
+      propertyId: "",
+      startsOn: "2027-01-05",
+    });
+    expect(added.status).toBe(200);
+    const { id } = (await added.json()) as { id: number };
+    const costs = async () =>
+      (
+        (await (await app.request("/api/app/charges", { headers: { cookie: session } })).json()) as {
+          costs: { id: number; amount: number }[];
+        }
+      ).costs;
+    expect(await costs()).toContainEqual(expect.objectContaining({ id: -id, amount: 1_196_21 }));
+
+    const refused = await host("PUT", `/loans/${id}/schedule`, { table: "no figures here" });
+    expect(refused.status).toBe(400);
+    expect(((await refused.json()) as { error: string }).error).toContain("table-empty");
+
+    const table =
+      "05/01/2027 1 226,21 641,67 554,54 30,00 199 445,46\n05/02/2027 1 226,21 639,89 556,32 30,00 198 889,14";
+    const imported = await host("PUT", `/loans/${id}/schedule`, { table });
+    expect(await imported.json()).toEqual({ lines: 2 });
+    expect((await costs()).filter((cost) => cost.id === -id).map((cost) => cost.amount)).toEqual([
+      1_226_21, 1_226_21,
+    ]);
+
+    expect((await host("DELETE", `/loans/${id}/schedule`)).status).toBe(200);
+    expect(await costs()).toContainEqual(expect.objectContaining({ id: -id, amount: 1_196_21 }));
+    expect((await host("DELETE", `/loans/${id}`)).status).toBe(200);
+  });
+
   it("lets the host add a cost, a cleaner and a cleaning day", async () => {
     const charge = await host("POST", "/charges", {
       label: "Cleaning",

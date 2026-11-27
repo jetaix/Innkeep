@@ -1,12 +1,12 @@
 import * as stylex from "@stylexjs/stylex";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { Charge, Loan, Property } from "@/db/schema";
+import type { Charge, Property } from "@/db/schema";
 import { formatMonth, type MonthSummary } from "@/features/revenue/compute";
 import { INTL_LOCALE } from "@/i18n/config";
 import { revenueQuery, revenueYearsQuery } from "../../api/queries";
 import { ChargeForm, ChargeRow } from "../../features/revenue/charges";
-import { LoanForm, LoanRow } from "../../features/revenue/loans";
+import { LoanForm, LoanRow, type LoanWithTable } from "../../features/revenue/loans";
 import { MonthChart } from "../../features/revenue/month-chart";
 import { loadMessages, useI18n } from "../../i18n";
 import { color, radius, shadow, text } from "../../tokens.stylex";
@@ -185,7 +185,7 @@ function Revenue({
   current: string;
   summaries: MonthSummary[];
   charges: Charge[];
-  loans: Loan[];
+  loans: LoanWithTable[];
   properties: Property[];
   byYear?: boolean;
 }) {

@@ -1,15 +1,17 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation } from "@tanstack/react-query";
-import type { Loan, Property } from "@/db/schema";
+import { useState } from "react";
+import type { Loan, LoanPayment, Property } from "@/db/schema";
 import { formatMonth } from "@/features/revenue/compute";
 import { loanState } from "@/features/revenue/loans";
 import { INTL_LOCALE } from "@/i18n/config";
 import { today } from "@/lib/dates";
-import { addLoan, deleteLoan } from "../../api/mutations";
+import { addLoan, clearSchedule, deleteLoan, importSchedule } from "../../api/mutations";
 import { useI18n } from "../../i18n";
-import { color, radius, text } from "../../tokens.stylex";
+import { color, font, radius, text } from "../../tokens.stylex";
 import { ConfirmButton, SubmitButton } from "../../ui/actions";
-import { Field, Input, Select } from "../../ui/form";
+import { Button } from "../../ui/button";
+import { Field, Input, Select, Textarea } from "../../ui/form";
 import { Badge, Notice } from "../../ui/primitives";
 
 const styles = stylex.create({
@@ -54,6 +56,12 @@ const styles = stylex.create({
   month: { "::first-letter": { textTransform: "uppercase" } },
   below: { display: "block", color: color.muted },
   remove: { alignSelf: "flex-start" },
+  table: { display: "flex", flexDirection: "column", gap: "0.5rem" },
+  tableForm: { display: "flex", flexDirection: "column", gap: "0.75rem" },
+  // Figures in columns read best in a face where every digit is as wide as the next.
+  pasted: { fontFamily: font.mono, fontSize: { default: text.field, "@media (min-width: 48rem)": text.sm } },
+  file: { maxWidth: "100%", fontSize: text.sm },
+  actions: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" },
   form: {
     display: "flex",
     flexDirection: "column",
@@ -76,13 +84,16 @@ const styles = stylex.create({
   stretch: { alignSelf: "stretch" },
 });
 
+/** A loan with the lines of its bank's table, when one was imported. */
+export type LoanWithTable = Loan & { schedule: LoanPayment[] };
+
 /** One loan: its terms, what it takes each month, and how far the repayment is. */
 export function LoanRow({
   loan,
   properties,
   currency,
 }: {
-  loan: Loan;
+  loan: LoanWithTable;
   properties: Property[];
   currency: string;
 }) {
@@ -90,7 +101,7 @@ export function LoanRow({
   const t = m.revenue.loans;
   const remove = useMutation(deleteLoan);
   const now = today();
-  const state = loanState(loan, now);
+  const state = loanState(loan, now, loan.schedule);
   const fullDate = { day: "numeric", month: "short", year: "numeric" } as const;
   const rate = `${new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: 2 }).format(
     loan.rate / 100,
@@ -106,7 +117,7 @@ export function LoanRow({
             {state.finished && <Badge tone="good">{t.finished}</Badge>}
           </p>
           <p {...stylex.props(styles.terms)}>
-            {t.terms(fmt.money(loan.principal, currency, { cents: false }), rate, t.duration(loan.months))}
+            {t.terms(fmt.money(loan.principal, currency, { cents: false }), rate, t.duration(state.total))}
             {", "}
             {loan.propertyId
               ? properties.find((place) => place.id === loan.propertyId)?.name
@@ -139,7 +150,7 @@ export function LoanRow({
           <dt {...stylex.props(styles.term)}>{t.paid}</dt>
           <dd {...stylex.props(styles.value)}>
             {loan.startsOn <= now
-              ? t.paidOf(state.paid, loan.months)
+              ? t.paidOf(state.paid, state.total)
               : t.notStarted(fmt.date(loan.startsOn, fullDate))}
           </dd>
         </div>
@@ -165,6 +176,7 @@ export function LoanRow({
           </dd>
         </div>
       </dl>
+      <ScheduleImport loan={loan} />
       <div {...stylex.props(styles.remove)}>
         <ConfirmButton
           variant="ghost"
@@ -182,6 +194,116 @@ export function LoanRow({
         </Notice>
       )}
     </li>
+  );
+}
+
+/**
+ * The bank's own amortisation table for a loan: pasted or read from a file,
+ * sent as text, and read on the server. Once imported it replaces the
+ * computed payments in every figure.
+ */
+function ScheduleImport({ loan }: { loan: LoanWithTable }) {
+  const { m, fmt } = useI18n("revenue");
+  const t = m.revenue.loans.table;
+  const [open, setOpen] = useState(false);
+  const [table, setTable] = useState("");
+  const send = useMutation(importSchedule);
+  const clear = useMutation(clearSchedule);
+  const fullDate = { day: "numeric", month: "short", year: "numeric" } as const;
+  const lines = loan.schedule;
+  const field = `loan-${loan.id}-table`;
+  // The server names what it could not do; anything else is said as it came.
+  const problem = send.error
+    ? send.error.message.includes("table-empty")
+      ? t.problem.empty
+      : send.error.message.includes("table-columns")
+        ? t.problem.columns
+        : send.error.message
+    : clear.error?.message;
+
+  return (
+    <div {...stylex.props(styles.table)}>
+      {lines.length > 0 && (
+        <p {...stylex.props(styles.small)}>
+          {t.imported(
+            lines.length,
+            fmt.date(lines[0].date, fullDate),
+            fmt.date(lines[lines.length - 1].date, fullDate),
+          )}
+        </p>
+      )}
+      {open ? (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            send.mutate(
+              { loan: loan.id, table },
+              {
+                onSuccess: () => {
+                  setTable("");
+                  setOpen(false);
+                },
+              },
+            );
+          }}
+          {...stylex.props(styles.tableForm)}
+        >
+          <Field label={t.label} htmlFor={field} hint={t.hint}>
+            <Textarea
+              id={field}
+              rows={6}
+              required
+              value={table}
+              placeholder={t.placeholder}
+              onChange={(event) => setTable(event.currentTarget.value)}
+              xstyle={styles.pasted}
+            />
+          </Field>
+          <Field label={t.file} htmlFor={`${field}-file`}>
+            <input
+              id={`${field}-file`}
+              type="file"
+              accept=".csv,.tsv,.txt,text/csv,text/plain"
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                if (file) void file.text().then(setTable);
+              }}
+              {...stylex.props(styles.file)}
+            />
+          </Field>
+          <div {...stylex.props(styles.actions)}>
+            <SubmitButton variant="primary" size="sm" pending={send.isPending} pendingLabel={t.submitting}>
+              {t.submit}
+            </SubmitButton>
+            <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+              {t.cancel}
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <div {...stylex.props(styles.actions)}>
+          <Button size="sm" title={t.why} onClick={() => setOpen(true)}>
+            {lines.length > 0 ? t.replace : t.import}
+          </Button>
+          {lines.length > 0 && (
+            <ConfirmButton
+              variant="ghost"
+              size="sm"
+              message={t.confirmClear(loan.label)}
+              pending={clear.isPending}
+              onConfirm={() => clear.mutate(loan.id)}
+            >
+              {t.clear}
+            </ConfirmButton>
+          )}
+        </div>
+      )}
+      {problem && (
+        <Notice tone="critical" role="alert">
+          {problem}
+        </Notice>
+      )}
+    </div>
   );
 }
 

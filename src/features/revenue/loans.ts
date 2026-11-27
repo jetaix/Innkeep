@@ -1,4 +1,4 @@
-import type { Loan } from "@/db/schema";
+import type { Loan, LoanPayment } from "@/db/schema";
 import type { ISODate } from "@/lib/dates";
 import type { Minor } from "@/lib/money";
 import { addMonths, type Cost, monthOf } from "./compute";
@@ -9,6 +9,8 @@ import { addMonths, type Cost, monthOf } from "./compute";
  * to its last, so every figure built on costs counts it without knowing.
  */
 type Terms = Pick<Loan, "principal" | "rate" | "months" | "insurance" | "startsOn">;
+/** A line of the bank's own table (see `schedule.ts`). */
+type Line = Pick<LoanPayment, "date" | "interest" | "capital" | "insurance" | "remaining">;
 
 /** The monthly rate as a ratio: 385 basis points a year is 0.0385 / 12. */
 const monthly = (rate: number) => rate / 10_000 / 12;
@@ -38,6 +40,8 @@ export function lastPaymentMonth(loan: Pick<Loan, "months" | "startsOn">): strin
 }
 
 export type LoanState = {
+  /** How many payments the loan has in all. */
+  total: number;
   /** Capital and interest each month. */
   payment: Minor;
   /** The payment with insurance: what leaves the account each month. */
@@ -57,8 +61,12 @@ export type LoanState = {
   finished: boolean;
 };
 
-/** Where a loan stands on a given day. */
-export function loanState(loan: Terms, today: ISODate): LoanState {
+/**
+ * Where a loan stands on a given day. With the bank's table, every figure
+ * comes from it; without, from the amount, the rate and the duration.
+ */
+export function loanState(loan: Terms, today: ISODate, schedule: Line[] = []): LoanState {
+  if (schedule.length > 0) return stateFromSchedule(loan, today, schedule);
   const payment = monthlyPayment(loan);
   const months = Math.max(0, loan.months);
   const [year, month, day] = today.split("-").map(Number);
@@ -73,6 +81,7 @@ export function loanState(loan: Terms, today: ISODate): LoanState {
   const before = balanceAfter(loan, (year - startYear) * 12 + (month - startMonth));
   const interestNow = running ? Math.min(payment, Math.round(before * monthly(loan.rate))) : 0;
   return {
+    total: months,
     payment,
     monthlyCost: payment + loan.insurance,
     paid,
@@ -86,17 +95,73 @@ export function loanState(loan: Terms, today: ISODate): LoanState {
   };
 }
 
+function stateFromSchedule(loan: Terms, today: ISODate, schedule: Line[]): LoanState {
+  const lines = [...schedule].sort((a, b) => (a.date < b.date ? -1 : 1));
+  const done = lines.filter((line) => line.date <= today);
+  const sum = (rows: Line[], pick: (line: Line) => number) => rows.reduce((all, line) => all + pick(line), 0);
+  // This month's payment, or failing that the next one, or the last.
+  const current =
+    lines.find((line) => monthOf(line.date) === monthOf(today)) ??
+    lines.find((line) => line.date > today) ??
+    lines[lines.length - 1];
+  const running = monthOf(current.date) === monthOf(today);
+  const lastDone = done[done.length - 1];
+  const interest = sum(lines, (line) => line.interest);
+  // What was owed before the first line: the table's balance plus that line's capital, or the amount borrowed.
+  const atStart = lines[0].remaining != null ? lines[0].remaining + lines[0].capital : loan.principal;
+  return {
+    total: lines.length,
+    payment: current.interest + current.capital,
+    monthlyCost: current.interest + current.capital + current.insurance,
+    paid: done.length,
+    // The table's own balance when it has one; otherwise what the capital paid leaves.
+    remaining: lastDone?.remaining ?? Math.max(0, atStart - sum(done, (line) => line.capital)),
+    interest,
+    cost: interest + sum(lines, (line) => line.insurance),
+    interestNow: running ? current.interest : 0,
+    capitalNow: running ? current.capital : 0,
+    lastMonth: monthOf(lines[lines.length - 1].date),
+    finished: done.length === lines.length,
+  };
+}
+
+type CostedLoan = Pick<
+  Loan,
+  "id" | "propertyId" | "label" | "principal" | "rate" | "months" | "insurance" | "startsOn"
+> & { schedule?: Line[] };
+
 /**
- * Each loan as a monthly cost, from the month of its first payment to the
- * month of its last. Ids are negative so they never meet a charge's.
+ * Each loan as a cost of its months. Without the bank's table: the same
+ * payment every month, from the first to the last. With it: what the table
+ * says for each month. Ids are negative so they never meet a charge's.
  */
-export function loanCosts(
-  loans: Pick<
-    Loan,
-    "id" | "propertyId" | "label" | "principal" | "rate" | "months" | "insurance" | "startsOn"
-  >[],
-): Cost[] {
-  return loans
+export function loanCosts(loans: CostedLoan[]): Cost[] {
+  return loans.flatMap((loan) =>
+    loan.schedule?.length ? scheduleCosts(loan, loan.schedule) : computedCosts(loan),
+  );
+}
+
+function scheduleCosts(loan: CostedLoan, schedule: Line[]): Cost[] {
+  const months = new Map<string, number>();
+  for (const line of schedule) {
+    const month = monthOf(line.date);
+    months.set(month, (months.get(month) ?? 0) + line.interest + line.capital + line.insurance);
+  }
+  return [...months].map(([month, amount]) => ({
+    id: -loan.id,
+    propertyId: loan.propertyId,
+    label: loan.label,
+    category: "loan",
+    frequency: "once",
+    amount,
+    appliesTo: "all",
+    startsOn: `${month}-01`,
+    endsOn: null,
+  }));
+}
+
+function computedCosts(loan: CostedLoan): Cost[] {
+  return [loan]
     .filter((loan) => loan.months > 0)
     .map((loan) => ({
       id: -loan.id,
