@@ -317,6 +317,10 @@ CREATE TABLE IF NOT EXISTS invitations (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS invitations_token ON invitations (token_hash);
 `,
+  // 22: a loan's monthly payment as the borrower typed it, insurance included
+  `
+ALTER TABLE loans ADD COLUMN payment INTEGER;
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

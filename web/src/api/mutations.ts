@@ -32,6 +32,11 @@ export const addLoan = mutationOptions({
   mutationFn: (json: Fields) => unwrap(rpc.loans.$post({ json })),
   ...stale(["charges"], ...FIGURES),
 });
+export const updateLoan = mutationOptions({
+  mutationFn: ({ loan, json }: { loan: number; json: Fields }) =>
+    unwrap(rpc.loans[":id"].$put({ param: id(loan), json })),
+  ...stale(["charges"], ...FIGURES),
+});
 export const deleteLoan = mutationOptions({
   mutationFn: (loan: number) => unwrap(rpc.loans[":id"].$delete({ param: id(loan) })),
   ...stale(["charges"], ...FIGURES),

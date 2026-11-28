@@ -6,7 +6,7 @@ import { formatMonth } from "@/features/revenue/compute";
 import { loanState } from "@/features/revenue/loans";
 import { INTL_LOCALE } from "@/i18n/config";
 import { today } from "@/lib/dates";
-import { addLoan, clearSchedule, deleteLoan, importSchedule } from "../../api/mutations";
+import { addLoan, clearSchedule, deleteLoan, importSchedule, updateLoan } from "../../api/mutations";
 import { useI18n } from "../../i18n";
 import { color, font, radius, text } from "../../tokens.stylex";
 import { ConfirmButton, SubmitButton } from "../../ui/actions";
@@ -100,6 +100,7 @@ export function LoanRow({
   const { locale, m, fmt } = useI18n("revenue");
   const t = m.revenue.loans;
   const remove = useMutation(deleteLoan);
+  const [editing, setEditing] = useState(false);
   const now = today();
   const state = loanState(loan, now, loan.schedule);
   const fullDate = { day: "numeric", month: "short", year: "numeric" } as const;
@@ -177,17 +178,29 @@ export function LoanRow({
         </div>
       </dl>
       <ScheduleImport loan={loan} />
-      <div {...stylex.props(styles.remove)}>
-        <ConfirmButton
-          variant="ghost"
-          size="sm"
-          message={t.confirmRemove(loan.label)}
-          pending={remove.isPending}
-          onConfirm={() => remove.mutate(loan.id)}
-        >
-          {t.remove}
-        </ConfirmButton>
-      </div>
+      {editing ? (
+        <LoanForm
+          properties={properties}
+          loan={loan}
+          payment={state.monthlyCost}
+          onDone={() => setEditing(false)}
+        />
+      ) : (
+        <div {...stylex.props(styles.actions)}>
+          <Button size="sm" onClick={() => setEditing(true)}>
+            {t.edit}
+          </Button>
+          <ConfirmButton
+            variant="ghost"
+            size="sm"
+            message={t.confirmRemove(loan.label)}
+            pending={remove.isPending}
+            onConfirm={() => remove.mutate(loan.id)}
+          >
+            {t.remove}
+          </ConfirmButton>
+        </div>
+      )}
       {remove.error && (
         <Notice tone="critical" role="alert">
           {remove.error.message}
@@ -321,10 +334,31 @@ function ScheduleImport({ loan }: { loan: LoanWithTable }) {
   );
 }
 
-export function LoanForm({ properties }: { properties: Property[] }) {
+/** An amount as it is typed in a field: 123456 minor units is "1234.56", and 120000 is "1200". */
+const typed = (amount: number) => String(amount / 100);
+
+/**
+ * Adds a loan, or changes the one given. The monthly payment is the
+ * borrower's to type: `payment` is only what an older loan shows to start from.
+ */
+export function LoanForm({
+  properties,
+  loan,
+  payment,
+  onDone,
+}: {
+  properties: Property[];
+  loan?: Loan;
+  payment?: number;
+  onDone?: () => void;
+}) {
   const { m } = useI18n("revenue");
   const form = m.revenue.loans.form;
   const add = useMutation(addLoan);
+  const update = useMutation(updateLoan);
+  const saving = loan ? update : add;
+  // Two forms can be on the page at once: each field's id names its loan.
+  const id = (name: string) => `loan-${loan?.id ?? "new"}-${name}`;
 
   return (
     <form
@@ -332,32 +366,83 @@ export function LoanForm({ properties }: { properties: Property[] }) {
         event.preventDefault();
         const sent = event.currentTarget;
         // Amounts, the rate and the years go as typed: the server turns them into what is stored.
-        add.mutate(Object.fromEntries(new FormData(sent)), { onSuccess: () => sent.reset() });
+        const json = Object.fromEntries(new FormData(sent));
+        if (loan) update.mutate({ loan: loan.id, json }, { onSuccess: onDone });
+        else add.mutate(json, { onSuccess: () => sent.reset() });
       }}
       {...stylex.props(styles.form)}
     >
-      <h3 {...stylex.props(styles.formTitle)}>{form.title}</h3>
+      <h3 {...stylex.props(styles.formTitle)}>{loan ? form.editTitle(loan.label) : form.title}</h3>
       <div {...stylex.props(styles.fields)}>
-        <Field label={form.name} htmlFor="loan-label" xstyle={styles.both}>
-          <Input id="loan-label" name="label" required placeholder={form.namePlaceholder} />
+        <Field label={form.name} htmlFor={id("label")} xstyle={styles.both}>
+          <Input
+            id={id("label")}
+            name="label"
+            required
+            defaultValue={loan?.label}
+            placeholder={form.namePlaceholder}
+          />
         </Field>
-        <Field label={form.principal} htmlFor="loan-principal" xstyle={styles.both}>
-          <Input id="loan-principal" name="principal" required inputMode="decimal" placeholder="200000" />
+        <Field label={form.principal} htmlFor={id("principal")} xstyle={styles.both}>
+          <Input
+            id={id("principal")}
+            name="principal"
+            required
+            inputMode="decimal"
+            defaultValue={loan && typed(loan.principal)}
+            placeholder="200000"
+          />
         </Field>
-        <Field label={form.rate} htmlFor="loan-rate" hint={form.rateHint}>
-          <Input id="loan-rate" name="rate" required inputMode="decimal" placeholder="3.85" />
+        <Field label={form.payment} htmlFor={id("payment")} hint={form.paymentHint} xstyle={styles.both}>
+          <Input
+            id={id("payment")}
+            name="payment"
+            required
+            inputMode="decimal"
+            defaultValue={payment != null ? typed(payment) : undefined}
+            placeholder="1230"
+          />
         </Field>
-        <Field label={form.years} htmlFor="loan-years" hint={form.yearsHint}>
-          <Input id="loan-years" name="years" required inputMode="decimal" placeholder="20" />
+        <Field label={form.insurance} htmlFor={id("insurance")} xstyle={styles.both}>
+          <Input
+            id={id("insurance")}
+            name="insurance"
+            inputMode="decimal"
+            defaultValue={loan && loan.insurance > 0 ? typed(loan.insurance) : undefined}
+            placeholder="30"
+          />
         </Field>
-        <Field label={form.startsOn} htmlFor="loan-startsOn">
-          <Input id="loan-startsOn" name="startsOn" type="date" required defaultValue={today()} />
+        <Field label={form.rate} htmlFor={id("rate")} hint={form.rateHint}>
+          <Input
+            id={id("rate")}
+            name="rate"
+            required
+            inputMode="decimal"
+            defaultValue={loan && String(loan.rate / 100)}
+            placeholder="3.85"
+          />
         </Field>
-        <Field label={form.insurance} htmlFor="loan-insurance">
-          <Input id="loan-insurance" name="insurance" inputMode="decimal" placeholder="30" />
+        <Field label={form.years} htmlFor={id("years")} hint={form.yearsHint}>
+          <Input
+            id={id("years")}
+            name="years"
+            required
+            inputMode="decimal"
+            defaultValue={loan && String(Math.round((loan.months / 12) * 1000) / 1000)}
+            placeholder="20"
+          />
         </Field>
-        <Field label={form.property} htmlFor="loan-propertyId" xstyle={styles.both}>
-          <Select id="loan-propertyId" name="propertyId" defaultValue="">
+        <Field label={form.startsOn} htmlFor={id("startsOn")} xstyle={styles.both}>
+          <Input
+            id={id("startsOn")}
+            name="startsOn"
+            type="date"
+            required
+            defaultValue={loan?.startsOn ?? today()}
+          />
+        </Field>
+        <Field label={form.property} htmlFor={id("propertyId")} xstyle={styles.both}>
+          <Select id={id("propertyId")} name="propertyId" defaultValue={loan?.propertyId ?? ""}>
             <option value="">{m.revenue.charges.allProperties}</option>
             {properties.map((property) => (
               <option key={property.id} value={property.id}>
@@ -367,14 +452,25 @@ export function LoanForm({ properties }: { properties: Property[] }) {
           </Select>
         </Field>
       </div>
-      {add.error && (
+      {saving.error && (
         <Notice tone="critical" role="alert" xstyle={styles.stretch}>
-          {add.error.message}
+          {saving.error.message}
         </Notice>
       )}
-      <SubmitButton variant="primary" pending={add.isPending} pendingLabel={form.submitting}>
-        {form.submit}
-      </SubmitButton>
+      <div {...stylex.props(styles.actions)}>
+        <SubmitButton
+          variant="primary"
+          pending={saving.isPending}
+          pendingLabel={loan ? form.saving : form.submitting}
+        >
+          {loan ? form.save : form.submit}
+        </SubmitButton>
+        {loan && (
+          <Button variant="ghost" onClick={onDone}>
+            {form.cancel}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

@@ -201,6 +201,11 @@ export const loans = sqliteTable("loans", {
   months: integer("months").notNull(),
   /** Borrower's insurance paid with each payment, in minor units. */
   insurance: integer("insurance").notNull().default(0),
+  /**
+   * What leaves the account each month, insurance included, as the borrower
+   * typed it. Null on loans entered before it was asked: theirs is computed.
+   */
+  payment: integer("payment"),
   /** The day of the first payment. */
   startsOn: text("starts_on").notNull(),
   createdAt: integer("created_at").notNull(),

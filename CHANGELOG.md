@@ -9,6 +9,9 @@ minor version may change how things work.
 
 ### Added
 
+- A loan can be edited, and takes the monthly payment you type, insurance
+  included: that amount is what each month costs, instead of one worked out
+  from the rate. Loans entered before keep their computed payment until edited.
 - Suggestions read each listing as a guest does: a title that could be any
   place, a description in one block, too few photos, amenities ticked but
   never written about, what several reviews complain of, and low reviews left

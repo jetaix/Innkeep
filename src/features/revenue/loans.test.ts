@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { summariseMonth } from "./compute";
-import { balanceAfter, loanCosts, loanState, monthlyPayment } from "./loans";
+import { balanceAfter, loanCosts, loanState, monthlyCost, monthlyPayment } from "./loans";
 
 // 200 000 over 20 years at 3.85%: 1 196.21 a month.
 const loan = {
@@ -114,5 +114,27 @@ describe("a loan with its bank's table", () => {
       remaining: 200_000_00 - 554_54 - 556_32,
       cost: 641_67 + 639_89 + 92_00,
     });
+  });
+});
+
+describe("a payment the borrower typed", () => {
+  const terms = { principal: 20_000_000, rate: 385, months: 240, insurance: 3_000, startsOn: "2024-01-05" };
+
+  it("is what the loan costs each month, insurance included", () => {
+    const loan = { ...terms, payment: 125_000 };
+    expect(monthlyCost(loan)).toBe(125_000);
+    expect(loanState(loan, "2024-06-10").monthlyCost).toBe(125_000);
+    expect(loanCosts([{ ...loan, id: 1, propertyId: null, label: "Mortgage" }])[0].amount).toBe(125_000);
+  });
+
+  it("leaves a loan entered without it on its computed payment", () => {
+    expect(monthlyCost({ ...terms, payment: null })).toBe(monthlyPayment(terms) + 3_000);
+  });
+
+  it("repays the capital with the payment less its insurance", () => {
+    const state = loanState({ ...terms, payment: 125_000 }, "2024-01-10");
+    expect(state.payment).toBe(122_000);
+    // One payment made: a month of interest on the whole amount, the rest off the capital.
+    expect(state.remaining).toBe(Math.round(20_000_000 * (1 + 0.0385 / 12) - 122_000));
   });
 });
