@@ -9,6 +9,13 @@ minor version may change how things work.
 
 ### Added
 
+- Suggestions read each listing as a guest does: a title that could be any
+  place, a description in one block, too few photos, amenities ticked but
+  never written about, what several reviews complain of, and low reviews left
+  without a reply.
+- Claude's advice now includes an audit of each listing (clarity, trust,
+  conversion, search, the stay itself) with three titles and an opening
+  paragraph to copy, written only from what the listing and the reviews say.
 - Loans on the Revenue page: enter the amount borrowed, the rate, the duration
   and the insurance, and the monthly payment counts as a cost until the last
   one. Each loan shows what is still owed and what the borrowing costs.

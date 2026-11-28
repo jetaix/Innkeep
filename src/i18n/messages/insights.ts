@@ -62,6 +62,53 @@ const en = {
         `Right now ${issues.join("; ")}. Lead with what is unique (view, location, a standout amenity) and spell out sleeping arrangements, Wi-Fi and parking: they are the questions guests ask most.`,
       action: "Edit the listing",
     },
+    page: {
+      /** "3 things a guest would trip on in the Airbnb listing of Canal Loft" */
+      title: (channel: string, property: string, count: number): string =>
+        count === 1
+          ? `One thing to sharpen on the ${channel} page of ${property}`
+          : `${count} things to sharpen on the ${channel} page of ${property}`,
+      shouts:
+        "The title is in capitals or leans on symbols: it reads as an advert. Write it as a plain sentence.",
+      vague:
+        "The title could be any place: it names the kind of home and how nice it is, nothing else. Put one concrete thing in it (the view, the terrace, minutes to the centre, the number of bedrooms).",
+      noPlace:
+        "Neither the title nor the opening lines say where it is. Name the town or the neighbourhood early: it is the first thing a guest checks.",
+      wall: "The description is one long block. Break it into short paragraphs (the place, sleeping, kitchen, getting around) so it can be scanned on a phone.",
+      fewPhotos:
+        "The page shows few photos. Guests expect each room, the bathroom, the view from the window and the entrance.",
+      amenitiesUnsaid: (amenities: string[]): string =>
+        `Some amenities are ticked but never written about (${amenities.join(", ")}). Say what each lets a guest do: “fibre Wi-Fi and a desk: fine for a week of remote work”.`,
+      action: "See the page as guests do",
+    },
+    reviewTheme: {
+      /** "3 guests of Canal Loft mention noise" */
+      title: (count: number, property: string, theme: string): string =>
+        `${count} guests of ${property} mention ${theme}`,
+      unsaid:
+        "The listing does not. Fix it if you can; if you cannot, say it plainly in the description (“lively street: light sleepers may want the back bedroom”). A guest who was told books knowingly and rates what they were promised.",
+      said: "The listing already says so, and it still weighs on the reviews: this one is to fix in the place itself, or to state earlier and more plainly.",
+      action: "Read these reviews",
+      /** Keyed by the subject of the complaint. */
+      theme: {
+        noise: "noise",
+        stairs: "the stairs",
+        parking: "parking",
+        cleanliness: "cleanliness",
+        wifi: "the Wi-Fi",
+        temperature: "the heating or the heat",
+        checkIn: "check-in or the keys",
+        bed: "the bed",
+      },
+    },
+    lowReviews: {
+      title: (count: number, property: string): string =>
+        count === 1
+          ? `A low review of ${property} has no reply`
+          : `${count} low reviews of ${property} have no reply`,
+      body: "Future guests read the reply as much as the review. Answer briefly: thank the guest, say what has changed since, and do not argue.",
+      action: "Reply",
+    },
     syncError: {
       title: (channel: string, property: string) => `${channel} calendar for ${property} is not syncing`,
       body: (error: string, channel: string) =>
@@ -102,7 +149,7 @@ const en = {
   },
   advice: {
     title: "Tailored advice",
-    source: "Written by Claude from your listings, payouts, nightly prices and revenue.",
+    source: "Written by Claude from your listings, reviews, payouts, nightly prices and revenue.",
     /** "Written 19 Nov, 14:30 by claude-…." */
     generated: (when: string, model: string) => `Written ${when} by ${model}.`,
     thinking: "Thinking, about a minute…",
@@ -114,8 +161,26 @@ const en = {
       after: " on the server and restart to turn this on. The suggestions above work without it.",
     },
     impact: { high: "high impact", medium: "medium impact", low: "low impact" },
+    audit: {
+      title: "Your listings, read as a guest",
+      note: "Written only from what your listing and your reviews say. Check every line before you publish it: Claude has not seen the place.",
+      /** Keyed by what is judged. */
+      dimension: {
+        clarity: "Clarity",
+        trust: "Trust",
+        conversion: "Makes you want to book",
+        search: "Found in search",
+        experience: "The stay itself",
+      },
+      verdict: { strong: "Strong", fix: "To fix", missing: "Missing" },
+      titles: "Three titles to try",
+      opening: "An opening paragraph",
+      benefits: "Amenities, as what they let a guest do",
+      photos: "Photos",
+      toVerify: "Check before publishing",
+    },
     privacy:
-      "Sends listing text, nightly prices, stay dates and payouts, and revenue totals to Anthropic. Never guest names or messages.",
+      "Sends listing text, the text of public reviews, nightly prices, stay dates and payouts, and revenue totals to Anthropic. Never guest names or messages.",
   },
   errors: {
     notConfigured: "Connect Claude first, lower on this page.",
@@ -190,6 +255,49 @@ const fr: typeof en = {
         `Actuellement, ${issues.join(" ; ")}. Commencez par ce qui est unique (vue, emplacement, équipement remarquable) et précisez le couchage, le Wi-Fi et le stationnement : ce sont les questions que les voyageurs posent le plus.`,
       action: "Modifier l’annonce",
     },
+    page: {
+      title: (channel, property, count) =>
+        count === 1
+          ? `Un point à préciser sur la page ${channel} de ${property}`
+          : `${count} points à préciser sur la page ${channel} de ${property}`,
+      shouts:
+        "Le titre est en majuscules ou s’appuie sur des symboles : il se lit comme une publicité. Écrivez-le comme une phrase simple.",
+      vague:
+        "Le titre pourrait désigner n’importe quel logement : il dit le type de bien et qu’il est agréable, rien d’autre. Ajoutez un élément concret (la vue, la terrasse, le temps à pied jusqu’au centre, le nombre de chambres).",
+      noPlace:
+        "Ni le titre ni les premières lignes ne disent où il se trouve. Nommez la ville ou le quartier dès le début : c’est la première chose qu’un voyageur vérifie.",
+      wall: "La description forme un seul bloc. Découpez-la en courts paragraphes (le lieu, le couchage, la cuisine, les déplacements) pour qu’elle se lise d’un coup d’œil sur téléphone.",
+      fewPhotos:
+        "La page montre peu de photos. Les voyageurs attendent chaque pièce, la salle de bain, la vue depuis la fenêtre et l’entrée.",
+      amenitiesUnsaid: (amenities) =>
+        `Des équipements sont cochés sans jamais être décrits (${amenities.join(", ")}). Dites ce que chacun permet : « fibre et bureau : de quoi télétravailler une semaine ».`,
+      action: "Voir la page comme un voyageur",
+    },
+    reviewTheme: {
+      title: (count, property, theme) => `${count} voyageurs de ${property} évoquent ${theme}`,
+      unsaid:
+        "L’annonce n’en parle pas. Corrigez-le si vous le pouvez ; sinon, dites-le simplement dans la description (« rue animée : si vous avez le sommeil léger, préférez la chambre sur cour »). Un voyageur prévenu réserve en connaissance de cause et note ce qu’on lui a promis.",
+      said: "L’annonce le dit déjà, et cela pèse encore sur les avis : c’est à corriger dans le logement lui-même, ou à annoncer plus tôt et plus clairement.",
+      action: "Lire ces avis",
+      theme: {
+        noise: "le bruit",
+        stairs: "les escaliers",
+        parking: "le stationnement",
+        cleanliness: "la propreté",
+        wifi: "le Wi-Fi",
+        temperature: "le chauffage ou la chaleur",
+        checkIn: "l’arrivée ou les clés",
+        bed: "le lit",
+      },
+    },
+    lowReviews: {
+      title: (count, property) =>
+        count === 1
+          ? `Un avis mitigé sur ${property} est resté sans réponse`
+          : `${count} avis mitigés sur ${property} sont restés sans réponse`,
+      body: "Les prochains voyageurs lisent la réponse autant que l’avis. Répondez brièvement : remerciez, dites ce qui a changé depuis, sans polémiquer.",
+      action: "Répondre",
+    },
     syncError: {
       title: (channel, property) => `Le calendrier ${channel} de ${property} ne se synchronise plus`,
       body: (error, channel) =>
@@ -230,7 +338,7 @@ const fr: typeof en = {
   },
   advice: {
     title: "Conseils personnalisés",
-    source: "Rédigés par Claude à partir de vos annonces, versements, prix par nuit et revenus.",
+    source: "Rédigés par Claude à partir de vos annonces, avis, versements, prix par nuit et revenus.",
     generated: (when, model) => `Rédigés le ${when} par ${model}.`,
     thinking: "Réflexion en cours, environ une minute…",
     refresh: "Actualiser les conseils",
@@ -241,8 +349,25 @@ const fr: typeof en = {
         " sur le serveur et redémarrez pour activer ces conseils. Les suggestions ci-dessus fonctionnent sans.",
     },
     impact: { high: "impact élevé", medium: "impact moyen", low: "impact faible" },
+    audit: {
+      title: "Vos annonces, lues comme un voyageur",
+      note: "Rédigé uniquement d’après ce que disent votre annonce et vos avis. Vérifiez chaque ligne avant de la publier : Claude n’a pas vu le logement.",
+      dimension: {
+        clarity: "Clarté",
+        trust: "Confiance",
+        conversion: "Donne envie de réserver",
+        search: "Trouvée dans la recherche",
+        experience: "Le séjour lui-même",
+      },
+      verdict: { strong: "Solide", fix: "À corriger", missing: "Manquant" },
+      titles: "Trois titres à essayer",
+      opening: "Un premier paragraphe",
+      benefits: "Les équipements, par ce qu’ils permettent",
+      photos: "Photos",
+      toVerify: "À vérifier avant de publier",
+    },
     privacy:
-      "Envoie à Anthropic le texte des annonces, les prix par nuit, les dates et versements des séjours et les totaux de revenus. Jamais les noms ni les messages des voyageurs.",
+      "Envoie à Anthropic le texte des annonces, le texte des avis publics, les prix par nuit, les dates et versements des séjours et les totaux de revenus. Jamais les noms ni les messages des voyageurs.",
   },
   errors: {
     notConfigured: "Connectez d’abord Claude, plus bas sur cette page.",

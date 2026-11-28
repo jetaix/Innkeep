@@ -6,10 +6,12 @@ import type { Advice } from "@/features/insights/ai";
 import { requestAdvice } from "../../api/mutations";
 import { useI18n } from "../../i18n";
 import { color, text } from "../../tokens.stylex";
+import { CopyButton } from "../../ui/actions";
 import { Button } from "../../ui/button";
 import { Badge, Notice } from "../../ui/primitives";
 
 const IMPACT_TONE = { high: "good", medium: "neutral", low: "neutral" } as const;
+const VERDICT_TONE = { strong: "good", fix: "warn", missing: "critical" } as const;
 
 const styles = stylex.create({
   head: {
@@ -86,6 +88,58 @@ const styles = stylex.create({
     lineHeight: 1.55,
   },
   gap: { marginTop: "1rem" },
+  // The listing audits: each property read as a guest reads it.
+  audits: {
+    marginTop: "1.25rem",
+    paddingTop: "1.25rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.lineStrong,
+  },
+  auditsTitle: { margin: 0, fontSize: text.md, fontWeight: 600 },
+  auditNote: {
+    margin: "0.25rem 0 0",
+    maxWidth: "68ch",
+    color: color.muted,
+    fontSize: text.sm,
+    lineHeight: 1.55,
+  },
+  audit: {
+    marginTop: "1.25rem",
+    paddingTop: "1.25rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: color.line,
+  },
+  scorecard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.75rem",
+    margin: "0.875rem 0 0",
+    maxWidth: "68ch",
+  },
+  score: { display: "flex", flexDirection: "column", gap: "0.25rem" },
+  scoreHead: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", fontWeight: 500 },
+  scoreBody: { margin: 0, color: color.muted, lineHeight: 1.6 },
+  fix: { display: "block", marginTop: "0.125rem", color: color.ink },
+  part: { margin: "1.125rem 0 0.375rem", fontSize: text.base, fontWeight: 600 },
+  copies: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    margin: 0,
+    padding: 0,
+    listStyle: "none",
+  },
+  copy: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "0.75rem",
+    maxWidth: "68ch",
+  },
+  quoted: { margin: 0, lineHeight: 1.625, whiteSpace: "pre-line" },
+  verify: { marginTop: "1rem", maxWidth: "68ch" },
 });
 
 /** AI-written advice: the stored result, a button to (re)generate it, and its failure states. */
@@ -173,6 +227,76 @@ export function AdvicePanel({
                 </li>
               ))}
             </ol>
+            {(advice.listings ?? []).length > 0 && (
+              <div {...stylex.props(styles.audits)}>
+                <h3 {...stylex.props(styles.auditsTitle)}>{t.audit.title}</h3>
+                <p {...stylex.props(styles.auditNote)}>{t.audit.note}</p>
+                {advice.listings.map((audit, index) => (
+                  <article key={index} {...stylex.props(styles.audit)}>
+                    <h4 {...stylex.props(styles.itemTitle)}>{audit.property}</h4>
+                    <p {...stylex.props(styles.why)}>{audit.position}</p>
+                    <dl {...stylex.props(styles.scorecard)}>
+                      {audit.scorecard.map((line) => (
+                        <div key={line.dimension} {...stylex.props(styles.score)}>
+                          <dt {...stylex.props(styles.scoreHead)}>
+                            {t.audit.dimension[line.dimension]}
+                            <Badge tone={VERDICT_TONE[line.verdict]}>{t.audit.verdict[line.verdict]}</Badge>
+                          </dt>
+                          <dd {...stylex.props(styles.scoreBody)}>
+                            {line.finding}
+                            {line.fix && <span {...stylex.props(styles.fix)}>{line.fix}</span>}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <h5 {...stylex.props(styles.part)}>{t.audit.titles}</h5>
+                    <ul {...stylex.props(styles.copies)}>
+                      {audit.titles.map((title, titleIndex) => (
+                        <li key={titleIndex} {...stylex.props(styles.copy)}>
+                          <span>{title}</span>
+                          <CopyButton value={title} />
+                        </li>
+                      ))}
+                    </ul>
+                    <h5 {...stylex.props(styles.part)}>{t.audit.opening}</h5>
+                    <div {...stylex.props(styles.copy)}>
+                      <p {...stylex.props(styles.quoted)}>{audit.opening}</p>
+                      <CopyButton value={audit.opening} />
+                    </div>
+                    {audit.benefits.length > 0 && (
+                      <>
+                        <h5 {...stylex.props(styles.part)}>{t.audit.benefits}</h5>
+                        <ul {...stylex.props(styles.steps)}>
+                          {audit.benefits.map((benefit, benefitIndex) => (
+                            <li key={benefitIndex} {...stylex.props(styles.step)}>
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    {audit.photos && (
+                      <>
+                        <h5 {...stylex.props(styles.part)}>{t.audit.photos}</h5>
+                        <p {...stylex.props(styles.why)}>{audit.photos}</p>
+                      </>
+                    )}
+                    {audit.toVerify.length > 0 && (
+                      <Notice tone="warn" xstyle={styles.verify}>
+                        <strong>{t.audit.toVerify}</strong>
+                        <ul {...stylex.props(styles.steps)}>
+                          {audit.toVerify.map((fact, factIndex) => (
+                            <li key={factIndex} {...stylex.props(styles.step)}>
+                              {fact}
+                            </li>
+                          ))}
+                        </ul>
+                      </Notice>
+                    )}
+                  </article>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
