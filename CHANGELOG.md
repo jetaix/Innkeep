@@ -95,6 +95,9 @@ minor version may change how things work.
 
 ### Fixed
 
+- The address in `OWNER_EMAIL` gets the data already there in every case: it
+  joins the members invited under the shared password, and an account that
+  signed up before the variable was set moves there the next time it signs in.
 - In the public demo, a visitor could trigger the host's Telegram test
   message, list the chats of the host's bot, or start a paid request for
   advice. Those actions are now for the host only.

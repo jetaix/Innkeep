@@ -48,8 +48,9 @@ export class NoAccessError extends Error {
  *
  * The first space is the main database itself, with whatever was already in
  * it: it goes to the first account created, or, when `OWNER_EMAIL` is set, to
- * the account with that address and nobody else. Every other account starts
- * in an empty database of its own.
+ * the account with that address and nobody else, as an admin beside the
+ * members it may already have. Every other account starts in an empty
+ * database of its own.
  *
  * Who may sign up at all is `SIGN_UP`'s to say (see `signUpMode`); whoever
  * takes the main database always may, or nobody could ever get in.
@@ -64,14 +65,33 @@ export async function signUp(input: unknown) {
     const host = () =>
       db.select().from(spaces).where(eq(spaces.store, MAIN_STORE)).orderBy(asc(spaces.id)).get();
     const owner = ownerEmail();
-    const takesHost = !(await host()) && (owner == null || owner === data.email);
-    if (!takesHost && owner !== data.email) {
+    const isOwner = owner != null && owner === data.email;
+    const existing = await host();
+    const takesHost = !existing && (owner == null || isOwner);
+    if (!takesHost && !isOwner) {
       const mode = signUpMode();
       if (mode === "closed") throw new NoAccessError("closed");
       if (mode === "beta" && !(await isApproved(data.email))) throw new NoAccessError("beta");
     }
 
     const now = Date.now();
+    // The main database already has members (invited under the shared password): the owner joins them.
+    if (existing && isOwner) {
+      const user = await db
+        .insert(users)
+        .values({
+          spaceId: existing.id,
+          email: data.email,
+          name: data.name,
+          role: "admin",
+          passwordHash: hashPassword(data.password),
+          createdAt: now,
+        })
+        .returning()
+        .get();
+      return { user, space: existing };
+    }
+
     let space = await db
       .insert(spaces)
       // "pending" is replaced below; a space never works on a store it was not given.
@@ -106,6 +126,33 @@ export async function signUp(input: unknown) {
       await db.delete(spaces).where(eq(spaces.id, space.id)).run();
       throw error;
     }
+  });
+}
+
+/**
+ * Puts the account `OWNER_EMAIL` names in the main database, as an admin, if
+ * it is somewhere else: it signed up before the variable was set, and got an
+ * empty space. Called when it signs in. What it had typed in that other space
+ * stays there, out of reach.
+ */
+export async function bringOwnerHome<Member extends { id: number; email: string; spaceId: number }>(
+  member: Member,
+): Promise<Member> {
+  if (ownerEmail() !== member.email) return member;
+  return central(async () => {
+    const db = getDb();
+    const main = () =>
+      db.select().from(spaces).where(eq(spaces.store, MAIN_STORE)).orderBy(asc(spaces.id)).get();
+    const host =
+      (await main()) ??
+      (await db
+        .insert(spaces)
+        .values({ name: "Innkeep", store: MAIN_STORE, createdAt: Date.now() })
+        .returning()
+        .get());
+    if (member.spaceId === host.id) return member;
+    await db.update(users).set({ spaceId: host.id, role: "admin" }).where(eq(users.id, member.id)).run();
+    return { ...member, spaceId: host.id, role: "admin" };
   });
 }
 

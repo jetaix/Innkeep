@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { exportEvents } from "../../src/channels/sync";
 import { appState, getDb, listings, properties, reservations } from "../../src/db";
 import { addDays, today } from "../../src/lib/dates";
@@ -173,6 +173,9 @@ describe("GET /api/cron", () => {
 
 describe("GET /api/ical/:token/:file", () => {
   it("serves the feed a channel imports, byte for byte", async () => {
+    // The feed is stamped to the second: hold the clock, or the two can differ.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    onTestFinished(() => void vi.useRealTimers());
     for (const target of ["airbnb", "booking", "all"] as const) {
       const response = await call(`/api/ical/feed-token/${target}.ics`);
       expect(response.status).toBe(200);
