@@ -26,6 +26,10 @@ minor version may change how things work.
   chooses the role; the person opens it, picks a password and is in. An admin
   sees and changes everything; a visitor sees the cleaning and the properties
   only, and can mark a cleaning as done.
+- Sign-up is in beta by default: only the addresses the host approves can
+  create an account. Requests for access are now kept and listed under
+  Settings, Beta access, where the host approves them or adds an address.
+  `SIGN_UP=open` takes anyone, `SIGN_UP=closed` nobody.
 - Your account in Settings: change your password, sign out. An admin can make
   a link for a member who forgot theirs. Innkeep sends no email.
 - Loans on the Revenue page: enter the amount borrowed, the rate, the duration
@@ -64,13 +68,12 @@ minor version may change how things work.
 
 ### Changed
 
-- **Breaking:** `APP_PASSWORD` no longer opens Innkeep, and an Innkeep with
-  no password is no longer open to anyone who reaches it: everyone signs in
-  with an account. After updating, create your account. If `APP_PASSWORD` was
-  set, type it once in "Password of this Innkeep" on the sign-up page to take
-  your properties and bookings with you, then remove the variable. On Turso,
-  accounts beyond the first need `TURSO_ORG`, `TURSO_API_TOKEN` and
-  `TURSO_GROUP_TOKEN`; `SIGN_UP=closed` takes no new accounts.
+- **Breaking:** `APP_PASSWORD` is gone, and an Innkeep with no password is no
+  longer open to anyone who reaches it: everyone signs in with an account.
+  The first account created takes the data already there, so create yours
+  right after updating; set `OWNER_EMAIL` to your address beforehand and only
+  that address can take it. On Turso, accounts beyond the first need
+  `TURSO_ORG`, `TURSO_API_TOKEN` and `TURSO_GROUP_TOKEN`.
 - The server's own settings (`ANTHROPIC_API_KEY`, the Telegram bot and chat,
   `EXTENSION_TOKEN`, `MCP_TOKEN`) serve the first account's space only. Other
   spaces have tokens of their own, shown in their Settings.

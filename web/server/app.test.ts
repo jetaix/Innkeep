@@ -68,6 +68,15 @@ describe("who sees which data", () => {
     process.env.PUBLIC_DEMO = "1";
   });
 
+  it("gives the first account the main database, even in beta, and says so beforehand", async () => {
+    // This file's host signed up first, with no owner named and the default mode.
+    expect(await (await get("/account")).json()).toEqual({ mode: "beta", first: false });
+    expect(
+      (await send("/account", { name: "N", email: "n@example.com", password: "a long enough password" }))
+        .status,
+    ).toBe(403);
+  });
+
   it("signs in with an email and a password, and counts the misses", async () => {
     const wrong = await send("/session", { email: "host@example.com", password: "a guess" });
     expect(wrong.status).toBe(401);

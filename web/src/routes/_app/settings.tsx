@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { NAV } from "@/config/navigation";
+import { Access } from "../../features/settings/access";
 import { Account } from "../../features/settings/account";
 import { Members } from "../../features/settings/members";
 import {
@@ -266,6 +267,7 @@ function General() {
           <Account />
         </Section>
       )}
+      {signedIn && <BetaAccess />}
       {signedIn && (
         <Section id="members-heading" title={t.members.title} note={t.members.note} stacked>
           <Members />
@@ -286,6 +288,18 @@ function General() {
         </dl>
       </Section>
     </div>
+  );
+}
+
+/** Who may create an account while sign-up is in beta: shown in the host's own space only. */
+function BetaAccess() {
+  const t = useI18n("settings").m.settings.access;
+  const { hostSpace, signUp } = useSuspenseQuery(settingsQuery).data;
+  if (!hostSpace || signUp !== "beta") return null;
+  return (
+    <Section id="access-heading" title={t.title} note={t.note} stacked>
+      <Access />
+    </Section>
   );
 }
 

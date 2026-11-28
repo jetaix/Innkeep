@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, gt, isNull } from "drizzle-orm";
 import { central, getDb, invitations, MAIN_STORE, type SpaceRef, spaces, users } from "@/db";
-import { hostPassword, signUpClosed } from "@/lib/session";
+import { ownerEmail, type SignUpMode, signUpMode } from "@/lib/session";
 
 /**
  * Users, spaces and invitations live in the main database, shared by every
@@ -90,15 +90,13 @@ const hostSpace = () =>
     async () => (await getDb().select().from(spaces).where(eq(spaces.store, MAIN_STORE)).get()) ?? null,
   );
 
-/** What the sign-up page needs to know before anyone has typed anything. */
-export async function signUpState(): Promise<{ open: boolean; claimable: boolean }> {
-  const claimed = Boolean(await hostSpace());
-  return {
-    // The first account is always possible: without it nobody could ever get in.
-    open: !claimed || !signUpClosed(),
-    // The password this Innkeep used to open with still lets its owner in, into the data that was there.
-    claimable: hostPassword() != null,
-  };
+/**
+ * What the sign-up page needs to know before anyone has typed anything.
+ * While nobody owns the main database and no owner is named, the next account
+ * is the first and takes it, whatever the mode.
+ */
+export async function signUpState(): Promise<{ mode: SignUpMode; first: boolean }> {
+  return { mode: signUpMode(), first: !(await hostSpace()) && ownerEmail() == null };
 }
 
 export { hostSpace };

@@ -92,7 +92,7 @@ function LoginPage() {
           </Button>
         </form>
         <p {...stylex.props(doorStyles.other)}>{t.forgot}</p>
-        {account.data?.open && (
+        {account.data && (account.data.mode !== "closed" || account.data.first) && (
           <p {...stylex.props(doorStyles.other)}>
             {t.noAccount}{" "}
             <Link to="/signup" {...stylex.props(doorStyles.link)}>

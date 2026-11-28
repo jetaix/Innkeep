@@ -296,6 +296,24 @@ export const invitations = sqliteTable(
   (t) => [uniqueIndex("invitations_token").on(t.tokenHash)],
 );
 
+/**
+ * Someone asking for an account while sign-up is in beta, and whether the
+ * host let them in. Kept in the main database only.
+ */
+export const accessRequests = sqliteTable(
+  "access_requests",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    /** Lower case. */
+    email: text("email").notNull(),
+    locale: text("locale").notNull().default("en"),
+    status: text("status").$type<"pending" | "approved">().notNull().default("pending"),
+    createdAt: integer("created_at").notNull(),
+    approvedAt: integer("approved_at"),
+  },
+  (t) => [uniqueIndex("access_requests_email").on(t.email)],
+);
+
 export const dismissedSuggestions = sqliteTable("dismissed_suggestions", {
   key: text("key").primaryKey(),
   dismissedAt: integer("dismissed_at").notNull(),

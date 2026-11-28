@@ -4,7 +4,8 @@ import { and, asc, count, eq, lt, ne } from "drizzle-orm";
 import { z } from "zod";
 import { central, getDb, invitations, MAIN_STORE, newStore, ROLES, spaces, users } from "@/db";
 import { InvalidInput, parse, text } from "@/lib/form";
-import { hostPassword, hostPasswordMatches } from "@/lib/session";
+import { isApproved } from "@/features/access/requests";
+import { ownerEmail, signUpMode } from "@/lib/session";
 import { hashPassword, passwordFits } from "./password";
 
 /**
@@ -28,18 +29,30 @@ const signingUp = z.object({
   name: text.min(1).max(100),
   email,
   password,
-  /** The old `APP_PASSWORD`, from someone taking over the data that was here before accounts. */
-  claim: z.string().max(500).default(""),
 });
 
+/** Refused: sign-up is closed, or in beta and this address was not let in. */
+export class NoAccessError extends Error {
+  constructor(readonly reason: "closed" | "beta") {
+    super(
+      reason === "closed"
+        ? "This Innkeep takes no new accounts."
+        : "This address has no access yet. Request access, then sign up once it is approved.",
+    );
+    this.name = "NoAccessError";
+  }
+}
+
 /**
- * Creates an account: a space, and a user who is its admin.
+ * Creates an account: a new space, and its first user, an admin.
  *
- * The host's space is the main database itself, with whatever was already in
- * it. Where the host had set `APP_PASSWORD`, only someone who types it gets
- * into that space (the first makes it; a later one joins it as an admin, as
- * that password always allowed). Anyone else starts in an empty database of
- * their own, as every later account does.
+ * The first space is the main database itself, with whatever was already in
+ * it: it goes to the first account created, or, when `OWNER_EMAIL` is set, to
+ * the account with that address and nobody else. Every other account starts
+ * in an empty database of its own.
+ *
+ * Who may sign up at all is `SIGN_UP`'s to say (see `signUpMode`); whoever
+ * takes the main database always may, or nobody could ever get in.
  */
 export async function signUp(input: unknown) {
   const data = parse(signingUp, input);
@@ -50,26 +63,15 @@ export async function signUp(input: unknown) {
     }
     const host = () =>
       db.select().from(spaces).where(eq(spaces.store, MAIN_STORE)).orderBy(asc(spaces.id)).get();
-    if (data.claim && !hostPasswordMatches(data.claim)) throw new InvalidInput("claim");
-    const existing = await host();
-    const takesHost = data.claim !== "" || (!existing && hostPassword() == null);
+    const owner = ownerEmail();
+    const takesHost = !(await host()) && (owner == null || owner === data.email);
+    if (!takesHost && owner !== data.email) {
+      const mode = signUpMode();
+      if (mode === "closed") throw new NoAccessError("closed");
+      if (mode === "beta" && !(await isApproved(data.email))) throw new NoAccessError("beta");
+    }
 
     const now = Date.now();
-    const member = (spaceId: number) =>
-      db
-        .insert(users)
-        .values({
-          spaceId,
-          email: data.email,
-          name: data.name,
-          role: "admin",
-          passwordHash: hashPassword(data.password),
-          createdAt: now,
-        })
-        .returning()
-        .get();
-    if (takesHost && existing) return { user: await member(existing.id), space: existing, claimed: true };
-
     let space = await db
       .insert(spaces)
       // "pending" is replaced below; a space never works on a store it was not given.
@@ -77,8 +79,8 @@ export async function signUp(input: unknown) {
       .returning()
       .get();
     try {
-      // Two strangers signing up at the same moment must not both get the main database.
-      const lost = takesHost && data.claim === "" && (await host())?.id !== space.id;
+      // Two people signing up at the same moment must not both get the main database.
+      const lost = takesHost && (await host())?.id !== space.id;
       if (!takesHost || lost) {
         space = await db
           .update(spaces)
@@ -87,7 +89,19 @@ export async function signUp(input: unknown) {
           .returning()
           .get();
       }
-      return { user: await member(space.id), space, claimed: data.claim !== "" };
+      const user = await db
+        .insert(users)
+        .values({
+          spaceId: space.id,
+          email: data.email,
+          name: data.name,
+          role: "admin",
+          passwordHash: hashPassword(data.password),
+          createdAt: now,
+        })
+        .returning()
+        .get();
+      return { user, space };
     } catch (error) {
       await db.delete(spaces).where(eq(spaces.id, space.id)).run();
       throw error;

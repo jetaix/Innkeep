@@ -31,6 +31,7 @@ describe("members and their roles", () => {
 
   beforeAll(async () => {
     process.env.PUBLIC_DEMO = "";
+    process.env.SIGN_UP = "open";
     owner = (await signedUp()).cookie;
     const row = await getDb()
       .insert(properties)
@@ -237,19 +238,6 @@ describe("members and their roles", () => {
       (await call("POST", "/account", undefined, { name: "C", email: "c2@example.com", password: "short" }))
         .status,
     ).toBe(400);
-  });
-
-  it("closes sign-up when the host says so, and keeps invitations working", async () => {
-    process.env.SIGN_UP = "closed";
-    expect(await (await call("GET", "/account")).json()).toEqual({ open: false, claimable: false });
-    const refused = await call("POST", "/account", undefined, {
-      name: "Late",
-      email: "late@example.com",
-      password: "a long enough password",
-    });
-    expect(refused.status).toBe(403);
-    expect((await join("visitor", "invited-late@example.com")).joined.status).toBe(200);
-    process.env.SIGN_UP = "";
   });
 
   it("does not take a forged member cookie", async () => {

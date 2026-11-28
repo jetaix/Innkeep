@@ -30,10 +30,16 @@ export const sessionQuery = queryOptions({
   },
 });
 
-/** Whether an account can be created here, and whether older data waits for its owner. */
+/** Who may create an account here: anyone, approved addresses, or nobody. */
 export const accountQuery = queryOptions({
   queryKey: ["account"],
   queryFn: () => unwrap(rpc.account.$get()),
+});
+
+/** Who asked for an account, and who was let in: the host's space alone can read it. */
+export const accessRequestsQuery = queryOptions({
+  queryKey: ["access-requests"],
+  queryFn: () => unwrap(rpc["access-requests"].$get()),
 });
 
 /** Who has access and the invitations still waiting: an admin's to read. */

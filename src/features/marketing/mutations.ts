@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Locale } from "@/i18n/config";
 import { MESSAGES } from "@/i18n/messages";
+import { recordRequest } from "@/features/access/requests";
 import { sendTelegram } from "@/lib/telegram";
 
 export type AccessState = { status: "idle" | "sent" | "error"; message?: string };
@@ -12,22 +13,24 @@ const schema = z.object({
 });
 
 /**
- * A host asks for early access to the hosted version. The address is sent as
- * a message to the Telegram chat named by `TELEGRAM_CHAT_ID` and kept nowhere
- * else: the public site has no database.
+ * Someone asks for access while sign-up is in beta. The address is kept in
+ * the main database, where the host approves it from Settings, and sent to
+ * the Telegram chat named by `TELEGRAM_CHAT_ID` so the host hears of it. One
+ * of the two is enough for the request to count: a host without a bot still
+ * finds it in Settings.
  */
 export async function requestAccess(input: unknown, locale: Locale): Promise<AccessState> {
   const t = MESSAGES[locale].marketing.access;
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { status: "error", message: t.invalid };
 
-  try {
-    await sendTelegram(
-      `Innkeep early access\n${parsed.data.email}\nLanguage: ${locale}`,
-      process.env.TELEGRAM_CHAT_ID ?? null,
-    );
-  } catch {
-    return { status: "error", message: t.failed };
-  }
-  return { status: "sent", message: t.sent };
+  const kept = await recordRequest(parsed.data.email, locale).catch(() => false);
+  const told = await sendTelegram(
+    `Innkeep access request\n${parsed.data.email}\nLanguage: ${locale}`,
+    process.env.TELEGRAM_CHAT_ID ?? null,
+  ).then(
+    () => true,
+    () => false,
+  );
+  return kept || told ? { status: "sent", message: t.sent } : { status: "error", message: t.failed };
 }

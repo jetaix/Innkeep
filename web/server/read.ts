@@ -43,7 +43,8 @@ import { LOCALES } from "../../src/i18n/config";
 import { addDays, today } from "../../src/lib/dates";
 import { isPrivateAddress } from "../../src/lib/net";
 import { hostSetting } from "../../src/lib/host";
-import { machineToken, publicDemo } from "../../src/lib/session";
+import { machineToken, publicDemo, signUpMode } from "../../src/lib/session";
+import { getRequests } from "../../src/features/access/requests";
 import { serverSecret } from "../../src/features/members/secret";
 import { inHostSpace } from "../../src/db";
 import { telegramBot } from "../../src/lib/telegram";
@@ -109,6 +110,12 @@ export const read = new Hono<Env>()
     const space = c.get("space");
     if (!space) throw hostOnly();
     return c.json({ members: await getMembers(space.id), invitations: await getInvitations(space.id) });
+  })
+
+  // Who asked for an account while sign-up is in beta: the host's own space alone decides.
+  .get("/access-requests", async (c) => {
+    if (!c.get("space") || !inHostSpace()) throw hostOnly();
+    return c.json({ requests: await getRequests() });
   })
 
   // The figures at the top of the overview, in one request.
@@ -400,6 +407,7 @@ export const read = new Hono<Env>()
     return c.json({
       // The host's own space takes its tokens from the server's settings; any other has its own, shown here.
       hostSpace: inHostSpace(),
+      signUp: signUpMode(),
       mcpTokenSet: Boolean(await machineTokenOf(c, "mcp")),
       mcpToken: inHostSpace() ? null : await machineTokenOf(c, "mcp"),
       extensionTokenSet: Boolean(await extensionToken(c)),

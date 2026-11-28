@@ -80,6 +80,23 @@ const en = {
     wrongCurrent: "That is not your current password.",
     tooShort: (min: number): string => `The new password needs at least ${min} characters.`,
   },
+  access: {
+    title: "Beta access",
+    note: "Sign-up is in beta: only the addresses you approve can create an account. Each gets an empty Innkeep of their own, never yours.",
+    noEmail:
+      "Innkeep sends no email: once you approve someone, tell them yourself that they can create their account.",
+    waiting: "Waiting",
+    approved: "Approved",
+    none: "Nobody has asked yet.",
+    approve: "Approve",
+    remove: "Remove",
+    /** "asked on 5 Dec" */
+    asked: (date: string): string => `asked on ${date}`,
+    add: "Give access to an address",
+    submit: "Give access",
+    saving: "Saving…",
+    invalid: "That does not look like an email address.",
+  },
   members: {
     title: "Members",
     note: "Who can open this Innkeep, and what each of them may do.",
@@ -202,6 +219,22 @@ const fr: typeof en = {
     saved: "Votre mot de passe est changé. Les autres navigateurs où vous étiez connecté sont déconnectés.",
     wrongCurrent: "Ce n’est pas votre mot de passe actuel.",
     tooShort: (min) => `Le nouveau mot de passe doit compter au moins ${min} caractères.`,
+  },
+  access: {
+    title: "Accès bêta",
+    note: "L’inscription est en bêta : seules les adresses que vous approuvez peuvent créer un compte. Chacune obtient un Innkeep vide à elle, jamais le vôtre.",
+    noEmail:
+      "Innkeep n’envoie aucun e-mail : une fois quelqu’un approuvé, dites-lui vous-même qu’il peut créer son compte.",
+    waiting: "En attente",
+    approved: "Approuvées",
+    none: "Personne n’a encore demandé.",
+    approve: "Approuver",
+    remove: "Retirer",
+    asked: (date) => `demandé le ${date}`,
+    add: "Donner l’accès à une adresse",
+    submit: "Donner l’accès",
+    saving: "Enregistrement…",
+    invalid: "Cela ne ressemble pas à une adresse e-mail.",
   },
   members: {
     title: "Membres",

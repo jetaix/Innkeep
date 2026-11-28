@@ -5,8 +5,10 @@ sign in with an email and a password of their own (kept as a salted scrypt
 hash), and the session cookie is signed by the server. Each account that signs
 up has its own space, kept in a database of its own, so one space's requests
 cannot read another's rows; the people invited into a space have a role, which
-the server enforces for every request. Set `SIGN_UP=closed` once you have your
-account if nobody else should be able to create one. Only these routes are
+the server enforces for every request. The first account created owns the main
+database (`OWNER_EMAIL` reserves it for one address); after it, only addresses
+the host approved can sign up unless `SIGN_UP` says otherwise. Innkeep does
+not verify email addresses. Only these routes are
 designed to be reachable without a session, each protected by its own secret:
 
 - `/api/ical/<token>/…` (random per-property token; exposes booked dates, never guest names)

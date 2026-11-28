@@ -226,7 +226,7 @@ export const signIn = mutationOptions({
   ...anotherPerson,
 });
 export const signUp = mutationOptions({
-  mutationFn: (json: { name: string; email: string; password: string; claim: string }) =>
+  mutationFn: (json: { name: string; email: string; password: string }) =>
     unwrap(rpc.account.$post({ json })),
   ...anotherPerson,
 });
@@ -238,6 +238,20 @@ export const changePassword = mutationOptions({
 export const resetMemberPassword = mutationOptions({
   mutationFn: (member: number) => unwrap(rpc.members[":id"].reset.$post({ param: id(member) })),
 });
+// Access while sign-up is in beta
+export const approveAccess = mutationOptions({
+  mutationFn: (request: number) => unwrap(rpc["access-requests"][":id"].$put({ param: id(request) })),
+  ...stale(["access-requests"]),
+});
+export const approveEmail = mutationOptions({
+  mutationFn: (email: string) => unwrap(rpc["access-requests"].$post({ json: { email } })),
+  ...stale(["access-requests"]),
+});
+export const removeAccess = mutationOptions({
+  mutationFn: (request: number) => unwrap(rpc["access-requests"][":id"].$delete({ param: id(request) })),
+  ...stale(["access-requests"]),
+});
+
 // Members and invitations
 export const invite = mutationOptions({
   mutationFn: (json: { role: "admin" | "visitor"; email: string }) => unwrap(rpc.invitations.$post({ json })),

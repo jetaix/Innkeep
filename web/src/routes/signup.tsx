@@ -7,7 +7,8 @@ import { signUp as signUpOptions } from "../api/mutations";
 import { accountQuery } from "../api/queries";
 import { Door, Doorway, doorStyles } from "../features/auth/door";
 import { loadMessages, useI18n } from "../i18n";
-import { Button, buttonStyle } from "../ui/button";
+import { takesAccessRequests } from "../site";
+import { Button } from "../ui/button";
 import { Field, Input } from "../ui/form";
 import { Loading, Notice } from "../ui/primitives";
 
@@ -32,7 +33,9 @@ export const Route = createFileRoute("/signup")({
 function SignUpPage() {
   const t = useI18n("auth").m.auth.signUp;
   const navigate = useNavigate();
-  const { open, claimable } = useSuspenseQuery(accountQuery).data;
+  const { mode, first } = useSuspenseQuery(accountQuery).data;
+  // The first account of an Innkeep is never held back; after it, the host's setting decides.
+  const held = first ? null : mode === "open" ? null : mode;
   const signUp = useMutation(signUpOptions);
   const refused = signUp.error instanceof ApiError ? signUp.error : null;
   // The server answers in English; the page says it in the reader's language.
@@ -42,32 +45,30 @@ function SignUpPage() {
       ? signUp.error.message
       : refused.status === 429
         ? t.tooMany
-        : refused.message.includes('"claim"')
-          ? t.claimWrong
+        : refused.status === 403
+          ? held === "closed"
+            ? t.closed
+            : t.noAccess
           : refused.message.includes('"email"') && /@/.test(signUp.variables?.email ?? "")
             ? t.taken
             : refused.status === 400
               ? t.check
               : refused.message;
 
-  // Closed to strangers, but the owner of what was here before accounts still gets in with its password.
-  if (!open && !claimable) {
-    return (
-      <>
-        <title>{`${t.title} · Innkeep`}</title>
-        <Door title={t.title} intro={t.closed}>
-          <Link to="/login" {...stylex.props(buttonStyle({}))}>
-            {t.signIn}
-          </Link>
-        </Door>
-      </>
-    );
-  }
-
   return (
     <>
       <title>{`${t.title} · Innkeep`}</title>
       <Door title={t.title} intro={t.intro}>
+        {held && (
+          <Notice tone="warn" role="note" xstyle={doorStyles.notice}>
+            {held === "closed" ? t.closed : t.beta}{" "}
+            {held === "beta" && takesAccessRequests && (
+              <Link to="/" hash="access" {...stylex.props(doorStyles.link)}>
+                {t.request}
+              </Link>
+            )}
+          </Notice>
+        )}
         <form
           {...stylex.props(doorStyles.form)}
           onSubmit={(event) => {
@@ -78,7 +79,6 @@ function SignUpPage() {
                 name: String(fields.get("name") ?? ""),
                 email: String(fields.get("email") ?? ""),
                 password: String(fields.get("password") ?? ""),
-                claim: String(fields.get("claim") ?? ""),
               },
               { onSuccess: () => navigate({ to: "/overview" }) },
             );
@@ -121,19 +121,6 @@ function SignUpPage() {
               xstyle={doorStyles.field}
             />
           </Field>
-          {claimable && (
-            <Field label={t.claim} htmlFor="claim" hint={t.claimHint} xstyle={doorStyles.wide}>
-              <Input
-                id="claim"
-                name="claim"
-                type="password"
-                required={!open}
-                autoComplete="off"
-                maxLength={500}
-                xstyle={doorStyles.field}
-              />
-            </Field>
-          )}
           {error && (
             <Notice tone="critical" role="alert" xstyle={doorStyles.wide}>
               {error}

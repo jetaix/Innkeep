@@ -54,6 +54,7 @@ export const doorStyles = stylex.create({
   form: { display: "flex", flexDirection: "column", alignItems: "stretch", gap: "0.875rem" },
   field: { height: "2.75rem", borderRadius: radius.xl },
   wide: { width: "100%" },
+  notice: { width: "100%", marginBottom: "1rem" },
   other: { margin: "1.25rem 0 0", color: color.muted, fontSize: text.md, lineHeight: 1.55 },
   link: {
     color: color.ink,

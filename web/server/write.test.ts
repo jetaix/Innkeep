@@ -220,9 +220,9 @@ describe("the write API", () => {
   it("answers an early-access request from anyone, and checks the address", async () => {
     const bad = await send("POST", "/access", { email: "not an address", locale: "fr" });
     expect(await bad.json()).toMatchObject({ status: "error" });
-    // No bot is set here, so a valid address is refused at the sending step, not before.
+    // No bot is set here: the request is kept for the host to find in Settings, which is enough.
     const good = await send("POST", "/access", { email: "host@example.com" });
-    expect(await good.json()).toMatchObject({ status: "error" });
+    expect(await good.json()).toMatchObject({ status: "sent" });
     expect(await (await send("POST", "/access", { email: "a@b.co", company: "bot" })).json()).toMatchObject({
       status: "error",
     });

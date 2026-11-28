@@ -19,17 +19,16 @@ const en = {
     emailHint: "You will sign in with it.",
     password: "Choose a password",
     passwordHint: (min: number): string => `At least ${min} characters.`,
-    claim: "Password of this Innkeep (optional)",
-    claimHint:
-      "Only if you used this Innkeep before accounts existed: type the password you opened it with, and your properties and bookings come with you.",
-    claimWrong:
-      "That is not the password this Innkeep had. Leave the field empty to start with an empty one.",
     submit: "Create account",
     creating: "Creating…",
     taken: "There is already an account with this email. Sign in instead, or use another address.",
     check: "Check your name, your email and your password.",
     tooMany: "Too many attempts just now. Wait a while, then try again.",
     closed: "This Innkeep takes no new accounts. Ask one of its admins for an invitation.",
+    beta: "Innkeep is in beta: an account can be created only with an email address that was given access.",
+    request: "Request access",
+    noAccess:
+      "This email address has no access yet. Request access, and create your account once you are told it is open.",
     haveAccount: "Already have an account?",
     signIn: "Sign in",
   },
@@ -82,17 +81,16 @@ const fr: typeof en = {
     emailHint: "Il vous servira à vous connecter.",
     password: "Choisissez un mot de passe",
     passwordHint: (min) => `Au moins ${min} caractères.`,
-    claim: "Mot de passe de cet Innkeep (facultatif)",
-    claimHint:
-      "Seulement si vous utilisiez cet Innkeep avant les comptes : saisissez le mot de passe qui l’ouvrait, et vos logements et réservations vous suivent.",
-    claimWrong:
-      "Ce n’est pas le mot de passe qu’avait cet Innkeep. Laissez le champ vide pour démarrer avec un Innkeep vide.",
     submit: "Créer le compte",
     creating: "Création…",
     taken: "Un compte existe déjà avec cet e-mail. Connectez-vous, ou utilisez une autre adresse.",
     check: "Vérifiez votre nom, votre e-mail et votre mot de passe.",
     tooMany: "Trop de tentatives pour l’instant. Patientez un moment, puis réessayez.",
     closed: "Cet Innkeep n’accepte pas de nouveaux comptes. Demandez une invitation à l’un de ses admins.",
+    beta: "Innkeep est en bêta : un compte ne peut être créé qu’avec une adresse e-mail qui a reçu un accès.",
+    request: "Demander un accès",
+    noAccess:
+      "Cette adresse e-mail n’a pas encore d’accès. Demandez un accès, puis créez votre compte quand on vous dira qu’il est ouvert.",
     haveAccount: "Vous avez déjà un compte ?",
     signIn: "Se connecter",
   },

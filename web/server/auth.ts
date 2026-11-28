@@ -6,7 +6,12 @@ import { validator } from "hono/validator";
 import { z } from "zod";
 import { appState, central, getDb } from "../../src/db";
 import { requestAccess } from "../../src/features/marketing/mutations";
-import { acceptInvitation, findInvitation, signUp } from "../../src/features/members/mutations";
+import {
+  acceptInvitation,
+  findInvitation,
+  NoAccessError,
+  signUp,
+} from "../../src/features/members/mutations";
 import { passwordFits } from "../../src/features/members/password";
 import { findAccount, findMemberByEmail, signUpState } from "../../src/features/members/queries";
 import { serverSecret } from "../../src/features/members/secret";
@@ -90,30 +95,17 @@ export const auth = new Hono<Env>()
   // Signing up: a new space, its admin, and a session at once.
   .post("/account", json, async (c) => {
     const now = Date.now();
-    const state = await signUpState();
-    const sent = c.req.valid("json");
-    // Closed to strangers; the owner, who proves it with the old password, still gets in.
-    if (!state.open && !(state.claimable && sent.claim)) {
-      throw new HTTPException(403, { message: "This Innkeep takes no new accounts." });
-    }
-    // The claim is a password too: guessing it is slowed down like any other.
-    const earlier = sent.claim ? await attempts(now) : [];
     const recent = (await times(SIGN_UPS)).filter((at) => at > now - HOUR);
     if (recent.length >= MAX_SIGN_UPS) {
       throw new HTTPException(429, { message: "Too many new accounts just now. Try again in an hour." });
     }
-    let made: Awaited<ReturnType<typeof signUp>>;
-    try {
-      made = await signUp(sent);
-    } catch (error) {
-      if (error instanceof Error && error.name === "InvalidInput" && error.message.includes('"claim"')) {
-        await keep(FAILURES, [...recentFailures(earlier, now), now]);
-      }
+    const made = await signUp(c.req.valid("json")).catch((error: unknown) => {
+      if (error instanceof NoAccessError) throw new HTTPException(403, { message: error.message });
       throw error;
-    }
+    });
     await keep(SIGN_UPS, [...recent, now]);
     await openSession(c, made.user);
-    return c.json({ ok: true as const, claimed: made.claimed });
+    return c.json({ ok: true as const });
   })
   .post("/session", async (c) => {
     const given = signingIn.safeParse(await c.req.json().catch(() => null));

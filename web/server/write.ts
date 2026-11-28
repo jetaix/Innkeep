@@ -1,6 +1,8 @@
 import { type Context, Hono } from "hono";
 import { validator } from "hono/validator";
 import { z } from "zod";
+import { inHostSpace } from "../../src/db";
+import * as access from "../../src/features/access/requests";
 import * as assistant from "../../src/features/assistant/mutations";
 import * as cleaning from "../../src/features/cleaning/mutations";
 import * as insights from "../../src/features/insights/mutations";
@@ -22,6 +24,11 @@ function spaceOf(c: Context<Env>): number {
   return space.id;
 }
 const locale = z.object({ locale: z.enum(LOCALES).default("en") });
+
+/** For what concerns the whole instance: only someone signed in to the host's own space. */
+function hostSpaceOnly(c: Context<Env>) {
+  if (!c.get("space") || !inHostSpace()) throw hostOnly();
+}
 
 /** A number from the address, or 400. */
 function num(raw: string): number {
@@ -89,6 +96,22 @@ export const write = new Hono<Env>()
   )
   .delete("/members/:id", async (c) => {
     await members.removeMember(spaceOf(c), num(c.req.param("id")));
+    return c.json(done);
+  })
+  // Access while sign-up is in beta: let an address in, or forget it. The host's space alone.
+  .post("/access-requests", json, async (c) => {
+    hostSpaceOnly(c);
+    await access.approveEmail(c.req.valid("json"));
+    return c.json(done);
+  })
+  .put("/access-requests/:id", async (c) => {
+    hostSpaceOnly(c);
+    await access.approveRequest(num(c.req.param("id")));
+    return c.json(done);
+  })
+  .delete("/access-requests/:id", async (c) => {
+    hostSpaceOnly(c);
+    await access.removeRequest(num(c.req.param("id")));
     return c.json(done);
   })
   // One's own password. The session is signed again, since it covered the old one.

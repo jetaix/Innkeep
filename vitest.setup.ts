@@ -12,6 +12,6 @@ delete process.env.TELEGRAM_BOT_TOKEN;
 delete process.env.TELEGRAM_CHAT_ID;
 
 // Nor may the host's own sign-in settings decide what a test's account gets.
-delete process.env.APP_PASSWORD;
+delete process.env.OWNER_EMAIL;
 delete process.env.SIGN_UP;
 delete process.env.SESSION_SECRET;

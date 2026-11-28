@@ -338,6 +338,18 @@ SELECT 'Innkeep', '', 0 WHERE EXISTS (SELECT 1 FROM users);
 UPDATE users SET space_id = (SELECT id FROM spaces WHERE store = '' ORDER BY id LIMIT 1) WHERE space_id = 0;
 UPDATE invitations SET space_id = COALESCE((SELECT id FROM spaces WHERE store = '' ORDER BY id LIMIT 1), 0) WHERE space_id = 0;
 `,
+  // 24: requests for access while sign-up is in beta, and the addresses the host let in
+  `
+CREATE TABLE IF NOT EXISTS access_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  locale TEXT NOT NULL DEFAULT 'en',
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  approved_at INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS access_requests_email ON access_requests (email);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

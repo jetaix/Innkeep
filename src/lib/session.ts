@@ -14,19 +14,6 @@ const same = (a: string, b: string) => {
 };
 
 /**
- * `APP_PASSWORD` used to open the whole Innkeep. It no longer signs anyone
- * in: on an Innkeep that had data before accounts existed, it is the key the
- * owner types once, when creating their account, to take that data with them.
- */
-export const hostPassword = () => process.env.APP_PASSWORD || null;
-
-export const hostPasswordMatches = (given: string) => {
-  const password = hostPassword();
-  const digest = (value: string) => createHmac("sha256", "innkeep-claim-v1").update(value).digest("hex");
-  return password != null && same(digest(given), digest(password));
-};
-
-/**
  * A user's cookie: their id, and a signature made with the server's secret.
  * The signature covers the password hash, so it stops working when they
  * change their password and when they are removed.
@@ -84,8 +71,25 @@ export const tooManyAttempts = (failures: number[], now: number) =>
  */
 export const publicDemo = () => process.env.PUBLIC_DEMO === "1";
 
-/** `SIGN_UP=closed` stops new accounts once the host has theirs; invitations still work. */
-export const signUpClosed = () => process.env.SIGN_UP === "closed";
+/**
+ * Who may create an account, from `SIGN_UP`:
+ * - `beta` (the default): the addresses the host approved, after a request for access;
+ * - `open`: anyone;
+ * - `closed`: nobody.
+ * The first account of an instance and invitations into a space are never held back.
+ */
+export type SignUpMode = "beta" | "open" | "closed";
+export function signUpMode(): SignUpMode {
+  const set = process.env.SIGN_UP?.trim().toLowerCase();
+  return set === "open" || set === "closed" ? set : "beta";
+}
+
+/**
+ * `OWNER_EMAIL` names who the main database belongs to. When it is set, only
+ * an account created with that address gets the data already there; without
+ * it, the first account does. Innkeep does not verify addresses.
+ */
+export const ownerEmail = () => process.env.OWNER_EMAIL?.trim().toLowerCase() || null;
 
 /**
  * Which data a request sees, decided by the server for every request (`web/server/scope.ts`) and read

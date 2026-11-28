@@ -433,8 +433,9 @@ describe("landing-only", () => {
 
 describe("a second space", () => {
   it("has machines of its own, which never reach the host's data", async () => {
-    const { signedUp: again } = await import("./testing");
-    const other = await again("other@example.com", "Someone else");
+    process.env.SIGN_UP = "open";
+    const other = await signedUp("other@example.com", "Someone else");
+    process.env.SIGN_UP = "";
     expect(other.space.store).not.toBe("");
     const asOther = { cookie: other.cookie, "content-type": "application/json" };
 

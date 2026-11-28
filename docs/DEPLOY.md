@@ -32,10 +32,9 @@ There are two ways to do it. Both give the same Innkeep.
    | `CRON_SECRET`        | A long random value                                   |
    | `TELEGRAM_…`         | See [Telegram notifications](#telegram-notifications) |
 
-4. **Deploy**, open the address and create your account: the first account
-   owns this database. To let other people sign up for an Innkeep of their
-   own, see [Accounts](#accounts); to keep it to yourself, add
-   `SIGN_UP=closed`.
+4. **Deploy**, open the address and create your account straight away: the
+   first account owns this database. See [Accounts](#accounts) for who else
+   may sign up; to keep it to yourself, add `SIGN_UP=closed`.
 
 ### The scheduler
 
@@ -102,12 +101,18 @@ account owns the data.
   the same place. A space with a single admin who forgets their password has
   nobody to ask: keep it somewhere safe.
 - **Other people.** Anyone else who signs up gets an empty Innkeep of their
-  own, in a separate database: a file in `spaces/` beside yours on your own
-  server. On Turso each one is a new database, so sign-up beyond the first
-  account works only once you set `TURSO_ORG` (your organisation's slug),
+  own, in a separate database, never yours. `SIGN_UP` says who may:
+  - `beta`, the default: only the addresses you approve. People ask through
+    the access form on the public page; the requests wait under Settings,
+    Beta access, where you approve them or add an address yourself. Innkeep
+    sends no email, so tell the person yourself once they are approved.
+  - `open`: anyone.
+  - `closed`: nobody. Invitations into your own Innkeep keep working.
+- **Where their data goes.** A file in `spaces/` beside yours on your own
+  server. On Turso each one is a new database, so accounts beyond the first
+  work only once you set `TURSO_ORG` (your organisation's slug),
   `TURSO_API_TOKEN`, and `TURSO_GROUP_TOKEN` (a token for the group, `default`
-  unless you set `TURSO_GROUP`). Set `SIGN_UP=closed` to take no new accounts
-  at all; invitations keep working.
+  unless you set `TURSO_GROUP`).
 - **Your server's settings stay yours.** `ANTHROPIC_API_KEY`, the Telegram bot
   and chat, `EXTENSION_TOKEN` and `MCP_TOKEN` serve the first account's space
   only. Other spaces get tokens of their own in their Settings and paste their
@@ -116,14 +121,18 @@ account owns the data.
 After twenty wrong passwords in ten minutes, sign-in is refused until the ten
 minutes have passed.
 
-### Upgrading from `APP_PASSWORD`
+### Upgrading from the shared password
 
-Innkeep used to open with one shared password. It no longer does: after the
-update nobody is signed in, and your data waits for its owner. Keep
-`APP_PASSWORD` set, create your account, and type that password in the field
-**Password of this Innkeep**: your properties and bookings come with you.
-Anyone who signs up without it gets an empty space instead. Then remove the
-variable.
+Innkeep used to open with one shared password, `APP_PASSWORD`. That variable
+is no longer read: remove it. After the update nobody is signed in, and **the
+first account created takes the data already there**. Create yours right
+after updating.
+
+To close that window, set `OWNER_EMAIL` to your address before updating: then
+only an account created with that address gets the existing data, and anyone
+who signs up before you gets an empty space. Innkeep does not verify email
+addresses, so someone who knows yours could still sign up with it first:
+create your account soon either way.
 
 Someone who is not signed in never reaches anyone's data: they are sent to
 the sign-in page.
