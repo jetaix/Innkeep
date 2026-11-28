@@ -134,6 +134,11 @@ who signs up before you gets an empty space. Innkeep does not verify email
 addresses, so someone who knows yours could still sign up with it first:
 create your account soon either way.
 
+`OWNER_EMAIL` also works afterwards. If the members you had invited are
+already there, the account with that address joins them as an admin. If you
+signed up before setting it and landed in an empty space, set it, redeploy
+and sign in again: your account moves to the existing data.
+
 Someone who is not signed in never reaches anyone's data: they are sent to
 the sign-in page.
 

@@ -8,6 +8,7 @@ import { appState, central, getDb } from "../../src/db";
 import { requestAccess } from "../../src/features/marketing/mutations";
 import {
   acceptInvitation,
+  bringOwnerHome,
   findInvitation,
   NoAccessError,
   signUp,
@@ -112,8 +113,9 @@ export const auth = new Hono<Env>()
     const now = Date.now();
     const earlier = await attempts(now);
     if (!given.success) return failed(earlier, now);
-    const member = await findMemberByEmail(given.data.email);
-    if (!member || !passwordFits(given.data.password, member.passwordHash)) return failed(earlier, now);
+    const found = await findMemberByEmail(given.data.email);
+    if (!found || !passwordFits(given.data.password, found.passwordHash)) return failed(earlier, now);
+    const member = await bringOwnerHome(found);
     await openSession(c, member);
     return c.json({ ok: true as const, role: member.role });
   })
