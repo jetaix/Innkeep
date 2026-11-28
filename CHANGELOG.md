@@ -19,6 +19,10 @@ minor version may change how things work.
 - Claude's advice now includes an audit of each listing (clarity, trust,
   conversion, search, the stay itself) with three titles and an opening
   paragraph to copy, written only from what the listing and the reviews say.
+- Members with a role. An admin creates an invitation link in Settings and
+  chooses the role; the person opens it, picks a password and is in. An admin
+  sees and changes everything; a visitor sees the cleaning and the properties
+  only, and can mark a cleaning as done. The owner keeps signing in with `APP_PASSWORD`.
 - Loans on the Revenue page: enter the amount borrowed, the rate, the duration
   and the insurance, and the monthly payment counts as a cost until the last
   one. Each loan shows what is still owed and what the borrowing costs.

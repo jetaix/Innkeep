@@ -22,12 +22,12 @@ describe("who sees which data", () => {
     await getDb().insert(properties).values({ name: "The host's flat", icalToken: "t", createdAt: 0 }).run();
   });
 
-  it("decides from the session, never from what the request claims", () => {
-    expect(decide("GET", sessionValue(PASSWORD))).toEqual({ scope: "real", signedIn: true });
-    expect(decide("GET", undefined)).toEqual({ scope: "demo", signedIn: false });
-    expect(decide("POST", "not-a-session")).toEqual({ scope: "demo-readonly", signedIn: false });
+  it("decides from the session, never from what the request claims", async () => {
+    expect(await decide("GET", sessionValue(PASSWORD))).toMatchObject({ scope: "real", signedIn: true });
+    expect(await decide("GET", undefined)).toMatchObject({ scope: "demo", signedIn: false });
+    expect(await decide("POST", "not-a-session")).toMatchObject({ scope: "demo-readonly", signedIn: false });
     process.env.PUBLIC_DEMO = "";
-    expect(decide("GET", undefined)).toEqual({ refuse: 401 });
+    expect(await decide("GET", undefined)).toEqual({ refuse: 401 });
     process.env.PUBLIC_DEMO = "1";
   });
 
@@ -44,8 +44,12 @@ describe("who sees which data", () => {
   });
 
   it("says who is asking", async () => {
-    expect(await (await get("/session")).json()).toEqual({ signedIn: false, demo: true, passwordSet: true });
-    expect(await (await get("/session", session)).json()).toEqual({
+    expect(await (await get("/session")).json()).toMatchObject({
+      signedIn: false,
+      demo: true,
+      passwordSet: true,
+    });
+    expect(await (await get("/session", session)).json()).toMatchObject({
       signedIn: true,
       demo: false,
       passwordSet: true,

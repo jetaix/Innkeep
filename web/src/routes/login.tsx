@@ -81,9 +81,10 @@ function LoginPage() {
   const t = useI18n("auth").m.auth;
   const navigate = useNavigate();
   const signIn = useMutation({
-    mutationFn: (password: string) => unwrap(rpc.session.$post({ json: { password } })),
-    onSuccess: async (_data, _password, _result, { client }) => {
+    mutationFn: (json: { email: string; password: string }) => unwrap(rpc.session.$post({ json })),
+    onSuccess: async (_data, _sent, _result, { client }) => {
       await client.invalidateQueries();
+      // A visitor's own pages: the frame sends them on from here.
       await navigate({ to: "/overview" });
     },
   });
@@ -106,9 +107,16 @@ function LoginPage() {
           {...stylex.props(styles.form)}
           onSubmit={(event) => {
             event.preventDefault();
-            signIn.mutate(String(new FormData(event.currentTarget).get("password") ?? ""));
+            const fields = new FormData(event.currentTarget);
+            signIn.mutate({
+              email: String(fields.get("email") ?? ""),
+              password: String(fields.get("password") ?? ""),
+            });
           }}
         >
+          <Field label={t.email} htmlFor="email" hint={t.emailHint} xstyle={styles.wide}>
+            <Input id="email" name="email" type="email" autoComplete="username" xstyle={styles.field} />
+          </Field>
           <Field label={t.password} htmlFor="password" xstyle={styles.wide}>
             <Input
               id="password"

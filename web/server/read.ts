@@ -37,6 +37,7 @@ import {
 import { findConflicts, getProperties, getStays } from "../../src/features/reservations/queries";
 import { getSetupProgress, getSetupProperty, getSetupSummary } from "../../src/features/setup/queries";
 import { occupancyAhead } from "../../src/features/revenue/compute";
+import { getInvitations, getMembers } from "../../src/features/members/queries";
 import { getCharges, getCosts, getRevenue, getRevenueYears } from "../../src/features/revenue/queries";
 import { LOCALES } from "../../src/i18n/config";
 import { addDays, today } from "../../src/lib/dates";
@@ -83,8 +84,17 @@ export const read = new Hono<Env>()
       signedIn: c.get("signedIn"),
       demo: !c.get("signedIn") && publicDemo(),
       passwordSet: appPassword() != null,
+      // What the person may do, and who they are when they are a member an admin invited.
+      role: c.get("role"),
+      member: c.get("member"),
     }),
   )
+
+  // Who has access, and the invitations still waiting. A visitor's role never reaches this.
+  .get("/members", async (c) => {
+    if (!c.get("signedIn")) throw hostOnly();
+    return c.json({ members: await getMembers(), invitations: await getInvitations() });
+  })
 
   // The figures at the top of the overview, in one request.
   .get("/overview", async (c) => {
