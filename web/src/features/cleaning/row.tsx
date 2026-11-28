@@ -179,6 +179,7 @@ export function Row({
   cleaners,
   overdue,
   open = false,
+  statusOnly = false,
 }: {
   entry: Cleaning;
   place: Property;
@@ -188,6 +189,8 @@ export function Row({
   overdue: boolean;
   /** Whether the message for the cleaner starts open: for the cleanings that are close. */
   open?: boolean;
+  /** For someone who may only say a cleaning is done: the message, the note and the removal are left out. */
+  statusOnly?: boolean;
 }) {
   const { m, fmt } = useI18n("cleaning");
   const t = m.cleaning.row;
@@ -252,7 +255,7 @@ export function Row({
           ) : (
             statusButton("pending", t.reopen)
           )}
-          {entry.kind === "manual" && (
+          {entry.kind === "manual" && !statusOnly && (
             <ConfirmButton
               size="sm"
               message={t.removeConfirm}
@@ -331,7 +334,7 @@ export function Row({
         </div>
       </div>
 
-      {pending && (
+      {pending && !statusOnly && (
         <details open={open} {...stylex.props(styles.request)}>
           <summary {...stylex.props(styles.summary)}>{r.title}</summary>
           <div {...stylex.props(styles.requestHead, styles.requestBody)}>
@@ -374,56 +377,58 @@ export function Row({
         </details>
       )}
 
-      <details {...stylex.props(styles.details)}>
-        <summary {...stylex.props(styles.summary)}>{t.edit}</summary>
-        <form
-          // The key remounts the fields once saved, so they show what is stored.
-          key={`${entry.notes}-${entry.reassigned ? entry.cleaner?.id : ""}`}
-          onSubmit={(event) => {
-            event.preventDefault();
-            const sent = new FormData(event.currentTarget);
-            const cleanerId = String(sent.get("cleanerId") ?? "");
-            edit.mutate({
-              ...day,
-              fields: {
-                notes: String(sent.get("notes") ?? ""),
-                cleanerId: cleanerId === "" ? "" : Number(cleanerId),
-              },
-            });
-          }}
-          {...stylex.props(styles.edit)}
-        >
-          <Field label={t.notes} htmlFor={`notes-${key}`}>
-            <Textarea
-              id={`notes-${key}`}
-              name="notes"
-              rows={2}
-              maxLength={500}
-              defaultValue={entry.notes}
-              placeholder={t.notesPlaceholder}
-            />
-          </Field>
-          <Field label={t.cleaner} htmlFor={`cleaner-${key}`}>
-            <Select
-              id={`cleaner-${key}`}
-              name="cleanerId"
-              defaultValue={entry.reassigned ? entry.cleaner?.id : ""}
-            >
-              <option value="">{t.usual}</option>
-              {cleaners.map((cleaner) => (
-                <option key={cleaner.id} value={cleaner.id}>
-                  {cleaner.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div {...stylex.props(styles.whole)}>
-            <SubmitButton size="sm" pending={edit.isPending}>
-              {t.save}
-            </SubmitButton>
-          </div>
-        </form>
-      </details>
+      {!statusOnly && (
+        <details {...stylex.props(styles.details)}>
+          <summary {...stylex.props(styles.summary)}>{t.edit}</summary>
+          <form
+            // The key remounts the fields once saved, so they show what is stored.
+            key={`${entry.notes}-${entry.reassigned ? entry.cleaner?.id : ""}`}
+            onSubmit={(event) => {
+              event.preventDefault();
+              const sent = new FormData(event.currentTarget);
+              const cleanerId = String(sent.get("cleanerId") ?? "");
+              edit.mutate({
+                ...day,
+                fields: {
+                  notes: String(sent.get("notes") ?? ""),
+                  cleanerId: cleanerId === "" ? "" : Number(cleanerId),
+                },
+              });
+            }}
+            {...stylex.props(styles.edit)}
+          >
+            <Field label={t.notes} htmlFor={`notes-${key}`}>
+              <Textarea
+                id={`notes-${key}`}
+                name="notes"
+                rows={2}
+                maxLength={500}
+                defaultValue={entry.notes}
+                placeholder={t.notesPlaceholder}
+              />
+            </Field>
+            <Field label={t.cleaner} htmlFor={`cleaner-${key}`}>
+              <Select
+                id={`cleaner-${key}`}
+                name="cleanerId"
+                defaultValue={entry.reassigned ? entry.cleaner?.id : ""}
+              >
+                <option value="">{t.usual}</option>
+                {cleaners.map((cleaner) => (
+                  <option key={cleaner.id} value={cleaner.id}>
+                    {cleaner.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <div {...stylex.props(styles.whole)}>
+              <SubmitButton size="sm" pending={edit.isPending}>
+                {t.save}
+              </SubmitButton>
+            </div>
+          </form>
+        </details>
+      )}
 
       {failed && (
         <Notice tone="critical" role="alert" xstyle={styles.problem}>

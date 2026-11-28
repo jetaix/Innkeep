@@ -4,12 +4,13 @@ import { z } from "zod";
 import * as assistant from "../../src/features/assistant/mutations";
 import * as cleaning from "../../src/features/cleaning/mutations";
 import * as insights from "../../src/features/insights/mutations";
+import * as members from "../../src/features/members/mutations";
 import * as place from "../../src/features/properties/mutations";
 import * as stay from "../../src/features/reservations/mutations";
 import * as revenue from "../../src/features/revenue/mutations";
 import * as setup from "../../src/features/setup/mutations";
 import { LOCALES } from "../../src/i18n/config";
-import { badRequest, type Env, hostOnly } from "./env";
+import { adminOnly, badRequest, type Env, hostOnly } from "./env";
 
 const done = { ok: true as const };
 const locale = z.object({ locale: z.enum(LOCALES).default("en") });
@@ -57,6 +58,24 @@ export const write = new Hono<Env>()
   })
   .delete("/loans/:id", async (c) => {
     await revenue.deleteLoan(num(c.req.param("id")));
+    return c.json(done);
+  })
+
+  // Members: an admin's alone, which the role check in `app.ts` already holds a visitor to.
+  .post("/invitations", json, async (c) => {
+    if (!c.get("signedIn")) throw hostOnly();
+    return c.json(await members.invite(c.req.valid("json")));
+  })
+  .delete("/invitations/:id", async (c) => {
+    await members.revokeInvitation(num(c.req.param("id")));
+    return c.json(done);
+  })
+  .put("/members/:id", json, async (c) => {
+    await members.setRole(num(c.req.param("id")), c.req.valid("json"));
+    return c.json(done);
+  })
+  .delete("/members/:id", async (c) => {
+    await members.removeMember(num(c.req.param("id")));
     return c.json(done);
   })
 
@@ -169,6 +188,10 @@ export const write = new Hono<Env>()
   .put("/cleanings/:propertyId/:date", json, async (c) => {
     const { propertyId, date } = c.req.param();
     const sent = c.req.valid("json");
+    // A visitor says whether the cleaning was done; who cleans, the note and the request are the host's.
+    if (c.get("role") === "visitor" && Object.keys(sent).some((field) => field !== "status")) {
+      throw adminOnly();
+    }
     if ("status" in sent) await cleaning.setCleaningStatus(propertyId, date, sent.status);
     if ("request" in sent) await cleaning.setCleaningRequest(propertyId, date, sent.request);
     if ("notes" in sent || "cleanerId" in sent) await cleaning.updateCleaning(propertyId, date, sent);

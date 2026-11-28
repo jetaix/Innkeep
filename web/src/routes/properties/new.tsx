@@ -38,6 +38,8 @@ export const Route = createFileRoute("/properties/new")({
   beforeLoad: async ({ context: { queryClient } }) => {
     const session = await queryClient.ensureQueryData(sessionQuery);
     if (!session.signedIn) throw redirect({ to: session.demo ? "/overview" : "/login" });
+    // Adding a property is an admin's.
+    if (session.role === "visitor") throw redirect({ to: "/properties" });
   },
   loaderDeps: ({ search }) => ({ step: search.step ?? "how", id: search.id }),
   loader: async ({ context: { queryClient }, deps }) => {

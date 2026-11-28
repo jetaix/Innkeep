@@ -14,6 +14,19 @@ export const sessionQuery = queryOptions({
   queryFn: () => unwrap(rpc.session.$get()),
 });
 
+/** Who has access and the invitations still waiting: an admin's to read. */
+export const membersQuery = queryOptions({
+  queryKey: ["members"],
+  queryFn: () => unwrap(rpc.members.$get()),
+});
+
+/** What an invitation link offers; fails when the link is no longer valid. */
+export const invitationQuery = (token: string) =>
+  queryOptions({
+    queryKey: ["invitation", token],
+    queryFn: () => unwrap(rpc.invitations[":token"].$get({ param: { token } })),
+  });
+
 export const overviewQuery = queryOptions({
   queryKey: ["overview"],
   queryFn: () => unwrap(rpc.overview.$get()),

@@ -29,6 +29,27 @@ export const sessionValid = (cookie: string | undefined, password: string) =>
   cookie != null && same(cookie, sessionValue(password));
 
 /**
+ * A member's cookie: their id, and a signature only this Innkeep can make.
+ * The signature covers the member's password hash, so it stops working when
+ * they change their password, when they are removed, and when `APP_PASSWORD`
+ * changes.
+ */
+export const memberSessionValue = (password: string, member: { id: number; passwordHash: string }) =>
+  `m${member.id}.${createHmac("sha256", password).update(`innkeep-member-v1:${member.id}:${member.passwordHash}`).digest("hex")}`;
+
+/** The member a cookie claims to be; whether it tells the truth is checked against their row. */
+export function claimedMember(cookie: string | undefined): number | null {
+  const id = cookie?.match(/^m(\d{1,10})\.[0-9a-f]{64}$/)?.[1];
+  return id ? Number(id) : null;
+}
+
+export const memberSessionValid = (
+  cookie: string | undefined,
+  password: string,
+  member: { id: number; passwordHash: string },
+) => cookie != null && same(cookie, memberSessionValue(password, member));
+
+/**
  * Slows down guessing: after too many wrong passwords in a few minutes, every
  * attempt is refused until the window has passed. People already signed in
  * are not affected. Pure: the times of recent failures are kept by the caller.

@@ -296,6 +296,27 @@ CREATE TABLE IF NOT EXISTS loan_payments (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS loan_payments_date ON loan_payments (loan_id, date);
 `,
+  // 21: members with a role, and the invitations that bring them in
+  `
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS users_email ON users (email);
+CREATE TABLE IF NOT EXISTS invitations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token_hash TEXT NOT NULL,
+  email TEXT NOT NULL DEFAULT '',
+  role TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS invitations_token ON invitations (token_hash);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

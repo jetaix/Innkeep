@@ -1,8 +1,10 @@
 # Security
 
-Innkeep is self-hosted. One password (`APP_PASSWORD`) protects every page; there
-are no separate accounts yet. Set it before the app is reachable from the
-internet, or keep the app on a private network. Only these routes are designed
+Innkeep is self-hosted. `APP_PASSWORD` protects every page: the owner
+signs in with it, and the members an admin invited sign in with an email and a
+password of their own (kept as a salted scrypt hash). A member's role is
+enforced by the server for every request. Set the password before the app is
+reachable from the internet, or keep the app on a private network. Only these routes are designed
 to be reachable without the password, each protected by its own secret:
 
 - `/api/ical/<token>/…` (random per-property token; exposes booked dates, never guest names)

@@ -22,8 +22,7 @@ import { DEFAULT_LOCALE, isLocale } from "../../src/i18n/config";
 import { MESSAGES } from "../../src/i18n/messages";
 import { hasBearerToken } from "../../src/lib/auth";
 import { generateICal } from "../../src/lib/ical";
-import { appPassword, publicDemo, sessionValid } from "../../src/lib/session";
-import { SESSION_COOKIE } from "./scope";
+import { decide, SESSION_COOKIE } from "./scope";
 
 /**
  * The routes that machines call: the scheduler, the browser extension, an
@@ -262,15 +261,17 @@ async function ical(token: string, file: string) {
  *
  * Only a click inside Innkeep counts: a link from another site is refused,
  * so no other page can set a run going. It is a page's address, not an API
- * route, so when a password is set it takes the host's session: anyone else
- * is sent to sign in or, where a demo is offered, back to the demo.
+ * route, so when a password is set it takes an admin's session: anyone else
+ * is sent to sign in, back to the demo where one is offered, or to the pages
+ * their role allows.
  */
 async function start(request: Request, c: Context) {
   const url = new URL(request.url);
-  const password = appPassword();
-  if (password && !sessionValid(getCookie(c, SESSION_COOKIE), password)) {
-    return Response.redirect(new URL(publicDemo() ? "/overview" : "/login", url), 307);
-  }
+  const verdict = await decide("GET", getCookie(c, SESSION_COOKIE));
+  if ("refuse" in verdict) return Response.redirect(new URL("/login", url), 307);
+  if (!verdict.signedIn) return Response.redirect(new URL("/overview", url), 307);
+  // Reading the platforms' pages changes the host's data: an admin's to start.
+  if (verdict.role !== "admin") return Response.redirect(new URL("/cleaning", url), 303);
   if (request.headers.get("sec-fetch-site") !== "same-origin") {
     return Response.redirect(new URL("/settings?tab=data", url), 303);
   }

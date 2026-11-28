@@ -208,6 +208,25 @@ export const signIn = mutationOptions({
   mutationFn: (password: string) => unwrap(rpc.session.$post({ json: { password } })),
   onSuccess: (_data, _sent, _result, { client }) => client.invalidateQueries(),
 });
+// Members and invitations
+export const invite = mutationOptions({
+  mutationFn: (json: { role: "admin" | "visitor"; email: string }) => unwrap(rpc.invitations.$post({ json })),
+  ...stale(["members"]),
+});
+export const revokeInvitation = mutationOptions({
+  mutationFn: (invitation: number) => unwrap(rpc.invitations[":id"].$delete({ param: id(invitation) })),
+  ...stale(["members"]),
+});
+export const setMemberRole = mutationOptions({
+  mutationFn: ({ member, role }: { member: number; role: "admin" | "visitor" }) =>
+    unwrap(rpc.members[":id"].$put({ param: id(member), json: { role } })),
+  ...stale(["members"]),
+});
+export const removeMember = mutationOptions({
+  mutationFn: (member: number) => unwrap(rpc.members[":id"].$delete({ param: id(member) })),
+  ...stale(["members"]),
+});
+
 export const signOut = mutationOptions({
   mutationFn: () => unwrap(rpc.session.$delete()),
   onSuccess: (_data, _sent, _result, { client }) => client.invalidateQueries(),

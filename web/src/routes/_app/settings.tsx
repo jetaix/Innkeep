@@ -3,8 +3,15 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { NAV } from "@/config/navigation";
+import { Members } from "../../features/settings/members";
 import { signOut } from "../../api/mutations";
-import { freshnessQuery, propertiesQuery, sessionQuery, settingsQuery } from "../../api/queries";
+import {
+  freshnessQuery,
+  membersQuery,
+  propertiesQuery,
+  sessionQuery,
+  settingsQuery,
+} from "../../api/queries";
 import { TelegramFind } from "../../features/cleaning/telegram-find";
 import { TelegramTest } from "../../features/cleaning/telegram-test";
 import { DataSection } from "../../features/settings/data-section";
@@ -34,6 +41,7 @@ export const Route = createFileRoute("/_app/settings")({
       queryClient.ensureQueryData(freshnessQuery),
       queryClient.ensureQueryData(propertiesQuery),
       session.signedIn ? queryClient.ensureQueryData(settingsQuery) : null,
+      session.signedIn ? queryClient.ensureQueryData(membersQuery) : null,
     ]);
   },
   component: SettingsPage,
@@ -240,7 +248,7 @@ function General() {
   const { m } = useI18n("settings");
   const t = m.settings;
   const i = t.integrations;
-  const { passwordSet } = useSuspenseQuery(sessionQuery).data;
+  const { passwordSet, signedIn } = useSuspenseQuery(sessionQuery).data;
   const navigate = useNavigate();
   const leave = useMutation(signOut);
 
@@ -286,6 +294,11 @@ function General() {
           </Integration>
         </ul>
       </Section>
+      {signedIn && (
+        <Section id="members-heading" title={t.members.title} note={t.members.note} stacked>
+          <Members />
+        </Section>
+      )}
       <Section id="shortcuts-heading" title={t.shortcuts.title}>
         <dl {...stylex.props(styles.shortcuts)}>
           <Shortcut keys={["⌘", "K"]}>{t.shortcuts.commandMenu}</Shortcut>

@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { CalendarPlus, type LucideIcon, RefreshCw, Search } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { NAV } from "@/config/navigation";
+import { NAV, type NavId } from "@/config/navigation";
 import { sync } from "../api/mutations";
 import { useI18n } from "../i18n";
 import { color, radius, shadow, text } from "../tokens.stylex";
@@ -134,7 +134,15 @@ const plain = (value: string) =>
  * The menu is the browser's own `<dialog>` around a filtered list: it traps
  * focus, closes on Escape and hands focus back on its own.
  */
-export function CommandMenu({ canSync }: { canSync: boolean }) {
+export function CommandMenu({
+  canSync,
+  only,
+}: {
+  canSync: boolean;
+  /** The pages this person has, when their role does not give them all. Then there is nothing to add either. */
+  only?: readonly NavId[];
+}) {
+  const pages = NAV.filter((item) => !only || only.includes(item.id));
   const navigate = useNavigate();
   const { m } = useI18n();
   const c = m.common.command;
@@ -170,7 +178,9 @@ export function CommandMenu({ canSync }: { canSync: boolean }) {
 
       if (awaitingGo) {
         awaitingGo = false;
-        const item = NAV.find((entry) => entry.key === event.key.toLowerCase());
+        const item = NAV.find(
+          (entry) => entry.key === event.key.toLowerCase() && (!only || only.includes(entry.id)),
+        );
         if (item) {
           event.preventDefault();
           void navigate({ to: item.href });
@@ -203,10 +213,10 @@ export function CommandMenu({ canSync }: { canSync: boolean }) {
       window.removeEventListener("keydown", onKeyDown);
       clearTimeout(goTimer);
     };
-  }, [navigate]);
+  }, [navigate, only]);
 
   const entries: Entry[] = [
-    ...NAV.map(
+    ...pages.map(
       (item): Entry => ({
         id: item.id,
         group: "goTo",
@@ -216,14 +226,19 @@ export function CommandMenu({ canSync }: { canSync: boolean }) {
         run: () => void navigate({ to: item.href }),
       }),
     ),
-    {
-      id: "add-booking",
-      group: "actions",
-      label: c.addBooking,
-      keywords: ["new", "block", "booking", "reservation", "ajouter", "bloquer", "réservation"],
-      icon: CalendarPlus,
-      run: () => void navigate({ to: "/calendar", search: { new: "1" } }),
-    },
+    // Someone who can only read has nothing to add.
+    ...(only
+      ? []
+      : [
+          {
+            id: "add-booking",
+            group: "actions",
+            label: c.addBooking,
+            keywords: ["new", "block", "booking", "reservation", "ajouter", "bloquer", "réservation"],
+            icon: CalendarPlus,
+            run: () => void navigate({ to: "/calendar", search: { new: "1" } }),
+          } satisfies Entry,
+        ]),
     ...(canSync
       ? [
           {

@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { NAV } from "@/config/navigation";
+import { NAV, type NavId } from "@/config/navigation";
 import { useI18n } from "../i18n";
 import { color, radius, shadow, text } from "../tokens.stylex";
 import { Hidden } from "../ui/primitives";
@@ -60,7 +60,14 @@ const styles = stylex.create({
   },
 });
 
-export function SidebarNav({ badges }: { badges?: Partial<Record<string, number>> }) {
+export function SidebarNav({
+  badges,
+  only,
+}: {
+  badges?: Partial<Record<string, number>>;
+  /** The pages this person has, when their role does not give them all. */
+  only?: readonly NavId[];
+}) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { m } = useI18n();
   // On a phone the menu is a strip that scrolls sideways: keep the current page in view.
@@ -74,7 +81,7 @@ export function SidebarNav({ badges }: { badges?: Partial<Record<string, number>
   }, [pathname]);
   return (
     <nav ref={strip} aria-label={m.common.nav.main} {...stylex.props(styles.nav)}>
-      {NAV.map((item) => {
+      {NAV.filter((item) => !only || only.includes(item.id)).map((item) => {
         const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const count = badges?.[item.href];
         const label = m.common.nav[item.id];

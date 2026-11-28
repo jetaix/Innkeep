@@ -4,7 +4,8 @@ import { useI18n } from "../i18n";
 import { color, radius, shadow, text } from "../tokens.stylex";
 
 /**
- * In the public demo the server refuses every change. `refused()` is called
+ * In the public demo, and for a member with the visitor role, the server
+ * refuses every change. `refused()` is called
  * when that happens (see `router.tsx`), and this says why at the bottom of the
  * screen, so a visitor who presses Save gets an answer instead of silence.
  */
@@ -52,7 +53,7 @@ const styles = stylex.create({
   },
 });
 
-export function RefusedNotice() {
+export function RefusedNotice({ readOnly = false }: { readOnly?: boolean }) {
   const { m } = useI18n();
   const shown = useSyncExternalStore(
     subscribe,
@@ -71,7 +72,7 @@ export function RefusedNotice() {
 
   return (
     <p role="status" {...stylex.props(shown ? styles.toast : styles.quiet)}>
-      {shown ? m.demo.refused : ""}
+      {shown ? (readOnly ? m.common.account.readOnly : m.demo.refused) : ""}
     </p>
   );
 }
