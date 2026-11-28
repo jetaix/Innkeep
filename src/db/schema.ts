@@ -240,15 +240,29 @@ export const ROLES = ["admin", "visitor"] as const;
 export type Role = (typeof ROLES)[number];
 
 /**
- * The people an admin invited to this Innkeep, each with a password of their
- * own. The owner is not in here: they sign in with `APP_PASSWORD` and are
- * always an admin, so nobody can lock the household out.
+ * A space: one household's Innkeep. Its data is in the database `store`
+ * names (see `src/db/index.ts`); the empty string is the main database.
+ * Spaces, users and invitations are kept in the main database only.
+ */
+export const spaces = sqliteTable("spaces", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  store: text("store").notNull().default(""),
+  createdAt: integer("created_at").notNull(),
+});
+
+/**
+ * The people who sign in, each with a password of their own and a role in
+ * their space. Whoever signs up is the admin of a new space; the others are
+ * invited into it.
  */
 export const users = sqliteTable(
   "users",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    /** Lower case; what the member signs in with. */
+    /** The space they belong to (`spaces.id`). */
+    spaceId: integer("space_id").notNull(),
+    /** Lower case; what the person signs in with. One account per address, across spaces. */
     email: text("email").notNull(),
     name: text("name").notNull(),
     role: text("role").$type<Role>().notNull(),
@@ -259,11 +273,18 @@ export const users = sqliteTable(
   (t) => [uniqueIndex("users_email").on(t.email)],
 );
 
-/** An invitation to join, sent by an admin as a link. Used once, and only for a while. */
+/**
+ * A link an admin hands over, used once and only for a while: an invitation
+ * to join their space, or, when `userId` is set, a way for that member to
+ * choose a new password.
+ */
 export const invitations = sqliteTable(
   "invitations",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
+    spaceId: integer("space_id").notNull(),
+    /** Set on a reset link: the member (`users.id`) who chooses a new password with it. */
+    userId: integer("user_id"),
     /** SHA-256 of the secret in the link: the link itself is shown once and never kept. */
     tokenHash: text("token_hash").notNull(),
     /** Who it is for, as a note for the admin. The person joining chooses their own address. */
@@ -290,6 +311,7 @@ export const aiAdvice = sqliteTable("ai_advice", {
 
 export type Charge = typeof charges.$inferSelect;
 export type Loan = typeof loans.$inferSelect;
+export type Space = typeof spaces.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Invitation = typeof invitations.$inferSelect;
 export type LoanPayment = typeof loanPayments.$inferSelect;

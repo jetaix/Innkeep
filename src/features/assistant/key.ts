@@ -1,4 +1,5 @@
 import "server-only";
+import { hostSetting } from "@/lib/host";
 import { eq } from "drizzle-orm";
 import { appState, getDb } from "@/db";
 
@@ -15,7 +16,7 @@ async function savedKey(): Promise<string | null> {
 }
 
 export async function getApiKey(): Promise<string | null> {
-  return process.env.ANTHROPIC_API_KEY || (await savedKey());
+  return hostSetting("ANTHROPIC_API_KEY") || (await savedKey());
 }
 
 export type KeyStatus =
@@ -24,8 +25,8 @@ export type KeyStatus =
 
 export async function getKeyStatus(): Promise<KeyStatus> {
   const ending = (key: string) => key.slice(-4);
-  if (process.env.ANTHROPIC_API_KEY)
-    return { source: "environment", ending: ending(process.env.ANTHROPIC_API_KEY) };
+  const fixed = hostSetting("ANTHROPIC_API_KEY");
+  if (fixed) return { source: "environment", ending: ending(fixed) };
   const saved = await savedKey();
   return saved ? { source: "saved", ending: ending(saved) } : { source: null };
 }

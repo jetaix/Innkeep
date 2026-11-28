@@ -3,6 +3,7 @@ const en = {
   banner: "This is a demo with example bookings. Look around; nothing you change is saved.",
   access: "Request early access",
   back: "Back to the website",
+  signIn: "Sign in",
   refused: "This is a demo: changes are not saved.",
   error: {
     title: "Something went wrong",
@@ -19,6 +20,7 @@ const fr: typeof en = {
     "Ceci est une démo avec des réservations d’exemple. Explorez librement ; rien de ce que vous modifiez n’est enregistré.",
   access: "Demander un accès anticipé",
   back: "Retour au site",
+  signIn: "Se connecter",
   refused: "Ceci est une démo : les modifications ne sont pas enregistrées.",
   error: {
     title: "Une erreur est survenue",

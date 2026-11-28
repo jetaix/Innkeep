@@ -3,9 +3,27 @@ import { and, asc, eq, inArray, like } from "drizzle-orm";
 import { DEMO_SCHEME } from "@/channels/demo";
 import { syncAll } from "@/channels/sync";
 import { addDays, diffDays, today } from "@/lib/dates";
-import { aiAdvice, charges, dismissedSuggestions, getDb, listings, properties, reservations } from "./index";
+import {
+  currentSpace,
+  MAIN_STORE,
+  aiAdvice,
+  charges,
+  dismissedSuggestions,
+  getDb,
+  listings,
+  properties,
+  reservations,
+} from "./index";
 
-export const newToken = () => randomBytes(18).toString("base64url");
+/**
+ * The secret in a property's calendar links. Outside the host's space it
+ * starts with the space's number, so a link says which database to read.
+ */
+export function newToken(): string {
+  const secret = randomBytes(18).toString("base64url");
+  const space = currentSpace();
+  return space && space.store !== MAIN_STORE ? `s${space.id}-${secret}` : secret;
+}
 
 const PROPERTIES = [
   {

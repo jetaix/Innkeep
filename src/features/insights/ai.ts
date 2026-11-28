@@ -1,4 +1,6 @@
 import "server-only";
+import { inHostSpace } from "@/db";
+import { hostSetting } from "@/lib/host";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
@@ -31,7 +33,7 @@ import type { InsightInput, Suggestion } from "./rules";
 export const AI_MODEL = process.env.AI_MODEL ?? "claude-opus-5-5";
 
 export async function aiConfigured(): Promise<boolean> {
-  return Boolean((await getApiKey()) || process.env.ANTHROPIC_AUTH_TOKEN);
+  return Boolean((await getApiKey()) || hostSetting("ANTHROPIC_AUTH_TOKEN"));
 }
 
 const adviceSchema = z.object({
@@ -267,8 +269,12 @@ export async function generateAdvice(
 ): Promise<AdviceResult> {
   const errors = MESSAGES[locale].insights.errors;
   const language = LANGUAGE[locale];
-  // No key here means the SDK falls back to its own environment variables.
-  const client = new Anthropic({ apiKey: (await getApiKey()) ?? undefined });
+  // No key here means the SDK falls back to its own environment variables: the host's, so
+  // only in the host's space. Elsewhere they are switched off and the request is refused.
+  const own = await getApiKey();
+  const client = inHostSpace()
+    ? new Anthropic({ apiKey: own ?? undefined })
+    : new Anthropic({ apiKey: own ?? "not-set", authToken: null });
   try {
     const response = await client.beta.messages.parse({
       model: AI_MODEL,

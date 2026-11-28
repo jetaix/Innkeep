@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { cleaners, getDb, listings, properties, reservations, withData } from "../../src/db";
-import { sessionValue } from "../../src/lib/session";
 import { app } from "./app";
+import { signedUp } from "./testing";
 
-const PASSWORD = "a sentence only the test knows";
-const session = `innkeep-session=${sessionValue(PASSWORD)}`;
+/** The host's cookie, once they have signed up in `beforeAll`. */
+let session = "";
 const send = (method: string, path: string, body?: unknown, cookie?: string) =>
   app.request(`/api/app${path}`, {
     method,
@@ -19,9 +19,9 @@ describe("the write API", () => {
   let flat: number;
 
   beforeAll(async () => {
-    process.env.APP_PASSWORD = PASSWORD;
     process.env.PUBLIC_DEMO = "1";
     delete process.env.TELEGRAM_BOT_TOKEN;
+    session = (await signedUp()).cookie;
   });
 
   it("lets the host create, edit and remove a property", async () => {

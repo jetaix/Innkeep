@@ -15,7 +15,10 @@ import { Loading, Notice } from "../ui/primitives";
 /** The shortest password the server takes (see `src/features/members/mutations.ts`). */
 const MIN_PASSWORD = 10;
 
-/** Where an invitation link leads: the person chooses a name, an address and a password, and is in. */
+/**
+ * Where a link from an admin leads. An invitation: the person chooses a name, an address and a
+ * password, and is in. A reset link: the member chooses a new password.
+ */
 export const Route = createFileRoute("/join")({
   validateSearch: (search: Record<string, unknown>): { token?: string } => ({
     token: typeof search.token === "string" && search.token.length <= 100 ? search.token : undefined,
@@ -76,11 +79,13 @@ function JoinPage() {
   const navigate = useNavigate();
   const invitation = useQuery({ ...invitationQuery(token), enabled: token !== "", retry: false });
   const join = useMutation({
-    mutationFn: (json: { name: string; email: string; password: string }) =>
+    mutationFn: (json: { name?: string; email?: string; password: string }) =>
       unwrap(rpc.invitations[":token"].$post({ param: { token }, json })),
     onSuccess: async ({ role }, _sent, _result, { client }) => {
       // The link is used up: asking about it again would only fail.
       client.removeQueries({ queryKey: ["invitation"] });
+      // Whoever was here before is not who is here now.
+      client.removeQueries({ queryKey: ["session"] });
       await client.invalidateQueries();
       await navigate({ to: role === "visitor" ? VISITOR_HOME : "/overview" });
     },
@@ -92,7 +97,7 @@ function JoinPage() {
       ? join.error.message
       : join.error.message.includes('"invitation"')
         ? t.invalid
-        : join.error.message.includes('"email"') && join.variables && /@/.test(join.variables.email)
+        : join.error.message.includes('"email"') && /@/.test(join.variables?.email ?? "")
           ? t.taken
           : join.error.status === 400
             ? t.check
@@ -100,13 +105,16 @@ function JoinPage() {
 
   if (invitation.isPending && token !== "") return <Loading />;
   const offered = invitation.data;
+  // A link an admin made for someone who forgot their password: only a new password to choose.
+  const reset = offered?.reset ?? null;
+  const title = reset ? t.reset.title : t.title;
 
   return (
     <>
-      <title>{`${t.title} · Innkeep`}</title>
+      <title>{`${title} · Innkeep`}</title>
       <div {...stylex.props(styles.door)}>
         <LogoMark tone="color" xstyle={styles.mark} />
-        <h1 {...stylex.props(styles.title)}>{t.title}</h1>
+        <h1 {...stylex.props(styles.title)}>{title}</h1>
         {!offered ? (
           <>
             <p {...stylex.props(styles.intro)}>{t.invalid}</p>
@@ -116,43 +124,56 @@ function JoinPage() {
           </>
         ) : (
           <>
-            <p {...stylex.props(styles.intro)}>
-              <span {...stylex.props(styles.strong)}>{t.invited(m.common.roles[offered.role])}</span>
-              {t.can[offered.role]}
-            </p>
+            {reset ? (
+              <p {...stylex.props(styles.intro)}>{t.reset.intro(reset.name)}</p>
+            ) : (
+              <p {...stylex.props(styles.intro)}>
+                <span {...stylex.props(styles.strong)}>{t.invited(m.common.roles[offered.role])}</span>
+                {t.can[offered.role]}
+              </p>
+            )}
             <form
               {...stylex.props(styles.form)}
               onSubmit={(event) => {
                 event.preventDefault();
                 const fields = new FormData(event.currentTarget);
-                join.mutate({
-                  name: String(fields.get("name") ?? ""),
-                  email: String(fields.get("email") ?? ""),
-                  password: String(fields.get("password") ?? ""),
-                });
+                const password = String(fields.get("password") ?? "");
+                join.mutate(
+                  reset
+                    ? { password }
+                    : {
+                        name: String(fields.get("name") ?? ""),
+                        email: String(fields.get("email") ?? ""),
+                        password,
+                      },
+                );
               }}
             >
-              <Field label={t.name} htmlFor="name" xstyle={styles.wide}>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  maxLength={100}
-                  autoComplete="name"
-                  xstyle={styles.field}
-                />
-              </Field>
-              <Field label={t.email} htmlFor="email" hint={t.emailHint} xstyle={styles.wide}>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="username"
-                  defaultValue={/@/.test(offered.email) ? offered.email : ""}
-                  xstyle={styles.field}
-                />
-              </Field>
+              {!reset && (
+                <>
+                  <Field label={t.name} htmlFor="name" xstyle={styles.wide}>
+                    <Input
+                      id="name"
+                      name="name"
+                      required
+                      maxLength={100}
+                      autoComplete="name"
+                      xstyle={styles.field}
+                    />
+                  </Field>
+                  <Field label={t.email} htmlFor="email" hint={t.emailHint} xstyle={styles.wide}>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      autoComplete="username"
+                      defaultValue={/@/.test(offered.email) ? offered.email : ""}
+                      xstyle={styles.field}
+                    />
+                  </Field>
+                </>
+              )}
               <Field
                 label={t.password}
                 htmlFor="password"
@@ -181,7 +202,7 @@ function JoinPage() {
                 disabled={join.isPending}
                 aria-busy={join.isPending}
               >
-                {join.isPending ? t.joining : t.submit}
+                {join.isPending ? t.joining : reset ? t.reset.submit : t.submit}
               </Button>
             </form>
           </>

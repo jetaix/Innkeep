@@ -17,16 +17,27 @@ export async function startBackground() {
 
   const { syncAll } = await import("../../src/channels/sync");
   const { notifyCleanings } = await import("../../src/features/cleaning/notify");
-  const { withData } = await import("../../src/db");
-  // The timer works on the host's own data, like the scheduler's request does.
-  const run = () =>
-    withData("real", async () => {
-      if (syncing) await syncAll().catch((error) => console.error("[innkeep] calendar sync failed", error));
-      // After the sync, so a booking that just arrived is announced in the same run.
-      await notifyCleanings().catch((error) =>
-        console.error("[innkeep] Telegram notification failed", error),
-      );
+  const { withData, withSpace } = await import("../../src/db");
+  const { everySpace } = await import("../../src/features/members/queries");
+  // The timer works on every space's data in turn, like the scheduler's request does.
+  const run = async () => {
+    const spaces = await everySpace().catch((error) => {
+      console.error("[innkeep] the spaces could not be listed", error);
+      return [];
     });
+    for (const space of spaces) {
+      await withData("real", () =>
+        withSpace(space, async () => {
+          if (syncing)
+            await syncAll().catch((error) => console.error("[innkeep] calendar sync failed", error));
+          // After the sync, so a booking that just arrived is announced in the same run.
+          await notifyCleanings().catch((error) =>
+            console.error("[innkeep] Telegram notification failed", error),
+          );
+        }),
+      );
+    }
+  };
 
   // Catch up straight away after a restart, then keep going on the interval.
   setTimeout(run, 5_000).unref();

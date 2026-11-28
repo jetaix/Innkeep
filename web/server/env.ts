@@ -1,9 +1,16 @@
 import { HTTPException } from "hono/http-exception";
-import type { Role } from "../../src/db";
+import type { Role, SpaceRef } from "../../src/db";
+import type { Member } from "./scope";
 
 /** What the scope middleware leaves for the handlers. */
 export type Env = {
-  Variables: { signedIn: boolean; role: Role | null; member: { id: number; name: string } | null };
+  Variables: {
+    signedIn: boolean;
+    role: Role | null;
+    member: Member | null;
+    /** The signed-in person's space; null for a visitor of the demo. */
+    space: SpaceRef | null;
+  };
 };
 
 export const notFound = (what: string) => new HTTPException(404, { message: `${what} was not found.` });

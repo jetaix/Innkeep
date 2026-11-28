@@ -4,7 +4,7 @@
  * app and the files written for search engines all agree.
  */
 const landingOnly = process.env.LANDING_ONLY === "1";
-const demo = !landingOnly && process.env.PUBLIC_DEMO === "1" && Boolean(process.env.APP_PASSWORD);
+const demo = !landingOnly && process.env.PUBLIC_DEMO === "1";
 
 export const siteEnv = {
   url: (

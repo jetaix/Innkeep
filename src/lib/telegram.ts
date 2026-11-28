@@ -1,3 +1,4 @@
+import { hostSetting } from "@/lib/host";
 import http from "node:http";
 import https from "node:https";
 
@@ -80,7 +81,7 @@ export function requestJson(url: URL, body?: unknown, timeoutMs = 10_000): Promi
 
 /** Calls one method of the bot API. A request that fails on the way is tried once more. */
 async function telegram(method: string, body?: unknown): Promise<Answer> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = hostSetting("TELEGRAM_BOT_TOKEN");
   if (!token) throw new Error("Set TELEGRAM_BOT_TOKEN");
   const url = new URL(`https://api.telegram.org/bot${token}/${method}`);
   try {
@@ -91,7 +92,7 @@ async function telegram(method: string, body?: unknown): Promise<Answer> {
 }
 
 /** Whether a bot is set up at all; which chat it writes to is a separate matter. */
-export const telegramBot = () => Boolean(process.env.TELEGRAM_BOT_TOKEN);
+export const telegramBot = () => Boolean(hostSetting("TELEGRAM_BOT_TOKEN"));
 
 export type TelegramChat = { id: string; title: string; kind: "group" | "person" | "channel" };
 
@@ -154,7 +155,8 @@ export async function sendTelegram(
   chat: string | null,
   onMoved?: (from: string, to: string) => Promise<void>,
 ): Promise<void> {
-  if (!process.env.TELEGRAM_BOT_TOKEN || !chat) throw new Error("Set TELEGRAM_BOT_TOKEN and choose a chat");
+  if (!hostSetting("TELEGRAM_BOT_TOKEN") || !chat)
+    throw new Error("Set TELEGRAM_BOT_TOKEN and choose a chat");
 
   let target = chat;
   for (const part of splitMessage(text)) {

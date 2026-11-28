@@ -5,7 +5,7 @@ import { Logo } from "../brand/logo";
 import { pillStyle } from "../brand/pill";
 import { loadMessages, useI18n } from "../i18n";
 import { LanguageSwitch, ThemeSwitch } from "../shell/preferences";
-import { site, takesAccessRequests } from "../site";
+import { landingOnly, site, takesAccessRequests } from "../site";
 import { color, text } from "../tokens.stylex";
 
 /**
@@ -121,6 +121,11 @@ function SiteHeader() {
           <a href={site.repo} {...stylex.props(styles.link)}>
             GitHub
           </a>
+          {!landingOnly && (
+            <Link to="/login" {...stylex.props(styles.link)}>
+              {t.nav.signIn}
+            </Link>
+          )}
           {takesAccessRequests ? (
             <Link to="/" hash="access" {...stylex.props(pillStyle("primary"), styles.action)}>
               <span {...stylex.props(styles.short)}>{t.nav.accessShort}</span>

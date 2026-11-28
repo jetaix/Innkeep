@@ -1,6 +1,6 @@
 import path from "node:path";
 import { and, count, eq, gte, lte } from "drizzle-orm";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { z } from "zod";
 import { CHANNELS } from "../../src/channels";
 import { effectiveContent, publishState } from "../../src/channels/content";
@@ -42,7 +42,10 @@ import { getCharges, getCosts, getRevenue, getRevenueYears } from "../../src/fea
 import { LOCALES } from "../../src/i18n/config";
 import { addDays, today } from "../../src/lib/dates";
 import { isPrivateAddress } from "../../src/lib/net";
-import { appPassword, publicDemo } from "../../src/lib/session";
+import { hostSetting } from "../../src/lib/host";
+import { machineToken, publicDemo } from "../../src/lib/session";
+import { serverSecret } from "../../src/features/members/secret";
+import { inHostSpace } from "../../src/db";
 import { telegramBot } from "../../src/lib/telegram";
 import { badRequest, type Env, hostOnly, notFound } from "./env";
 
@@ -66,6 +69,18 @@ function idOf(raw: string): number {
   return parsed.data;
 }
 
+/**
+ * The token a machine sends for the space of this request. The host's space
+ * uses the one set on the server (none set: switched off); every other space
+ * has its own, made from its number.
+ */
+async function machineTokenOf(c: Context<Env>, kind: "extension" | "mcp"): Promise<string | null> {
+  const space = c.get("space");
+  if (!space || inHostSpace()) return hostSetting(kind === "mcp" ? "MCP_TOKEN" : "EXTENSION_TOKEN") ?? null;
+  return machineToken(await serverSecret(), kind, space.id);
+}
+const extensionToken = (c: Context<Env>) => machineTokenOf(c, "extension");
+
 async function propertyOr404(propertyId: number) {
   const property = await getDb().select().from(properties).where(eq(properties.id, propertyId)).get();
   if (!property) throw notFound("That property");
@@ -83,8 +98,7 @@ export const read = new Hono<Env>()
     c.json({
       signedIn: c.get("signedIn"),
       demo: !c.get("signedIn") && publicDemo(),
-      passwordSet: appPassword() != null,
-      // What the person may do, and who they are when they are a member an admin invited.
+      // What the person may do, and who they are.
       role: c.get("role"),
       member: c.get("member"),
     }),
@@ -92,8 +106,9 @@ export const read = new Hono<Env>()
 
   // Who has access, and the invitations still waiting. A visitor's role never reaches this.
   .get("/members", async (c) => {
-    if (!c.get("signedIn")) throw hostOnly();
-    return c.json({ members: await getMembers(), invitations: await getInvitations() });
+    const space = c.get("space");
+    if (!space) throw hostOnly();
+    return c.json({ members: await getMembers(space.id), invitations: await getInvitations(space.id) });
   })
 
   // The figures at the top of the overview, in one request.
@@ -183,7 +198,7 @@ export const read = new Hono<Env>()
       origin,
       // Innkeep runs on an address the platforms cannot open (this computer, a home network).
       unreachable: isPrivateAddress(origin),
-      extensionOn: Boolean(process.env.EXTENSION_TOKEN),
+      extensionOn: Boolean(await extensionToken(c)),
     });
   })
 
@@ -202,7 +217,7 @@ export const read = new Hono<Env>()
       quotes: await getDb().select().from(guestQuotes).where(eq(guestQuotes.propertyId, property.id)).all(),
       adminPhotos: photos,
       publicLinks: await publicPageLinks(property.id),
-      extensionOn: Boolean(process.env.EXTENSION_TOKEN),
+      extensionOn: Boolean(await extensionToken(c)),
     });
   })
 
@@ -214,7 +229,7 @@ export const read = new Hono<Env>()
       stays,
       conflicts: [...findConflicts(stays)],
       // Where the extension can read each platform's reservations; empty when it is not set up.
-      links: process.env.EXTENSION_TOKEN ? await reservationLinks() : [],
+      links: (await extensionToken(c)) ? await reservationLinks() : [],
     });
   })
 
@@ -260,7 +275,7 @@ export const read = new Hono<Env>()
     );
     const property = await propertyOr404(asked.property);
     const pricing = await getPricing(asked.property, asked.plan, asked.days);
-    const extensionOn = Boolean(process.env.EXTENSION_TOKEN);
+    const extensionOn = Boolean(await extensionToken(c));
     const noLinks: Awaited<ReturnType<typeof guestViewLinks>> = {};
     return c.json({
       pricing,
@@ -346,7 +361,7 @@ export const read = new Hono<Env>()
   // Below: how this Innkeep is set up. The demo has nothing to show there.
   .get("/extension", async (c) => {
     if (!c.get("signedIn")) throw hostOnly();
-    const token = process.env.EXTENSION_TOKEN;
+    const token = await extensionToken(c);
     return c.json({
       status: await getExtensionStatus(),
       required: REQUIRED_EXTENSION,
@@ -383,9 +398,11 @@ export const read = new Hono<Env>()
   .get("/settings", async (c) => {
     if (!c.get("signedIn")) throw hostOnly();
     return c.json({
-      passwordSet: appPassword() != null,
-      mcpTokenSet: Boolean(process.env.MCP_TOKEN),
-      extensionTokenSet: Boolean(process.env.EXTENSION_TOKEN),
+      // The host's own space takes its tokens from the server's settings; any other has its own, shown here.
+      hostSpace: inHostSpace(),
+      mcpTokenSet: Boolean(await machineTokenOf(c, "mcp")),
+      mcpToken: inHostSpace() ? null : await machineTokenOf(c, "mcp"),
+      extensionTokenSet: Boolean(await extensionToken(c)),
       telegram: { bot: telegramBot(), chat: await getTelegramChat() },
       claude: { configured: await aiConfigured(), key: await getKeyStatus(), model: AI_MODEL },
       // On a serverless host a scheduler calls /api/cron; there is no timer to show.

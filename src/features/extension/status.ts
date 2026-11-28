@@ -1,6 +1,6 @@
 import "server-only";
 import { eq, isNotNull } from "drizzle-orm";
-import { appState, getDb, reservations, type OtaChannel } from "@/db";
+import { appState, getDb, inHostSpace, reservations, type OtaChannel } from "@/db";
 
 /** The oldest version of the extension that sends everything this version of Innkeep stores. */
 export const REQUIRED_EXTENSION = "0.13.1";
@@ -38,7 +38,8 @@ export type ExtensionStatus =
   | { state: "ready"; version: string; at: number };
 
 export async function getExtensionStatus(): Promise<ExtensionStatus> {
-  if (!process.env.EXTENSION_TOKEN) return { state: "off" };
+  // The host's space needs its token set on the server; every other space has one of its own.
+  if (inHostSpace() && !process.env.EXTENSION_TOKEN) return { state: "off" };
   const db = getDb();
   const row = await db.select().from(appState).where(eq(appState.key, KEY)).get();
   if (!row) {

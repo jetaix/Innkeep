@@ -208,10 +208,35 @@ export const chooseTelegramChat = mutationOptions({
   ...stale(["settings"]),
 });
 
-// Session and early access
+// Accounts and sessions
+
+/**
+ * After signing in, up or out, nothing read before belongs to whoever is
+ * there now. Who they are is forgotten outright, not just marked old: the
+ * frame asks for it before it opens, and must not be told the previous answer.
+ */
+const anotherPerson = {
+  onSuccess: (_data: unknown, _sent: unknown, _result: unknown, { client }: { client: QueryClient }) => {
+    client.removeQueries({ queryKey: ["session"] });
+    return client.invalidateQueries();
+  },
+};
 export const signIn = mutationOptions({
-  mutationFn: (password: string) => unwrap(rpc.session.$post({ json: { password } })),
-  onSuccess: (_data, _sent, _result, { client }) => client.invalidateQueries(),
+  mutationFn: (json: { email: string; password: string }) => unwrap(rpc.session.$post({ json })),
+  ...anotherPerson,
+});
+export const signUp = mutationOptions({
+  mutationFn: (json: { name: string; email: string; password: string; claim: string }) =>
+    unwrap(rpc.account.$post({ json })),
+  ...anotherPerson,
+});
+/** One's own password: nothing to reload, the session is renewed by the answer. */
+export const changePassword = mutationOptions({
+  mutationFn: (json: { current: string; password: string }) => unwrap(rpc.account.password.$put({ json })),
+});
+/** A link with which a member chooses a new password; shown once to the admin who asked. */
+export const resetMemberPassword = mutationOptions({
+  mutationFn: (member: number) => unwrap(rpc.members[":id"].reset.$post({ param: id(member) })),
 });
 // Members and invitations
 export const invite = mutationOptions({
@@ -234,7 +259,7 @@ export const removeMember = mutationOptions({
 
 export const signOut = mutationOptions({
   mutationFn: () => unwrap(rpc.session.$delete()),
-  onSuccess: (_data, _sent, _result, { client }) => client.invalidateQueries(),
+  ...anotherPerson,
 });
 export const requestAccess = mutationOptions({
   mutationFn: (json: { email: string; company?: string; locale: Locale }) =>

@@ -4,11 +4,11 @@ import { exportEvents } from "../../src/channels/sync";
 import { appState, getDb, listings, properties, reservations } from "../../src/db";
 import { addDays, today } from "../../src/lib/dates";
 import { generateICal } from "../../src/lib/ical";
-import { sessionValue } from "../../src/lib/session";
 import { server } from "./app";
+import { signedUp } from "./testing";
 
-const PASSWORD = "a sentence only the test knows";
-const session = `innkeep-session=${sessionValue(PASSWORD)}`;
+/** The host's cookie, once they have signed up in `beforeAll`. */
+let session = "";
 const EXTENSION = "the extension's token";
 const CRON = "the scheduler's secret";
 const MCP = "the assistant's token";
@@ -46,8 +46,6 @@ const GUARDED = [
 let propertyId: number;
 
 beforeAll(async () => {
-  // A password and a demo: the setting in which a machine could be handed the wrong data.
-  process.env.APP_PASSWORD = PASSWORD;
   process.env.PUBLIC_DEMO = "1";
   process.env.EXTENSION_TOKEN = EXTENSION;
   process.env.CRON_SECRET = CRON;
@@ -56,6 +54,7 @@ beforeAll(async () => {
   delete process.env.TELEGRAM_BOT_TOKEN;
   delete process.env.TELEGRAM_CHAT_ID;
   delete process.env.APP_URL;
+  session = (await signedUp()).cookie;
   const db = getDb();
   propertyId = (
     await db
@@ -104,7 +103,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
   process.env.LANDING_ONLY = "";
   process.env.VERCEL = "";
-  process.env.APP_PASSWORD = PASSWORD;
   process.env.PUBLIC_DEMO = "1";
   process.env.EXTENSION_TOKEN = EXTENSION;
   process.env.CRON_SECRET = CRON;
@@ -160,6 +158,7 @@ describe("GET /api/cron", () => {
       ok: true,
       sync: { synced: 1, failed: 0 },
       notified: { needed: 0, cancelled: 0 },
+      spaces: 1,
     });
     expect(fetched).toHaveBeenCalledTimes(1);
     // The stay landed in the host's data, not in the demo a visitor sees.
@@ -401,13 +400,6 @@ describe("GET /extension/start", () => {
     expect(stranger.headers.get("location")).toBe(`${ORIGIN}/login`);
     expect(await keys()).toBe(before);
   });
-
-  it("needs no session where there is no password", async () => {
-    process.env.APP_PASSWORD = "";
-    const response = await start({ "sec-fetch-site": "same-origin" });
-    expect(response.status).toBe(303);
-    expect(response.headers.get("location")).toContain("/extension/run?scope=reservations&key=");
-  });
 });
 
 describe("landing-only", () => {
@@ -439,39 +431,46 @@ describe("landing-only", () => {
   });
 });
 
-describe("a public host with no password", () => {
-  it("refuses the app's API rather than hand the host's data to anyone", async () => {
-    process.env.VERCEL = "1";
-    process.env.APP_PASSWORD = "";
-    for (const [method, path] of [
-      ["GET", "/api/app/overview"],
-      ["GET", "/api/app/session"],
-      ["POST", "/api/app/session"],
-    ] as const) {
-      const response = await call(path, { method });
-      expect(response.status).toBe(503);
-      expect(await response.json()).toEqual({
-        error: "Innkeep is not configured: set APP_PASSWORD, then redeploy.",
-      });
-    }
-    const page = await call("/extension/start", { headers: { "sec-fetch-site": "same-origin" } });
-    expect(page.status).toBe(503);
-  });
+describe("a second space", () => {
+  it("has machines of its own, which never reach the host's data", async () => {
+    const { signedUp: again } = await import("./testing");
+    const other = await again("other@example.com", "Someone else");
+    expect(other.space.store).not.toBe("");
+    const asOther = { cookie: other.cookie, "content-type": "application/json" };
 
-  it("keeps the machines working on their tokens", async () => {
-    process.env.VERCEL = "1";
-    process.env.APP_PASSWORD = "";
-    expect((await call("/api/ical/feed-token/all.ics")).status).toBe(200);
-    expect((await call("/api/extension/events", { headers: bearer(EXTENSION) })).status).toBe(200);
-    expect((await call("/api/cron", { headers: bearer("a guess") })).status).toBe(401);
-  });
+    // Their own token, handed to the extension by their own page.
+    const page = await (await call("/api/app/extension", { headers: asOther })).json();
+    expect(page.token).toMatch(/^x\d+\./);
+    expect(page.token).not.toBe(EXTENSION);
+    const events = await call("/api/extension/events", { headers: bearer(page.token) });
+    expect(events.status).toBe(200);
+    // A token altered to name the host's space is refused.
+    const forged = page.token.replace(/^x\d+/, "x1");
+    expect((await call("/api/extension/events", { headers: bearer(forged) })).status).toBe(401);
 
-  it("serves the app once a password is set, and a machine at home without one", async () => {
-    process.env.VERCEL = "1";
-    expect((await call("/api/app/overview", { headers: { cookie: session } })).status).toBe(200);
-    process.env.VERCEL = "";
-    process.env.APP_PASSWORD = "";
-    expect((await call("/api/app/overview")).status).toBe(200);
+    // A property made there has a calendar link that names the space, and is not in the host's list.
+    const made = await call("/api/app/properties", {
+      method: "POST",
+      headers: asOther,
+      body: JSON.stringify({ name: "Their cabin" }),
+    });
+    const { id } = (await made.json()) as { id: number };
+    const theirs = await (await call(`/api/app/properties/${id}`, { headers: asOther })).json();
+    expect(theirs.property.icalToken).toMatch(new RegExp(`^s${other.space.id}-`));
+    const feed = await call(`/api/ical/${theirs.property.icalToken}/all.ics`);
+    expect(feed.status).toBe(200);
+    expect(await feed.text()).toContain("Their cabin");
+    expect((await call(`/api/ical/s${other.space.id}-a-guess/all.ics`)).status).toBe(404);
+
+    const mine = await (await call("/api/app/properties", { headers: { cookie: session } })).json();
+    expect(JSON.stringify(mine)).not.toContain("Their cabin");
+    const others = await (await call("/api/app/properties", { headers: asOther })).json();
+    expect(JSON.stringify(others)).not.toContain("Canal");
+    expect((await (await call("/api/app/overview", { headers: asOther })).json()).properties).toBe(1);
+
+    // The scheduler goes through both.
+    const cron = await (await call("/api/cron", { headers: bearer(CRON) })).json();
+    expect(cron).toMatchObject({ ok: true, spaces: 2 });
   });
 });
 

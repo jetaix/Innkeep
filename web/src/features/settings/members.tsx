@@ -1,7 +1,13 @@
 import * as stylex from "@stylexjs/stylex";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { invite, removeMember, revokeInvitation, setMemberRole } from "../../api/mutations";
+import {
+  invite,
+  removeMember,
+  resetMemberPassword,
+  revokeInvitation,
+  setMemberRole,
+} from "../../api/mutations";
 import { membersQuery, sessionQuery } from "../../api/queries";
 import { useI18n } from "../../i18n";
 import type { Role } from "../../roles";
@@ -68,7 +74,6 @@ const styles = stylex.create({
   roles: { display: "flex", flexDirection: "column", gap: "0.125rem", margin: 0 },
   roleLine: { display: "flex", flexWrap: "wrap", columnGap: "0.5rem" },
   roleName: { fontSize: text.sm, fontWeight: 500 },
-  code: { fontFamily: font.mono, fontSize: text.sm },
 });
 
 /**
@@ -78,39 +83,26 @@ const styles = stylex.create({
 export function Members() {
   const { m, fmt } = useI18n("settings");
   const t = m.settings.members;
-  const { passwordSet, member: me } = useSuspenseQuery(sessionQuery).data;
+  const { member: me } = useSuspenseQuery(sessionQuery).data;
   const { members, invitations } = useSuspenseQuery(membersQuery).data;
   const change = useMutation(setMemberRole);
   const remove = useMutation(removeMember);
   const revoke = useMutation(revokeInvitation);
   const create = useMutation(invite);
+  const reset = useMutation(resetMemberPassword);
   // The link of the invitation just made: shown once, here, and kept nowhere.
   const [link, setLink] = useState<string | null>(null);
-  const failed = change.error ?? remove.error ?? revoke.error ?? create.error;
-
-  if (!passwordSet) {
-    return (
-      <p {...stylex.props(styles.small)}>
-        {t.needsPassword.before}
-        <code {...stylex.props(styles.code)}>APP_PASSWORD</code>
-        {t.needsPassword.after}
-      </p>
-    );
-  }
+  // The same for a link that lets one member choose a new password.
+  const [resetLink, setResetLink] = useState<{ name: string; link: string } | null>(null);
+  const address = (token: string) => `${window.location.origin}/join?token=${token}`;
+  const failed = change.error ?? remove.error ?? revoke.error ?? create.error ?? reset.error;
+  // The server keeps a space's last admin; the page says why instead of an error from it.
+  const lastAdmin = (id: number) =>
+    members.filter((member) => member.role === "admin" && member.id !== id).length === 0;
 
   return (
     <div {...stylex.props(styles.parts)}>
       <ul {...stylex.props(styles.list)}>
-        <li {...stylex.props(styles.row)}>
-          <div {...stylex.props(styles.who)}>
-            <p {...stylex.props(styles.name)}>
-              {t.owner}
-              {!me && <Badge>{t.you}</Badge>}
-            </p>
-            <p {...stylex.props(styles.small)}>{t.ownerNote}</p>
-          </div>
-          <Badge>{m.common.roles.admin}</Badge>
-        </li>
         {members.map((member) => (
           <li key={member.id} {...stylex.props(styles.row)}>
             <div {...stylex.props(styles.who)}>
@@ -123,7 +115,8 @@ export function Members() {
             <Select
               aria-label={`${t.role}, ${member.name}`}
               value={member.role}
-              disabled={change.isPending}
+              disabled={change.isPending || lastAdmin(member.id)}
+              title={lastAdmin(member.id) ? t.lastAdmin : undefined}
               onChange={(event) =>
                 change.mutate({ member: member.id, role: event.currentTarget.value as Role })
               }
@@ -135,18 +128,43 @@ export function Members() {
                 </option>
               ))}
             </Select>
-            <ConfirmButton
-              variant="ghost"
-              size="sm"
-              message={t.confirmRemove(member.name)}
-              pending={remove.isPending}
-              onConfirm={() => remove.mutate(member.id)}
-            >
-              {t.remove}
-            </ConfirmButton>
+            {me?.id !== member.id && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={reset.isPending}
+                  onClick={() =>
+                    reset.mutate(member.id, {
+                      onSuccess: ({ token }) => setResetLink({ name: member.name, link: address(token) }),
+                    })
+                  }
+                >
+                  {t.reset.action}
+                </Button>
+                <ConfirmButton
+                  variant="ghost"
+                  size="sm"
+                  message={t.confirmRemove(member.name)}
+                  pending={remove.isPending}
+                  onConfirm={() => remove.mutate(member.id)}
+                >
+                  {t.remove}
+                </ConfirmButton>
+              </>
+            )}
           </li>
         ))}
       </ul>
+      {resetLink && (
+        <div role="status">
+          <p {...stylex.props(styles.small)}>{t.reset.ready(resetLink.name)}</p>
+          <div {...stylex.props(styles.link)}>
+            <span {...stylex.props(styles.address)}>{resetLink.link}</span>
+            <CopyButton value={resetLink.link} />
+          </div>
+        </div>
+      )}
 
       {invitations.length > 0 && (
         <div>
@@ -184,7 +202,7 @@ export function Members() {
             { role: fields.get("role") as Role, email: String(fields.get("email") ?? "") },
             {
               onSuccess: ({ token }) => {
-                setLink(`${window.location.origin}/join?token=${token}`);
+                setLink(address(token));
                 sent.reset();
               },
             },

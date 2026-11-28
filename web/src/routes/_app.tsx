@@ -123,6 +123,8 @@ const styles = stylex.create({
   link: { color: color.ink, fontWeight: 500, textUnderlineOffset: 2 },
   quietLink: { color: { default: color.muted, ":hover": color.ink }, textUnderlineOffset: 2 },
   strong: { fontWeight: 600 },
+  // An admin on a phone signs out from Settings; a visitor has no Settings, so the way out stays.
+  shown: { display: "flex" },
   account: {
     display: { default: "none", [WIDE]: "flex" },
     flexWrap: "wrap",
@@ -165,8 +167,7 @@ function AppFrame() {
           <ThemeSwitch />
           <LanguageSwitch />
         </div>
-        {/* A visitor has no Settings page to sign out from. */}
-        {visitor && <SignOut name={session.member?.name} />}
+        {session.signedIn && <SignOut name={session.member?.name} always={visitor} />}
       </aside>
       <div {...stylex.props(styles.column)}>
         {session.demo && <DemoBanner />}
@@ -204,12 +205,12 @@ function Menu({ only }: { only?: readonly NavId[] }) {
 }
 
 /** Who is signed in, and the way out. */
-function SignOut({ name }: { name?: string }) {
+function SignOut({ name, always }: { name?: string; always?: boolean }) {
   const { m } = useI18n();
   const navigate = useNavigate();
   const leave = useMutation(signOut);
   return (
-    <div {...stylex.props(styles.account)}>
+    <div {...stylex.props(styles.account, always && styles.shown)}>
       {name && <span {...stylex.props(styles.who)}>{name}</span>}
       <Button
         variant="ghost"
@@ -232,6 +233,9 @@ function DemoBanner() {
       <p {...stylex.props(styles.links)}>
         <Link to="/" hash="access" {...stylex.props(styles.link)}>
           {m.demo.access}
+        </Link>
+        <Link to="/login" {...stylex.props(styles.quietLink)}>
+          {m.demo.signIn}
         </Link>
         <Link to="/" {...stylex.props(styles.quietLink)}>
           {m.demo.back}

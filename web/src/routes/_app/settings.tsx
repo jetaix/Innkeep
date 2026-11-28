@@ -1,10 +1,10 @@
 import * as stylex from "@stylexjs/stylex";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { NAV } from "@/config/navigation";
+import { Account } from "../../features/settings/account";
 import { Members } from "../../features/settings/members";
-import { signOut } from "../../api/mutations";
 import {
   freshnessQuery,
   membersQuery,
@@ -18,8 +18,8 @@ import { DataSection } from "../../features/settings/data-section";
 import { loadMessages, useI18n } from "../../i18n";
 import { LanguageSwitch, ThemeSwitch } from "../../shell/preferences";
 import { color, font, radius, shadow, text } from "../../tokens.stylex";
-import { CopyButton, SubmitButton } from "../../ui/actions";
-import { Badge, Kbd, Notice, PageHeader } from "../../ui/primitives";
+import { CopyButton } from "../../ui/actions";
+import { Badge, Kbd, PageHeader } from "../../ui/primitives";
 
 /** The page in four parts, one on screen at a time. The first is the default. */
 const TABS = ["general", "connections", "assistant", "data"] as const;
@@ -247,10 +247,7 @@ function Settings() {
 function General() {
   const { m } = useI18n("settings");
   const t = m.settings;
-  const i = t.integrations;
-  const { passwordSet, signedIn } = useSuspenseQuery(sessionQuery).data;
-  const navigate = useNavigate();
-  const leave = useMutation(signOut);
+  const { signedIn } = useSuspenseQuery(sessionQuery).data;
 
   return (
     <div {...stylex.props(styles.parts)}>
@@ -264,36 +261,11 @@ function General() {
           </Preference>
         </div>
       </Section>
-      <Section id="access-heading" title={t.tabs.access}>
-        <ul {...stylex.props(styles.list)}>
-          <Integration
-            name={i.password.name}
-            on={passwordSet}
-            status={passwordSet ? i.on : i.off}
-            variable="APP_PASSWORD"
-          >
-            {i.password.body}
-            {passwordSet && (
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  leave.mutate(undefined, { onSuccess: () => navigate({ to: "/login" }) });
-                }}
-                {...stylex.props(styles.action)}
-              >
-                <SubmitButton size="sm" pending={leave.isPending}>
-                  {i.password.signOut}
-                </SubmitButton>
-              </form>
-            )}
-            {leave.error && (
-              <Notice tone="critical" role="alert" xstyle={styles.action}>
-                {leave.error.message}
-              </Notice>
-            )}
-          </Integration>
-        </ul>
-      </Section>
+      {signedIn && (
+        <Section id="account-heading" title={t.account.title} note={t.account.note} stacked>
+          <Account />
+        </Section>
+      )}
       {signedIn && (
         <Section id="members-heading" title={t.members.title} note={t.members.note} stacked>
           <Members />
@@ -323,12 +295,14 @@ function Connections() {
   const t = m.settings;
   const i = t.integrations;
   const state = (on: boolean) => (on ? i.on : i.off);
-  const { sync, extensionTokenSet, telegram, claude } = useSuspenseQuery(settingsQuery).data;
+  const { sync, extensionTokenSet, telegram, claude, hostSpace } = useSuspenseQuery(settingsQuery).data;
+  // The variables are the server's: named only to the host, who can set them.
+  const named = (variable: string) => (hostSpace ? variable : undefined);
   const telegramChat = telegram.bot ? telegram.chat : null;
   const telegramOn = telegramChat !== null;
 
   return (
-    <Section id="connections-heading" title={t.tabs.connections} note={<Footer />}>
+    <Section id="connections-heading" title={t.tabs.connections} note={hostSpace ? <Footer /> : undefined}>
       <ul {...stylex.props(styles.list)}>
         <Integration
           name={i.sync.name}
@@ -336,7 +310,7 @@ function Connections() {
           status={
             sync.hosted ? i.sync.scheduled : sync.interval > 0 ? i.sync.every(sync.interval) : i.sync.manual
           }
-          variable={sync.hosted ? "CRON_SECRET" : "SYNC_INTERVAL_MINUTES"}
+          variable={named(sync.hosted ? "CRON_SECRET" : "SYNC_INTERVAL_MINUTES")}
         >
           {i.sync.body}
         </Integration>
@@ -344,7 +318,7 @@ function Connections() {
           name={i.extension.name}
           on={extensionTokenSet}
           status={state(extensionTokenSet)}
-          variable="EXTENSION_TOKEN"
+          variable={named("EXTENSION_TOKEN")}
         >
           {i.extension.body}{" "}
           <Link to="/extension" {...stylex.props(styles.link)}>
@@ -355,7 +329,7 @@ function Connections() {
           name={i.telegram.name}
           on={telegramOn}
           status={state(telegramOn)}
-          variable="TELEGRAM_BOT_TOKEN"
+          variable={named("TELEGRAM_BOT_TOKEN")}
         >
           {i.telegram.body}
           {telegramOn && telegramChat?.title && (
@@ -368,7 +342,7 @@ function Connections() {
           name={i.ai.name}
           on={claude.configured}
           status={claude.configured ? claude.model : i.off}
-          variable="ANTHROPIC_API_KEY"
+          variable={named("ANTHROPIC_API_KEY")}
         >
           {i.ai.body}
         </Integration>
@@ -381,18 +355,20 @@ function Connections() {
 function Assistant() {
   const t = useI18n("settings").m.settings;
   const i = t.integrations;
-  const { mcpTokenSet: mcpOn, sync, appUrl } = useSuspenseQuery(settingsQuery).data;
+  const { mcpTokenSet: mcpOn, mcpToken, hostSpace, sync, appUrl } = useSuspenseQuery(settingsQuery).data;
+  // A space other than the host's has a token of its own, ready in the commands below.
+  const token = mcpToken ?? "YOUR_MCP_TOKEN";
   const mcpUrl = `${appUrl ?? window.location.origin}/api/mcp`;
-  const bearer = "Authorization: Bearer YOUR_MCP_TOKEN";
+  const bearer = `Authorization: Bearer ${token}`;
   const json = (value: unknown) => JSON.stringify(value, null, 2);
   const mcpSnippets = [
     {
-      text: i.mcp.claudeCode,
+      text: i.mcp.claudeCode(mcpToken != null),
       code: `claude mcp add --transport http innkeep ${mcpUrl} --header "${bearer}"`,
     },
     {
       // Claude Desktop starts servers as local commands: mcp-remote bridges to the HTTP address.
-      text: i.mcp.desktop,
+      text: i.mcp.desktop(mcpToken != null),
       code: json({
         mcpServers: {
           innkeep: {
@@ -400,7 +376,7 @@ function Assistant() {
             // No space inside the argument: some systems split it there. The value comes from `env`.
             // biome-ignore lint/suspicious/noTemplateCurlyInString: mcp-remote fills this in, not JavaScript
             args: ["-y", "mcp-remote", mcpUrl, "--header", "Authorization:${AUTH_HEADER}"],
-            env: { AUTH_HEADER: "Bearer YOUR_MCP_TOKEN" },
+            env: { AUTH_HEADER: `Bearer ${token}` },
           },
         },
       }),
@@ -414,14 +390,21 @@ function Assistant() {
   ];
 
   return (
-    <Section id="assistant-heading" title={t.tabs.assistant} note={<Footer />}>
+    <Section id="assistant-heading" title={t.tabs.assistant} note={hostSpace ? <Footer /> : undefined}>
       <ul {...stylex.props(styles.list)}>
-        <Integration name={i.mcp.name} on={mcpOn} status={mcpOn ? i.on : i.off} variable="MCP_TOKEN">
+        <Integration
+          name={i.mcp.name}
+          on={mcpOn}
+          status={mcpOn ? i.on : i.off}
+          variable={hostSpace ? "MCP_TOKEN" : undefined}
+        >
           {i.mcp.body}
           <span {...stylex.props(styles.steps)}>{i.mcp.steps}</span>
           <ol {...stylex.props(styles.ordered)}>
             <li {...stylex.props(styles.step)}>
-              {mcpOn ? (
+              {mcpToken ? (
+                i.mcp.tokenOwn
+              ) : mcpOn ? (
                 i.mcp.tokenSet
               ) : (
                 <>
@@ -512,7 +495,8 @@ function Integration({
   name: string;
   on: boolean;
   status: string;
-  variable: string;
+  /** The server's variable that switches it on, for the host who can set it. */
+  variable?: string;
   children: ReactNode;
 }) {
   return (
@@ -520,7 +504,7 @@ function Integration({
       <div {...stylex.props(styles.integrationHead)}>
         <h3 {...stylex.props(styles.name)}>{name}</h3>
         <Badge tone={on ? "good" : "neutral"}>{status}</Badge>
-        <code {...stylex.props(styles.variable)}>{variable}</code>
+        {variable && <code {...stylex.props(styles.variable)}>{variable}</code>}
       </div>
       <div {...stylex.props(styles.body)}>{children}</div>
     </li>

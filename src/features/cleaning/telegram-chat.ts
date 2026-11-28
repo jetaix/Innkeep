@@ -1,4 +1,5 @@
 import "server-only";
+import { hostSetting } from "@/lib/host";
 import { eq } from "drizzle-orm";
 import { appState, getDb } from "@/db";
 import { telegramBot } from "@/lib/telegram";
@@ -56,8 +57,9 @@ export async function getTelegramChat(): Promise<{
   title: string | null;
   source: "environment" | "saved";
 } | null> {
-  if (process.env.TELEGRAM_CHAT_ID) {
-    return { id: await movedTo(process.env.TELEGRAM_CHAT_ID), title: null, source: "environment" };
+  const fixed = hostSetting("TELEGRAM_CHAT_ID");
+  if (fixed) {
+    return { id: await movedTo(fixed), title: null, source: "environment" };
   }
   const saved = await savedChat();
   return saved ? { ...saved, source: "saved" } : null;

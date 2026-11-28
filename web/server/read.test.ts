@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { getDb, properties } from "../../src/db";
-import { sessionValue } from "../../src/lib/session";
 import { app } from "./app";
+import { signedUp } from "./testing";
 
-const PASSWORD = "a sentence only the test knows";
-const session = `innkeep-session=${sessionValue(PASSWORD)}`;
+/** The host's cookie, once they have signed up in `beforeAll`. */
+let session = "";
 const get = (path: string, cookie?: string) =>
   app.request(`/api/app${path}`, { headers: cookie ? { cookie } : undefined });
 
@@ -34,8 +34,8 @@ const HOST_ONLY = ["/extension", "/settings", "/setup/progress", "/setup/1"];
 
 describe("the read API", () => {
   beforeAll(async () => {
-    process.env.APP_PASSWORD = PASSWORD;
     process.env.PUBLIC_DEMO = "1";
+    session = (await signedUp()).cookie;
     await getDb().insert(properties).values({ name: "The host's flat", icalToken: "t", createdAt: 0 }).run();
   });
 

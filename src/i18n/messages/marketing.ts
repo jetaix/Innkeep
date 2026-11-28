@@ -12,6 +12,7 @@ const en = {
     access: "Request early access",
     accessShort: "Early access",
     dashboard: "Open dashboard",
+    signIn: "Sign in",
   },
   hero: {
     title: "One calendar for every place you rent.",
@@ -244,6 +245,7 @@ const fr: typeof en = {
     access: "Demander un accès anticipé",
     accessShort: "Accès anticipé",
     dashboard: "Tableau de bord",
+    signIn: "Connexion",
   },
   hero: {
     title: "Un seul calendrier pour tous vos logements.",
