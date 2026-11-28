@@ -49,6 +49,8 @@ const newLoan = z.object({
   rate: text.min(1),
   /** Typed in years: 20, or 12.5 for 150 months. */
   years: text.min(1),
+  /** What leaves the account each month, insurance included. Blank: computed from the terms. */
+  payment: text.default(""),
   insurance: text,
   propertyId: blankAsNull(wholeNumber(1)),
   startsOn: isoDate,
@@ -60,7 +62,8 @@ function decimal(input: string): number | null {
   return input.trim() !== "" && Number.isFinite(value) ? value : null;
 }
 
-export async function addLoan(input: unknown) {
+/** A loan as typed, checked and turned into what is stored. */
+function loanValues(input: unknown) {
   const data = parse(newLoan, input);
   const principal = parseMoney(data.principal);
   if (principal == null || principal <= 0) throw new InvalidInput("principal");
@@ -72,21 +75,41 @@ export async function addLoan(input: unknown) {
   if (months < 1 || months > 600) throw new InvalidInput("years");
   const insurance = data.insurance === "" ? 0 : parseMoney(data.insurance);
   if (insurance == null || insurance < 0) throw new InvalidInput("insurance");
+  // The payment is the borrower's own figure: it is kept as typed, never worked out again.
+  const payment = data.payment === "" ? null : parseMoney(data.payment);
+  if (data.payment !== "" && (payment == null || payment <= 0)) throw new InvalidInput("payment");
+  // The insurance is a part of the payment, so it cannot be more than it.
+  if (payment != null && insurance > payment) throw new InvalidInput("insurance");
+  return {
+    label: data.label,
+    propertyId: data.propertyId,
+    principal,
+    rate: Math.round(rate * 100),
+    months,
+    insurance,
+    payment,
+    startsOn: data.startsOn,
+  };
+}
+
+export async function addLoan(input: unknown) {
   const row = await getDb()
     .insert(loans)
-    .values({
-      label: data.label,
-      propertyId: data.propertyId,
-      principal,
-      rate: Math.round(rate * 100),
-      months,
-      insurance,
-      startsOn: data.startsOn,
-      createdAt: Date.now(),
-    })
+    .values({ ...loanValues(input), createdAt: Date.now() })
     .returning({ id: loans.id })
     .get();
   return row.id;
+}
+
+/** Changes a loan's terms. The bank's table, when one was imported, is left as it is. */
+export async function updateLoan(id: number, input: unknown) {
+  const changed = await getDb()
+    .update(loans)
+    .set(loanValues(input))
+    .where(eq(loans.id, id))
+    .returning({ id: loans.id })
+    .get();
+  if (!changed) throw new InvalidInput("loan");
 }
 
 export async function deleteLoan(id: number) {

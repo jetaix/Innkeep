@@ -136,6 +136,25 @@ describe("the write API", () => {
 
     expect((await host("DELETE", `/loans/${id}/schedule`)).status).toBe(200);
     expect(await costs()).toContainEqual(expect.objectContaining({ id: -id, amount: 1_196_21 }));
+
+    // Edited with the payment the bank takes: that figure is counted, not a computed one.
+    const terms = {
+      label: "Mortgage",
+      principal: "200000",
+      rate: "3,85",
+      years: "20",
+      propertyId: "",
+      startsOn: "2027-01-05",
+    };
+    const edited = await host("PUT", `/loans/${id}`, { ...terms, payment: "1 245,50", insurance: "30" });
+    expect(edited.status).toBe(200);
+    expect(await costs()).toContainEqual(expect.objectContaining({ id: -id, amount: 1_245_50 }));
+    expect((await host("PUT", `/loans/${id}`, { ...terms, payment: "20", insurance: "30" })).status).toBe(
+      400,
+    );
+    expect((await host("PUT", "/loans/99999", { ...terms, payment: "1200", insurance: "" })).status).toBe(
+      400,
+    );
     expect((await host("DELETE", `/loans/${id}`)).status).toBe(200);
   });
 

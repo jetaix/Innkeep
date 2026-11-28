@@ -48,6 +48,10 @@ export const write = new Hono<Env>()
   })
 
   .post("/loans", json, async (c) => c.json({ id: await revenue.addLoan(c.req.valid("json")) }))
+  .put("/loans/:id", json, async (c) => {
+    await revenue.updateLoan(num(c.req.param("id")), c.req.valid("json"));
+    return c.json(done);
+  })
   .put("/loans/:id/schedule", json, async (c) =>
     c.json({ lines: await revenue.importSchedule(num(c.req.param("id")), c.req.valid("json")) }),
   )

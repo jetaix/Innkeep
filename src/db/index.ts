@@ -296,6 +296,10 @@ CREATE TABLE IF NOT EXISTS loan_payments (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS loan_payments_date ON loan_payments (loan_id, date);
 `,
+  // 21: a loan's monthly payment as the borrower typed it, insurance included
+  `
+ALTER TABLE loans ADD COLUMN payment INTEGER;
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */

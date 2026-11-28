@@ -8,7 +8,9 @@ import { addMonths, type Cost, monthOf } from "./compute";
  * the revenue maths: a loan becomes one monthly cost from its first payment
  * to its last, so every figure built on costs counts it without knowing.
  */
-type Terms = Pick<Loan, "principal" | "rate" | "months" | "insurance" | "startsOn">;
+type Terms = Pick<Loan, "principal" | "rate" | "months" | "insurance" | "startsOn"> & {
+  payment?: Minor | null;
+};
 /** A line of the bank's own table (see `schedule.ts`). */
 type Line = Pick<LoanPayment, "date" | "interest" | "capital" | "insurance" | "remaining">;
 
@@ -23,15 +25,36 @@ export function monthlyPayment(loan: Pick<Loan, "principal" | "rate" | "months">
   return Math.round((loan.principal * r) / (1 - (1 + r) ** -loan.months));
 }
 
-/** Capital still owed once `paid` payments have been made. */
-export function balanceAfter(loan: Pick<Loan, "principal" | "rate" | "months">, paid: number): Minor {
+/**
+ * What leaves the account each month, insurance included: the amount the
+ * borrower typed, which is the bank's own figure. Only a loan entered without
+ * it falls back on the payment computed from the amount, the rate and the duration.
+ */
+export function monthlyCost(
+  loan: Pick<Loan, "principal" | "rate" | "months" | "insurance"> & { payment?: Minor | null },
+): Minor {
+  return loan.payment ?? monthlyPayment(loan) + loan.insurance;
+}
+
+/**
+ * Capital still owed once `paid` payments have been made. `payment` is what
+ * goes to capital and interest each month when the borrower gave it.
+ */
+export function balanceAfter(
+  loan: Pick<Loan, "principal" | "rate" | "months">,
+  paid: number,
+  payment?: Minor,
+): Minor {
   if (paid >= loan.months) return 0;
   if (paid <= 0) return loan.principal;
   const r = monthly(loan.rate);
-  if (r === 0) return Math.round(loan.principal * (1 - paid / loan.months));
+  if (r === 0) {
+    const each = payment ?? loan.principal / loan.months;
+    return Math.max(0, Math.round(loan.principal - each * paid));
+  }
   const growth = (1 + r) ** paid;
-  const payment = (loan.principal * r) / (1 - (1 + r) ** -loan.months);
-  return Math.max(0, Math.round(loan.principal * growth - (payment * (growth - 1)) / r));
+  const each = payment ?? (loan.principal * r) / (1 - (1 + r) ** -loan.months);
+  return Math.max(0, Math.round(loan.principal * growth - (each * (growth - 1)) / r));
 }
 
 /** The month of the last payment. */
@@ -67,23 +90,25 @@ export type LoanState = {
  */
 export function loanState(loan: Terms, today: ISODate, schedule: Line[] = []): LoanState {
   if (schedule.length > 0) return stateFromSchedule(loan, today, schedule);
-  const payment = monthlyPayment(loan);
+  // Capital and interest: what the borrower pays each month, less the insurance in it.
+  const typed = loan.payment != null ? Math.max(0, loan.payment - loan.insurance) : undefined;
+  const payment = typed ?? monthlyPayment(loan);
   const months = Math.max(0, loan.months);
   const [year, month, day] = today.split("-").map(Number);
   const [startYear, startMonth, startDay] = loan.startsOn.split("-").map(Number);
   // One payment per month, on the day of the first one.
   const elapsed = (year - startYear) * 12 + (month - startMonth) + (day >= startDay ? 1 : 0);
   const paid = Math.min(months, Math.max(0, elapsed));
-  const remaining = balanceAfter(loan, paid);
+  const remaining = balanceAfter(loan, paid, typed);
   const interest = Math.max(0, payment * months - loan.principal);
   // The payment of the month we are in: the one just made, or the one about to be.
   const running = monthOf(today) >= monthOf(loan.startsOn) && monthOf(today) <= lastPaymentMonth(loan);
-  const before = balanceAfter(loan, (year - startYear) * 12 + (month - startMonth));
+  const before = balanceAfter(loan, (year - startYear) * 12 + (month - startMonth), typed);
   const interestNow = running ? Math.min(payment, Math.round(before * monthly(loan.rate))) : 0;
   return {
     total: months,
     payment,
-    monthlyCost: payment + loan.insurance,
+    monthlyCost: monthlyCost(loan),
     paid,
     remaining,
     interest,
@@ -128,11 +153,11 @@ function stateFromSchedule(loan: Terms, today: ISODate, schedule: Line[]): LoanS
 type CostedLoan = Pick<
   Loan,
   "id" | "propertyId" | "label" | "principal" | "rate" | "months" | "insurance" | "startsOn"
-> & { schedule?: Line[] };
+> & { payment?: Minor | null; schedule?: Line[] };
 
 /**
- * Each loan as a cost of its months. Without the bank's table: the same
- * payment every month, from the first to the last. With it: what the table
+ * Each loan as a cost of its months. Without the bank's table: the payment
+ * the borrower typed, every month from the first to the last. With it: what the table
  * says for each month. Ids are negative so they never meet a charge's.
  */
 export function loanCosts(loans: CostedLoan[]): Cost[] {
@@ -179,7 +204,7 @@ function computedCosts(loan: CostedLoan): Cost[] {
       label: loan.label,
       category: "loan",
       frequency: "monthly",
-      amount: monthlyPayment(loan) + loan.insurance,
+      amount: monthlyCost(loan),
       appliesTo: "all",
       startsOn: `${monthOf(loan.startsOn)}-01`,
       endsOn: `${lastPaymentMonth(loan)}-01`,
