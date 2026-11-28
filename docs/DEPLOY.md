@@ -29,12 +29,12 @@ There are two ways to do it. Both give the same Innkeep.
    | -------------------- | ----------------------------------------------------- |
    | `TURSO_DATABASE_URL` | The database address, `libsql://…`                    |
    | `TURSO_AUTH_TOKEN`   | The database token                                    |
-   | `APP_PASSWORD`       | A long sentence only the two of you know              |
    | `CRON_SECRET`        | A long random value                                   |
    | `TELEGRAM_…`         | See [Telegram notifications](#telegram-notifications) |
 
-4. **Deploy**, open the address and sign in. Without `APP_PASSWORD` the pages
-   refuse to open, so an unfinished setup never shows your data.
+4. **Deploy**, open the address and create your account straight away: the
+   first account owns this database. See [Accounts](#accounts) for who else
+   may sign up; to keep it to yourself, add `SIGN_UP=closed`.
 
 ### The scheduler
 
@@ -71,7 +71,6 @@ docker build -t innkeep .
 docker run -d --name innkeep --restart unless-stopped \
   -p 3000:3000 \
   -v innkeep-data:/data \
-  -e APP_PASSWORD='a long sentence only the two of you know' \
   -e APP_URL='https://innkeep.example.com' \
   -e TELEGRAM_BOT_TOKEN='123456:ABC...' \
   -e TELEGRAM_CHAT_ID='-1001234567890' \
@@ -88,32 +87,66 @@ docker run -d --name innkeep --restart unless-stopped \
 - Add `EXTENSION_TOKEN` if you use the browser extension, and enter the
   public address in the extension's settings.
 
-## The password
+## Accounts
 
-`APP_PASSWORD` is the owner's password: every page asks for it once per
-browser, then remembers it for 90 days. To let someone else in, an admin
-creates an invitation link under Settings, Members, and chooses a role: admin
-(everything) or visitor (the cleaning and the properties, and marking a cleaning as done). The
-person picks a password of their own; Innkeep sends no email, so you pass the
-link on yourself. Changing `APP_PASSWORD` signs everyone out. After twenty wrong
-passwords in ten minutes, sign-in is refused until the ten minutes have
-passed.
+Nobody opens the dashboard without an account. On a new Innkeep, open it and
+choose **Create an account**: a name, an email and a password. That first
+account owns the data.
 
-Someone who is not signed in never reaches your data: their requests are
-answered from a separate set of sample bookings kept in memory, whatever page
-or action they aim at.
+- **Your household.** Under Settings, Members, an admin creates an invitation
+  link and chooses a role: admin (everything) or visitor (the cleaning and the
+  properties, and marking a cleaning as done). The person picks a password of
+  their own. Innkeep sends no email, so you pass the link on yourself.
+- **A forgotten password.** An admin creates a reset link for that member in
+  the same place. A space with a single admin who forgets their password has
+  nobody to ask: keep it somewhere safe.
+- **Other people.** Anyone else who signs up gets an empty Innkeep of their
+  own, in a separate database, never yours. `SIGN_UP` says who may:
+  - `beta`, the default: only the addresses you approve. People ask through
+    the access form on the public page; the requests wait under Settings,
+    Beta access, where you approve them or add an address yourself. Innkeep
+    sends no email, so tell the person yourself once they are approved.
+  - `open`: anyone.
+  - `closed`: nobody. Invitations into your own Innkeep keep working.
+- **Where their data goes.** A file in `spaces/` beside yours on your own
+  server. On Turso each one is a new database, so accounts beyond the first
+  work only once you set `TURSO_ORG` (your organisation's slug),
+  `TURSO_API_TOKEN`, and `TURSO_GROUP_TOKEN` (a token for the group, `default`
+  unless you set `TURSO_GROUP`).
+- **Your server's settings stay yours.** `ANTHROPIC_API_KEY`, the Telegram bot
+  and chat, `EXTENSION_TOKEN` and `MCP_TOKEN` serve the first account's space
+  only. Other spaces get tokens of their own in their Settings and paste their
+  own Anthropic key.
+
+After twenty wrong passwords in ten minutes, sign-in is refused until the ten
+minutes have passed.
+
+### Upgrading from the shared password
+
+Innkeep used to open with one shared password, `APP_PASSWORD`. That variable
+is no longer read: remove it. After the update nobody is signed in, and **the
+first account created takes the data already there**. Create yours right
+after updating.
+
+To close that window, set `OWNER_EMAIL` to your address before updating: then
+only an account created with that address gets the existing data, and anyone
+who signs up before you gets an empty space. Innkeep does not verify email
+addresses, so someone who knows yours could still sign up with it first:
+create your account soon either way.
+
+Someone who is not signed in never reaches anyone's data: they are sent to
+the sign-in page.
 
 ### A public demo
 
-Add `PUBLIC_DEMO=1` next to `APP_PASSWORD` to show Innkeep to visitors. They
-then get the public pages and a dashboard on the sample bookings, which they
-can read but not change, instead of the sign-in page. Settings and the
-extension pages stay yours alone. You sign in at `/login`, which nothing
-links to. Do not combine it with `LANDING_ONLY`, which switches the dashboard
+Add `PUBLIC_DEMO=1` to show Innkeep to visitors. They then get the public
+pages and a dashboard on the sample bookings, which they can read but not
+change, instead of the sign-in page. Settings and the extension pages stay
+for people who are signed in. Do not combine it with `LANDING_ONLY`, which switches the dashboard
 off altogether.
 
 The addresses that machines call keep their own secrets and do not use the
-password: the calendar links you give Airbnb and Booking.com, the browser
+session: the calendar links you give Airbnb and Booking.com, the browser
 extension and the MCP server.
 
 ## Telegram notifications

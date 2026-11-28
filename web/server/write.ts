@@ -1,6 +1,8 @@
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { validator } from "hono/validator";
 import { z } from "zod";
+import { inHostSpace } from "../../src/db";
+import * as access from "../../src/features/access/requests";
 import * as assistant from "../../src/features/assistant/mutations";
 import * as cleaning from "../../src/features/cleaning/mutations";
 import * as insights from "../../src/features/insights/mutations";
@@ -10,10 +12,23 @@ import * as stay from "../../src/features/reservations/mutations";
 import * as revenue from "../../src/features/revenue/mutations";
 import * as setup from "../../src/features/setup/mutations";
 import { LOCALES } from "../../src/i18n/config";
+import { openSession } from "./auth";
 import { adminOnly, badRequest, type Env, hostOnly } from "./env";
 
 const done = { ok: true as const };
+
+/** The space of whoever is signed in; the demo has none, and no members to manage. */
+function spaceOf(c: Context<Env>): number {
+  const space = c.get("space");
+  if (!space) throw hostOnly();
+  return space.id;
+}
 const locale = z.object({ locale: z.enum(LOCALES).default("en") });
+
+/** For what concerns the whole instance: only someone signed in to the host's own space. */
+function hostSpaceOnly(c: Context<Env>) {
+  if (!c.get("space") || !inHostSpace()) throw hostOnly();
+}
 
 /** A number from the address, or 400. */
 function num(raw: string): number {
@@ -66,20 +81,44 @@ export const write = new Hono<Env>()
   })
 
   // Members: an admin's alone, which the role check in `app.ts` already holds a visitor to.
-  .post("/invitations", json, async (c) => {
-    if (!c.get("signedIn")) throw hostOnly();
-    return c.json(await members.invite(c.req.valid("json")));
-  })
+  .post("/invitations", json, async (c) => c.json(await members.invite(spaceOf(c), c.req.valid("json"))))
   .delete("/invitations/:id", async (c) => {
-    await members.revokeInvitation(num(c.req.param("id")));
+    await members.revokeInvitation(spaceOf(c), num(c.req.param("id")));
     return c.json(done);
   })
   .put("/members/:id", json, async (c) => {
-    await members.setRole(num(c.req.param("id")), c.req.valid("json"));
+    await members.setRole(spaceOf(c), num(c.req.param("id")), c.req.valid("json"));
     return c.json(done);
   })
+  // A link with which a member who forgot their password chooses a new one.
+  .post("/members/:id/reset", async (c) =>
+    c.json(await members.resetLink(spaceOf(c), num(c.req.param("id")))),
+  )
   .delete("/members/:id", async (c) => {
-    await members.removeMember(num(c.req.param("id")));
+    await members.removeMember(spaceOf(c), num(c.req.param("id")));
+    return c.json(done);
+  })
+  // Access while sign-up is in beta: let an address in, or forget it. The host's space alone.
+  .post("/access-requests", json, async (c) => {
+    hostSpaceOnly(c);
+    await access.approveEmail(c.req.valid("json"));
+    return c.json(done);
+  })
+  .put("/access-requests/:id", async (c) => {
+    hostSpaceOnly(c);
+    await access.approveRequest(num(c.req.param("id")));
+    return c.json(done);
+  })
+  .delete("/access-requests/:id", async (c) => {
+    hostSpaceOnly(c);
+    await access.removeRequest(num(c.req.param("id")));
+    return c.json(done);
+  })
+  // One's own password. The session is signed again, since it covered the old one.
+  .put("/account/password", json, async (c) => {
+    const member = c.get("member");
+    if (!member) throw hostOnly();
+    await openSession(c, await members.changePassword(member.id, c.req.valid("json")));
     return c.json(done);
   })
 

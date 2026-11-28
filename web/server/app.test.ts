@@ -1,11 +1,11 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { getDb, properties } from "../../src/db";
-import { sessionValue } from "../../src/lib/session";
 import { app } from "./app";
+import { signedUp } from "./testing";
 import { decide } from "./scope";
 
-const PASSWORD = "a sentence only the test knows";
-const session = `innkeep-session=${sessionValue(PASSWORD)}`;
+/** The host's cookie, once they have signed up in `beforeAll`. */
+let session = "";
 const get = (path: string, cookie?: string) =>
   app.request(`/api/app${path}`, { headers: cookie ? { cookie } : undefined });
 const send = (path: string, body: unknown, method = "POST") =>
@@ -17,13 +17,18 @@ const send = (path: string, body: unknown, method = "POST") =>
 
 describe("who sees which data", () => {
   beforeAll(async () => {
-    process.env.APP_PASSWORD = PASSWORD;
     process.env.PUBLIC_DEMO = "1";
+    session = (await signedUp()).cookie;
     await getDb().insert(properties).values({ name: "The host's flat", icalToken: "t", createdAt: 0 }).run();
   });
 
   it("decides from the session, never from what the request claims", async () => {
-    expect(await decide("GET", sessionValue(PASSWORD))).toMatchObject({ scope: "real", signedIn: true });
+    expect(await decide("GET", session.split("=")[1])).toMatchObject({
+      scope: "real",
+      signedIn: true,
+      role: "admin",
+      space: { store: "" },
+    });
     expect(await decide("GET", undefined)).toMatchObject({ scope: "demo", signedIn: false });
     expect(await decide("POST", "not-a-session")).toMatchObject({ scope: "demo-readonly", signedIn: false });
     process.env.PUBLIC_DEMO = "";
@@ -47,12 +52,12 @@ describe("who sees which data", () => {
     expect(await (await get("/session")).json()).toMatchObject({
       signedIn: false,
       demo: true,
-      passwordSet: true,
     });
     expect(await (await get("/session", session)).json()).toMatchObject({
       signedIn: true,
       demo: false,
-      passwordSet: true,
+      role: "admin",
+      member: { name: "The host", email: "host@example.com" },
     });
   });
 
@@ -63,14 +68,24 @@ describe("who sees which data", () => {
     process.env.PUBLIC_DEMO = "1";
   });
 
-  it("signs in with the password only, and counts the misses", async () => {
-    const wrong = await send("/session", { password: "a guess" });
+  it("gives the first account the main database, even in beta, and says so beforehand", async () => {
+    // This file's host signed up first, with no owner named and the default mode.
+    expect(await (await get("/account")).json()).toEqual({ mode: "beta", first: false });
+    expect(
+      (await send("/account", { name: "N", email: "n@example.com", password: "a long enough password" }))
+        .status,
+    ).toBe(403);
+  });
+
+  it("signs in with an email and a password, and counts the misses", async () => {
+    const wrong = await send("/session", { email: "host@example.com", password: "a guess" });
     expect(wrong.status).toBe(401);
     expect(wrong.headers.get("set-cookie")).toBeNull();
+    expect((await send("/session", { password: "a long enough password" })).status).toBe(401);
 
-    const right = await send("/session", { password: PASSWORD });
+    const right = await send("/session", { email: "Host@Example.com", password: "a long enough password" });
     expect(right.status).toBe(200);
-    expect(right.headers.get("set-cookie")).toContain(`innkeep-session=${sessionValue(PASSWORD)}`);
+    expect(right.headers.get("set-cookie")).toContain(session);
     expect(right.headers.get("set-cookie")).toContain("HttpOnly");
-  }, 10_000);
+  });
 });

@@ -8,8 +8,6 @@ const en = {
     connections: "Connections",
     assistant: "AI assistant (MCP)",
     data: "Data",
-    /** Heading of the password card, in General. */
-    access: "Access",
   },
   appearance: {
     title: "Appearance",
@@ -40,11 +38,6 @@ const en = {
       name: "Telegram notifications",
       body: "Sends you a Telegram message each time a cleaning has to be arranged: a new check-out, or a cleaning added by hand. Needs a bot token and a chat.",
     },
-    password: {
-      name: "Password",
-      body: "Asks for a password before any page opens. Set it before putting Innkeep on the internet.",
-      signOut: "Sign out",
-    },
     mcp: {
       name: "MCP server",
       body: "Lets an AI assistant read your calendar, revenue and suggestions, and block dates, over the Model Context Protocol.",
@@ -52,12 +45,17 @@ const en = {
       /** Step 1, when the token is not set yet. */
       token: "Create a secret token: a long random text only you know. This command makes one:",
       tokenSet: "A token is set. It is the value you gave MCP_TOKEN; Innkeep never shows it.",
+      /** Step 1, in a space that has a token of its own. */
+      tokenOwn:
+        "Your token is already in the commands below. Whoever has it can read your calendar and revenue: keep it to yourself.",
       whereHosted:
         "Add it in Vercel: your project, Settings, Environment Variables, name MCP_TOKEN. Then redeploy.",
       whereSelf: "Add it to your .env file as MCP_TOKEN, then restart the server.",
-      claudeCode: "Claude Code: run this in a terminal, with your token in place of YOUR_MCP_TOKEN.",
-      desktop:
-        "Claude Desktop: open Settings, Developer, Edit Config, and add this to the file, with your token in place of YOUR_MCP_TOKEN. Change nothing else. Node.js must be installed on that computer. Restart Claude Desktop.",
+      /** `own`: the token is already written in the command, so there is nothing to replace. */
+      claudeCode: (own: boolean): string =>
+        `Claude Code: run this in a terminal${own ? "" : ", with your token in place of YOUR_MCP_TOKEN"}.`,
+      desktop: (own: boolean): string =>
+        `Claude Desktop: open Settings, Developer, Edit Config, and add this to the file${own ? "" : ", with your token in place of YOUR_MCP_TOKEN"}. Change nothing else. Node.js must be installed on that computer. Restart Claude Desktop.`,
       other: "Another assistant that accepts an MCP server over HTTP: give it this configuration.",
       tryIt: "Then ask it: “What are my next arrivals in Innkeep?”",
     },
@@ -69,12 +67,47 @@ const en = {
       after: "lists them all.",
     },
   },
+  account: {
+    title: "Your account",
+    note: "Who you are signed in as, and your password.",
+    change: "Change your password",
+    current: "Current password",
+    next: "New password",
+    hint: (min: number): string => `At least ${min} characters.`,
+    save: "Change password",
+    saving: "Saving…",
+    saved: "Your password is changed. Other browsers you were signed in on are signed out.",
+    wrongCurrent: "That is not your current password.",
+    tooShort: (min: number): string => `The new password needs at least ${min} characters.`,
+  },
+  access: {
+    title: "Beta access",
+    note: "Sign-up is in beta: only the addresses you approve can create an account. Each gets an empty Innkeep of their own, never yours.",
+    noEmail:
+      "Innkeep sends no email: once you approve someone, tell them yourself that they can create their account.",
+    waiting: "Waiting",
+    approved: "Approved",
+    none: "Nobody has asked yet.",
+    approve: "Approve",
+    remove: "Remove",
+    /** "asked on 5 Dec" */
+    asked: (date: string): string => `asked on ${date}`,
+    add: "Give access to an address",
+    submit: "Give access",
+    saving: "Saving…",
+    invalid: "That does not look like an email address.",
+  },
   members: {
     title: "Members",
     note: "Who can open this Innkeep, and what each of them may do.",
-    owner: "Owner",
-    ownerNote: "Signs in with the password of this Innkeep. Always an admin.",
     you: "you",
+    lastAdmin: "An Innkeep keeps at least one admin.",
+    reset: {
+      action: "Reset password",
+      /** Above the link, once made. */
+      ready: (name: string): string =>
+        `Send this link to ${name}. They choose a new password with it. It works once, for two days, and cannot be shown again.`,
+    },
     role: "Role",
     /** Under the role, in the list of choices. */
     can: {
@@ -95,11 +128,6 @@ const en = {
       pending: (role: string, note: string, until: string): string =>
         `${role}${note ? `, for ${note}` : ""}, until ${until}`,
       revoke: "Cancel",
-    },
-    needsPassword: {
-      before: "Set ",
-      after:
-        " on the server first: without it Innkeep opens for anyone who reaches it, and there is nothing to sign in to.",
     },
   },
   shortcuts: {
@@ -123,7 +151,6 @@ const fr: typeof en = {
     connections: "Connexions",
     assistant: "Assistant IA (MCP)",
     data: "Données",
-    access: "Accès",
   },
   appearance: {
     title: "Apparence",
@@ -154,11 +181,6 @@ const fr: typeof en = {
       name: "Notifications Telegram",
       body: "Vous envoie un message Telegram chaque fois qu’un ménage est à demander : un nouveau départ, ou un ménage ajouté à la main. Nécessite le jeton d’un bot et une conversation.",
     },
-    password: {
-      name: "Mot de passe",
-      body: "Demande un mot de passe avant d’ouvrir la moindre page. À définir avant de mettre Innkeep sur Internet.",
-      signOut: "Se déconnecter",
-    },
     mcp: {
       name: "Serveur MCP",
       body: "Permet à un assistant IA de lire votre calendrier, vos revenus et vos suggestions, et de bloquer des dates, via le Model Context Protocol.",
@@ -166,13 +188,15 @@ const fr: typeof en = {
       token:
         "Créez un jeton secret : un long texte aléatoire que vous seul connaissez. Cette commande en fabrique un :",
       tokenSet: "Un jeton est défini. C’est la valeur donnée à MCP_TOKEN ; Innkeep ne l’affiche jamais.",
+      tokenOwn:
+        "Votre jeton est déjà dans les commandes ci-dessous. Quiconque le possède peut lire votre calendrier et vos revenus : gardez-le pour vous.",
       whereHosted:
         "Ajoutez-le dans Vercel : votre projet, Settings, Environment Variables, nom MCP_TOKEN. Puis redéployez.",
       whereSelf: "Ajoutez-le à votre fichier .env sous le nom MCP_TOKEN, puis redémarrez le serveur.",
-      claudeCode:
-        "Claude Code : lancez ceci dans un terminal, avec votre jeton à la place de YOUR_MCP_TOKEN.",
-      desktop:
-        "Claude Desktop : ouvrez Settings, Developer, Edit Config, et ajoutez ceci au fichier, avec votre jeton à la place de YOUR_MCP_TOKEN. Ne changez rien d’autre. Node.js doit être installé sur cet ordinateur. Redémarrez Claude Desktop.",
+      claudeCode: (own) =>
+        `Claude Code : lancez ceci dans un terminal${own ? "" : ", avec votre jeton à la place de YOUR_MCP_TOKEN"}.`,
+      desktop: (own) =>
+        `Claude Desktop : ouvrez Settings, Developer, Edit Config, et ajoutez ceci au fichier${own ? "" : ", avec votre jeton à la place de YOUR_MCP_TOKEN"}. Ne changez rien d’autre. Node.js doit être installé sur cet ordinateur. Redémarrez Claude Desktop.`,
       other: "Un autre assistant qui accepte un serveur MCP en HTTP : donnez-lui cette configuration.",
       tryIt: "Demandez-lui ensuite : « Quelles sont mes prochaines arrivées dans Innkeep ? »",
     },
@@ -183,12 +207,45 @@ const fr: typeof en = {
       after: "les recense toutes.",
     },
   },
+  account: {
+    title: "Votre compte",
+    note: "Sous quel nom vous êtes connecté, et votre mot de passe.",
+    change: "Changer votre mot de passe",
+    current: "Mot de passe actuel",
+    next: "Nouveau mot de passe",
+    hint: (min) => `Au moins ${min} caractères.`,
+    save: "Changer le mot de passe",
+    saving: "Enregistrement…",
+    saved: "Votre mot de passe est changé. Les autres navigateurs où vous étiez connecté sont déconnectés.",
+    wrongCurrent: "Ce n’est pas votre mot de passe actuel.",
+    tooShort: (min) => `Le nouveau mot de passe doit compter au moins ${min} caractères.`,
+  },
+  access: {
+    title: "Accès bêta",
+    note: "L’inscription est en bêta : seules les adresses que vous approuvez peuvent créer un compte. Chacune obtient un Innkeep vide à elle, jamais le vôtre.",
+    noEmail:
+      "Innkeep n’envoie aucun e-mail : une fois quelqu’un approuvé, dites-lui vous-même qu’il peut créer son compte.",
+    waiting: "En attente",
+    approved: "Approuvées",
+    none: "Personne n’a encore demandé.",
+    approve: "Approuver",
+    remove: "Retirer",
+    asked: (date) => `demandé le ${date}`,
+    add: "Donner l’accès à une adresse",
+    submit: "Donner l’accès",
+    saving: "Enregistrement…",
+    invalid: "Cela ne ressemble pas à une adresse e-mail.",
+  },
   members: {
     title: "Membres",
     note: "Qui peut ouvrir cet Innkeep, et ce que chacun peut y faire.",
-    owner: "Propriétaire",
-    ownerNote: "Se connecte avec le mot de passe de cet Innkeep. Toujours administrateur.",
     you: "vous",
+    lastAdmin: "Un Innkeep garde au moins un admin.",
+    reset: {
+      action: "Réinitialiser le mot de passe",
+      ready: (name) =>
+        `Envoyez ce lien à ${name}, qui choisira un nouveau mot de passe. Il fonctionne une seule fois, pendant deux jours, et ne pourra plus être affiché.`,
+    },
     role: "Rôle",
     can: {
       admin: "Voit et modifie tout",
@@ -207,11 +264,6 @@ const fr: typeof en = {
       waiting: "Invitations en attente",
       pending: (role, note, until) => `${role}${note ? `, pour ${note}` : ""}, jusqu’au ${until}`,
       revoke: "Annuler",
-    },
-    needsPassword: {
-      before: "Définissez d’abord ",
-      after:
-        " sur le serveur : sans lui, Innkeep s’ouvre à quiconque y accède, et il n’y a rien à quoi se connecter.",
     },
   },
   shortcuts: {

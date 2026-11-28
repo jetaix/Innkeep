@@ -1,14 +1,37 @@
-/** The sign-in page shown when the instance is protected by `APP_PASSWORD`. */
+/** Signing in, creating an account, and the pages an admin's links open. */
 const en = {
   title: "Sign in",
-  intro: "This Innkeep is private. Enter its password to open it.",
+  intro: "Welcome back. Sign in to open your Innkeep.",
   email: "Email",
-  emailHint: "Leave empty if you are the owner and sign in with the password of this Innkeep.",
   password: "Password",
   submit: "Sign in",
   checking: "Checking…",
-  wrong: "That is not the password. Check it and try again.",
+  wrong: "That email and password do not match. Check them and try again.",
   tooMany: "Too many wrong passwords. Wait ten minutes, then try again.",
+  forgot: "Forgot your password? Ask an admin of your Innkeep for a reset link.",
+  noAccount: "No account yet?",
+  createAccount: "Create an account",
+  signUp: {
+    title: "Create your account",
+    intro: "You get an Innkeep of your own, empty and private. You can invite others once you are in.",
+    name: "Your name",
+    email: "Your email",
+    emailHint: "You will sign in with it.",
+    password: "Choose a password",
+    passwordHint: (min: number): string => `At least ${min} characters.`,
+    submit: "Create account",
+    creating: "Creating…",
+    taken: "There is already an account with this email. Sign in instead, or use another address.",
+    check: "Check your name, your email and your password.",
+    tooMany: "Too many attempts just now. Wait a while, then try again.",
+    closed: "This Innkeep takes no new accounts. Ask one of its admins for an invitation.",
+    beta: "Innkeep is in beta: an account can be created only with an email address that was given access.",
+    request: "Request access",
+    noAccess:
+      "This email address has no access yet. Request access, and create your account once you are told it is open.",
+    haveAccount: "Already have an account?",
+    signIn: "Sign in",
+  },
   join: {
     title: "Join this Innkeep",
     /** "You are invited as Visitor." */
@@ -24,24 +47,53 @@ const en = {
     passwordHint: (min: number): string => `At least ${min} characters.`,
     submit: "Join",
     joining: "Joining…",
-    invalid: "This invitation is no longer valid. Ask for a new link.",
+    invalid: "This link is no longer valid. Ask for a new one.",
     taken: "Someone already joined with this email. Sign in instead, or use another address.",
     check: "Check your name, your email and your password.",
     signIn: "Sign in",
+    reset: {
+      title: "Choose a new password",
+      /** "For Sandrine's account." */
+      intro: (name: string): string => `For ${name}’s account. You will be signed in at once.`,
+      submit: "Save password",
+    },
   },
 };
 
 const fr: typeof en = {
   title: "Connexion",
-  intro: "Cet Innkeep est privé. Saisissez son mot de passe pour l’ouvrir.",
+  intro: "Bon retour. Connectez-vous pour ouvrir votre Innkeep.",
   email: "E-mail",
-  emailHint:
-    "Laissez vide si vous êtes le propriétaire et vous connectez avec le mot de passe de cet Innkeep.",
   password: "Mot de passe",
   submit: "Se connecter",
   checking: "Vérification…",
-  wrong: "Ce n’est pas le mot de passe. Vérifiez-le et réessayez.",
+  wrong: "Cet e-mail et ce mot de passe ne correspondent pas. Vérifiez-les et réessayez.",
   tooMany: "Trop de mots de passe erronés. Attendez dix minutes, puis réessayez.",
+  forgot: "Mot de passe oublié ? Demandez un lien de réinitialisation à un admin de votre Innkeep.",
+  noAccount: "Pas encore de compte ?",
+  createAccount: "Créer un compte",
+  signUp: {
+    title: "Créer votre compte",
+    intro:
+      "Vous obtenez un Innkeep à vous, vide et privé. Vous pourrez inviter d’autres personnes une fois dedans.",
+    name: "Votre nom",
+    email: "Votre e-mail",
+    emailHint: "Il vous servira à vous connecter.",
+    password: "Choisissez un mot de passe",
+    passwordHint: (min) => `Au moins ${min} caractères.`,
+    submit: "Créer le compte",
+    creating: "Création…",
+    taken: "Un compte existe déjà avec cet e-mail. Connectez-vous, ou utilisez une autre adresse.",
+    check: "Vérifiez votre nom, votre e-mail et votre mot de passe.",
+    tooMany: "Trop de tentatives pour l’instant. Patientez un moment, puis réessayez.",
+    closed: "Cet Innkeep n’accepte pas de nouveaux comptes. Demandez une invitation à l’un de ses admins.",
+    beta: "Innkeep est en bêta : un compte ne peut être créé qu’avec une adresse e-mail qui a reçu un accès.",
+    request: "Demander un accès",
+    noAccess:
+      "Cette adresse e-mail n’a pas encore d’accès. Demandez un accès, puis créez votre compte quand on vous dira qu’il est ouvert.",
+    haveAccount: "Vous avez déjà un compte ?",
+    signIn: "Se connecter",
+  },
   join: {
     title: "Rejoindre cet Innkeep",
     invited: (role) => `Vous êtes invité en tant que ${role}.`,
@@ -56,10 +108,15 @@ const fr: typeof en = {
     passwordHint: (min) => `Au moins ${min} caractères.`,
     submit: "Rejoindre",
     joining: "Un instant…",
-    invalid: "Cette invitation n’est plus valable. Demandez un nouveau lien.",
+    invalid: "Ce lien n’est plus valable. Demandez-en un nouveau.",
     taken: "Quelqu’un a déjà rejoint avec cet e-mail. Connectez-vous, ou utilisez une autre adresse.",
     check: "Vérifiez votre nom, votre e-mail et votre mot de passe.",
     signIn: "Se connecter",
+    reset: {
+      title: "Choisir un nouveau mot de passe",
+      intro: (name) => `Pour le compte de ${name}. Vous serez connecté aussitôt.`,
+      submit: "Enregistrer le mot de passe",
+    },
   },
 };
 

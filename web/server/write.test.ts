@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { cleaners, getDb, listings, properties, reservations, withData } from "../../src/db";
-import { sessionValue } from "../../src/lib/session";
 import { app } from "./app";
+import { signedUp } from "./testing";
 
-const PASSWORD = "a sentence only the test knows";
-const session = `innkeep-session=${sessionValue(PASSWORD)}`;
+/** The host's cookie, once they have signed up in `beforeAll`. */
+let session = "";
 const send = (method: string, path: string, body?: unknown, cookie?: string) =>
   app.request(`/api/app${path}`, {
     method,
@@ -19,9 +19,9 @@ describe("the write API", () => {
   let flat: number;
 
   beforeAll(async () => {
-    process.env.APP_PASSWORD = PASSWORD;
     process.env.PUBLIC_DEMO = "1";
     delete process.env.TELEGRAM_BOT_TOKEN;
+    session = (await signedUp()).cookie;
   });
 
   it("lets the host create, edit and remove a property", async () => {
@@ -220,9 +220,9 @@ describe("the write API", () => {
   it("answers an early-access request from anyone, and checks the address", async () => {
     const bad = await send("POST", "/access", { email: "not an address", locale: "fr" });
     expect(await bad.json()).toMatchObject({ status: "error" });
-    // No bot is set here, so a valid address is refused at the sending step, not before.
+    // No bot is set here: the request is kept for the host to find in Settings, which is enough.
     const good = await send("POST", "/access", { email: "host@example.com" });
-    expect(await good.json()).toMatchObject({ status: "error" });
+    expect(await good.json()).toMatchObject({ status: "sent" });
     expect(await (await send("POST", "/access", { email: "a@b.co", company: "bot" })).json()).toMatchObject({
       status: "error",
     });

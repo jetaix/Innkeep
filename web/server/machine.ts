@@ -4,7 +4,7 @@ import { getCookie } from "hono/cookie";
 import { z } from "zod";
 import { CHANNELS } from "../../src/channels";
 import { exportEvents, findPropertyByToken, syncAll } from "../../src/channels/sync";
-import { OTA_CHANNELS, type OtaChannel, withData } from "../../src/db";
+import { OTA_CHANNELS, type OtaChannel, type SpaceRef, withData, withSpace } from "../../src/db";
 import { notifyCleanings } from "../../src/features/cleaning/notify";
 import { consumeRunKey, createRunKey } from "../../src/features/extension/run";
 import { recordExtension, recordFullRun, recordUpdate } from "../../src/features/extension/status";
@@ -20,15 +20,18 @@ import { reservationLinks } from "../../src/features/reservations/platform-links
 import { ingestReviews, reviewsSchema } from "../../src/features/reviews/ingest";
 import { DEFAULT_LOCALE, isLocale } from "../../src/i18n/config";
 import { MESSAGES } from "../../src/i18n/messages";
+import { everySpace, findSpace } from "../../src/features/members/queries";
+import { serverSecret } from "../../src/features/members/secret";
 import { hasBearerToken } from "../../src/lib/auth";
+import { type MachineKind, machineSpace } from "../../src/lib/session";
 import { generateICal } from "../../src/lib/ical";
 import { decide, SESSION_COOKIE } from "./scope";
 
 /**
  * The routes that machines call: the scheduler, the browser extension, an
  * MCP client, and the channels that import a calendar. Each is guarded by its
- * own token, not by the session, and each works on the host's own data: a
- * machine has no demo to look at.
+ * own token, not by the session, and the token says which space it works on:
+ * a machine has no demo to look at.
  *
  * The handlers take a web `Request` and answer with a web `Response`, as the
  * Next.js route handlers they replace did, so what a machine receives has not
@@ -36,8 +39,11 @@ import { decide, SESSION_COOKIE } from "./scope";
  */
 type Handler = (request: Request, c: Context) => Response | Promise<Response>;
 
-/** Runs a handler on the host's data, whatever the request says about itself. */
+/** Runs a handler on the main database, whatever the request says about itself. */
 const real = (handler: Handler) => (c: Context) => withData("real", async () => handler(c.req.raw, c));
+
+const inSpace = <T>(space: SpaceRef, work: () => Promise<T>) =>
+  withData("real", () => withSpace(space, work));
 
 /** A token that is not set switches its routes off; a wrong one is refused. */
 function refusal(request: Request, token: string | undefined, unset: string): Response | null {
@@ -46,13 +52,35 @@ function refusal(request: Request, token: string | undefined, unset: string): Re
   return null;
 }
 
-/** The extension's token, and a note of which version called. */
-async function extensionOnly(request: Request): Promise<Response | null> {
-  const denied = refusal(request, process.env.EXTENSION_TOKEN, "Set EXTENSION_TOKEN to enable the extension");
-  if (denied) return denied;
-  await recordExtension(request);
-  return null;
-}
+/**
+ * Guards a route with a machine's token and runs it in that token's space.
+ * A space's own token carries its number. Any other token is compared with
+ * the one set on the server, which opens the host's space.
+ */
+const guarded =
+  (kind: MachineKind, variable: "EXTENSION_TOKEN" | "MCP_TOKEN", unset: string, handler: Handler) =>
+  async (c: Context) => {
+    const request = c.req.raw;
+    const sent = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+    const id = /^[xc]\d/.test(sent) ? machineSpace(await serverSecret(), kind, sent) : null;
+    const space = id == null ? null : await findSpace(id);
+    if (space) return inSpace(space, async () => handler(request, c));
+    return (
+      refusal(request, process.env[variable], unset) ?? withData("real", async () => handler(request, c))
+    );
+  };
+
+/** The extension's routes: its token, and a note of which version called. */
+const extension = (handler: Handler) =>
+  guarded(
+    "extension",
+    "EXTENSION_TOKEN",
+    "Set EXTENSION_TOKEN to enable the extension",
+    async (request, c) => {
+      await recordExtension(request);
+      return handler(request, c);
+    },
+  );
 
 const invalidPayload = (error: z.ZodError) =>
   Response.json({ error: "Invalid payload", issues: error.issues.slice(0, 5) }, { status: 400 });
@@ -62,7 +90,7 @@ const sent = (request: Request): Promise<unknown> => request.json().catch(() => 
 
 /**
  * One round of background work, for hosts with no process that stays awake:
- * imports every calendar, then sends the Telegram messages that are due.
+ * imports every calendar of every space, then sends the Telegram messages that are due.
  *
  *   GET /api/cron
  *   Authorization: Bearer $CRON_SECRET
@@ -71,12 +99,21 @@ async function cron(request: Request) {
   const denied = refusal(request, process.env.CRON_SECRET, "Set CRON_SECRET to enable scheduled runs");
   if (denied) return denied;
 
-  const sync = await syncAll();
-  // A failed message must not hide the sync that worked; it is retried on the next run.
-  const notified = await notifyCleanings().catch((cause: unknown) => ({
-    error: cause instanceof Error ? cause.message : String(cause),
-  }));
-  return Response.json({ ok: true, sync, notified });
+  const round = async () => {
+    const sync = await syncAll();
+    // A failed message must not hide the sync that worked; it is retried on the next run.
+    const notified = await notifyCleanings().catch((cause: unknown) => ({
+      error: cause instanceof Error ? cause.message : String(cause),
+    }));
+    return { sync, notified };
+  };
+  // Every space in turn, the host's first: its result is the one reported, as before.
+  const [host, ...others] = await everySpace();
+  const first = await inSpace(host, round);
+  for (const space of others) {
+    await inSpace(space, round).catch((error) => console.error(`[innkeep] space ${space.id} failed`, error));
+  }
+  return Response.json({ ok: true, ...first, spaces: others.length + 1 });
 }
 
 /**
@@ -88,9 +125,6 @@ async function cron(request: Request) {
  * Disabled until MCP_TOKEN is set, because it exposes the calendar and revenue.
  */
 async function mcp(request: Request) {
-  const denied = refusal(request, process.env.MCP_TOKEN, "Set MCP_TOKEN to enable the MCP server");
-  if (denied) return denied;
-
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
@@ -107,9 +141,6 @@ async function mcp(request: Request) {
  *   Authorization: Bearer $EXTENSION_TOKEN
  */
 async function tour(request: Request) {
-  const denied = await extensionOnly(request);
-  if (denied) return denied;
-
   const url = new URL(request.url);
   // A run started from a button in Innkeep carries a one-time key, which also fixes its scope.
   const key = url.searchParams.get("key");
@@ -140,9 +171,6 @@ const eventsQuery = z.object({
  *   Authorization: Bearer $EXTENSION_TOKEN
  */
 async function events(request: Request) {
-  const denied = await extensionOnly(request);
-  if (denied) return denied;
-
   const parsed = eventsQuery.safeParse(Object.fromEntries(new URL(request.url).searchParams));
   if (!parsed.success) return Response.json({ error: "Invalid query" }, { status: 400 });
   const lang = parsed.data.lang?.slice(0, 2).toLowerCase();
@@ -171,9 +199,6 @@ function ingest<Input>(
   store: (input: Input) => Promise<{ ok: true } | { ok: false; error: string }>,
 ): Handler {
   return async (request) => {
-    const denied = await extensionOnly(request);
-    if (denied) return denied;
-
     const parsed = schema.safeParse(await sent(request));
     if (!parsed.success) return invalidPayload(parsed.error);
     const result = await store(parsed.data);
@@ -187,9 +212,6 @@ function ingest<Input>(
  *   POST /api/ingest/listing   { source, listingId, listingUrl, title?, description?, details?, … }
  */
 async function listing(request: Request) {
-  const denied = await extensionOnly(request);
-  if (denied) return denied;
-
   const parsed = listingSchema.safeParse(await sent(request));
   if (!parsed.success) return invalidPayload(parsed.error);
   const result = await ingestListing(parsed.data);
@@ -198,19 +220,16 @@ async function listing(request: Request) {
 }
 
 /** The extension's connection test; answers with the host's reservations pages. */
-async function reservationsTest(request: Request) {
-  return (
-    (await extensionOnly(request)) ??
-    Response.json({
-      ok: true,
-      app: "innkeep",
-      // Where the extension's settings page sends the host next.
-      links: (await reservationLinks()).map((link) => ({
-        label: CHANNELS[link.channel].label,
-        href: link.href,
-      })),
-    })
-  );
+async function reservationsTest() {
+  return Response.json({
+    ok: true,
+    app: "innkeep",
+    // Where the extension's settings page sends the host next.
+    links: (await reservationLinks()).map((link) => ({
+      label: CHANNELS[link.channel].label,
+      href: link.href,
+    })),
+  });
 }
 
 /**
@@ -219,9 +238,6 @@ async function reservationsTest(request: Request) {
  *   POST /api/ingest/reservations   { source, reservations: [...] }
  */
 async function reservations(request: Request) {
-  const denied = await extensionOnly(request);
-  if (denied) return denied;
-
   const parsed = ingestSchema.safeParse(await sent(request));
   if (!parsed.success) return invalidPayload(parsed.error);
   const result = await ingestReservations(parsed.data);
@@ -243,16 +259,23 @@ async function ical(token: string, file: string) {
     return new Response("Not found", { status: 404 });
   }
 
-  const property = await findPropertyByToken(token);
-  if (!property) return new Response("Not found", { status: 404 });
-
-  const body = generateICal(property.name, await exportEvents(property.id, target as OtaChannel | "all"));
-  return new Response(body, {
-    headers: {
-      "Content-Type": "text/calendar; charset=utf-8",
-      "Cache-Control": "no-store",
-    },
-  });
+  const feed = async () => {
+    const property = await findPropertyByToken(token);
+    if (!property) return null;
+    const body = generateICal(property.name, await exportEvents(property.id, target as OtaChannel | "all"));
+    return new Response(body, {
+      headers: {
+        "Content-Type": "text/calendar; charset=utf-8",
+        "Cache-Control": "no-store",
+      },
+    });
+  };
+  // The host's space first: its links have no prefix. Another space's start with its number.
+  const found = await withData("real", feed);
+  if (found) return found;
+  const id = token.match(/^s(\d{1,10})-/)?.[1];
+  const space = id ? await findSpace(Number(id)) : null;
+  return (space ? await inSpace(space, feed) : null) ?? new Response("Not found", { status: 404 });
 }
 
 /**
@@ -261,7 +284,7 @@ async function ical(token: string, file: string) {
  *
  * Only a click inside Innkeep counts: a link from another site is refused,
  * so no other page can set a run going. It is a page's address, not an API
- * route, so when a password is set it takes an admin's session: anyone else
+ * route, so it takes an admin's session: anyone else
  * is sent to sign in, back to the demo where one is offered, or to the pages
  * their role allows.
  */
@@ -278,29 +301,31 @@ async function start(request: Request, c: Context) {
   const scope = url.searchParams.get("scope") === "all" ? "all" : "reservations";
   const target = new URL("/extension/run", url);
   target.searchParams.set("scope", scope);
-  target.searchParams.set("key", await createRunKey(scope));
+  const { space } = verdict;
+  if (!space) return Response.redirect(new URL("/overview", url), 307);
+  target.searchParams.set("key", await inSpace(space, () => createRunKey(scope)));
   return Response.redirect(target, 303);
 }
 
 /** Next.js answered a method a route does not take with an empty 405; a machine that probes gets the same. */
 const notAllowed = () => new Response(null, { status: 405 });
 
+const mcpRoute = guarded("mcp", "MCP_TOKEN", "Set MCP_TOKEN to enable the MCP server", mcp);
+
 export const machine = new Hono()
   .get("/api/cron", real(cron))
-  .on(["GET", "POST", "DELETE"], "/api/mcp", real(mcp))
-  .get("/api/extension/tour", real(tour))
-  .get("/api/extension/events", real(events))
-  .post("/api/ingest/listing", real(listing))
-  .post("/api/ingest/page", real(ingest(pageSchema, ingestPage)))
-  .post("/api/ingest/preview", real(ingest(previewIngestSchema, ingestPreview)))
-  .post("/api/ingest/prices", real(ingest(pricesSchema, ingestPrices)))
-  .post("/api/ingest/quote", real(ingest(quoteSchema, ingestQuote)))
-  .get("/api/ingest/reservations", real(reservationsTest))
-  .post("/api/ingest/reservations", real(reservations))
-  .post("/api/ingest/reviews", real(ingest(reviewsSchema, ingestReviews)))
-  .get("/api/ical/:token/:file", (c) =>
-    withData("real", () => ical(c.req.param("token"), c.req.param("file"))),
-  )
+  .on(["GET", "POST", "DELETE"], "/api/mcp", mcpRoute)
+  .get("/api/extension/tour", extension(tour))
+  .get("/api/extension/events", extension(events))
+  .post("/api/ingest/listing", extension(listing))
+  .post("/api/ingest/page", extension(ingest(pageSchema, ingestPage)))
+  .post("/api/ingest/preview", extension(ingest(previewIngestSchema, ingestPreview)))
+  .post("/api/ingest/prices", extension(ingest(pricesSchema, ingestPrices)))
+  .post("/api/ingest/quote", extension(ingest(quoteSchema, ingestQuote)))
+  .get("/api/ingest/reservations", extension(reservationsTest))
+  .post("/api/ingest/reservations", extension(reservations))
+  .post("/api/ingest/reviews", extension(ingest(reviewsSchema, ingestReviews)))
+  .get("/api/ical/:token/:file", (c) => ical(c.req.param("token"), c.req.param("file")))
   .get("/extension/start", real(start))
   .all("/api/cron", notAllowed)
   .all("/api/mcp", notAllowed)

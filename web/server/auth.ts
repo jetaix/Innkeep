@@ -4,27 +4,25 @@ import { deleteCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import { validator } from "hono/validator";
 import { z } from "zod";
-import { appState, getDb, withData } from "../../src/db";
+import { appState, central, getDb } from "../../src/db";
 import { requestAccess } from "../../src/features/marketing/mutations";
-import { acceptInvitation, findInvitation } from "../../src/features/members/mutations";
-import { passwordFits } from "../../src/features/members/password";
-import { findMemberByEmail } from "../../src/features/members/queries";
-import { LOCALES } from "../../src/i18n/config";
 import {
-  appPassword,
-  memberSessionValue,
-  passwordMatches,
-  recentFailures,
-  SESSION_DAYS,
-  sessionValue,
-  tooManyAttempts,
-} from "../../src/lib/session";
+  acceptInvitation,
+  findInvitation,
+  NoAccessError,
+  signUp,
+} from "../../src/features/members/mutations";
+import { passwordFits } from "../../src/features/members/password";
+import { findAccount, findMemberByEmail, signUpState } from "../../src/features/members/queries";
+import { serverSecret } from "../../src/features/members/secret";
+import { LOCALES } from "../../src/i18n/config";
+import { memberSessionValue, recentFailures, SESSION_DAYS, tooManyAttempts } from "../../src/lib/session";
 import type { Env } from "./env";
 import { SESSION_COOKIE } from "./scope";
 
 /** Opens a session in the browser that asked. */
-function open(c: Context, session: string) {
-  setCookie(c, SESSION_COOKIE, session, {
+export async function openSession(c: Context, member: { id: number; passwordHash: string }) {
+  setCookie(c, SESSION_COOKIE, memberSessionValue(await serverSecret(), member), {
     path: "/",
     httpOnly: true,
     sameSite: "Lax",
@@ -33,17 +31,15 @@ function open(c: Context, session: string) {
   });
 }
 
-/** Wrong passwords are counted in the host's own data, so the limit holds across servers. */
+/** Counted in the main database, so the limits hold across servers. */
 const FAILURES = "sign-in-failures";
+const SIGN_UPS = "sign-ups";
+/** New accounts per hour, all visitors together: enough for people, too few to fill a disk. */
+const MAX_SIGN_UPS = 30;
+const HOUR = 60 * 60_000;
 
-/**
- * Someone signing in is not signed in yet. The count of wrong passwords is
- * the one thing they may read and write in the host's own data.
- */
-async function failures(): Promise<number[]> {
-  const row = await withData("real", () =>
-    getDb().select().from(appState).where(eq(appState.key, FAILURES)).get(),
-  );
+async function times(key: string): Promise<number[]> {
+  const row = await central(() => getDb().select().from(appState).where(eq(appState.key, key)).get());
   try {
     const parsed: unknown = JSON.parse(row?.value ?? "[]");
     return Array.isArray(parsed) ? parsed.filter((at) => typeof at === "number") : [];
@@ -52,17 +48,32 @@ async function failures(): Promise<number[]> {
   }
 }
 
-async function failed(earlier: number[], now: number): Promise<never> {
-  const value = JSON.stringify([...recentFailures(earlier, now), now]);
-  await withData("real", () =>
+async function keep(key: string, value: number[]) {
+  const text = JSON.stringify(value);
+  await central(() =>
     getDb()
       .insert(appState)
-      .values({ key: FAILURES, value })
-      .onConflictDoUpdate({ target: appState.key, set: { value } })
+      .values({ key, value: text })
+      .onConflictDoUpdate({ target: appState.key, set: { value: text } })
       .run(),
   );
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  throw new HTTPException(401, { message: "That is not the password. Check it and try again." });
+}
+
+/** Refuses when too many wrong passwords were typed lately, and answers with them. */
+async function attempts(now: number): Promise<number[]> {
+  const earlier = await times(FAILURES);
+  if (tooManyAttempts(earlier, now)) {
+    throw new HTTPException(429, { message: "Too many attempts. Try again in ten minutes." });
+  }
+  return earlier;
+}
+
+async function failed(earlier: number[], now: number): Promise<never> {
+  await keep(FAILURES, [...recentFailures(earlier, now), now]);
+  await new Promise((resolve) => setTimeout(resolve, process.env.VITEST ? 0 : 800));
+  throw new HTTPException(401, {
+    message: "That email and password do not match. Check them and try again.",
+  });
 }
 
 /** What was sent, as an object: the change itself checks every field. */
@@ -72,55 +83,57 @@ const json = validator(
     value && typeof value === "object" ? (value as Record<string, unknown>) : {},
 );
 
-const signingIn = z.object({
-  /** Empty for the owner, who signs in with the password of the instance alone. */
-  email: z.string().max(200).default(""),
-  password: z.string().max(500),
-});
+const signingIn = z.object({ email: z.string().max(200), password: z.string().max(500) });
 
-/** Signing in, joining and signing out: the only requests answered before the data a request may see is decided. */
+/**
+ * Creating an account, signing in, following a link and signing out: the only
+ * requests answered before the data a request may see is decided.
+ */
 export const auth = new Hono<Env>()
-  .post("/session", async (c) => {
-    const password = appPassword();
-    if (!password) return c.json({ ok: true as const });
-    const given = signingIn.safeParse(await c.req.json().catch(() => null));
+  // Whether an account can be created here, for the sign-in and sign-up pages.
+  .get("/account", async (c) => c.json(await signUpState()))
+  // Signing up: a new space, its admin, and a session at once.
+  .post("/account", json, async (c) => {
     const now = Date.now();
-    const earlier = await failures();
-    if (tooManyAttempts(earlier, now)) {
-      throw new HTTPException(429, { message: "Too many attempts. Try again in ten minutes." });
+    const recent = (await times(SIGN_UPS)).filter((at) => at > now - HOUR);
+    if (recent.length >= MAX_SIGN_UPS) {
+      throw new HTTPException(429, { message: "Too many new accounts just now. Try again in an hour." });
     }
-    if (!given.success) return failed(earlier, now);
-    let session: string;
-    if (given.data.email.trim() === "") {
-      if (!passwordMatches(given.data.password, password)) return failed(earlier, now);
-      session = sessionValue(password);
-    } else {
-      // A member, with the password they chose when they joined.
-      const member = await withData("real", () => findMemberByEmail(given.data.email));
-      if (!member || !passwordFits(given.data.password, member.passwordHash)) return failed(earlier, now);
-      session = memberSessionValue(password, member);
-    }
-    open(c, session);
+    const made = await signUp(c.req.valid("json")).catch((error: unknown) => {
+      if (error instanceof NoAccessError) throw new HTTPException(403, { message: error.message });
+      throw error;
+    });
+    await keep(SIGN_UPS, [...recent, now]);
+    await openSession(c, made.user);
     return c.json({ ok: true as const });
   })
-  // What an invitation offers, for the page that opens from its link.
-  .get("/invitations/:token", async (c) => {
-    const invitation = await withData("real", () => findInvitation(c.req.param("token")));
-    if (!invitation) throw new HTTPException(404, { message: "This invitation is no longer valid." });
-    return c.json({ role: invitation.role, email: invitation.email });
-  })
-  // Joining: the invitation becomes a member, who is signed in at once.
-  .post("/invitations/:token", json, async (c) => {
-    const password = appPassword();
-    // Without a password on the instance nobody signs in, so there is nothing to join.
-    if (!password) throw new HTTPException(409, { message: "This Innkeep has no sign-in." });
+  .post("/session", async (c) => {
+    const given = signingIn.safeParse(await c.req.json().catch(() => null));
     const now = Date.now();
-    const earlier = await failures();
-    if (tooManyAttempts(earlier, now)) {
-      throw new HTTPException(429, { message: "Too many attempts. Try again in ten minutes." });
-    }
-    const member = await withData("real", () => acceptInvitation(c.req.param("token"), c.req.valid("json")));
-    open(c, memberSessionValue(password, member));
+    const earlier = await attempts(now);
+    if (!given.success) return failed(earlier, now);
+    const member = await findMemberByEmail(given.data.email);
+    if (!member || !passwordFits(given.data.password, member.passwordHash)) return failed(earlier, now);
+    await openSession(c, member);
+    return c.json({ ok: true as const, role: member.role });
+  })
+  // What a link offers, for the page that opens from it: a place in a space, or a new password.
+  .get("/invitations/:token", async (c) => {
+    const invitation = await findInvitation(c.req.param("token"));
+    if (!invitation) throw new HTTPException(404, { message: "This link is no longer valid." });
+    const account = invitation.userId == null ? null : await findAccount(invitation.userId);
+    return c.json({
+      role: invitation.role,
+      email: invitation.email,
+      // A reset link names the member it is for, so they know which account they are opening.
+      reset: account ? { name: account.user.name } : null,
+    });
+  })
+  // Following it: the invitation becomes a member, or the member has a new password; signed in at once.
+  .post("/invitations/:token", json, async (c) => {
+    await attempts(Date.now());
+    const member = await acceptInvitation(c.req.param("token"), c.req.valid("json"));
+    await openSession(c, member);
     return c.json({ ok: true as const, role: member.role });
   })
   // Early access to the hosted version: open to anyone, touches no data, sends one message.

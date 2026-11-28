@@ -321,6 +321,35 @@ CREATE UNIQUE INDEX IF NOT EXISTS invitations_token ON invitations (token_hash);
   `
 ALTER TABLE loans ADD COLUMN payment INTEGER;
 `,
+  // 23: accounts. A space is one household's Innkeep, and every user and invitation belongs to one.
+  // Members invited before spaces existed shared the host's data: they get the space that holds it.
+  `
+CREATE TABLE IF NOT EXISTS spaces (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  store TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL
+);
+ALTER TABLE users ADD COLUMN space_id INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE invitations ADD COLUMN space_id INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE invitations ADD COLUMN user_id INTEGER;
+INSERT INTO spaces (name, store, created_at)
+SELECT 'Innkeep', '', 0 WHERE EXISTS (SELECT 1 FROM users);
+UPDATE users SET space_id = (SELECT id FROM spaces WHERE store = '' ORDER BY id LIMIT 1) WHERE space_id = 0;
+UPDATE invitations SET space_id = COALESCE((SELECT id FROM spaces WHERE store = '' ORDER BY id LIMIT 1), 0) WHERE space_id = 0;
+`,
+  // 24: requests for access while sign-up is in beta, and the addresses the host let in
+  `
+CREATE TABLE IF NOT EXISTS access_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  locale TEXT NOT NULL DEFAULT 'en',
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  approved_at INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS access_requests_email ON access_requests (email);
+`,
 ];
 
 /** One statement per entry: a hosted database takes them as a batch, not as a script. */
@@ -363,34 +392,139 @@ export type Db = LibSQLDatabase<typeof schema>;
  * hosted database, for an Innkeep on a host with no disk of its own.
  * Otherwise it is a SQLite file on this machine.
  */
+const testing = () => Boolean(process.env.VITEST);
+
+/** The file the main database is in, or `:memory:`; null when it is hosted. */
+function mainFile(): string | null {
+  if (process.env.TURSO_DATABASE_URL) return null;
+  return (
+    process.env.DATABASE_PATH ?? (testing() ? ":memory:" : path.join(process.cwd(), "data", "innkeep.db"))
+  );
+}
+
 function connect(): Client {
-  const testing = Boolean(process.env.VITEST);
   const url = process.env.TURSO_DATABASE_URL;
   // Tests delete whole tables. `vitest.setup.ts` already clears the address; this is the second lock.
-  if (url && testing) throw new Error("Tests must not use the hosted database: unset TURSO_DATABASE_URL");
+  if (url && testing()) throw new Error("Tests must not use the hosted database: unset TURSO_DATABASE_URL");
   if (url) return createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
 
-  const file =
-    process.env.DATABASE_PATH ?? (testing ? ":memory:" : path.join(process.cwd(), "data", "innkeep.db"));
+  const file = mainFile() as string;
   if (file === ":memory:") return createClient({ url: ":memory:" });
   fs.mkdirSync(path.dirname(file), { recursive: true });
   return createClient({ url: `file:${file}` });
 }
 
 /**
- * Which data a request sees. An Innkeep protected by a password keeps two
- * databases apart: the host's own, and a demo with sample bookings that lives
- * in memory. The server decides for each request (`web/server/scope.ts`) and runs it
- * inside `withData`; nothing else may set it. Someone who is not signed in therefore never
- * reaches the host's data, whatever page or action they aim at: with
- * `PUBLIC_DEMO` they see the demo, without it they only ever see the sign-in page.
+ * Spaces. Each account that signs up has a space: its properties, bookings
+ * and settings, in a database of its own, so no query can reach another
+ * space's rows. The first space lives in the main database itself (its store
+ * is the empty string), which keeps a household's Innkeep in one file. The
+ * main database also holds what is shared: the spaces, their users and the
+ * invitations.
  *
- * - `real`: the host, signed in, and the machines that call the API with a token.
- * - `demo`: a visitor looking around.
+ * A store names where a later space's database is:
+ * - `file:spaces/3.db`, beside the main file;
+ * - `memory:…`, when the main database is in memory (tests);
+ * - `libsql://…`, a hosted database made through Turso's API.
+ */
+export type SpaceRef = { id: number; store: string };
+export const MAIN_STORE = "";
+
+function connectSpace(store: string): Client {
+  if (store.startsWith("memory:")) return createClient({ url: ":memory:" });
+  if (store.startsWith("file:")) {
+    const main = mainFile();
+    if (!main || main === ":memory:") throw new Error(`No folder to keep ${store} in`);
+    const file = path.join(path.dirname(main), store.slice("file:".length));
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    return createClient({ url: `file:${file}` });
+  }
+  if (testing()) throw new Error("Tests must not use a hosted database");
+  return createClient({
+    url: store,
+    authToken: process.env.TURSO_GROUP_TOKEN ?? process.env.TURSO_AUTH_TOKEN,
+  });
+}
+
+/** Refused when this Innkeep has nowhere to put another space. */
+export class NoRoomError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NoRoomError";
+  }
+}
+
+/**
+ * Makes the place a new space's data will live in, and answers with its store.
+ * On Turso it asks the Platform API for a database in the group the main one
+ * is in; the group's token then opens it.
+ */
+export async function newStore(spaceId: number): Promise<string> {
+  const main = mainFile();
+  if (main === ":memory:") return `memory:${spaceId}-${Math.random().toString(36).slice(2)}`;
+  if (main) return `file:spaces/${spaceId}.db`;
+
+  const { TURSO_ORG: org, TURSO_API_TOKEN: token } = process.env;
+  if (!org || !token) {
+    throw new NoRoomError(
+      "This Innkeep cannot open another space yet: its host has to set TURSO_ORG and TURSO_API_TOKEN.",
+    );
+  }
+  const name = `innkeep-space-${spaceId}-${Math.random().toString(36).slice(2, 8)}`;
+  const response = await fetch(
+    `https://api.turso.tech/v1/organizations/${encodeURIComponent(org)}/databases`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ name, group: process.env.TURSO_GROUP ?? "default" }),
+    },
+  );
+  const body = (await response.json().catch(() => null)) as {
+    database?: { Hostname?: string; hostname?: string };
+  } | null;
+  const host = body?.database?.Hostname ?? body?.database?.hostname;
+  if (!response.ok || !host) {
+    console.error("[innkeep] Turso refused a new database", response.status, body);
+    throw new NoRoomError("This Innkeep could not open another space. Try again later.");
+  }
+  return `libsql://${host}`;
+}
+
+/**
+ * Which data a request sees. The server decides for each request
+ * (`web/server/scope.ts`) and runs it inside `withData`, and inside
+ * `withSpace` for someone signed in; nothing else may set them. Someone who is
+ * not signed in therefore never reaches anyone's data, whatever page or action
+ * they aim at: with `PUBLIC_DEMO` they see the demo, without it they only ever
+ * see the sign-in page.
+ *
+ * - `real`: someone signed in, in their own space, and the machines that call the API with a token.
+ * - `demo`: a visitor looking around sample bookings kept in memory.
  * - `demo-readonly`: a visitor trying to change something. Every write is refused.
  */
 
 const forced = new AsyncLocalStorage<DataScope>();
+const space = new AsyncLocalStorage<SpaceRef | null>();
+
+/** Runs `work` on one space's data. The server does it for every signed-in request and every machine's. */
+export const withSpace = <T>(ref: SpaceRef, work: () => Promise<T>): Promise<T> => space.run(ref, work);
+
+/**
+ * Runs `work` on the main database, whatever space or demo the request is in:
+ * for the spaces, the users and the invitations, which every space shares.
+ */
+export const central = <T>(work: () => Promise<T>): Promise<T> =>
+  forced.run("real", () => space.run(null, work));
+
+/** The space the current request works in; null outside one (a script, or the shared tables). */
+export const currentSpace = (): SpaceRef | null => space.getStore() ?? null;
+
+/**
+ * Whether this is the host's own space: the one in the main database. What
+ * the host pays for or owns through the server's settings (the Anthropic key,
+ * the Telegram chat, the tokens) serves that space alone.
+ */
+export const inHostSpace = (): boolean => (space.getStore()?.store ?? MAIN_STORE) === MAIN_STORE;
 const seeding = new AsyncLocalStorage<true>();
 
 /** Runs `work` against the given data, whatever the request says. For filling the demo, and for tests. */
@@ -492,7 +626,18 @@ async function demo(): Promise<Lane> {
 /** The client drizzle talks to: it sends each call to the host's database or to the demo. */
 function open(): Db {
   const client = connect();
-  const real = lane(client, client.protocol === "file" && process.env.DATABASE_PATH === ":memory:");
+  const lanes = new Map<string, Lane>([
+    [MAIN_STORE, lane(client, client.protocol === "file" && process.env.DATABASE_PATH === ":memory:")],
+  ]);
+  const real = (property: string, args: unknown[]) => {
+    const store = space.getStore()?.store ?? MAIN_STORE;
+    let found = lanes.get(store);
+    if (!found) {
+      found = lane(connectSpace(store), store.startsWith("memory:"));
+      lanes.set(store, found);
+    }
+    return found(property, args);
+  };
 
   const routing = new Proxy(client, {
     get(target, property) {

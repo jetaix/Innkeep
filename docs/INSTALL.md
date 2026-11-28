@@ -160,6 +160,7 @@ Everything Innkeep knows is in the `data` folder inside `Innkeep-main`.
 - **Reading your pages with the extension is your decision.** Airbnb and
   Booking.com restrict automated collection of data in their terms. The
   extension only reads your own pages, in your own browser, when you ask.
-- **There is no password on Innkeep unless you set one.** Anyone who can use
-  your computer can open it. To reach it from your phone or share it with
-  your partner, follow [DEPLOY.md](DEPLOY.md), which sets a password.
+- **Innkeep asks you to create an account the first time.** A name, an email
+  and a password, kept on your computer: nothing is sent anywhere. To reach
+  it from your phone or share it with your partner, follow
+  [DEPLOY.md](DEPLOY.md).

@@ -133,15 +133,15 @@ Airbnb and Booking.com give every host calendar links. Everything else
 (reservation details, listing content, messaging, rates) is reserved for
 approved software partners, and Innkeep is not one.
 
-| Capability                     | Status      | How                                                                |
-| ------------------------------ | ----------- | ------------------------------------------------------------------ |
-| Calendar sync, both directions | Works       | iCal import and export                                             |
-| Double-booking detection       | Works       | Overlap check across channels                                      |
-| Guest names, payouts, history  | Extension   | The browser extension reads them from your reservations pages      |
-| Listing details on platforms   | Semi-manual | Edit once, copy into each platform, mark as published              |
-| Guest messages                 | No          | Read and answered on each platform; Innkeep does not handle them   |
-| Changing prices on platforms   | No          | Suggestions tell you what to change; you change it there           |
-| Login and multiple users       | Yes         | `APP_PASSWORD` for the owner; members you invite, admin or visitor |
+| Capability                     | Status      | How                                                              |
+| ------------------------------ | ----------- | ---------------------------------------------------------------- |
+| Calendar sync, both directions | Works       | iCal import and export                                           |
+| Double-booking detection       | Works       | Overlap check across channels                                    |
+| Guest names, payouts, history  | Extension   | The browser extension reads them from your reservations pages    |
+| Listing details on platforms   | Semi-manual | Edit once, copy into each platform, mark as published            |
+| Guest messages                 | No          | Read and answered on each platform; Innkeep does not handle them |
+| Changing prices on platforms   | No          | Suggestions tell you what to change; you change it there         |
+| Login and multiple users       | Yes         | An account each; members you invite, admin or visitor            |
 
 iCal is not instant: platforms re-read links on their own schedule, so a
 double booking is still possible in the gap. Innkeep flags it; it cannot
@@ -153,7 +153,7 @@ free tiers.
 ## Configuration
 
 Every setting is optional. Copy [.env.example](.env.example) to `.env.local`.
-To run Innkeep online for you and your partner, with a password and Telegram
+To run Innkeep online for you and your partner, with Telegram
 notifications, see [docs/DEPLOY.md](docs/DEPLOY.md).
 The Settings page shows what is switched on.
 
@@ -169,7 +169,8 @@ The Settings page shows what is switched on.
 | `AI_MODEL`              | `claude-opus-5-5`   | Model used for AI advice                                |
 | `MCP_TOKEN`             | unset               | Turns on the MCP server at `/api/mcp`                   |
 | `EXTENSION_TOKEN`       | unset               | Lets the browser extension send details                 |
-| `APP_PASSWORD`          | unset               | Asks for this password before any page opens            |
+| `SIGN_UP`               | `beta`              | Who may sign up: approved addresses, `open` or `closed` |
+| `OWNER_EMAIL`           | unset               | Only this address may take the data already there       |
 | `TELEGRAM_BOT_TOKEN`    | unset               | With the chat below, turns on Telegram notifications    |
 | `TELEGRAM_CHAT_ID`      | unset               | The person or group the notifications go to             |
 | `TELEGRAM_LANGUAGE`     | `en`                | Language of the notifications: `en` or `fr`             |
@@ -227,10 +228,13 @@ example conversation and its limits.
 
 ## Security
 
-`APP_PASSWORD` protects every page and is the owner's own way in. From
-Settings, an admin invites other people with a link: an admin sees and changes
-everything, a visitor sees the cleaning and the properties only, and can mark a cleaning as done. Set the
-password before Innkeep is reachable from the internet. See
+Everyone signs in with an account of their own, created on the sign-up page.
+Each account has its own Innkeep, empty and separate from the others. From
+Settings, an admin invites other people into theirs with a link: an admin sees
+and changes everything, a visitor sees the cleaning and the properties only,
+and can mark a cleaning as done. Beyond the first account, only the addresses
+you approve can sign up (`SIGN_UP=beta`, the default); `SIGN_UP=closed` takes
+nobody. See
 [SECURITY.md](SECURITY.md) for the routes that are safe to expose and how to
 report a vulnerability.
 

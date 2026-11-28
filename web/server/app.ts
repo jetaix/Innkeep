@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
-import { withData } from "../../src/db";
-import { appPassword } from "../../src/lib/session";
+import { withData, withSpace } from "../../src/db";
 import { auth } from "./auth";
 import { adminOnly, type Env } from "./env";
 import { machine } from "./machine";
@@ -32,7 +31,9 @@ export const app = new Hono<Env>()
     c.set("signedIn", verdict.signedIn);
     c.set("role", verdict.role);
     c.set("member", verdict.member);
-    await withData(verdict.scope, next);
+    c.set("space", verdict.space);
+    const { space } = verdict;
+    await withData(verdict.scope, () => (space ? withSpace(space, next) : next()));
   })
   .route("/", read)
   .route("/", write);
@@ -48,6 +49,8 @@ app.onError((error, c) => {
   }
   // drizzle wraps what the database layer throws.
   const cause = (error as { cause?: { name?: string } }).cause;
+  // Nowhere to put another space: the host's to fix, and said as it is.
+  if (error.name === "NoRoomError") return c.json({ error: error.message }, 503);
   if (error.name === "DemoReadOnlyError" || cause?.name === "DemoReadOnlyError") {
     return c.json({ error: "This is a demo: changes are not saved." }, 403);
   }
@@ -55,11 +58,9 @@ app.onError((error, c) => {
   return c.json({ error: "Something went wrong." }, 500);
 });
 
-const UNCONFIGURED = "Innkeep is not configured: set APP_PASSWORD, then redeploy.";
-
 /**
  * Everything the server answers: the app's API and the routes machines call.
- * This is what gets deployed, with two rules in front of them.
+ * This is what gets deployed, with one rule in front of them.
  *
  * `app` must have its error handler before it is mounted here, so this stays
  * below `app.onError`.
@@ -75,12 +76,6 @@ export const server = new Hono()
       if (api) return new Response(null, { status: 404 });
       if (page) return Response.redirect(new URL("/", c.req.url), 307);
       return next();
-    }
-    // A public host with no password would hand the host's data to anyone who finds the address.
-    // Machine routes are left alone: each has a token of its own.
-    if (process.env.VERCEL && !appPassword()) {
-      if (pathname.startsWith("/api/app/")) return c.json({ error: UNCONFIGURED }, 503);
-      if (page) return new Response(UNCONFIGURED, { status: 503 });
     }
     return next();
   })

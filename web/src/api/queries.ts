@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { rpc, unwrap } from "./client";
+import { ApiError, rpc, unwrap } from "./client";
 
 /**
  * One definition per resource. A route's loader and the components that
@@ -9,9 +9,37 @@ import { rpc, unwrap } from "./client";
 type Locale = "en" | "fr";
 const text = (value: number | undefined) => (value === undefined ? undefined : String(value));
 
+type Session = Awaited<ReturnType<Awaited<ReturnType<typeof rpc.session.$get>>["json"]>>;
+
+/**
+ * Who is asking. Where no demo is offered the server turns away anyone who
+ * is not signed in: that is an answer, not a failure, and it sends them to
+ * the sign-in page.
+ */
 export const sessionQuery = queryOptions({
   queryKey: ["session"],
-  queryFn: () => unwrap(rpc.session.$get()),
+  queryFn: async (): Promise<Session> => {
+    try {
+      return await unwrap(rpc.session.$get());
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        return { signedIn: false, demo: false, role: null, member: null };
+      }
+      throw error;
+    }
+  },
+});
+
+/** Who may create an account here: anyone, approved addresses, or nobody. */
+export const accountQuery = queryOptions({
+  queryKey: ["account"],
+  queryFn: () => unwrap(rpc.account.$get()),
+});
+
+/** Who asked for an account, and who was let in: the host's space alone can read it. */
+export const accessRequestsQuery = queryOptions({
+  queryKey: ["access-requests"],
+  queryFn: () => unwrap(rpc["access-requests"].$get()),
 });
 
 /** Who has access and the invitations still waiting: an admin's to read. */
